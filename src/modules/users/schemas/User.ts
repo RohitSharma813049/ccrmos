@@ -11,6 +11,7 @@ export interface IUser extends Document {
   directorId?: mongoose.Types.ObjectId;
   managerId?: mongoose.Types.ObjectId;
   teamLeaderId?: mongoose.Types.ObjectId;
+  isActive?: boolean;
 }
 
 const UserSchema: Schema<IUser> = new Schema({
@@ -37,6 +38,7 @@ const UserSchema: Schema<IUser> = new Schema({
   directorId: { type: Schema.Types.ObjectId, ref: "User" },
   managerId: { type: Schema.Types.ObjectId, ref: "User" },
   teamLeaderId: { type: Schema.Types.ObjectId, ref: "User" },
+  isActive: { type: Boolean, default: true },
 }, { timestamps: true });
 
 const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
