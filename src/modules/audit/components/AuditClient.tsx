@@ -11,10 +11,6 @@ export default function AuditClient() {
   const [moduleFilter, setModuleFilter] = useState("");
   const [actionFilter, setActionFilter] = useState("");
 
-  useEffect(() => {
-    fetchLogs();
-  }, [moduleFilter, actionFilter]); // Refetch if filters change
-
   async function fetchLogs() {
     setLoading(true);
     try {
@@ -27,7 +23,12 @@ export default function AuditClient() {
         const data = await res.json();
         setLogs(data.logs || []);
       }
-    } catch (e) {
+
+  useEffect(() => {
+    fetchLogs();
+  }, [moduleFilter, actionFilter]); // Refetch if filters change
+
+      } catch (e) {
       console.error(e);
     } finally {
       setLoading(false);

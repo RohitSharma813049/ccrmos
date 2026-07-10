@@ -6,6 +6,7 @@ export interface ISubscriptionPlan extends Document {
   billing: "Monthly" | "Yearly";
   users: string;
   features: string[];
+  maxCustomForms: number;
   isActive: boolean; // Soft delete flag
   createdAt: Date;
   updatedAt: Date;
@@ -18,6 +19,7 @@ const subscriptionPlanSchema = new Schema<ISubscriptionPlan>(
     billing: { type: String, enum: ["Monthly", "Yearly"], default: "Monthly" },
     users: { type: String, required: true },
     features: [{ type: String }],
+    maxCustomForms: { type: Number, default: 2 },
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }

@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import SystemSetting from '@/modules/settings/schemas/SystemSetting';
-import { getSession } from "@/lib/auth-utils";
+import { requireAuthenticatedUser, requirePermission } from "@/lib/auth-utils";
+import { PERMISSIONS } from "@/config/permissions";
 
 export async function GET(req: Request, { params }: { params: Promise<{ key: string }> }) {
   await dbConnect();
   try {
-    const session = await getSession();
-    const user = session?.user as any;
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const user = await requireAuthenticatedUser();
+    await requirePermission(PERMISSIONS.GLOBAL_SETTINGS, 'view');
 
     const key = (await params).key;
 
@@ -31,9 +31,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ key: str
 export async function PUT(req: Request, { params }: { params: Promise<{ key: string }> }) {
   await dbConnect();
   try {
-    const session = await getSession();
-    const user = session?.user as any;
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const user = await requireAuthenticatedUser();
+    await requirePermission(PERMISSIONS.GLOBAL_SETTINGS, 'edit');
 
     const key = (await params).key;
     const body = await req.json();

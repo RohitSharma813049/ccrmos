@@ -12,7 +12,7 @@ export default async function OwnerLayout({ children }: { children: React.ReactN
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 flex overflow-hidden">
+    <div className="h-screen bg-gray-50 text-gray-900 flex overflow-hidden">
       {/* Premium Sidebar */}
       <aside className="w-72 bg-white border-r border-gray-200 flex flex-col shrink-0 relative overflow-hidden">
         {/* Subtle Background Glow */}

@@ -7,10 +7,6 @@ export default function SettingsClient() {
   const [globalCurrency, setGlobalCurrency] = useState("USD ($)");
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchSettings();
-  }, []);
-
   async function fetchSettings() {
     try {
       const res = await fetch("/api/settings/global");
@@ -20,7 +16,12 @@ export default function SettingsClient() {
           if (data.value.maintenanceMode !== undefined) setMaintenanceMode(data.value.maintenanceMode);
           if (data.value.globalCurrency) setGlobalCurrency(data.value.globalCurrency);
         }
-      }
+
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+        }
     } catch (e) {
       console.error(e);
     } finally {

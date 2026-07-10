@@ -1,18 +1,25 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import EmptyState from "@/components/ui/EmptyState";
+import Button from "@/components/ui/Button";
 import DynamicFormBuilder from "@/components/ui/DynamicFormBuilder";
+import { usePermissions } from "@/hooks/usePermissions";
 
 export default function CustomersClient() {
   const [customers, setCustomers] = useState<any[]>([]);
   const [pipelineStages, setPipelineStages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [search, setSearch] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { hasPermission } = usePermissions();
 
   useEffect(() => {
     fetchPipeline();
     fetchCustomers();
-  }, []);
+  }, [page, search]);
 
   async function fetchPipeline() {
     try {
@@ -28,10 +35,11 @@ export default function CustomersClient() {
 
   async function fetchCustomers() {
     try {
-      const res = await fetch("/api/customers");
+      const res = await fetch(`/api/customers?page=${page}&limit=10&search=${search}`);
       if (res.ok) {
         const data = await res.json();
         setCustomers(data.customers || []);
+        if (data.totalPages) setTotalPages(data.totalPages);
       }
     } catch (error) {
       console.error("Failed to fetch customers", error);
@@ -90,17 +98,35 @@ export default function CustomersClient() {
           <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Customers</h1>
           <p className="text-gray-600 mt-1">Manage your customer base and dynamic fields.</p>
         </div>
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl shadow-lg transition-all"
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Add Customer
-        </button>
+        {hasPermission("Customers", "Create") && (
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl shadow-lg transition-all"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Add Customer
+          </button>
+        )}
       </div>
 
+      
+      <>
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
+        <div className="relative w-full sm:w-96">
+          <input 
+            type="text" 
+            placeholder="Search..." 
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+          />
+          <svg className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+      </div>
       <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm text-gray-700">
@@ -117,7 +143,15 @@ export default function CustomersClient() {
               {loading ? (
                 <tr><td colSpan={5} className="px-6 py-8 text-center text-gray-500">Loading customers...</td></tr>
               ) : customers.length === 0 ? (
-                <tr><td colSpan={5} className="px-6 py-8 text-center text-gray-500">No customers found.</td></tr>
+                <tr>
+                  <td colSpan={5} className="p-0">
+                    <EmptyState 
+                      title="No customers found" 
+                      description="You haven't added any customers yet. Create your first customer to get started."
+                      action={<Button size="sm" onClick={() => setIsModalOpen(true)}>Add Customer</Button>}
+                    />
+                  </td>
+                </tr>
               ) : (
                 customers.map((customer) => (
                   <tr key={customer._id} className="hover:bg-gray-50/80 transition-colors">
@@ -170,7 +204,31 @@ export default function CustomersClient() {
             </tbody>
           </table>
         </div>
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between px-6 py-3 border-t border-gray-200 bg-gray-50">
+            <div className="text-sm text-gray-500">
+              Page <span className="font-medium text-gray-900">{page}</span> of <span className="font-medium text-gray-900">{totalPages}</span>
+            </div>
+            <div className="flex gap-2">
+              <button 
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="px-3 py-1 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Previous
+              </button>
+              <button 
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="px-3 py-1 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
+      </>
 
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">

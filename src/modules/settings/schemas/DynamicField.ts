@@ -10,6 +10,7 @@ export interface IDynamicField extends Document {
   section?: string;
   order?: number;
   options?: string[]; // For dropdown types
+  customCss?: string; // For field-level CSS overrides
   createdAt: Date;
   updatedAt: Date;
 }
@@ -29,6 +30,7 @@ const dynamicFieldSchema = new Schema<IDynamicField>(
     section: { type: String, default: "General" },
     order: { type: Number, default: 0 },
     options: [{ type: String }],
+    customCss: { type: String, default: "" },
   },
   { timestamps: true }
 );

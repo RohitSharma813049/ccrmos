@@ -171,7 +171,11 @@ export default function ManageCompaniesPage() {
               ) : (
                 companies.map((company) => (
                   <tr key={company._id} className="hover:bg-gray-50/80 transition-colors">
-                    <td className="px-6 py-4 font-medium text-gray-900">{company.name}</td>
+                    <td className="px-6 py-4 font-medium text-gray-900">
+                      <Link href={`/owner/companies/${company._id}`} className="hover:text-blue-600 hover:underline">
+                        {company.name}
+                      </Link>
+                    </td>
                     <td className="px-6 py-4 text-gray-600">{company.adminEmail}</td>
                     <td className="px-6 py-4">
                       <span className="bg-purple-100 text-purple-700 px-2.5 py-1 rounded-md text-xs font-semibold">

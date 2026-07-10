@@ -21,8 +21,7 @@ async function seedTestData() {
     if (!company) {
       company = await Company.create({
         name: "Acme Corp",
-        subdomain: "acme",
-        isActive: true,
+        status: "Active",
         adminEmail: "founder@acme.com",
       });
       console.log("Created Company: Acme Corp");
@@ -35,7 +34,7 @@ async function seedTestData() {
       founderRole = await Role.create({
         name: "founder",
         companyId: company._id,
-        permissions: ["all"],
+        permissions: {} as any,
       });
     }
 

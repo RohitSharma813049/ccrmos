@@ -1,18 +1,25 @@
 import { NextResponse } from 'next/server';
-import { getSession } from "@/lib/auth-utils";
+import { requireAuthenticatedUser, requirePermission } from "@/lib/auth-utils";
+import { PERMISSIONS } from "@/config/permissions";
 import fs from 'fs';
 import path from 'path';
 
 export async function POST(req: Request) {
   try {
-    const session = await getSession();
-    if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const user = await requireAuthenticatedUser();
+    await requirePermission(PERMISSIONS.WHITE_LABEL_MANAGEMENT);
 
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
     
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
+    }
+
+    const allowedTypes = new Set(["image/jpeg", "image/png", "image/svg+xml"]);
+    const maxSize = 2 * 1024 * 1024;
+    if (!allowedTypes.has(file.type) || file.size > maxSize) {
+      return NextResponse.json({ error: "Only JPEG, PNG, or SVG files up to 2 MB are allowed" }, { status: 400 });
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());

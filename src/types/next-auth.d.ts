@@ -1,17 +1,25 @@
-import NextAuth, { DefaultSession } from "next-auth";
+import { DefaultSession } from "next-auth";
+
+type PermissionMatrix = Record<string, Record<string, unknown>>;
 
 declare module "next-auth" {
   interface Session {
     user: {
       id: string;
       role: string | null;
-      permissions: string[];
+      permissions: PermissionMatrix;
+      companyId?: string | null;
+      founderId?: string | null;
+      hierarchyLevel?: number;
     } & DefaultSession["user"];
   }
 
   interface User {
     role?: string | null;
-    permissions?: string[];
+    permissions?: PermissionMatrix;
+    companyId?: string | null;
+    founderId?: string | null;
+    hierarchyLevel?: number;
   }
 }
 
@@ -19,6 +27,9 @@ declare module "next-auth/jwt" {
   interface JWT {
     id: string;
     role?: string | null;
-    permissions?: string[];
+    permissions?: PermissionMatrix;
+    companyId?: string | null;
+    founderId?: string | null;
+    hierarchyLevel?: number;
   }
 }

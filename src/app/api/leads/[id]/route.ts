@@ -1,11 +1,15 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Lead from '@/modules/leads/schemas/Lead';
+import { requireAuthenticatedUser, requirePermission } from '@/lib/auth-utils';
+import { buildTenantQuery } from '@/lib/access-control';
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   await dbConnect();
   try {
-    const lead = await Lead.findById((await params).id);
+    const user = await requireAuthenticatedUser();
+    await requirePermission('Leads', 'view');
+    const lead = await Lead.findOne({ _id: (await params).id, ...buildTenantQuery(user) });
     if (!lead) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     return NextResponse.json({ lead });
   } catch (error: any) {
@@ -16,8 +20,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   await dbConnect();
   try {
+    const user = await requireAuthenticatedUser();
+    await requirePermission('Leads', 'edit');
     const body = await req.json();
-    const updatedLead = await Lead.findByIdAndUpdate((await params).id, body, { new: true });
+    const updatedLead = await Lead.findOneAndUpdate({ _id: (await params).id, ...buildTenantQuery(user) }, body, { new: true, runValidators: true });
     if (!updatedLead) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     return NextResponse.json({ lead: updatedLead });
   } catch (error: any) {
@@ -28,8 +34,10 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   await dbConnect();
   try {
+    const user = await requireAuthenticatedUser();
+    await requirePermission('Leads', 'delete');
     const lead = // Soft delete instead of hard delete
-    await Lead.findByIdAndUpdate((await params).id, { status: 'Archived' });
+    await Lead.findOneAndUpdate({ _id: (await params).id, ...buildTenantQuery(user) }, { status: 'Archived' });
     if (!lead) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     return NextResponse.json({ success: true });
   } catch (error: any) {

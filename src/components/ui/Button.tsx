@@ -1,36 +1,55 @@
 import React from "react";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "outline";
+  loading?: boolean;
+  variant?: "primary" | "secondary" | "danger" | "ghost";
   size?: "sm" | "md" | "lg";
+  icon?: React.ReactNode;
 }
 
-export const Button: React.FC<ButtonProps> = ({ 
-  children, 
+export function Button({ 
+  loading = false, 
   variant = "primary", 
   size = "md", 
+  icon,
+  children, 
   className = "", 
+  disabled, 
   ...props 
-}) => {
-  const baseStyles = "inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50 disabled:cursor-not-allowed";
+}: ButtonProps) {
+  
+  const baseStyles = "inline-flex items-center justify-center font-semibold rounded-xl shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed";
   
   const variants = {
-    primary: "bg-primary text-gray-900 hover:bg-primary-hover shadow-[0_0_15px_rgba(79,70,229,0.3)] hover:shadow-[0_0_25px_rgba(79,70,229,0.5)]",
-    secondary: "bg-surface text-foreground hover:bg-surface-border glass-panel",
-    outline: "border border-surface-border text-foreground hover:bg-surface",
+    primary: "bg-indigo-600 hover:bg-indigo-500 text-white focus:ring-indigo-600 shadow-md shadow-indigo-500/20",
+    secondary: "bg-white hover:bg-gray-50 text-gray-800 border border-gray-300 focus:ring-gray-200",
+    danger: "bg-red-600 hover:bg-red-500 text-white focus:ring-red-600 shadow-md shadow-red-500/20",
+    ghost: "bg-transparent hover:bg-gray-100 text-gray-700 shadow-none border-none focus:ring-gray-200"
   };
 
   const sizes = {
     sm: "px-3 py-1.5 text-sm",
-    md: "px-5 py-2.5 text-base",
-    lg: "px-8 py-3.5 text-lg font-semibold",
+    md: "px-5 py-2.5 text-sm",
+    lg: "px-6 py-3 text-base"
   };
 
-  const classes = `${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`;
-
   return (
-    <button className={classes} {...props}>
+    <button 
+      className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${loading ? "opacity-80 cursor-wait" : ""} ${className}`}
+      disabled={disabled || loading}
+      {...props}
+    >
+      {loading ? (
+        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      ) : icon ? (
+        <span className="mr-2">{icon}</span>
+      ) : null}
       {children}
     </button>
   );
-};
+}
+
+export default Button;

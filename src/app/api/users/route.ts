@@ -17,10 +17,16 @@ export async function GET(req: Request) {
     
     const query: any = {};
     if (user.hierarchyLevel !== 1) {
-      if (!user.companyId) {
+      const targetFounderId = user.hierarchyLevel === 2 ? user.id : user.founderId;
+      if (!targetFounderId) {
         return NextResponse.json({ users: [] });
       }
-      query.companyId = user.companyId;
+      query.founderId = targetFounderId;
+      // Users can only see others who are strictly BELOW them in hierarchy, plus themselves
+      query.$or = [
+        { hierarchyLevel: { $gt: user.hierarchyLevel } },
+        { _id: user.id } // Can see themselves
+      ];
     }
 
     const users = await User.find(query)
@@ -45,9 +51,15 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     
-    // Enforce Company isolation
+    // Enforce Company isolation and Hierarchy
     if (authUser.hierarchyLevel !== 1) {
       body.companyId = authUser.companyId;
+      body.founderId = authUser.hierarchyLevel === 2 ? authUser.id : authUser.founderId;
+      
+      const newHierarchyLevel = body.hierarchyLevel || 6;
+      if (newHierarchyLevel <= authUser.hierarchyLevel) {
+        return NextResponse.json({ error: "Forbidden: Cannot create users at or above your own hierarchy level." }, { status: 403 });
+      }
     }
 
     // In a real system, you would send an invite email and they would set their password.
@@ -71,8 +83,21 @@ export async function PUT(req: Request) {
     const { id, ...updateData } = body;
 
     const query: any = { _id: id };
+    
     if (authUser.hierarchyLevel !== 1) {
-      query.companyId = authUser.companyId;
+      const targetFounderId = authUser.hierarchyLevel === 2 ? authUser.id : authUser.founderId;
+      if (targetFounderId) query.founderId = targetFounderId;
+      
+      const targetUser = await User.findById(id);
+      if (!targetUser) return NextResponse.json({ error: "Not found" }, { status: 404 });
+      
+      if ((targetUser.hierarchyLevel ?? 99) <= authUser.hierarchyLevel && targetUser._id.toString() !== authUser.id) {
+        return NextResponse.json({ error: "Forbidden: Cannot edit users at or above your own hierarchy level." }, { status: 403 });
+      }
+      
+      if (updateData.hierarchyLevel && updateData.hierarchyLevel <= authUser.hierarchyLevel && targetUser._id.toString() !== authUser.id) {
+        return NextResponse.json({ error: "Forbidden: Cannot promote users to or above your own hierarchy level." }, { status: 403 });
+      }
     }
 
     const updatedUser = await User.findOneAndUpdate(query, updateData, { new: true });
@@ -95,7 +120,15 @@ export async function DELETE(req: Request) {
 
     const query: any = { _id: id };
     if (authUser.hierarchyLevel !== 1) {
-      query.companyId = authUser.companyId;
+      const targetFounderId = authUser.hierarchyLevel === 2 ? authUser.id : authUser.founderId;
+      if (targetFounderId) query.founderId = targetFounderId;
+      
+      const targetUser = await User.findById(id);
+      if (!targetUser) return NextResponse.json({ error: "Not found" }, { status: 404 });
+      
+      if ((targetUser.hierarchyLevel ?? 99) <= authUser.hierarchyLevel) {
+        return NextResponse.json({ error: "Forbidden: Cannot delete users at or above your own hierarchy level." }, { status: 403 });
+      }
     }
 
     await User.findOneAndDelete(query);

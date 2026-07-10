@@ -11,6 +11,18 @@ export async function getCurrentUser() {
 }
 
 /**
+ * Ensures a user is authenticated, returning the user object or throwing an error.
+ * Prevents repeating the manual session check and 401 handling across routes.
+ */
+export async function requireAuthenticatedUser() {
+  const user = await getCurrentUser();
+  if (!user || !user.id) {
+    throw new Error("Unauthorized");
+  }
+  return user as any;
+}
+
+/**
  * Checks if the current authenticated user has the required permission.
  * Supports legacy array permissions and new matrix permissions.
  * Throws an error if not authorized. Useful for API Routes and Server Actions.
@@ -20,6 +32,11 @@ export async function requirePermission(permissionOrModule: string, action?: str
   
   if (!session || !session.user) {
     throw new Error("Unauthorized: Please log in.");
+  }
+
+  const hierarchyLevel = (session.user as any).hierarchyLevel;
+  if (hierarchyLevel !== undefined && hierarchyLevel <= 2) {
+    return session.user; // Founders and Owners have global access
   }
 
   const userPermissions = (session.user as any).permissions || {};
@@ -50,6 +67,11 @@ export async function hasPermission(permissionOrModule: string, action?: string)
   const session = await getSession();
   if (!session || !session.user) return false;
   
+  const hierarchyLevel = (session.user as any).hierarchyLevel;
+  if (hierarchyLevel !== undefined && hierarchyLevel <= 2) {
+    return true; // Founders and Owners have global access
+  }
+
   const userPermissions = (session.user as any).permissions || {};
   
   if (Array.isArray(userPermissions)) {

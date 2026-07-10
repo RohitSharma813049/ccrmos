@@ -2,13 +2,33 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Customer from '@/modules/customers/schemas/Customer';
 import Pipeline from '@/modules/settings/schemas/Pipeline';
-import { getSession } from "@/lib/auth-utils";
+import { requireAuthenticatedUser, requirePermission } from '@/lib/auth-utils';
+import { buildTenantQuery } from "@/lib/access-control";
 
-export async function GET() {
+export async function GET(req: Request) {
   await dbConnect();
   try {
-    const customers = await Customer.find({ status: { $ne: 'Archived' } }).sort({ createdAt: -1 });
-    return NextResponse.json({ customers });
+    const user = await requireAuthenticatedUser();
+    await requirePermission('Customers', 'view');
+    
+    const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get("page") || "1", 10);
+    const limit = parseInt(searchParams.get("limit") || "10", 10);
+    const search = searchParams.get("search") || "";
+    
+    const queryObj: any = { ...buildTenantQuery(user) };
+    
+    if (search) {
+      const searchRegex = { $regex: search, $options: "i" };
+      const searchOr = ['name', 'email', 'company'].map(field => ({ [field]: searchRegex }));
+      queryObj.$or = queryObj.$or ? [...queryObj.$or, ...searchOr] : searchOr;
+    }
+
+    const skip = (page - 1) * limit;
+    const total = await Customer.countDocuments(queryObj);
+    const customers = await Customer.find(queryObj).sort({ createdAt: -1 }).skip(skip).limit(limit);
+    
+    return NextResponse.json({ customers, total, page, totalPages: Math.ceil(total / limit) });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -17,7 +37,15 @@ export async function GET() {
 export async function POST(req: Request) {
   await dbConnect();
   try {
+    const user = await requireAuthenticatedUser();
+    await requirePermission('Customers', 'create');
     const body = await req.json();
+
+    if (user) {
+      body.companyId = user.companyId;
+      body.founderId = user.hierarchyLevel === 2 ? user.id : user.founderId;
+    }
+
     const newCustomer = await Customer.create(body);
     return NextResponse.json({ customer: newCustomer }, { status: 201 });
   } catch (error: any) {
@@ -28,16 +56,15 @@ export async function POST(req: Request) {
 export async function PUT(req: Request) {
   await dbConnect();
   try {
-    const session = await getSession();
-    const user = session?.user as any;
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const user = await requireAuthenticatedUser();
+    await requirePermission('Customers', 'edit');
 
     const body = await req.json();
     const { _id, status, ...updateData } = body;
 
     if (!_id) return NextResponse.json({ error: "Missing Customer ID" }, { status: 400 });
 
-    const customer = await Customer.findById(_id);
+    const customer = await Customer.findOne({ _id, ...buildTenantQuery(user) });
     if (!customer) return NextResponse.json({ error: "Customer not found" }, { status: 404 });
 
     // Enforce "forward-only" logic if status is changing

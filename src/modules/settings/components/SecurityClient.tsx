@@ -13,10 +13,6 @@ export default function SecurityClient() {
   ]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchSettings();
-  }, []);
-
   async function fetchSettings() {
     try {
       const res = await fetch("/api/settings/security");
@@ -29,7 +25,12 @@ export default function SecurityClient() {
           if (data.value.rateLimit) setRateLimit(data.value.rateLimit);
           if (data.value.apiKeys) setApiKeys(data.value.apiKeys);
         }
-      }
+
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+        }
     } catch (e) {
       console.error(e);
     } finally {

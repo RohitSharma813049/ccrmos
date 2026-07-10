@@ -33,7 +33,7 @@ async function seedRolesAndUsers() {
         roleDoc = await Role.create({
           name: r.name,
           companyId: company._id,
-          permissions: r.permissions,
+          permissions: r.permissions as any,
         });
         console.log(`Created Role: ${r.name}`);
       }
@@ -47,7 +47,7 @@ async function seedRolesAndUsers() {
           companyId: company._id,
           hierarchyLevel: r.level,
           role: roleDoc._id,
-          status: "active"
+          isActive: true
         });
         console.log(`Created Test User: ${testEmail}`);
       }

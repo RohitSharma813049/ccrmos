@@ -30,7 +30,7 @@ async function fixOwner() {
       ownerRole = await Role.create({
         name: "owner",
         companyId: company._id,
-        permissions: ["all"],
+        permissions: {} as any,
       });
       console.log("Created valid 'owner' Role document.");
     }
@@ -52,7 +52,7 @@ async function fixOwner() {
         companyId: company._id,
         hierarchyLevel: 1,
         role: ownerRole._id,
-        status: "active"
+        isActive: true
       });
       console.log("Created owner@crmos.com");
     }

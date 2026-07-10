@@ -51,7 +51,7 @@ export async function POST(req: Request) {
       await mongoose.connect(process.env.MONGODB_URI!);
     }
     
-    const { name, target, type, required, section, order, options, tenantScope } = await req.json();
+    const { name, target, type, required, section, order, options, tenantScope, customCss } = await req.json();
     
     if (!name || !target || !type) {
       return NextResponse.json({ error: "Name, target, and type are required." }, { status: 400 });
@@ -71,7 +71,8 @@ export async function POST(req: Request) {
       companyId: tenantScope === "Global" ? undefined : userCompanyId,
       section: section || "General",
       order: order || 0,
-      options: options || []
+      options: options || [],
+      customCss: customCss || ""
     });
     
     return NextResponse.json({ message: "Field deployed successfully.", field: newField }, { status: 201 });

@@ -2,27 +2,42 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Lead from '@/modules/leads/schemas/Lead';
 import Pipeline from '@/modules/settings/schemas/Pipeline';
-import { getSession } from "@/lib/auth-utils";
+import { requireAuthenticatedUser, requirePermission } from '@/lib/auth-utils';
 import { evaluateWorkflows } from "@/modules/automation/services/workflow.service";
 import { buildQueryScope } from "@/lib/access-control";
+import { buildTenantQuery } from "@/lib/access-control";
 import { logActivity } from "@/modules/audit/services/audit.service";
 
 export async function GET(req: Request) {
   await dbConnect();
   try {
-    const session = await getSession();
-    const user = session?.user as any;
+    const user = await requireAuthenticatedUser();
+    await requirePermission('Leads', 'view');
     
     // For now, assuming standard Manager/Director access uses 'Company' scope or 'Department' scope
     // We would fetch their Role's recordScope, but for MVP we default to "Company" if Founder, else "Own"
     // Let's assume recordScope is passed or resolved. Here we enforce standard RBAC.
-    const scope = user?.hierarchyLevel <= 2 ? "Company" : (user?.role?.permissions?.leads?.recordScope || "Own");
+    const scope = user.hierarchyLevel <= 2 ? "Company" : (user.permissions?.Leads?.recordScope || "Own");
     
     const queryScope = buildQueryScope(user, scope);
-    const finalQuery = { ...queryScope, status: { $ne: 'Archived' } };
+    
+    const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get("page") || "1", 10);
+    const limit = parseInt(searchParams.get("limit") || "10", 10);
+    const search = searchParams.get("search") || "";
+    
+    const queryObj: any = { ...queryScope, status: { $ne: 'Archived' } };
+    if (search) {
+      const searchRegex = { $regex: search, $options: "i" };
+      const searchOr = ['firstName', 'lastName', 'email'].map(field => ({ [field]: searchRegex }));
+      queryObj.$or = queryObj.$or ? [...queryObj.$or, ...searchOr] : searchOr;
+    }
 
-    const leads = await Lead.find(finalQuery).sort({ createdAt: -1 });
-    return NextResponse.json({ leads });
+    const skip = (page - 1) * limit;
+    const total = await Lead.countDocuments(queryObj);
+    const leads = await Lead.find(queryObj).sort({ createdAt: -1 }).skip(skip).limit(limit);
+    
+    return NextResponse.json({ leads, total, page, totalPages: Math.ceil(total / limit) });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -31,17 +46,18 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   await dbConnect();
   try {
-    const session = await getSession();
-    const user = session?.user as any;
+    const user = await requireAuthenticatedUser();
+    await requirePermission('Leads', 'create');
     const companyId = user?.companyId || null;
 
     const body = await req.json();
 
     // Auto-assign hierarchical ownership based on creator
     if (user) {
-      body.createdBy = user._id;
+      body.createdBy = user.id;
       body.companyId = companyId;
-      if (!body.assignedUserId) body.assignedUserId = user._id;
+      body.founderId = user.hierarchyLevel === 2 ? user.id : user.founderId;
+      if (!body.assignedUserId) body.assignedUserId = user.id;
       if (user.departmentId) body.departmentId = user.departmentId;
       if (user.teamLeaderId) body.teamLeaderId = user.teamLeaderId;
       if (user.managerId) body.managerId = user.managerId;
@@ -54,7 +70,7 @@ export async function POST(req: Request) {
       // Log the creation
       logActivity({
         companyId,
-        userId: user._id,
+        userId: user.id,
         module: "Leads",
         recordId: newLead._id.toString(),
         action: "Lead Created",
@@ -77,16 +93,15 @@ export async function POST(req: Request) {
 export async function PUT(req: Request) {
   await dbConnect();
   try {
-    const session = await getSession();
-    const user = session?.user as any;
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const user = await requireAuthenticatedUser();
+    await requirePermission('Leads', 'edit');
 
     const body = await req.json();
     const { _id, status, ...updateData } = body;
 
     if (!_id) return NextResponse.json({ error: "Missing Lead ID" }, { status: 400 });
 
-    const lead = await Lead.findById(_id);
+    const lead = await Lead.findOne({ _id, ...buildTenantQuery(user) });
     if (!lead) return NextResponse.json({ error: "Lead not found" }, { status: 404 });
 
     // Enforce "forward-only" logic if status is changing

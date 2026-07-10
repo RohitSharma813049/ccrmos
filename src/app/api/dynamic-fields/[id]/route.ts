@@ -1,13 +1,19 @@
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 import DynamicField from "@/modules/settings/schemas/DynamicField";
-import { requirePermission } from "@/lib/auth-utils";
+import { requirePermission, getSession } from "@/lib/auth-utils";
 import { PERMISSIONS } from "@/config/permissions";
 
 // PUT /api/dynamic-fields/[id]
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await requirePermission(PERMISSIONS.MANAGE_COMPANIES);
+    const session = await getSession();
+    if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const user = session.user as any;
+    
+    if (user.hierarchyLevel > 2) {
+      return NextResponse.json({ error: "Forbidden: Only Founders and Platform Owners can edit form fields." }, { status: 403 });
+    }
     
     if (!mongoose.connection.readyState) {
       await mongoose.connect(process.env.MONGODB_URI!);
@@ -16,15 +22,18 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     const { id } = await params;
     const { name, target, type, required } = await req.json();
     
+    const field = await DynamicField.findById(id);
+    if (!field) return NextResponse.json({ error: "Field not found" }, { status: 404 });
+    
+    if (field.tenantScope === "Global" && user.hierarchyLevel > 1) {
+      return NextResponse.json({ error: "Forbidden: Cannot edit Global fields." }, { status: 403 });
+    }
+    
     const updatedField = await DynamicField.findByIdAndUpdate(
       id,
       { name, target, type, required },
       { new: true, runValidators: true }
     );
-    
-    if (!updatedField) {
-      return NextResponse.json({ error: "Field not found" }, { status: 404 });
-    }
     
     return NextResponse.json({ message: "Field updated successfully.", field: updatedField }, { status: 200 });
   } catch (error: any) {
@@ -35,20 +44,27 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 // DELETE /api/dynamic-fields/[id]
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await requirePermission(PERMISSIONS.MANAGE_COMPANIES);
+    const session = await getSession();
+    if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const user = session.user as any;
+    
+    if (user.hierarchyLevel > 2) {
+      return NextResponse.json({ error: "Forbidden: Only Founders and Platform Owners can delete form fields." }, { status: 403 });
+    }
     
     if (!mongoose.connection.readyState) {
       await mongoose.connect(process.env.MONGODB_URI!);
     }
     
     const { id } = await params;
+    const field = await DynamicField.findById(id);
+    if (!field) return NextResponse.json({ error: "Field not found" }, { status: 404 });
     
-    // UI-level deletion (removes the definition, does not clean up actual records in tenants)
-    const field = await DynamicField.findByIdAndDelete(id);
-    
-    if (!field) {
-      return NextResponse.json({ error: "Field not found" }, { status: 404 });
+    if (field.tenantScope === "Global" && user.hierarchyLevel > 1) {
+      return NextResponse.json({ error: "Forbidden: Cannot delete Global fields." }, { status: 403 });
     }
+    
+    await DynamicField.findByIdAndDelete(id);
     
     return NextResponse.json({ message: "Field definition deleted successfully." }, { status: 200 });
   } catch (error: any) {

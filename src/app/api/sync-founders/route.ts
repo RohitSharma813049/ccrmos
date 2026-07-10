@@ -3,12 +3,13 @@ import mongoose from "mongoose";
 import Company from "@/modules/companies/schemas/Company";
 import User from "@/modules/users/schemas/User";
 import Role from "@/modules/roles/schemas/Role";
-import { requirePermission } from "@/lib/auth-utils";
+import { requirePermission, requireAuthenticatedUser } from "@/lib/auth-utils";
 import { PERMISSIONS } from "@/config/permissions";
 
 export async function GET() {
   try {
-    // await requirePermission(PERMISSIONS.MANAGE_COMPANIES);
+    const user = await requireAuthenticatedUser();
+    if (user.hierarchyLevel !== 1) throw new Error("Forbidden: Platform Owner access required.");
     
     if (!mongoose.connection.readyState) {
       await mongoose.connect(process.env.MONGODB_URI!);

@@ -15,24 +15,35 @@ import mongoose from "mongoose";
  * @param recordScope "Own" | "Team" | "Department" | "Director" | "Company" | "Platform"
  */
 export function buildQueryScope(user: any, recordScope: string = "Own") {
-  // If the user has no companyId or role data, they can see nothing by default
-  if (!user || !user.companyId) {
+  // If the user has no companyId (and is not a Platform Owner), they can see nothing by default
+  if (!user || (!user.companyId && user.hierarchyLevel !== 1)) {
     return { _id: null }; // Invalid query returns nothing
   }
 
-  // 1. Platform Owner (Level 1) can see EVERYTHING across all companies
+  // 1. Platform Owner (Level 1) can see EVERYTHING across all companies (unless impersonating)
   if (user.hierarchyLevel === 1) {
+    if (user.impersonatedFounderId) {
+      return { founderId: user.impersonatedFounderId };
+    }
     return {};
   }
 
-  // 2. Founder (Level 2) or "Company" scope can see everything IN THEIR COMPANY
+  // 2. Founder (Level 2) or "Company" scope can see everything IN THEIR FOUNDER'S TENANT
   if (user.hierarchyLevel === 2 || recordScope === "Company") {
-    return { companyId: user.companyId };
+    // If the user is a Founder, their ID is the founderId. 
+    // Otherwise, they belong to a founder and have a founderId set on their user record.
+    const targetFounderId = user.hierarchyLevel === 2 ? user.id : user.founderId;
+    return targetFounderId ? { founderId: targetFounderId } : { _id: null };
   }
 
-  // From this point, all queries MUST be scoped to the company
-  const baseQuery: any = { companyId: user.companyId };
-  const userId = new mongoose.Types.ObjectId(user._id);
+  // From this point, all queries MUST be scoped to the founder's tenant
+  const targetFounderId = user.hierarchyLevel === 2 ? user.id : user.founderId;
+  const baseQuery: any = targetFounderId ? { founderId: targetFounderId } : { _id: null };
+  const currentUserId = user.id;
+  if (!currentUserId || !mongoose.isValidObjectId(currentUserId)) {
+    return { _id: null };
+  }
+  const userId = new mongoose.Types.ObjectId(currentUserId);
 
   switch (recordScope) {
     case "Director":
@@ -86,4 +97,17 @@ export function buildQueryScope(user: any, recordScope: string = "Own") {
   }
 
   return baseQuery;
+}
+
+/** Restricts a query to the current tenant. Use for every record lookup by ID. */
+export function buildTenantQuery(user: any) {
+  if (!user) return { _id: null };
+  if (user.hierarchyLevel === 1) {
+    if (user.impersonatedFounderId) {
+      return { founderId: user.impersonatedFounderId };
+    }
+    return {};
+  }
+  const targetFounderId = user.hierarchyLevel === 2 ? user.id : user.founderId;
+  return targetFounderId ? { founderId: targetFounderId } : { _id: null };
 }

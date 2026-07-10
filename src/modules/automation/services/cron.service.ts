@@ -12,7 +12,7 @@ export async function runScheduledTasks() {
   await dbConnect();
   
   try {
-    const companies = await Company.find({ status: "active" });
+    const companies = await Company.find({ status: "Active" });
 
     for (const company of companies) {
       await processCompanyCronJobs(company._id);
@@ -41,7 +41,7 @@ async function processCompanyCronJobs(companyId: any) {
     for (const workflow of scheduledWorkflows) {
       // In a real implementation, this would fetch records meeting specific criteria
       // and run the workflow engine on them.
-      console.log(`[CRON] Executing scheduled workflow ${workflow.name} for company ${companyId}`);
+      console.log(`[CRON] Executing scheduled workflow ${workflow.title} for company ${companyId}`);
     }
 
     // 2. Data Cleanup / Stale Leads

@@ -4,15 +4,43 @@ import User from "@/modules/users/schemas/User";
 import { setTemporaryOTP } from "@/lib/redis";
 import nodemailer from "nodemailer";
 
+const rateLimitCache = new Map<string, { count: number, timestamp: number }>();
+
 export async function POST(req: Request) {
   try {
     const { email } = await req.json();
 
     if (!email) {
-      return NextResponse.json({ message: "Email is required" }, { status: 400 });
+      return NextResponse.json({ message: "If the email exists, an OTP will be sent." }, { status: 200 });
+    }
+
+    const ip = req.headers.get("x-forwarded-for") || "unknown";
+    const key = `${ip}-${email}`;
+    const now = Date.now();
+    const windowMs = 15 * 60 * 1000; // 15 minutes
+    
+    const record = rateLimitCache.get(key) || { count: 0, timestamp: now };
+    if (now - record.timestamp > windowMs) {
+      record.count = 1;
+      record.timestamp = now;
+    } else {
+      record.count++;
+    }
+    rateLimitCache.set(key, record);
+
+    if (record.count > 3) {
+      return NextResponse.json({ message: "Too many requests. Please try again later." }, { status: 429 });
     }
 
     await dbConnect();
+    
+    // Check if user exists but always return generic message
+    const user = await User.findOne({ email });
+    if (!user) {
+      // Intentionally mimic processing time to prevent timing attacks
+      await new Promise(resolve => setTimeout(resolve, Math.random() * 500 + 500));
+      return NextResponse.json({ message: "If the email exists, an OTP will be sent." }, { status: 200 });
+    }
 
     // Generate a 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -40,10 +68,10 @@ export async function POST(req: Request) {
       });
       console.log(`OTP sent to ${email}`);
     } else {
-      console.warn("Email configuration is missing. OTP generated: ", otp);
+      console.warn("Email configuration is missing. Cannot send OTP.");
     }
 
-    return NextResponse.json({ message: "OTP sent successfully" }, { status: 200 });
+    return NextResponse.json({ message: "If the email exists, an OTP will be sent." }, { status: 200 });
   } catch (error) {
     console.error("Error in request-otp:", error);
     return NextResponse.json({ message: "Internal server error" }, { status: 500 });

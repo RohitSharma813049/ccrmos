@@ -16,27 +16,28 @@ export default function WhitelabelClient() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    async function fetchSettings() {
+      try {
+        const res = await fetch("/api/settings/whitelabel");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.value) {
+            if (data.value.platformName) setPlatformName(data.value.platformName);
+            if (data.value.primaryColor) setPrimaryColor(data.value.primaryColor);
+            if (data.value.logoUrl) setLogoUrl(data.value.logoUrl);
+            if (data.value.domains) setDomains(data.value.domains);
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    }
+
     fetchSettings();
   }, []);
 
-  async function fetchSettings() {
-    try {
-      const res = await fetch("/api/settings/whitelabel");
-      if (res.ok) {
-        const data = await res.json();
-        if (data.value) {
-          if (data.value.platformName) setPlatformName(data.value.platformName);
-          if (data.value.primaryColor) setPrimaryColor(data.value.primaryColor);
-          if (data.value.logoUrl) setLogoUrl(data.value.logoUrl);
-          if (data.value.domains) setDomains(data.value.domains);
-        }
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  }
 
   async function saveBranding() {
     try {
