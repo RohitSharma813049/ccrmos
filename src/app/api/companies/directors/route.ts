@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import dbConnect from '@/lib/db';
 import User from '@/modules/users/schemas/User';
 import { getSession } from "@/lib/auth-utils";
@@ -14,7 +15,7 @@ export async function GET() {
     const directors = await User.find({ 
       companyId: user.companyId,
       hierarchyLevel: 3 
-    }).sort({ createdAt: -1 });
+    }).populate("role").sort({ createdAt: -1 });
 
     return NextResponse.json({ directors });
   } catch (error: any) {
@@ -31,10 +32,23 @@ export async function POST(req: Request) {
 
     const body = await req.json();
 
+    let assignedRole = await mongoose.models.Role.findOne({ 
+      name: body.department, 
+      companyId: user.companyId 
+    });
+
+    if (!assignedRole) {
+      assignedRole = await mongoose.models.Role.create({
+        name: body.department,
+        companyId: user.companyId,
+        permissions: ["view_dashboard"]
+      });
+    }
+
     const newDirector = await User.create({
       name: `${body.firstName} ${body.lastName}`,
       email: body.email,
-      role: body.department, // For mock purposes
+      role: assignedRole._id,
       hierarchyLevel: 3,
       companyId: user.companyId,
       isActive: true

@@ -27,13 +27,13 @@ export async function requirePermission(permissionOrModule: string, action?: str
 
   if (Array.isArray(userPermissions)) {
     // Legacy support
-    hasAccess = userPermissions.includes(permissionOrModule);
+    hasAccess = userPermissions.includes("all") || userPermissions.includes(permissionOrModule);
   } else if (action) {
     // New Matrix Support: e.g. requirePermission('Leads', 'view')
-    hasAccess = !!userPermissions[permissionOrModule]?.[action];
+    hasAccess = !!userPermissions["all"] || !!userPermissions[permissionOrModule]?.[action];
   } else {
     // Check if they have ANY permission in a module, or fallback
-    hasAccess = !!userPermissions[permissionOrModule];
+    hasAccess = !!userPermissions["all"] || !!userPermissions[permissionOrModule];
   }
   
   if (!hasAccess) {
@@ -53,10 +53,13 @@ export async function hasPermission(permissionOrModule: string, action?: string)
   const userPermissions = (session.user as any).permissions || {};
   
   if (Array.isArray(userPermissions)) {
+    if (userPermissions.includes("all")) return true;
     return userPermissions.includes(permissionOrModule);
   } else if (action) {
+    if (userPermissions["all"]) return true;
     return !!userPermissions[permissionOrModule]?.[action];
   } else {
+    if (userPermissions["all"]) return true;
     return !!userPermissions[permissionOrModule];
   }
 }

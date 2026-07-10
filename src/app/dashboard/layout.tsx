@@ -59,7 +59,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <NavItem href="/dashboard/invoices" label="Invoices" icon="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
 
           {/* Conditional Admin Menus */}
-          {(session?.user as any)?.permissions?.includes("MANAGE_DIRECTORS") && (
+          {((session?.user as any)?.hierarchyLevel <= 2 || (session?.user as any)?.permissions?.includes("MANAGE_DIRECTORS")) && (
             <>
               <div className="pt-6 pb-2">
                 <p className="px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Company Admin</p>

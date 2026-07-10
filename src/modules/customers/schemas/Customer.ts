@@ -1,6 +1,8 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
+import Counter from '@/modules/core/schemas/Counter';
 
 export interface ICustomer extends Document {
+  displayId?: string;
   companyId?: mongoose.Types.ObjectId;
   companyName: string;
   contactName: string;
@@ -21,6 +23,7 @@ export interface ICustomer extends Document {
 }
 
 const customerSchema = new Schema<ICustomer>({
+  displayId: { type: String, unique: true },
   companyId: { type: Schema.Types.ObjectId, ref: 'Company' },
   companyName: { type: String, required: true },
   contactName: { type: String, required: true },
@@ -38,6 +41,23 @@ const customerSchema = new Schema<ICustomer>({
   teamLeaderId: { type: Schema.Types.ObjectId, ref: "User" },
   assignedUserId: { type: Schema.Types.ObjectId, ref: "User" },
 }, { timestamps: true, strict: false });
+
+customerSchema.pre('save', async function (next) {
+  if (this.isNew && !this.displayId) {
+    try {
+      const counterId = `customer_seq_${this.companyId || 'global'}`;
+      const counter = await Counter.findByIdAndUpdate(
+        counterId,
+        { $inc: { seq: 1 }, $setOnInsert: { companyId: this.companyId } },
+        { new: true, upsert: true }
+      );
+      this.displayId = `CRT-${String(counter.seq).padStart(4, '0')}`;
+    } catch (error: any) {
+      return next(error);
+    }
+  }
+  next();
+});
 
 const Customer: Model<ICustomer> = mongoose.models.Customer || mongoose.model<ICustomer>('Customer', customerSchema);
 export default Customer;

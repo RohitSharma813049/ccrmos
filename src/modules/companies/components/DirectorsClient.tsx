@@ -131,7 +131,7 @@ export default function DirectorsClient() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-gray-700">{typeof dir.role === 'string' ? dir.role : 'Unassigned'}</td>
+                    <td className="px-6 py-4 text-gray-700">{dir.role?.name || (typeof dir.role === 'string' ? dir.role : 'Unassigned')}</td>
                     <td className="px-6 py-4">
                       <span className={`px-2.5 py-1 rounded-md text-xs font-semibold border ${dir.isActive ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'}`}>
                         {dir.isActive ? 'Active' : 'Suspended'}

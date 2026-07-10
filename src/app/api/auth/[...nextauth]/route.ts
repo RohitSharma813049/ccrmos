@@ -55,6 +55,8 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           role: user.role ? (user.role as any).name : null,
           permissions: user.role ? (user.role as any).permissions : [],
+          companyId: user.companyId ? user.companyId.toString() : null,
+          hierarchyLevel: user.hierarchyLevel,
         };
       },
     }),
@@ -68,6 +70,8 @@ export const authOptions: NextAuthOptions = {
         token.role = (user as any).role;
         token.id = user.id;
         token.permissions = (user as any).permissions;
+        token.companyId = (user as any).companyId;
+        token.hierarchyLevel = (user as any).hierarchyLevel;
       }
       return token;
     },
@@ -77,6 +81,8 @@ export const authOptions: NextAuthOptions = {
           (session.user as any).role = token.role;
           (session.user as any).id = token.id;
           (session.user as any).permissions = token.permissions;
+          (session.user as any).companyId = token.companyId;
+          (session.user as any).hierarchyLevel = token.hierarchyLevel;
         }
       }
       return session;
