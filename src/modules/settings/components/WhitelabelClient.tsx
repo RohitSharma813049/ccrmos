@@ -1,15 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 
 export default function WhitelabelClient() {
   const [platformName, setPlatformName] = useState("CRM OS");
   const [primaryColor, setPrimaryColor] = useState("#3B82F6");
+  const [logoUrl, setLogoUrl] = useState("");
   const [domains, setDomains] = useState<any[]>([
     { name: "app.acmecorp.com", status: "Active" },
     { name: "portal.globex.io", status: "Pending DNS Verification" }
   ]);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchSettings();
@@ -23,6 +27,7 @@ export default function WhitelabelClient() {
         if (data.value) {
           if (data.value.platformName) setPlatformName(data.value.platformName);
           if (data.value.primaryColor) setPrimaryColor(data.value.primaryColor);
+          if (data.value.logoUrl) setLogoUrl(data.value.logoUrl);
           if (data.value.domains) setDomains(data.value.domains);
         }
       }
@@ -40,7 +45,7 @@ export default function WhitelabelClient() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           global: true, // Assuming this user is a super admin
-          value: { platformName, primaryColor, domains }
+          value: { platformName, primaryColor, logoUrl, domains }
         })
       });
       if (res.ok) {
@@ -49,6 +54,35 @@ export default function WhitelabelClient() {
     } catch (e) {
       console.error(e);
       alert("Failed to save branding");
+    }
+  }
+
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/api/settings/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setLogoUrl(data.url);
+      } else {
+        alert("Upload failed.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Upload failed.");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   }
 
@@ -65,7 +99,7 @@ export default function WhitelabelClient() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           global: false, // domains are usually tenant-specific
-          value: { platformName, primaryColor, domains: newDomains }
+          value: { platformName, primaryColor, logoUrl, domains: newDomains }
         })
       });
     } catch (e) {
@@ -109,11 +143,32 @@ export default function WhitelabelClient() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Logo Upload</label>
-              <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-gray-500 transition-colors cursor-pointer" onClick={() => alert("File upload is mocked for now.")}>
-                <svg className="w-8 h-8 text-gray-500 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                </svg>
-                <p className="text-sm text-gray-600">Click to upload or drag and drop SVG/PNG</p>
+              
+              <div className="flex flex-col gap-4">
+                {logoUrl && (
+                  <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 flex justify-center">
+                    <img src={logoUrl} alt="Logo Preview" className="max-h-24 object-contain" />
+                  </div>
+                )}
+                
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  onChange={handleFileUpload} 
+                  accept="image/png, image/jpeg, image/svg+xml"
+                  className="hidden" 
+                />
+                <div 
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-gray-500 transition-colors cursor-pointer ${uploading ? 'opacity-50 pointer-events-none' : ''}`}
+                >
+                  <svg className="w-8 h-8 text-gray-500 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  </svg>
+                  <p className="text-sm text-gray-600">
+                    {uploading ? 'Uploading...' : 'Click to upload or drag and drop SVG/PNG'}
+                  </p>
+                </div>
               </div>
             </div>
             <button onClick={saveBranding} className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-blue-500/20">
