@@ -6,6 +6,11 @@ export interface IUser extends Document {
   name?: string;
   role?: mongoose.Types.ObjectId | IRole;
   companyId?: mongoose.Types.ObjectId;
+  hierarchyLevel?: number; // 1: Platform Owner, 2: Founder, 3: Director, 4: Manager, 5: Team Leader, 6: Team Member
+  departmentId?: mongoose.Types.ObjectId;
+  directorId?: mongoose.Types.ObjectId;
+  managerId?: mongoose.Types.ObjectId;
+  teamLeaderId?: mongoose.Types.ObjectId;
 }
 
 const UserSchema: Schema<IUser> = new Schema({
@@ -27,6 +32,11 @@ const UserSchema: Schema<IUser> = new Schema({
     type: Schema.Types.ObjectId,
     ref: "Company",
   },
+  hierarchyLevel: { type: Number, min: 1, max: 6, default: 6 },
+  departmentId: { type: Schema.Types.ObjectId, ref: "Department" },
+  directorId: { type: Schema.Types.ObjectId, ref: "User" },
+  managerId: { type: Schema.Types.ObjectId, ref: "User" },
+  teamLeaderId: { type: Schema.Types.ObjectId, ref: "User" },
 }, { timestamps: true });
 
 const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>("User", UserSchema);

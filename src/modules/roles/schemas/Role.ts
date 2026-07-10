@@ -10,7 +10,18 @@ export interface IRole extends Document {
       create: boolean;
       edit: boolean;
       delete: boolean;
-      [customAction: string]: boolean;
+      assign: boolean;
+      export: boolean;
+      import: boolean;
+      approve: boolean;
+      recordScope: "Own" | "Team" | "Department" | "Director" | "Company" | "Platform";
+      fieldPermissions: {
+        hiddenFields: string[];
+        readOnlyFields: string[];
+      };
+      actionPermissions: {
+        [customAction: string]: boolean;
+      };
     };
   };
   isSystem: boolean; // True for default roles like Founder that shouldn't be deleted
