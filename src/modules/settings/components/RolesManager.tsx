@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 
 const MODULES = ["Leads", "Customers", "Projects", "Orders", "Invoices", "Tasks", "Settings"];
-const ACTIONS = ["view", "create", "edit", "delete"];
+const ACTIONS = ["view", "create", "edit", "delete", "assign", "export", "import", "approve"];
+const SCOPES = ["Own", "Team", "Department", "Director", "Company", "Platform"];
 
 export default function RolesManager() {
   const [roles, setRoles] = useState<any[]>([]);
@@ -43,6 +44,16 @@ export default function RolesManager() {
     }));
   };
 
+  const handleScopeChange = (mod: string, scope: string) => {
+    setPermissions((prev: any) => ({
+      ...prev,
+      [mod]: {
+        ...(prev[mod] || {}),
+        recordScope: scope
+      }
+    }));
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -51,7 +62,6 @@ export default function RolesManager() {
         name: roleName,
         description: roleDesc,
         permissions,
-        // In reality, companyId is injected server-side or from session
       };
 
       const url = "/api/roles";
@@ -157,7 +167,7 @@ export default function RolesManager() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
-          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-6xl max-h-[90vh] flex flex-col">
             <div className="p-6 border-b border-gray-100 flex-shrink-0">
               <h2 className="text-xl font-bold text-gray-900">{currentRole ? "Edit Role" : "Create New Role"}</h2>
             </div>
@@ -191,24 +201,36 @@ export default function RolesManager() {
 
                 <div className="pt-6">
                   <h3 className="text-lg font-bold text-gray-900 mb-4">Permission Matrix</h3>
-                  <div className="border border-gray-200 rounded-xl overflow-hidden">
-                    <table className="w-full text-left text-sm text-gray-700">
+                  <div className="border border-gray-200 rounded-xl overflow-x-auto">
+                    <table className="w-full text-left text-sm text-gray-700 whitespace-nowrap">
                       <thead className="bg-gray-50 border-b border-gray-200">
                         <tr>
-                          <th className="px-6 py-3 font-semibold">Module</th>
+                          <th className="px-4 py-3 font-semibold">Module</th>
+                          <th className="px-4 py-3 font-semibold">Record Scope</th>
                           {ACTIONS.map(a => (
-                            <th key={a} className="px-6 py-3 font-semibold capitalize text-center">{a}</th>
+                            <th key={a} className="px-4 py-3 font-semibold capitalize text-center">{a}</th>
                           ))}
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
                         {MODULES.map(mod => (
                           <tr key={mod} className="hover:bg-gray-50 transition-colors">
-                            <td className="px-6 py-4 font-medium text-gray-900">{mod}</td>
+                            <td className="px-4 py-4 font-medium text-gray-900">{mod}</td>
+                            <td className="px-4 py-4">
+                              <select 
+                                value={permissions[mod]?.recordScope || "Own"}
+                                onChange={(e) => handleScopeChange(mod, e.target.value)}
+                                className="border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm py-1"
+                              >
+                                {SCOPES.map(scope => (
+                                  <option key={scope} value={scope}>{scope}</option>
+                                ))}
+                              </select>
+                            </td>
                             {ACTIONS.map(action => {
                               const isChecked = permissions[mod]?.[action] || false;
                               return (
-                                <td key={`${mod}-${action}`} className="px-6 py-4 text-center">
+                                <td key={`${mod}-${action}`} className="px-4 py-4 text-center">
                                   <input 
                                     type="checkbox"
                                     checked={isChecked}

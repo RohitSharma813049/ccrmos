@@ -29,10 +29,28 @@ export default function FormBuilderClient() {
     section: "General",
     options: ""
   });
+  const [hierarchyLevel, setHierarchyLevel] = useState<number | null>(null);
 
   useEffect(() => {
-    fetchFields();
-  }, [activeTab]);
+    fetchSession();
+  }, []);
+
+  useEffect(() => {
+    if (hierarchyLevel === 1) {
+      fetchFields();
+    }
+  }, [activeTab, hierarchyLevel]);
+
+  async function fetchSession() {
+    try {
+      const res = await fetch("/api/auth/session");
+      const session = await res.json();
+      setHierarchyLevel(session?.user?.hierarchyLevel || 6);
+    } catch (e) {
+      console.error(e);
+      setHierarchyLevel(6);
+    }
+  }
 
   async function fetchFields() {
     setLoading(true);
@@ -55,7 +73,7 @@ export default function FormBuilderClient() {
       const payload = {
         ...formData,
         target: activeTab,
-        tenantScope: "Company", // Founders create company-scoped fields
+        tenantScope: "Global", // Only Platform owner can use this UI, so fields are Global by default
         options: formData.type === "Dropdown (Select)" ? formData.options.split(",").map(s => s.trim()).filter(Boolean) : [],
         order: fields.length
       };
@@ -69,6 +87,8 @@ export default function FormBuilderClient() {
       if (res.ok) {
         setIsModalOpen(false);
         fetchFields();
+      } else {
+        alert("Failed to save field. Ensure you have the right permissions.");
       }
     } catch (error) {
       console.error(error);
@@ -76,10 +96,6 @@ export default function FormBuilderClient() {
   };
 
   const handleDelete = async (id: string, scope: string) => {
-    if (scope === "Global") {
-      alert("You cannot delete a Global field assigned by the Platform Owner.");
-      return;
-    }
     if (confirm("Delete this custom field?")) {
       const res = await fetch(`/api/dynamic-fields/${id}`, { method: "DELETE" });
       if (res.ok) fetchFields();
@@ -91,20 +107,36 @@ export default function FormBuilderClient() {
   
   const onDragEnd = async (result: DropResult) => {
     if (!result.destination) return;
-    // For simplicity, just handling ordering in the UI for now
-    // A robust implementation would bulk update `order` property in DB
     const items = Array.from(fields);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
     setFields(items);
   };
 
+  if (hierarchyLevel === null) {
+    return <div className="p-8 text-center text-gray-500">Checking permissions...</div>;
+  }
+
+  if (hierarchyLevel !== 1) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 px-4">
+        <div className="bg-red-50 text-red-600 p-6 rounded-2xl max-w-lg text-center border border-red-100 shadow-sm">
+          <svg className="w-12 h-12 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <h2 className="text-xl font-bold mb-2">Access Restricted</h2>
+          <p className="text-red-700/80 font-medium">Database schema modification is restricted to Platform Owners only.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8 fade-in pb-12">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Form Builder</h1>
-          <p className="text-gray-600 mt-1">Design custom forms for your CRM modules.</p>
+          <p className="text-gray-600 mt-1">Design custom forms for your CRM modules (Platform Owner only).</p>
         </div>
         <button 
           onClick={() => {
