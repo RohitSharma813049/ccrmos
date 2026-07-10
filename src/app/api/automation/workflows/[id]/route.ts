@@ -3,7 +3,7 @@ import dbConnect from '@/lib/db';
 import Workflow from '@/modules/automation/schemas/Workflow';
 import { getSession } from "@/lib/auth-utils";
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   await dbConnect();
   try {
     const session = await getSession();
@@ -12,8 +12,9 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 
     const body = await req.json();
     const companyId = user.companyId;
+    const { id } = await params;
 
-    const workflow = await Workflow.findOne({ _id: params.id, companyId });
+    const workflow = await Workflow.findOne({ _id: id, companyId });
     if (!workflow) {
       return NextResponse.json({ error: "Workflow not found" }, { status: 404 });
     }
@@ -27,7 +28,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   await dbConnect();
   try {
     const session = await getSession();
@@ -35,8 +36,9 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const companyId = user.companyId;
+    const { id } = await params;
 
-    const deleted = await Workflow.findOneAndDelete({ _id: params.id, companyId });
+    const deleted = await Workflow.findOneAndDelete({ _id: id, companyId });
     if (!deleted) {
       return NextResponse.json({ error: "Workflow not found" }, { status: 404 });
     }

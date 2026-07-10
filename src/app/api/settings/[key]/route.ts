@@ -3,14 +3,14 @@ import dbConnect from '@/lib/db';
 import SystemSetting from '@/modules/settings/schemas/SystemSetting';
 import { getSession } from "@/lib/auth-utils";
 
-export async function GET(req: Request, { params }: { params: { key: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ key: string }> }) {
   await dbConnect();
   try {
     const session = await getSession();
     const user = session?.user as any;
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const key = params.key;
+    const key = (await params).key;
 
     // For Platform Owners (Level 1), they manage global settings (companyId = null)
     // For other tenants, we look up settings specific to their companyId, falling back to global if not found
@@ -28,14 +28,14 @@ export async function GET(req: Request, { params }: { params: { key: string } })
   }
 }
 
-export async function PUT(req: Request, { params }: { params: { key: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ key: string }> }) {
   await dbConnect();
   try {
     const session = await getSession();
     const user = session?.user as any;
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const key = params.key;
+    const key = (await params).key;
     const body = await req.json();
     
     // Determine scope based on user level or request body (if they explicitly pass global=true)
