@@ -1,15 +1,28 @@
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import dbConnect from "@/lib/db";
+import SystemSetting from "@/modules/settings/schemas/SystemSetting";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions);
+  
+  await dbConnect();
+  // Fetch global branding
+  const whitelabelSetting = await SystemSetting.findOne({ key: 'whitelabel', companyId: null });
+  const branding = whitelabelSetting?.value || {};
+  const platformName = branding.platformName || 'CRM OS';
+  const logoUrl = branding.logoUrl || null;
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 flex flex-col md:flex-row overflow-hidden">
       {/* Mobile Header (Hidden on Desktop) */}
       <div className="md:hidden flex items-center justify-between p-4 bg-white border-b border-gray-200">
-        <h1 className="font-bold text-xl text-gray-900">CRM OS</h1>
+        {logoUrl ? (
+          <img src={logoUrl} alt={platformName} className="h-8 object-contain" />
+        ) : (
+          <h1 className="font-bold text-xl text-gray-900">{platformName}</h1>
+        )}
         <button className="p-2 text-gray-600">
           <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -23,7 +36,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-purple-500/10 to-transparent pointer-events-none" />
 
         <div className="p-6 relative z-10 flex items-center gap-3">
-          <h2 className="font-bold text-xl tracking-tight text-gray-900">CRM OS</h2>
+          {logoUrl ? (
+            <img src={logoUrl} alt={platformName} className="max-h-12 w-auto object-contain" />
+          ) : (
+            <h2 className="font-bold text-xl tracking-tight text-gray-900">{platformName}</h2>
+          )}
         </div>
 
         <nav className="flex-1 px-4 space-y-1 overflow-y-auto pb-6 relative z-10 custom-scrollbar">
