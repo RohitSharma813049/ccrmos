@@ -19,18 +19,46 @@ export async function GET(req: Request) {
     const pipelines = await Pipeline.find(query);
     
     // If no pipeline exists, we can return a default structure for the frontend to use
-    if (pipelines.length === 0 && module === "lead") {
-      return NextResponse.json({
-        pipeline: {
-          module: "lead",
-          stages: [
-            { name: "New", order: 0 },
-            { name: "Contacted", order: 1 },
-            { name: "Qualified", order: 2 },
-            { name: "Converted", order: 3 },
-          ]
-        }
-      });
+    if (pipelines.length === 0) {
+      let defaultStages: any[] = [];
+      if (module === "lead") {
+        defaultStages = [
+          { name: "New", order: 0 },
+          { name: "Contacted", order: 1 },
+          { name: "Qualified", order: 2 },
+          { name: "Converted", order: 3 },
+        ];
+      } else if (module === "customer") {
+        defaultStages = [
+          { name: "Onboarding", order: 0 },
+          { name: "Active", order: 1 },
+          { name: "At Risk", order: 2 },
+          { name: "Churned", order: 3 },
+        ];
+      } else if (module === "project") {
+        defaultStages = [
+          { name: "Planning", order: 0 },
+          { name: "In Progress", order: 1 },
+          { name: "Review", order: 2 },
+          { name: "Completed", order: 3 },
+        ];
+      } else if (module === "invoice") {
+        defaultStages = [
+          { name: "Draft", order: 0 },
+          { name: "Sent", order: 1 },
+          { name: "Overdue", order: 2 },
+          { name: "Paid", order: 3 },
+        ];
+      }
+
+      if (defaultStages.length > 0) {
+        return NextResponse.json({
+          pipeline: {
+            module,
+            stages: defaultStages
+          }
+        });
+      }
     }
 
     return NextResponse.json({ pipeline: pipelines[0] });

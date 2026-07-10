@@ -6,13 +6,27 @@ import KanbanBoard, { KanbanCard } from "@/components/ui/KanbanBoard";
 
 export default function ProjectsClient() {
   const [items, setItems] = useState<any[]>([]);
+  const [pipelineStages, setPipelineStages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [view, setView] = useState<"table" | "kanban">("kanban");
 
   useEffect(() => {
+    fetchPipeline();
     fetchItems();
   }, []);
+
+  async function fetchPipeline() {
+    try {
+      const res = await fetch("/api/pipelines?module=project");
+      if (res.ok) {
+        const data = await res.json();
+        setPipelineStages(data.pipeline?.stages || []);
+      }
+    } catch (e) {
+      console.error("Failed to fetch pipeline", e);
+    }
+  }
 
   async function fetchItems() {
     try {
@@ -47,30 +61,60 @@ export default function ProjectsClient() {
     }
   };
 
+  const updateStatus = async (id: string, newStatus: string) => {
+    try {
+      const res = await fetch("/api/projects", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ _id: id, status: newStatus })
+      });
+      if (res.ok) {
+        fetchItems();
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to update status");
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const handleCardMoved = async (cardId: string, newStatus: string) => {
+    // Optimistic update
     setItems(prev => prev.map(item => item._id === cardId ? { ...item, status: newStatus } : item));
     
     try {
-      await fetch(`/api/projects/${cardId}`, {
+      const res = await fetch("/api/projects", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus })
+        body: JSON.stringify({ _id: cardId, status: newStatus })
       });
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.error || "Failed to move card (Forward only)");
+        fetchItems(); // revert
+      }
     } catch (e) {
       console.error("Failed to move card", e);
       fetchItems();
     }
   };
 
+  const isStageDisabled = (currentStatus: string, targetStage: any) => {
+    const currentIndex = pipelineStages.findIndex(s => s.name === currentStatus);
+    if (currentIndex === -1) return false;
+    return targetStage.order < pipelineStages[currentIndex].order;
+  };
+
   const kanbanCards: KanbanCard[] = items.map(item => ({
     id: item._id,
     title: item.name,
     subtitle: item.description || "No description",
-    status: item.status || "Active",
+    status: item.status || "Planning",
     ...item
   }));
 
-  const columns = ["Active", "Pending", "Closed"];
+  const columns = pipelineStages.length > 0 ? pipelineStages.sort((a,b) => a.order - b.order).map(s => s.name) : ["Planning", "In Progress", "Review", "Completed"];
 
   return (
     <div className="space-y-8 fade-in pb-12">
@@ -109,7 +153,8 @@ export default function ProjectsClient() {
             <table className="w-full text-left text-sm text-gray-700">
               <thead className="bg-gray-50 text-xs uppercase text-gray-600 font-semibold border-b border-gray-200">
                 <tr>
-                  <th className="px-6 py-4">Name</th><th className="px-6 py-4">Status</th>
+                  <th className="px-6 py-4">Name</th>
+                  <th className="px-6 py-4 min-w-[200px]">Status (Pipeline)</th>
                   <th className="px-6 py-4">Custom Data</th>
                 </tr>
               </thead>
@@ -121,9 +166,46 @@ export default function ProjectsClient() {
                 ) : (
                   items.map((item) => (
                     <tr key={item._id} className="hover:bg-gray-50/80 transition-colors">
-                      <td className="px-6 py-4">{item.name}</td><td className="px-6 py-4">{item.status}</td>
+                      <td className="px-6 py-4 font-medium text-gray-900">{item.name}</td>
+                      <td className="px-6 py-4">
+                        {pipelineStages.length > 0 ? (
+                          <select
+                            value={item.status}
+                            onChange={(e) => updateStatus(item._id, e.target.value)}
+                            className="w-full text-sm border-gray-300 rounded-lg shadow-sm py-1.5 pl-3 pr-8 focus:ring-indigo-500 focus:border-indigo-500 border bg-white text-gray-700 font-medium cursor-pointer"
+                          >
+                            {!pipelineStages.find(s => s.name === item.status) && (
+                              <option value={item.status} disabled>{item.status}</option>
+                            )}
+                            
+                            {pipelineStages.sort((a,b) => a.order - b.order).map(stage => (
+                              <option 
+                                key={stage.name} 
+                                value={stage.name}
+                                disabled={isStageDisabled(item.status, stage)}
+                              >
+                                {stage.name} {isStageDisabled(item.status, stage) ? '(Locked)' : ''}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <span className="px-2.5 py-1 rounded-md text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                            {item.status}
+                          </span>
+                        )}
+                      </td>
                       <td className="px-6 py-4 text-xs text-gray-500">
-                        {item.customData ? Object.entries(item.customData).map(([k, v]) => `${k}: ${v}`).join(', ') : 'None'}
+                        {item.customData && Object.keys(item.customData).length > 0 ? (
+                          <div className="flex flex-wrap gap-2">
+                            {Object.entries(item.customData).map(([k, v]) => (
+                              <span key={k} className="bg-gray-100 border border-gray-200 px-2 py-1 rounded text-gray-700">
+                                <strong className="text-gray-900">{k}:</strong> {String(v)}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-gray-400">None</span>
+                        )}
                       </td>
                     </tr>
                   ))
@@ -149,7 +231,7 @@ export default function ProjectsClient() {
             <div className="p-6 border-b border-gray-100">
               <h2 className="text-xl font-bold text-gray-900">Add Project</h2>
             </div>
-            <div className="p-6">
+            <div className="p-6 max-h-[80vh] overflow-y-auto custom-scrollbar">
               <DynamicFormBuilder 
                 targetModule="project" 
                 onSubmit={handleSave} 
