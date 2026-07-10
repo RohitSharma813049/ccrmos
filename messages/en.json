@@ -1,0 +1,20 @@
+{
+  "Navigation": {
+    "dashboard": "Dashboard",
+    "leads": "Leads",
+    "customers": "Customers",
+    "projects": "Projects",
+    "tasks": "Tasks",
+    "orders": "Orders",
+    "invoices": "Invoices",
+    "settings": "Settings"
+  },
+  "Dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Overview of your business metrics",
+    "totalRevenue": "Total Revenue",
+    "activeProjects": "Active Projects",
+    "newLeads": "New Leads",
+    "pendingTasks": "Pending Tasks"
+  }
+}

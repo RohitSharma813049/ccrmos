@@ -1,0 +1,20 @@
+{
+  "Navigation": {
+    "dashboard": "Tablero",
+    "leads": "Clientes Potenciales",
+    "customers": "Clientes",
+    "projects": "Proyectos",
+    "tasks": "Tareas",
+    "orders": "Pedidos",
+    "invoices": "Facturas",
+    "settings": "Ajustes"
+  },
+  "Dashboard": {
+    "title": "Tablero",
+    "subtitle": "Resumen de las métricas de tu negocio",
+    "totalRevenue": "Ingresos Totales",
+    "activeProjects": "Proyectos Activos",
+    "newLeads": "Nuevos Prospectos",
+    "pendingTasks": "Tareas Pendientes"
+  }
+}
