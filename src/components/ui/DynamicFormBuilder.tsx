@@ -9,6 +9,8 @@ interface DynamicField {
   name: string;
   type: string;
   required: boolean;
+  section?: string;
+  options?: string[];
 }
 
 interface DynamicFormBuilderProps {
