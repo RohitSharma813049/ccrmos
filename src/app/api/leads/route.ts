@@ -4,23 +4,32 @@ import Lead from '@/modules/leads/schemas/Lead';
 import Pipeline from '@/modules/settings/schemas/Pipeline';
 import { requireAuthenticatedUser, requirePermission } from '@/lib/auth-utils';
 import { evaluateWorkflows } from "@/modules/automation/services/workflow.service";
-import { buildQueryScope } from "@/lib/access-control";
 import { buildTenantQuery } from "@/lib/access-control";
 import { logActivity } from "@/modules/audit/services/audit.service";
+import { getRecordScopeFilter, filterFields } from "@/lib/permissions";
+
+function errorResponse(error: any) {
+  const message = error?.message || "Internal server error";
+  if (message === "Unauthorized" || message.startsWith("Unauthorized:")) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (message.startsWith("Forbidden:") || message.includes("permission")) {
+    return NextResponse.json({ error: message }, { status: 403 });
+  }
+  if (error?.code === 11000) {
+    return NextResponse.json({ error: "A lead with this email already exists in this tenant." }, { status: 409 });
+  }
+  return NextResponse.json({ error: message }, { status: 500 });
+}
 
 export async function GET(req: Request) {
-  await dbConnect();
   try {
     const user = await requireAuthenticatedUser();
     await requirePermission('Leads', 'view');
-    
-    // For now, assuming standard Manager/Director access uses 'Company' scope or 'Department' scope
-    // We would fetch their Role's recordScope, but for MVP we default to "Company" if Founder, else "Own"
-    // Let's assume recordScope is passed or resolved. Here we enforce standard RBAC.
-    const scope = user.hierarchyLevel <= 2 ? "Company" : (user.permissions?.Leads?.recordScope || "Own");
-    
-    const queryScope = buildQueryScope(user, scope);
-    
+    await dbConnect();
+
+    const queryScope = getRecordScopeFilter(user, "Leads");
+
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get("page") || "1", 10);
     const limit = parseInt(searchParams.get("limit") || "10", 10);
@@ -35,19 +44,20 @@ export async function GET(req: Request) {
 
     const skip = (page - 1) * limit;
     const total = await Lead.countDocuments(queryObj);
-    const leads = await Lead.find(queryObj).sort({ createdAt: -1 }).skip(skip).limit(limit);
+    const leads = await Lead.find(queryObj).sort({ createdAt: -1 }).skip(skip).limit(limit).lean();
     
-    return NextResponse.json({ leads, total, page, totalPages: Math.ceil(total / limit) });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
+    // Apply Field-Level Permissions
+    const filteredLeads = leads.map(lead => filterFields(lead, user, "Leads"));
+    
+    return NextResponse.json({ leads: filteredLeads, total, page, totalPages: Math.ceil(total / limit) });
+  } catch (error: any) { return errorResponse(error); }
 }
 
 export async function POST(req: Request) {
-  await dbConnect();
   try {
     const user = await requireAuthenticatedUser();
     await requirePermission('Leads', 'create');
+    await dbConnect();
     const companyId = user?.companyId || null;
 
     const body = await req.json();
@@ -85,16 +95,14 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ lead: newLead }, { status: 201 });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
+  } catch (error: any) { return errorResponse(error); }
 }
 
 export async function PUT(req: Request) {
-  await dbConnect();
   try {
     const user = await requireAuthenticatedUser();
     await requirePermission('Leads', 'edit');
+    await dbConnect();
 
     const body = await req.json();
     const { _id, status, ...updateData } = body;
@@ -106,10 +114,10 @@ export async function PUT(req: Request) {
 
     // Enforce "forward-only" logic if status is changing
     if (status && lead.status !== status) {
-      let pipeline = await Pipeline.findOne({ companyId: user.companyId, module: "lead" });
+      const pipeline = await Pipeline.findOne({ companyId: user.companyId, module: "lead" });
       
       // Fallback for default pipeline stages
-      let stages = pipeline?.stages || [
+      const stages = pipeline?.stages || [
         { name: "New", order: 0 },
         { name: "Contacted", order: 1 },
         { name: "Qualified", order: 2 },
@@ -141,7 +149,5 @@ export async function PUT(req: Request) {
     await lead.save();
 
     return NextResponse.json({ lead });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
+  } catch (error: any) { return errorResponse(error); }
 }

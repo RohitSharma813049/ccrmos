@@ -23,17 +23,16 @@ export default function AuditClient() {
         const data = await res.json();
         setLogs(data.logs || []);
       }
-
-  useEffect(() => {
-    fetchLogs();
-  }, [moduleFilter, actionFilter]); // Refetch if filters change
-
-      } catch (e) {
+    } catch (e) {
       console.error(e);
     } finally {
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    fetchLogs();
+  }, [moduleFilter, actionFilter]);
 
   const exportCSV = () => {
     if (logs.length === 0) {

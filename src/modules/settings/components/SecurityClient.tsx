@@ -25,18 +25,17 @@ export default function SecurityClient() {
           if (data.value.rateLimit) setRateLimit(data.value.rateLimit);
           if (data.value.apiKeys) setApiKeys(data.value.apiKeys);
         }
-
-  useEffect(() => {
-    fetchSettings();
-  }, []);
-
-        }
+      }
     } catch (e) {
       console.error(e);
     } finally {
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    fetchSettings();
+  }, []);
 
   async function saveSettings(updates: any) {
     try {

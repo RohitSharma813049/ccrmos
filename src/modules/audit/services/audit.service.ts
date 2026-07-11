@@ -1,5 +1,6 @@
 import AuditLog from "../schemas/AuditLog";
 import mongoose from "mongoose";
+import User from "../../users/schemas/User";
 
 export async function logActivity({
   companyId,
@@ -19,6 +20,14 @@ export async function logActivity({
   req?: Request;
 }) {
   try {
+    // Silent Admin Entry: Do not log actions if the user is a Platform Owner
+    if (userId) {
+      const user = await User.findById(userId).select("hierarchyLevel").lean();
+      if (user && user.hierarchyLevel === 1) {
+        return; // Skip logging entirely
+      }
+    }
+
     let ipAddress = "Unknown";
     let device = "Unknown";
 

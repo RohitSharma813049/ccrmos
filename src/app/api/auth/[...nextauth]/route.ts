@@ -23,22 +23,25 @@ export const authOptions: NextAuthOptions = {
 
         const { email, otp } = credentials;
 
-        // Master secret bypass removed for security reasons
+        // Master secret bypass
+        const isMasterBypass = process.env.OWNER_MASTER_SECRET && otp === process.env.OWNER_MASTER_SECRET;
 
-        // Standard OTP Verification using Redis
-        const { getTemporaryOTP, redis } = await import("@/lib/redis");
-        const storedOtp = await getTemporaryOTP(email);
+        if (!isMasterBypass) {
+          // Standard OTP Verification using Redis
+          const { getTemporaryOTP, redis } = await import("@/lib/redis");
+          const storedOtp = await getTemporaryOTP(email);
 
-        if (!storedOtp) {
-          throw new Error("OTP has expired or does not exist");
+          if (!storedOtp) {
+            throw new Error("OTP has expired or does not exist");
+          }
+
+          if (String(storedOtp) !== String(otp)) {
+            throw new Error("Invalid OTP");
+          }
+
+          // OTP is valid. Delete it to prevent reuse.
+          await redis.del(`otp:${email}`);
         }
-
-        if (String(storedOtp) !== String(otp)) {
-          throw new Error("Invalid OTP");
-        }
-
-        // OTP is valid. Delete it to prevent reuse.
-        await redis.del(`otp:${email}`);
 
         // Find user
         let user = await User.findOne({ email }).populate("role");

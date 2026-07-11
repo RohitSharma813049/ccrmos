@@ -315,11 +315,11 @@ export default function FormBuilderClient() {
             <form onSubmit={handleFormSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Field Name</label>
-                <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full border-gray-300 rounded-lg px-3 py-2 border outline-none focus:border-indigo-500" />
+                <input required type="text" name="name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full border-gray-300 rounded-lg px-3 py-2 border outline-none focus:border-indigo-500" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Data Type</label>
-                <select value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})} className="w-full border-gray-300 rounded-lg px-3 py-2 border outline-none focus:border-indigo-500">
+                <select name="type" value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})} className="w-full border-gray-300 rounded-lg px-3 py-2 border outline-none focus:border-indigo-500">
                   <option>Text String</option>
                   <option>Number</option>
                   <option>Dropdown (Select)</option>

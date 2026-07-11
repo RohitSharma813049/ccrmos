@@ -230,6 +230,7 @@ export default function UsersClient() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Role (Permissions)</label>
                     <select
+                      name="role"
                       value={formData.role}
                       onChange={e => setFormData({...formData, role: e.target.value})}
                       className="w-full border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 border"

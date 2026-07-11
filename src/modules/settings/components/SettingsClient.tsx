@@ -16,18 +16,17 @@ export default function SettingsClient() {
           if (data.value.maintenanceMode !== undefined) setMaintenanceMode(data.value.maintenanceMode);
           if (data.value.globalCurrency) setGlobalCurrency(data.value.globalCurrency);
         }
-
-  useEffect(() => {
-    fetchSettings();
-  }, []);
-
-        }
+      }
     } catch (e) {
       console.error(e);
     } finally {
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    fetchSettings();
+  }, []);
 
   async function saveSettings(updates: any) {
     try {

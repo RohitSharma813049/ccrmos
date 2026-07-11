@@ -31,7 +31,7 @@ const leadSchema = new Schema<ILead>({
   founderId: { type: Schema.Types.ObjectId, ref: 'User' },
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
-  email: { type: String, required: true },
+  email: { type: String, required: true, trim: true, lowercase: true },
   phone: { type: String },
   company: { type: String },
   status: { type: String, default: 'new' },
@@ -44,6 +44,11 @@ const leadSchema = new Schema<ILead>({
   teamLeaderId: { type: Schema.Types.ObjectId, ref: "User" },
   assignedUserId: { type: Schema.Types.ObjectId, ref: "User" },
 }, { timestamps: true, strict: false });
+
+// A contact may exist in different tenants, but a tenant must not receive the
+// same lead twice through a repeated form submission or retry.
+leadSchema.index({ founderId: 1, email: 1 }, { unique: true });
+leadSchema.index({ founderId: 1, phone: 1 }, { unique: true, sparse: true });
 
 leadSchema.pre('save', async function (this: ILead) {
   if (this.isNew && !this.displayId) {

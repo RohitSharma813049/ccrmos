@@ -1,8 +1,16 @@
 import { getServerSession } from "next-auth/next";
+import { cookies } from "next/headers";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function getSession() {
-  return await getServerSession(authOptions);
+  const session = await getServerSession(authOptions);
+  if (session?.user && (session.user as any).hierarchyLevel === 1) {
+    const impersonatedFounderId = (await cookies()).get("impersonatedFounderId")?.value;
+    if (impersonatedFounderId) {
+      (session.user as any).impersonatedFounderId = impersonatedFounderId;
+    }
+  }
+  return session;
 }
 
 export async function getCurrentUser() {
@@ -22,6 +30,8 @@ export async function requireAuthenticatedUser() {
   return user as any;
 }
 
+import { PLATFORM_OWNER_PERMISSIONS } from "@/config/permissions";
+
 /**
  * Checks if the current authenticated user has the required permission.
  * Supports legacy array permissions and new matrix permissions.
@@ -35,22 +45,28 @@ export async function requirePermission(permissionOrModule: string, action?: str
   }
 
   const hierarchyLevel = (session.user as any).hierarchyLevel;
-  if (hierarchyLevel !== undefined && hierarchyLevel <= 2) {
-    return session.user; // Founders and Owners have global access
+  if (hierarchyLevel === 1) {
+    return session.user; // Platform Owners have global access
+  }
+
+  if (PLATFORM_OWNER_PERMISSIONS.includes(permissionOrModule) && hierarchyLevel !== 1) {
+    throw new Error(`Forbidden: You lack the required permission (${permissionOrModule}).`);
   }
 
   const userPermissions = (session.user as any).permissions || {};
   let hasAccess = false;
 
+    const hasAll = userPermissions["all"] === true || Object.values(userPermissions).includes("all");
+    
   if (Array.isArray(userPermissions)) {
     // Legacy support
     hasAccess = userPermissions.includes("all") || userPermissions.includes(permissionOrModule);
   } else if (action) {
     // New Matrix Support: e.g. requirePermission('Leads', 'view')
-    hasAccess = !!userPermissions["all"] || !!userPermissions[permissionOrModule]?.[action];
+    hasAccess = hasAll || !!userPermissions[permissionOrModule]?.[action];
   } else {
     // Check if they have ANY permission in a module, or fallback
-    hasAccess = !!userPermissions["all"] || !!userPermissions[permissionOrModule];
+    hasAccess = hasAll || !!userPermissions[permissionOrModule];
   }
   
   if (!hasAccess) {
@@ -68,20 +84,26 @@ export async function hasPermission(permissionOrModule: string, action?: string)
   if (!session || !session.user) return false;
   
   const hierarchyLevel = (session.user as any).hierarchyLevel;
-  if (hierarchyLevel !== undefined && hierarchyLevel <= 2) {
-    return true; // Founders and Owners have global access
+  if (hierarchyLevel === 1) {
+    return true; // Platform Owners have global access
+  }
+
+  if (PLATFORM_OWNER_PERMISSIONS.includes(permissionOrModule) && hierarchyLevel !== 1) {
+    return false;
   }
 
   const userPermissions = (session.user as any).permissions || {};
+  
+  const hasAll = userPermissions["all"] === true || Object.values(userPermissions).includes("all");
   
   if (Array.isArray(userPermissions)) {
     if (userPermissions.includes("all")) return true;
     return userPermissions.includes(permissionOrModule);
   } else if (action) {
-    if (userPermissions["all"]) return true;
+    if (hasAll) return true;
     return !!userPermissions[permissionOrModule]?.[action];
   } else {
-    if (userPermissions["all"]) return true;
+    if (hasAll) return true;
     return !!userPermissions[permissionOrModule];
   }
 }

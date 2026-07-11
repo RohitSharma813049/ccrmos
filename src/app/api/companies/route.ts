@@ -37,9 +37,10 @@ export async function POST(req: Request) {
     
     return NextResponse.json({ message: "Tenant registered successfully.", company: newCompany }, { status: 201 });
   } catch (error: any) {
-    if (error.message === "Name and Admin Email are required.") {
+    if (error.message === "Name and Admin Email are required." || error.message === "A company already exists for this admin email." || error.message === "This admin email is already assigned to another user.") {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
+    if (error?.code === 11000) return NextResponse.json({ error: "A company or admin email already exists." }, { status: 409 });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

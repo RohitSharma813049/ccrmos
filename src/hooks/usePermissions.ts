@@ -34,7 +34,7 @@ export function usePermissions() {
 
     if (permissions["all"]) return true;
     
-    return !!permissions[moduleName]?.[action];
+    return !!permissions[moduleName]?.[action.toLowerCase()];
   };
 
   return { session, loading, hasPermission };

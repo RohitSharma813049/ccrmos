@@ -1,0 +1,87 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: e2e\form-builder.spec.ts >> Dynamic Form Builder >> Founder can add a custom field to the Leads module
+- Location: tests\e2e\form-builder.spec.ts:14:7
+
+# Error details
+
+```
+Test timeout of 60000ms exceeded.
+```
+
+```
+Error: page.waitForURL: Test timeout of 60000ms exceeded.
+=========================== logs ===========================
+waiting for navigation to "**/dashboard**" until "load"
+============================================================
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - heading "Welcome Back" [level=1] [ref=e4]
+    - generic [ref=e5]: User does not exist. Please contact your administrator.
+    - generic [ref=e6]:
+      - generic [ref=e7]:
+        - generic [ref=e8]: Enter OTP
+        - paragraph [ref=e9]: We sent a 6-digit code to founderA@crmos.com
+        - textbox "000000" [ref=e10]: "123456"
+      - button "Sign In" [ref=e11]
+      - button "Use a different email" [ref=e12]
+  - button "Open Next.js Dev Tools" [ref=e18] [cursor=pointer]:
+    - img [ref=e19]
+  - alert [ref=e22]
+```
+
+# Test source
+
+```ts
+  1  | import { test, expect } from '@playwright/test';
+  2  | 
+  3  | async function login(page: any, email: string) {
+  4  |   await page.goto('/login');
+  5  |   await page.fill('input[type="email"]', email);
+  6  |   await page.click('button:has-text("Send OTP")');
+  7  |   await expect(page.getByText('Enter OTP')).toBeVisible({ timeout: 15000 });
+  8  |   await page.fill('input[type="text"]', '123456');
+  9  |   await page.click('button:has-text("Sign In")');
+> 10 |   await page.waitForURL('**/dashboard**');
+     |              ^ Error: page.waitForURL: Test timeout of 60000ms exceeded.
+  11 | }
+  12 | 
+  13 | test.describe('Dynamic Form Builder', () => {
+  14 |   test('Founder can add a custom field to the Leads module', async ({ page }) => {
+  15 |     await login(page, 'founderA@crmos.com');
+  16 |     
+  17 |     // Navigate to Custom Fields settings
+  18 |     await page.goto('/dashboard/settings/fields');
+  19 |     
+  20 |     // Create new field
+  21 |     await page.click('button:has-text("Add Field")');
+  22 |     
+  23 |     const fieldName = `CustomE2EField_${Date.now()}`;
+  24 |     await page.fill('input[name="name"]', fieldName);
+  25 |     await page.selectOption('select[name="type"]', 'Text');
+  26 |     await page.click('button:has-text("Save Field")');
+  27 |     
+  28 |     // Verify field appears in list
+  29 |     await expect(page.getByText(fieldName)).toBeVisible();
+  30 |     
+  31 |     // Go to Leads module to verify it appears in the create form
+  32 |     await page.click('text=Lead Management');
+  33 |     await page.click('button:has-text("Add Lead")');
+  34 |     
+  35 |     // The custom field label should be visible
+  36 |     await expect(page.getByText(fieldName)).toBeVisible();
+  37 |   });
+  38 | });
+  39 | 
+```

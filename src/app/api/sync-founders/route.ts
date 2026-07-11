@@ -3,8 +3,7 @@ import mongoose from "mongoose";
 import Company from "@/modules/companies/schemas/Company";
 import User from "@/modules/users/schemas/User";
 import Role from "@/modules/roles/schemas/Role";
-import { requirePermission, requireAuthenticatedUser } from "@/lib/auth-utils";
-import { PERMISSIONS } from "@/config/permissions";
+import { requireAuthenticatedUser } from "@/lib/auth-utils";
 
 export async function GET() {
   try {
@@ -32,12 +31,17 @@ export async function GET() {
           user = await User.create({
             email,
             role: founderRole._id,
-            companyId: company._id
+            companyId: company._id,
+            hierarchyLevel: 2,
           });
+          user.founderId = user._id;
+          await user.save();
           results.push(`Created user for ${email}`);
         } else {
           user.role = founderRole._id;
           user.companyId = company._id;
+          user.hierarchyLevel = 2;
+          user.founderId = user._id;
           await user.save();
           results.push(`Updated user ${email}`);
         }

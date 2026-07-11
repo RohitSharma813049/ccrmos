@@ -10,7 +10,7 @@ import Order from "@/modules/orders/schemas/Order";
 import Task from "@/modules/tasks/schemas/Task";
 import Company from "@/modules/companies/schemas/Company";
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, context: { params: Promise<{ id: string }> }) {
   await dbConnect();
 
   try {
@@ -21,7 +21,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
       return NextResponse.json({ error: "Forbidden: Only Platform Owners can view tenant stats" }, { status: 403 });
     }
 
-    const companyId = params.id;
+    const { id: companyId } = await context.params;
     const company = await Company.findById(companyId);
 
     if (!company) {
@@ -62,7 +62,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 
     return NextResponse.json({
       company,
-      founder: founder ? { name: founder.name, email: founder.email } : null,
+      founder: founder ? { _id: founder._id, name: founder.name, email: founder.email } : null,
       stats: {
         users: usersCount,
         leads: leadsCount,

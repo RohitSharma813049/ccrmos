@@ -77,6 +77,7 @@ export default function DynamicFormBuilder({ targetModule, initialData, onSubmit
             <label className="block text-sm font-medium text-gray-700 mb-1.5">First Name *</label>
             <input 
               type="text" 
+              name="firstName"
               required 
               value={formData.firstName || ""}
               onChange={(e) => handleFixedDataChange("firstName", e.target.value)}
@@ -87,6 +88,7 @@ export default function DynamicFormBuilder({ targetModule, initialData, onSubmit
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Last Name *</label>
             <input 
               type="text" 
+              name="lastName"
               required 
               value={formData.lastName || ""}
               onChange={(e) => handleFixedDataChange("lastName", e.target.value)}
@@ -97,6 +99,7 @@ export default function DynamicFormBuilder({ targetModule, initialData, onSubmit
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
             <input 
               type="email" 
+              name="email"
               value={formData.email || ""}
               onChange={(e) => handleFixedDataChange("email", e.target.value)}
               className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none" 
