@@ -27,6 +27,9 @@ export async function GET(req: Request) {
         { hierarchyLevel: { $gt: user.hierarchyLevel } },
         { _id: user.id } // Can see themselves
       ];
+    } else if (user.impersonatedFounderId) {
+      // Platform Owner is impersonating a tenant, only show that tenant's users
+      query.founderId = user.impersonatedFounderId;
     }
 
     const users = await User.find(query)

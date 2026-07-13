@@ -7,24 +7,30 @@ export default function SecurityClient() {
   const [strictSession, setStrictSession] = useState(false);
   const [passwordRegex, setPasswordRegex] = useState("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$");
   const [rateLimit, setRateLimit] = useState(1000);
-  const [apiKeys, setApiKeys] = useState<any[]>([
-    { id: 1, name: "Acme Corp Integration Key", status: "Active" },
-    { id: 2, name: "Globex Zapier Link", status: "Active" }
-  ]);
+  const [apiKeys, setApiKeys] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [newlyGeneratedKey, setNewlyGeneratedKey] = useState<{name: string, key: string} | null>(null);
 
   async function fetchSettings() {
     try {
-      const res = await fetch("/api/settings/security");
-      if (res.ok) {
-        const data = await res.json();
+      const [settingsRes, apiKeysRes] = await Promise.all([
+        fetch("/api/settings/security"),
+        fetch("/api/settings/api-keys")
+      ]);
+      
+      if (settingsRes.ok) {
+        const data = await settingsRes.json();
         if (data.value) {
           if (data.value.require2FA !== undefined) setRequire2FA(data.value.require2FA);
           if (data.value.strictSession !== undefined) setStrictSession(data.value.strictSession);
           if (data.value.passwordRegex) setPasswordRegex(data.value.passwordRegex);
           if (data.value.rateLimit) setRateLimit(data.value.rateLimit);
-          if (data.value.apiKeys) setApiKeys(data.value.apiKeys);
         }
+      }
+
+      if (apiKeysRes.ok) {
+        const keysData = await apiKeysRes.json();
+        if (keysData.keys) setApiKeys(keysData.keys);
       }
     } catch (e) {
       console.error(e);
@@ -45,7 +51,7 @@ export default function SecurityClient() {
         body: JSON.stringify({
           global: true,
           value: { 
-            require2FA, strictSession, passwordRegex, rateLimit, apiKeys, 
+            require2FA, strictSession, passwordRegex, rateLimit, 
             ...updates 
           }
         })
@@ -75,19 +81,46 @@ export default function SecurityClient() {
     saveSettings({ rateLimit: Number(e.target.value) });
   };
 
-  const generateApiKey = () => {
+  const generateApiKey = async () => {
     const name = prompt("Enter a name for the new API Key:");
     if (!name) return;
-    const newKeys = [...apiKeys, { id: Date.now(), name, status: "Active" }];
-    setApiKeys(newKeys);
-    saveSettings({ apiKeys: newKeys });
+    
+    try {
+      const res = await fetch("/api/settings/api-keys", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name })
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        if (data.apiKey) {
+          setNewlyGeneratedKey({ name: data.apiKey.name, key: data.apiKey.key });
+          fetchSettings(); // Refresh list to show masked version
+        }
+      } else {
+        alert("Failed to generate API Key");
+      }
+    } catch (e) {
+      console.error(e);
+    }
   };
 
-  const revokeKey = (id: number) => {
+  const revokeKey = async (id: string) => {
     if (!confirm("Revoke this key? It will immediately stop working.")) return;
-    const newKeys = apiKeys.filter(k => k.id !== id);
-    setApiKeys(newKeys);
-    saveSettings({ apiKeys: newKeys });
+    
+    try {
+      const res = await fetch(`/api/settings/api-keys?id=${id}`, {
+        method: "DELETE"
+      });
+      if (res.ok) {
+        fetchSettings();
+      } else {
+        alert("Failed to revoke API Key");
+      }
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   if (loading) return <div className="p-8 text-center text-gray-500">Loading settings...</div>;
@@ -156,11 +189,14 @@ export default function SecurityClient() {
                <h3 className="text-sm font-semibold text-gray-900 mb-3">API Keys Created by Tenants</h3>
                <div className="space-y-2">
                  {apiKeys.map(key => (
-                   <div key={key.id} className="p-3 border border-gray-200 bg-gray-50 rounded-lg flex justify-between items-center group">
-                     <span className="text-sm text-gray-700">{key.name}</span>
+                   <div key={key._id} className="p-3 border border-gray-200 bg-gray-50 rounded-lg flex justify-between items-center group">
+                     <div>
+                       <span className="text-sm font-medium text-gray-900 block">{key.name}</span>
+                       <span className="text-xs text-gray-500 font-mono block mt-1">{key.maskedKey}</span>
+                     </div>
                      <div className="flex items-center gap-3">
                        <span className="text-xs text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded">Active</span>
-                       <button onClick={() => revokeKey(key.id)} className="text-red-500 text-xs opacity-0 group-hover:opacity-100 transition-opacity">Revoke</button>
+                       <button onClick={() => revokeKey(key._id)} className="text-red-500 text-xs opacity-0 group-hover:opacity-100 transition-opacity">Revoke</button>
                      </div>
                    </div>
                  ))}
@@ -170,6 +206,47 @@ export default function SecurityClient() {
           </div>
         </div>
       </div>
+
+      {newlyGeneratedKey && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setNewlyGeneratedKey(null)} />
+          <div className="relative bg-white border border-gray-200 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <h2 className="text-xl font-bold text-gray-900">API Key Generated</h2>
+              <p className="text-sm text-gray-600 mt-1">
+                Please copy this key immediately. For security reasons, it will never be shown again.
+              </p>
+              
+              <div className="mt-6">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">{newlyGeneratedKey.name}</label>
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    readOnly
+                    value={newlyGeneratedKey.key}
+                    className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-gray-900 font-mono text-sm focus:outline-none focus:border-blue-500" 
+                  />
+                  <button 
+                    onClick={() => navigator.clipboard.writeText(newlyGeneratedKey.key).then(() => alert("Copied to clipboard!"))}
+                    className="absolute right-2 top-2 bottom-2 px-3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-semibold rounded-lg transition-colors"
+                  >
+                    Copy
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-8 flex justify-end">
+                <button 
+                  onClick={() => setNewlyGeneratedKey(null)} 
+                  className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-xl shadow-sm transition-all"
+                >
+                  I have copied it safely
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

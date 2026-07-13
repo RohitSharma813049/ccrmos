@@ -20,12 +20,11 @@ export default function IntegrationsClient() {
     } finally {
       setLoading(false);
     }
+  };
 
   useEffect(() => {
     fetchApiKeys();
   }, []);
-
-    };
 
   const generateKey = async (e: React.FormEvent) => {
     e.preventDefault();

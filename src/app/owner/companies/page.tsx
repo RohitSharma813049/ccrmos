@@ -22,11 +22,13 @@ export default function ManageCompaniesPage() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentCompanyId, setCurrentCompanyId] = useState<string | null>(null);
   const [plans, setPlans] = useState<any[]>([]);
+  const [templates, setTemplates] = useState<any[]>([]);
   
   const [formData, setFormData] = useState({
     name: "",
     adminEmail: "",
     subscriptionPlanId: "",
+    industryTemplateId: "",
     usersQuota: 5,
     status: "Active"
   });
@@ -34,6 +36,7 @@ export default function ManageCompaniesPage() {
   useEffect(() => {
     fetchCompanies();
     fetchPlans();
+    fetchTemplates();
   }, []);
 
   async function fetchPlans() {
@@ -45,6 +48,18 @@ export default function ManageCompaniesPage() {
       }
     } catch (error) {
       console.error("Failed to fetch plans", error);
+    }
+  }
+
+  async function fetchTemplates() {
+    try {
+      const res = await fetch("/api/settings/templates");
+      if (res.ok) {
+        const data = await res.json();
+        setTemplates(data.templates || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch templates", error);
     }
   }
 
@@ -65,7 +80,7 @@ export default function ManageCompaniesPage() {
 
   const openCreateModal = () => {
     setIsEditMode(false);
-    setFormData({ name: "", adminEmail: "", subscriptionPlanId: plans[0]?._id || "", usersQuota: 5, status: "Active" });
+    setFormData({ name: "", adminEmail: "", subscriptionPlanId: plans[0]?._id || "", industryTemplateId: "", usersQuota: 5, status: "Active" });
     setIsModalOpen(true);
   };
 
@@ -78,6 +93,7 @@ export default function ManageCompaniesPage() {
       name: company.name,
       adminEmail: company.adminEmail,
       subscriptionPlanId: matchingPlan ? matchingPlan._id : (plans[0]?._id || ""),
+      industryTemplateId: "", // Cannot edit template after creation
       usersQuota: company.usersQuota,
       status: company.status
     });
@@ -270,7 +286,22 @@ export default function ManageCompaniesPage() {
                     ))}
                   </select>
                 </div>
-                <div>
+                {!isEditMode && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Industry Template</label>
+                    <select 
+                      value={formData.industryTemplateId}
+                      onChange={(e) => setFormData({...formData, industryTemplateId: e.target.value})}
+                      className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                    >
+                      <option value="">None (Blank CRM)</option>
+                      {templates.map(t => (
+                        <option key={t._id} value={t._id}>{t.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                <div className={isEditMode ? "col-span-2" : ""}>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">Users Quota</label>
                   <input 
                     type="number" 

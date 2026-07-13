@@ -108,7 +108,7 @@ export default function WorkflowClient() {
             </div>
           ) : (
             workflows.map((wf) => (
-              <div key={wf._id} className="border border-gray-200 rounded-xl p-4 bg-white/80 flex items-center justify-between group">
+              <div key={wf._id} className="border border-gray-200 rounded-xl p-4 bg-white/80 flex items-center justify-between group hover:border-blue-300 transition-colors cursor-pointer" onClick={() => window.location.href = `/owner/workflow/${wf._id}`}>
                 <div className="flex items-center gap-4">
                   <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${wf.trigger === 'EVENT' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-purple-500/10 text-purple-500'}`}>
                     {wf.trigger === 'EVENT' ? (
@@ -122,19 +122,19 @@ export default function WorkflowClient() {
                     )}
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">{wf.title}</h3>
+                    <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">{wf.title}</h3>
                     <p className="text-xs text-gray-500">{wf.description || `Trigger: ${wf.trigger}`}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
                   <button 
-                    onClick={() => toggleStatus(wf)}
+                    onClick={(e) => { e.stopPropagation(); toggleStatus(wf); }}
                     className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium cursor-pointer transition-colors ${wf.active ? 'bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
                   >
                     {wf.active && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>}
                     {wf.active ? 'Active' : 'Idle'}
                   </button>
-                  <button onClick={() => deleteWorkflow(wf._id)} className="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity p-1">
+                  <button onClick={(e) => { e.stopPropagation(); deleteWorkflow(wf._id); }} className="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity p-1">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                   </button>
                 </div>

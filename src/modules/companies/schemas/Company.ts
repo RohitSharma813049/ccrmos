@@ -9,9 +9,10 @@ export interface ICompany extends Document {
   currency?: string;
   status: "Active" | "Suspended";
   subscriptionPlanId?: mongoose.Types.ObjectId | string;
-  subscriptionStatus?: "trialing" | "active" | "past_due" | "canceled";
+  subscriptionStatus?: "pending_payment" | "trialing" | "active" | "past_due" | "canceled";
   razorpayCustomerId?: string;
   razorpaySubscriptionId?: string;
+  checkoutToken?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -26,13 +27,19 @@ const companySchema = new Schema<ICompany>(
     currency: { type: String, default: "USD" },
     status: { type: String, enum: ["Active", "Suspended"], default: "Active" },
     subscriptionPlanId: { type: Schema.Types.ObjectId, ref: 'SubscriptionPlan' },
-    subscriptionStatus: { type: String, enum: ["trialing", "active", "past_due", "canceled"], default: "trialing" },
+    subscriptionStatus: { type: String, enum: ["pending_payment", "trialing", "active", "past_due", "canceled"], default: "trialing" },
     razorpayCustomerId: { type: String },
     razorpaySubscriptionId: { type: String },
+    checkoutToken: { type: String },
   },
   { timestamps: true }
 );
 
-const Company: Model<ICompany> = mongoose.models.Company || mongoose.model<ICompany>("Company", companySchema);
+// Delete the cached model if it exists to allow Next.js Fast Refresh to update schema
+if (mongoose.models.Company) {
+  delete mongoose.models.Company;
+}
+
+const Company: Model<ICompany> = mongoose.model<ICompany>("Company", companySchema);
 
 export default Company;

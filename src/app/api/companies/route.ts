@@ -41,6 +41,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
     if (error?.code === 11000) return NextResponse.json({ error: "A company or admin email already exists." }, { status: 409 });
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("POST /api/companies error:", error);
+    return NextResponse.json({ error: error.message, stack: error.stack }, { status: 500 });
   }
 }

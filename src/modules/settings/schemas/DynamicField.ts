@@ -2,7 +2,7 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface IDynamicField extends Document {
   name: string;
-  target: "lead" | "customer" | "project" | "invoice" | "task" | "order";
+  target: "lead" | "customer" | "project" | "invoice" | "task" | "order" | "all";
   type: string;
   required: boolean;
   tenantScope: string;
@@ -20,7 +20,7 @@ const dynamicFieldSchema = new Schema<IDynamicField>(
     name: { type: String, required: true, trim: true },
     target: { 
       type: String, 
-      enum: ["lead", "customer", "project", "invoice", "task", "order"], 
+      enum: ["lead", "customer", "project", "invoice", "task", "order", "all"], 
       required: true 
     },
     type: { type: String, required: true },

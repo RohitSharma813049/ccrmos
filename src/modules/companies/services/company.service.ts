@@ -1,6 +1,13 @@
+import crypto from "crypto";
 import Company from "@/modules/companies/schemas/Company";
 import User from "@/modules/users/schemas/User";
 import Role from "@/modules/roles/schemas/Role";
+import SubscriptionPlan from "@/modules/settings/schemas/SubscriptionPlan";
+import IndustryTemplate from "@/modules/settings/schemas/IndustryTemplate";
+import CustomModule from "@/modules/settings/schemas/CustomModule";
+import DynamicField from "@/modules/settings/schemas/DynamicField";
+import ApiKey from "@/modules/settings/schemas/ApiKey";
+import nodemailer from "nodemailer";
 
 export class CompanyService {
   static async getCompaniesWithUserCounts() {
@@ -21,7 +28,7 @@ export class CompanyService {
     return companiesWithCounts;
   }
 
-  static async registerTenant({ name, adminEmail, subscriptionPlanId, usersQuota, status }: { name: string, adminEmail: string, subscriptionPlanId?: string, usersQuota?: number, status?: "Active" | "Suspended" }) {
+  static async registerTenant({ name, adminEmail, subscriptionPlanId, usersQuota, industryTemplateId }: { name: string, adminEmail: string, subscriptionPlanId?: string, usersQuota?: number, industryTemplateId?: string }) {
     if (!name || !adminEmail) {
       throw new Error("Name and Admin Email are required.");
     }
@@ -37,13 +44,17 @@ export class CompanyService {
       throw new Error("This admin email is already assigned to another user.");
     }
     
-    // Create the company
+    const checkoutToken = crypto.randomBytes(32).toString("hex");
+
+    // Create the company as pending/suspended
     const newCompany = await Company.create({
       name,
       adminEmail: normalizedEmail,
       subscriptionPlanId: subscriptionPlanId || undefined,
       usersQuota: usersQuota || 5,
-      status: status || "Active"
+      status: "Suspended",
+      subscriptionStatus: "pending_payment",
+      checkoutToken
     });
 
     // Automatically create the founder user account
@@ -61,6 +72,74 @@ export class CompanyService {
     });
     founder.founderId = founder._id;
     await founder.save();
+    
+    // Scaffold Industry Template if provided
+    if (industryTemplateId) {
+      const template = await IndustryTemplate.findById(industryTemplateId).lean();
+      if (template) {
+        // Clone Modules
+        if (template.modules && template.modules.length > 0) {
+          const newModules = template.modules.map((mod: any) => ({
+            ...mod,
+            _id: undefined, // Let mongoose generate a new ID
+            companyId: newCompany._id,
+            createdAt: undefined,
+            updatedAt: undefined
+          }));
+          await CustomModule.insertMany(newModules);
+        }
+        
+        // Clone Fields
+        if (template.fields && template.fields.length > 0) {
+          const newFields = template.fields.map((field: any) => ({
+            ...field,
+            _id: undefined, // Let mongoose generate a new ID
+            companyId: newCompany._id,
+            createdAt: undefined,
+            updatedAt: undefined
+          }));
+          await DynamicField.insertMany(newFields);
+        }
+      }
+    }
+    
+    // Automatically generate a default API Key for the new tenant
+    const rawKey = `crm_live_${crypto.randomBytes(24).toString("hex")}`;
+    await ApiKey.create({
+      name: "Default API Key",
+      key: rawKey,
+      founderId: founder._id,
+      companyId: newCompany._id
+    });
+    
+    // Send email using nodemailer
+    if (process.env.EMAIL_SERVER_HOST && process.env.EMAIL_SERVER_USER) {
+      const transporter = nodemailer.createTransport({
+        host: process.env.EMAIL_SERVER_HOST,
+        port: Number(process.env.EMAIL_SERVER_PORT),
+        auth: {
+          user: process.env.EMAIL_SERVER_USER,
+          pass: process.env.EMAIL_SERVER_PASSWORD,
+        },
+      });
+
+      const checkoutUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/checkout?token=${checkoutToken}`;
+
+      try {
+        await transporter.sendMail({
+          from: process.env.EMAIL_FROM || '"Admin Panel" <noreply@example.com>',
+          to: normalizedEmail,
+          subject: "Complete your CRM Setup",
+          text: `Welcome! Please complete your setup and payment by visiting: ${checkoutUrl}`,
+          html: `<p>Welcome to CRM OS!</p><p>Please complete your setup and payment by clicking the link below:</p><p><a href="${checkoutUrl}"><strong>Complete Setup</strong></a></p>`,
+        });
+        console.log(`Checkout email sent to ${normalizedEmail}`);
+      } catch (emailError) {
+        console.error(`Failed to send checkout email to ${normalizedEmail}:`, emailError);
+      }
+    } else {
+      console.warn("Email configuration is missing. Cannot send checkout email. Mock URL:", `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/checkout?token=${checkoutToken}`);
+    }
     
     return newCompany;
   }

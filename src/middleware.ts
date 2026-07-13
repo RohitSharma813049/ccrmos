@@ -1,9 +1,39 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
+import { getRateLimiter } from './lib/rate-limit';
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+
+  // Rate Limiting on API routes (excluding auth endpoints)
+  if (pathname.startsWith('/api') && !pathname.startsWith('/api/auth')) {
+    try {
+      const ip = req.ip ?? req.headers.get('x-forwarded-for') ?? '127.0.0.1';
+      // For a real production app, you might fetch the global setting limit dynamically
+      // Here we default to 1000 req / minute
+      const ratelimit = getRateLimiter(1000);
+      const { success, limit, reset, remaining } = await ratelimit.limit(`ratelimit_${ip}`);
+
+      if (!success) {
+        return new NextResponse(
+          JSON.stringify({ error: "Too Many Requests. Rate limit exceeded." }),
+          {
+            status: 429,
+            headers: {
+              'Content-Type': 'application/json',
+              'X-RateLimit-Limit': limit.toString(),
+              'X-RateLimit-Remaining': remaining.toString(),
+              'X-RateLimit-Reset': reset.toString(),
+            },
+          }
+        );
+      }
+    } catch (e) {
+      // If Redis is not configured properly, continue to avoid breaking the app completely
+      console.error("Rate limit error (Redis might not be configured):", e);
+    }
+  }
   
   // Only protect /dashboard and /owner paths natively
   if (pathname.startsWith('/dashboard') || pathname.startsWith('/owner')) {
@@ -26,5 +56,5 @@ export async function middleware(req: NextRequest) {
 
 // Specify the paths that should trigger this middleware
 export const config = {
-  matcher: ['/dashboard/:path*', '/owner/:path*'],
+  matcher: ['/dashboard/:path*', '/owner/:path*', '/api/:path*'],
 };

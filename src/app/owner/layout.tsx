@@ -12,9 +12,9 @@ export default async function OwnerLayout({ children }: { children: React.ReactN
   }
 
   return (
-    <div className="h-screen bg-gray-50 text-gray-900 flex overflow-hidden">
+    <div className="h-screen bg-gray-50 text-gray-900 flex flex-col md:flex-row overflow-hidden">
       {/* Premium Sidebar */}
-      <aside className="w-72 bg-white border-r border-gray-200 flex flex-col shrink-0 relative overflow-hidden">
+      <aside className="hidden md:flex w-72 bg-white border-r border-gray-200 flex-col shrink-0 relative overflow-hidden">
         {/* Subtle Background Glow */}
         <div className="absolute top-0 left-0 w-full h-48 bg-gradient-to-b from-blue-600/10 to-transparent pointer-events-none" />
 
@@ -65,8 +65,16 @@ export default async function OwnerLayout({ children }: { children: React.ReactN
         </div>
       </aside>
 
+      {/* Mobile Header (Hidden on Desktop) */}
+      <div className="md:hidden flex items-center justify-between p-4 bg-white border-b border-gray-200 shrink-0">
+        <h1 className="font-bold text-xl text-gray-900">Platform Owner</h1>
+        <Link href="/dashboard" className="text-sm font-medium text-blue-600">
+          Dashboard &rarr;
+        </Link>
+      </div>
+
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col h-screen overflow-hidden">
+      <main className="flex-1 flex flex-col h-[calc(100vh-64px)] md:h-screen overflow-hidden">
         {/* Top Header */}
         <header className="h-16 border-b border-gray-200 bg-white/50 backdrop-blur-xl flex items-center justify-between px-8 shrink-0">
           <h1 className="text-sm font-medium text-gray-600 tracking-wide uppercase">Owner Control Center</h1>

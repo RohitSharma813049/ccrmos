@@ -18,7 +18,7 @@ export async function GET(req: Request) {
     
     const query: any = {};
     if (target) {
-      query.target = target;
+      query.target = { $in: [target, "all"] };
     }
 
     // Fetch Global fields OR company-specific fields if session exists
