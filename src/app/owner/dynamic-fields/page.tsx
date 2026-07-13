@@ -13,7 +13,7 @@ interface DynamicField {
 }
 
 export default function DynamicFieldsPage() {
-  const [activeTab, setActiveTab] = useState<"lead" | "customer" | "project" | "invoice">("lead");
+  const [activeTab, setActiveTab] = useState<"lead" | "customer" | "project" | "invoice" | "task" | "order">("lead");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [fields, setFields] = useState<DynamicField[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,6 +57,8 @@ export default function DynamicFieldsPage() {
     { id: "customer", label: "Customer Fields" },
     { id: "project", label: "Project Fields" },
     { id: "invoice", label: "Invoice Fields" },
+    { id: "task", label: "Task Fields" },
+    { id: "order", label: "Order Fields" },
   ] as const;
 
   const openCreateModal = () => {
