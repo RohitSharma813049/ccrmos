@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
-import SubscriptionPlan from "@/modules/settings/schemas/SubscriptionPlan";
+import Coupon from "@/modules/settings/schemas/Coupon";
 import { requirePermission } from "@/lib/auth-utils";
 import { PERMISSIONS } from "@/config/permissions";
 
-// PUT /api/subscriptions/[id]
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     await requirePermission(PERMISSIONS.MANAGE_COMPANIES);
@@ -14,32 +13,35 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     }
     
     const { id } = await params;
-    const { name, price, billing, users, features, isActive } = await req.json();
+    const updates = await req.json();
     
-    const updatedPlan = await SubscriptionPlan.findByIdAndUpdate(
+    // Ensure code is uppercase if it's being updated
+    if (updates.code) {
+      updates.code = updates.code.toUpperCase();
+    }
+    if (updates.validUntil) {
+      updates.validUntil = new Date(updates.validUntil);
+    }
+    
+    const updatedCoupon = await Coupon.findByIdAndUpdate(
       id,
-      { 
-        name, 
-        price: price !== undefined ? Number(price) : undefined, 
-        billing, 
-        users, 
-        features,
-        ...(isActive !== undefined && { isActive })
-      },
+      updates,
       { new: true, runValidators: true }
     );
     
-    if (!updatedPlan) {
-      return NextResponse.json({ error: "Plan not found" }, { status: 404 });
+    if (!updatedCoupon) {
+      return NextResponse.json({ error: "Coupon not found" }, { status: 404 });
     }
     
-    return NextResponse.json({ message: "Plan updated successfully.", plan: updatedPlan }, { status: 200 });
+    return NextResponse.json({ message: "Coupon updated.", coupon: updatedCoupon }, { status: 200 });
   } catch (error: any) {
+    if (error.code === 11000) {
+      return NextResponse.json({ error: "Coupon code already exists." }, { status: 400 });
+    }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
-// DELETE /api/subscriptions/[id]
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     await requirePermission(PERMISSIONS.MANAGE_COMPANIES);
@@ -50,18 +52,13 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     
     const { id } = await params;
     
-    // Soft deletion: we don't want to break tenants currently on this plan
-    const plan = await SubscriptionPlan.findByIdAndUpdate(
-      id,
-      { isActive: false },
-      { new: true }
-    );
+    const deletedCoupon = await Coupon.findByIdAndDelete(id);
     
-    if (!plan) {
-      return NextResponse.json({ error: "Plan not found" }, { status: 404 });
+    if (!deletedCoupon) {
+      return NextResponse.json({ error: "Coupon not found" }, { status: 404 });
     }
     
-    return NextResponse.json({ message: "Subscription tier deactivated successfully." }, { status: 200 });
+    return NextResponse.json({ message: "Coupon deleted." }, { status: 200 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

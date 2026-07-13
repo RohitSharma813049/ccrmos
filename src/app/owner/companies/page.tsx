@@ -10,6 +10,7 @@ interface Company {
   plan: string;
   usersQuota: number;
   status: string;
+  subscriptionStatus?: string;
   users?: number;
   createdAt: string;
 }
@@ -159,7 +160,8 @@ export default function ManageCompaniesPage() {
                 <th className="px-6 py-4">Admin Email</th>
                 <th className="px-6 py-4">Plan</th>
                 <th className="px-6 py-4">Users</th>
-                <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4">Tenant Status</th>
+                <th className="px-6 py-4">Payment Status</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
@@ -186,6 +188,11 @@ export default function ManageCompaniesPage() {
                     <td className="px-6 py-4">
                       <span className={`px-2.5 py-1 rounded-md text-xs font-semibold border ${company.status === 'Active' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-red-100 text-red-700 border-red-200'}`}>
                         {company.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2.5 py-1 rounded-md text-xs font-bold ${company.subscriptionStatus === 'active' ? 'text-green-600 bg-green-50' : 'text-yellow-600 bg-yellow-50'}`}>
+                        {company.subscriptionStatus?.toUpperCase() || 'TRIALING'}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">

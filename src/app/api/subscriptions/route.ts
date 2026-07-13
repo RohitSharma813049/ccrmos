@@ -5,7 +5,7 @@ import { requirePermission } from "@/lib/auth-utils";
 import { PERMISSIONS } from "@/config/permissions";
 
 // GET /api/subscriptions
-export async function GET() {
+export async function GET(req: Request) {
   try {
     // Only Platform Owners manage the subscription tiers
     await requirePermission(PERMISSIONS.MANAGE_COMPANIES);
@@ -14,8 +14,12 @@ export async function GET() {
       await mongoose.connect(process.env.MONGODB_URI!);
     }
     
-    // Only fetch active plans
-    const plans = await SubscriptionPlan.find({ isActive: true }).sort({ price: 1 });
+    const { searchParams } = new URL(req.url);
+    const showAll = searchParams.get("showAll") === "true";
+    
+    // Only fetch active plans unless showAll is requested
+    const filter = showAll ? {} : { isActive: true };
+    const plans = await SubscriptionPlan.find(filter).sort({ price: 1 });
     
     return NextResponse.json({ plans }, { status: 200 });
   } catch (error: any) {

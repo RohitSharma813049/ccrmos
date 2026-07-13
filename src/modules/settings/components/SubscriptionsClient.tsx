@@ -9,11 +9,13 @@ interface SubscriptionPlan {
   billing: "Monthly" | "Yearly";
   users: string;
   features: string[];
+  isActive?: boolean;
 }
 
 export default function SubscriptionsClient() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showInactive, setShowInactive] = useState(false);
   
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -31,12 +33,12 @@ export default function SubscriptionsClient() {
 
   useEffect(() => {
     fetchPlans();
-  }, []);
+  }, [showInactive]);
 
   async function fetchPlans() {
     setLoading(true);
     try {
-      const res = await fetch("/api/subscriptions");
+      const res = await fetch(`/api/subscriptions${showInactive ? "?showAll=true" : ""}`);
       if (res.ok) {
         const data = await res.json();
         setPlans(data.plans || []);
@@ -118,18 +120,23 @@ export default function SubscriptionsClient() {
     }
   };
 
-  const handleDelete = async (id: string, name: string) => {
-    if (confirm(`Are you sure you want to deactivate the "${name}" tier? Existing tenants will keep their features, but it will be hidden from new signups.`)) {
+  const handleToggleActive = async (plan: SubscriptionPlan) => {
+    const action = plan.isActive === false ? "activate" : "deactivate";
+    if (confirm(`Are you sure you want to ${action} the "${plan.name}" tier?`)) {
       try {
-        const res = await fetch(`/api/subscriptions/${id}`, { method: "DELETE" });
+        const res = await fetch(`/api/subscriptions/${plan._id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isActive: plan.isActive === false ? true : false })
+        });
         if (res.ok) {
           fetchPlans();
         } else {
           const errorData = await res.json();
-          alert(errorData.error || "Failed to delete plan");
+          alert(errorData.error || `Failed to ${action} plan`);
         }
       } catch (error) {
-        console.error("Delete error", error);
+        console.error("Toggle error", error);
       }
     }
   };
@@ -141,15 +148,25 @@ export default function SubscriptionsClient() {
           <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Subscription Management</h1>
           <p className="text-gray-600 mt-1">Manage global SaaS pricing tiers and billing cycles.</p>
         </div>
-        <button 
-          onClick={openCreateModal} 
-          className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl shadow-lg transition-all"
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Create New Tier
-        </button>
+        <div className="flex flex-col sm:flex-row items-center gap-4">
+          <label className="flex items-center gap-2 cursor-pointer bg-white/50 px-4 py-2 rounded-xl border border-gray-200 shadow-sm">
+            <div className="relative">
+              <input type="checkbox" className="sr-only" checked={showInactive} onChange={(e) => setShowInactive(e.target.checked)} />
+              <div className={`block w-10 h-6 rounded-full transition-colors ${showInactive ? 'bg-blue-500' : 'bg-gray-300'}`}></div>
+              <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${showInactive ? 'translate-x-4' : ''}`}></div>
+            </div>
+            <span className="text-sm font-medium text-gray-700">Show Inactive</span>
+          </label>
+          <button 
+            onClick={openCreateModal} 
+            className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl shadow-lg transition-all"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Create New Tier
+          </button>
+        </div>
       </div>
 
       {loading ? (
@@ -163,16 +180,23 @@ export default function SubscriptionsClient() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {plans.map(plan => (
-            <div key={plan._id} className="bg-white/60 backdrop-blur-md border border-gray-200 rounded-3xl p-8 shadow-xl flex flex-col hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 relative group overflow-hidden">
-              <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+            <div key={plan._id} className={`bg-white/60 backdrop-blur-md border border-gray-200 rounded-3xl p-8 shadow-xl flex flex-col hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 relative group overflow-hidden ${plan.isActive === false ? 'opacity-70 grayscale-[0.5]' : ''}`}>
+              {plan.isActive === false && (
+                <div className="absolute top-4 left-4 bg-red-100 text-red-700 text-xs font-bold px-3 py-1 rounded-full shadow-sm z-10">INACTIVE</div>
+              )}
+              <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 z-10">
                 <button onClick={() => openEditModal(plan)} className="p-2 bg-gray-100 hover:bg-white text-gray-600 hover:text-blue-600 rounded-lg shadow-sm transition-all border border-gray-200" title="Edit">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                   </svg>
                 </button>
-                <button onClick={() => handleDelete(plan._id, plan.name)} className="p-2 bg-red-50 hover:bg-red-100 text-red-500 hover:text-red-600 rounded-lg shadow-sm transition-all border border-red-100" title="Deactivate">
+                <button onClick={() => handleToggleActive(plan)} className={`p-2 rounded-lg shadow-sm transition-all border ${plan.isActive === false ? 'bg-green-50 hover:bg-green-100 text-green-600 border-green-200' : 'bg-red-50 hover:bg-red-100 text-red-500 border-red-100'}`} title={plan.isActive === false ? "Activate" : "Deactivate"}>
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    {plan.isActive === false ? (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    ) : (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                    )}
                   </svg>
                 </button>
               </div>

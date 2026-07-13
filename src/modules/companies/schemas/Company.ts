@@ -8,6 +8,10 @@ export interface ICompany extends Document {
   country?: string;
   currency?: string;
   status: "Active" | "Suspended";
+  subscriptionPlanId?: mongoose.Types.ObjectId | string;
+  subscriptionStatus?: "trialing" | "active" | "past_due" | "canceled";
+  razorpayCustomerId?: string;
+  razorpaySubscriptionId?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -21,6 +25,10 @@ const companySchema = new Schema<ICompany>(
     country: { type: String, default: "US" },
     currency: { type: String, default: "USD" },
     status: { type: String, enum: ["Active", "Suspended"], default: "Active" },
+    subscriptionPlanId: { type: Schema.Types.ObjectId, ref: 'SubscriptionPlan' },
+    subscriptionStatus: { type: String, enum: ["trialing", "active", "past_due", "canceled"], default: "trialing" },
+    razorpayCustomerId: { type: String },
+    razorpaySubscriptionId: { type: String },
   },
   { timestamps: true }
 );

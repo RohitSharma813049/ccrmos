@@ -4,13 +4,15 @@ import Role from "@/modules/roles/schemas/Role";
 
 export class CompanyService {
   static async getCompaniesWithUserCounts() {
-    const companies = await Company.find().sort({ createdAt: -1 });
+    const companies = await Company.find().populate("subscriptionPlanId").sort({ createdAt: -1 });
     
     const companiesWithCounts = await Promise.all(
       companies.map(async (company) => {
         const usersCount = await User.countDocuments({ companyId: company._id });
+        const companyObj = company.toObject();
         return {
-          ...company.toObject(),
+          ...companyObj,
+          plan: company.subscriptionPlanId ? (company.subscriptionPlanId as any).name : companyObj.plan,
           users: usersCount
         };
       })
