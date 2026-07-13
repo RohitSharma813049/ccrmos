@@ -27,7 +27,8 @@ export default function DynamicFieldsPage() {
     name: "",
     target: "lead",
     type: "Text String",
-    required: false
+    required: false,
+    tenantScope: "Global"
   });
 
   useEffect(() => {
@@ -60,7 +61,7 @@ export default function DynamicFieldsPage() {
 
   const openCreateModal = () => {
     setIsEditMode(false);
-    setFormData({ name: "", target: activeTab, type: "Text String", required: false });
+    setFormData({ name: "", target: activeTab, type: "Text String", required: false, tenantScope: "Global" });
     setIsModalOpen(true);
   };
 
@@ -71,7 +72,8 @@ export default function DynamicFieldsPage() {
       name: field.name,
       target: field.target,
       type: field.type,
-      required: field.required
+      required: field.required,
+      tenantScope: field.tenantScope || "Global"
     });
     setIsModalOpen(true);
   };
