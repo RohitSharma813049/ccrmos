@@ -3,7 +3,7 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 export interface ICompany extends Document {
   name: string;
   adminEmail: string;
-  plan: "Basic" | "Pro" | "Enterprise";
+  plan: string;
   usersQuota: number;
   country?: string;
   currency?: string;
@@ -20,7 +20,7 @@ const companySchema = new Schema<ICompany>(
   {
     name: { type: String, required: true, trim: true },
     adminEmail: { type: String, required: true, lowercase: true, trim: true },
-    plan: { type: String, enum: ["Basic", "Pro", "Enterprise"], default: "Basic" },
+    plan: { type: String, default: "Basic" },
     usersQuota: { type: Number, default: 5 },
     country: { type: String, default: "US" },
     currency: { type: String, default: "USD" },

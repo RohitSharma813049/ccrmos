@@ -21,7 +21,7 @@ export class CompanyService {
     return companiesWithCounts;
   }
 
-  static async registerTenant({ name, adminEmail, plan, usersQuota }: { name: string, adminEmail: string, plan?: "Basic" | "Pro" | "Enterprise", usersQuota?: number }) {
+  static async registerTenant({ name, adminEmail, subscriptionPlanId, usersQuota, status }: { name: string, adminEmail: string, subscriptionPlanId?: string, usersQuota?: number, status?: "Active" | "Suspended" }) {
     if (!name || !adminEmail) {
       throw new Error("Name and Admin Email are required.");
     }
@@ -41,9 +41,9 @@ export class CompanyService {
     const newCompany = await Company.create({
       name,
       adminEmail: normalizedEmail,
-      plan: plan || "Basic",
+      subscriptionPlanId: subscriptionPlanId || undefined,
       usersQuota: usersQuota || 5,
-      status: "Active"
+      status: status || "Active"
     });
 
     // Automatically create the founder user account

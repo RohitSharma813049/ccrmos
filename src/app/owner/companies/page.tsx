@@ -21,19 +21,32 @@ export default function ManageCompaniesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentCompanyId, setCurrentCompanyId] = useState<string | null>(null);
+  const [plans, setPlans] = useState<any[]>([]);
   
-  // Form State
   const [formData, setFormData] = useState({
     name: "",
     adminEmail: "",
-    plan: "Basic",
+    subscriptionPlanId: "",
     usersQuota: 5,
     status: "Active"
   });
 
   useEffect(() => {
     fetchCompanies();
+    fetchPlans();
   }, []);
+
+  async function fetchPlans() {
+    try {
+      const res = await fetch("/api/subscriptions");
+      if (res.ok) {
+        const data = await res.json();
+        setPlans(data.plans || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch plans", error);
+    }
+  }
 
   async function fetchCompanies() {
     setLoading(true);
@@ -52,17 +65,19 @@ export default function ManageCompaniesPage() {
 
   const openCreateModal = () => {
     setIsEditMode(false);
-    setFormData({ name: "", adminEmail: "", plan: "Basic", usersQuota: 5, status: "Active" });
+    setFormData({ name: "", adminEmail: "", subscriptionPlanId: plans[0]?._id || "", usersQuota: 5, status: "Active" });
     setIsModalOpen(true);
   };
 
   const openEditModal = (company: Company) => {
     setIsEditMode(true);
     setCurrentCompanyId(company._id);
+    // Find the plan ID that matches the company's plan name, or default to the first one
+    const matchingPlan = plans.find(p => p.name === company.plan);
     setFormData({
       name: company.name,
       adminEmail: company.adminEmail,
-      plan: company.plan,
+      subscriptionPlanId: matchingPlan ? matchingPlan._id : (plans[0]?._id || ""),
       usersQuota: company.usersQuota,
       status: company.status
     });
@@ -246,13 +261,13 @@ export default function ManageCompaniesPage() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">Subscription Plan</label>
                   <select 
-                    value={formData.plan}
-                    onChange={(e) => setFormData({...formData, plan: e.target.value})}
+                    value={formData.subscriptionPlanId}
+                    onChange={(e) => setFormData({...formData, subscriptionPlanId: e.target.value})}
                     className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                   >
-                    <option value="Basic">Basic</option>
-                    <option value="Pro">Pro</option>
-                    <option value="Enterprise">Enterprise</option>
+                    {plans.map(p => (
+                      <option key={p._id} value={p._id}>{p.name} (₹{p.price})</option>
+                    ))}
                   </select>
                 </div>
                 <div>
