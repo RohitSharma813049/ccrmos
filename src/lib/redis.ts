@@ -17,5 +17,7 @@ export async function setTemporaryOTP(email: string, otp: string, expiresInSecon
  * Utility to retrieve an OTP
  */
 export async function getTemporaryOTP(email: string): Promise<string | null> {
-  return await redis.get(`otp:${email}`);
+  const val = await redis.get(`otp:${email}`);
+  if (val === null || val === undefined) return null;
+  return String(val);
 }
