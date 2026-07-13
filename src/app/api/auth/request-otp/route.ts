@@ -26,7 +26,7 @@ export async function POST(req: Request) {
       rateLimitCache.set(ip, { count: 1, timestamp: Date.now() });
     }
 
-    if (record && record.count > 3 && email !== 'owner@crmos.com' && email !== 'test@example.com' && !email.endsWith('@crmos.com')) {
+    if (record && record.count > 10 && email !== 'owner@crmos.com' && email !== 'test@example.com' && !email.endsWith('@crmos.com')) {
       return NextResponse.json({ message: "Too many requests. Please try again later." }, { status: 429 });
     }
 
