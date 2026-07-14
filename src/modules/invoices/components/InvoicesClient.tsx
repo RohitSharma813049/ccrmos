@@ -7,6 +7,7 @@ import DynamicFormBuilder from "@/components/ui/DynamicFormBuilder";
 import { formatCurrency } from "@/utils/currency";
 import { generateInvoicePDF } from "@/utils/pdfGenerator";
 import { usePermissions } from "@/hooks/usePermissions";
+import { DataTable, ColumnDef } from "@/components/ui/DataTable";
 
 export default function InvoicesClient() {
   const [items, setItems] = useState<any[]>([]);
@@ -15,13 +16,29 @@ export default function InvoicesClient() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState("");
+  
+  // New Filters
+  const [statusFilter, setStatusFilter] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { hasPermission } = usePermissions();
+
+  const [advancedFilters, setAdvancedFilters] = useState<any[]>([]);
+
+  // Configure fields that can be dynamically filtered
+  const filterFields = [
+    { name: "invoiceNumber", label: "Invoice #", type: "string" as const },
+    { name: "amount", label: "Amount", type: "number" as const },
+    { name: "status", label: "Status", type: "string" as const },
+    { name: "customData.notes", label: "Notes (Custom)", type: "string" as const },
+  ];
 
   useEffect(() => {
     fetchPipeline();
     fetchItems();
-  }, []);
+  }, [page, search, statusFilter, dateFrom, dateTo]);
 
   async function fetchPipeline() {
     try {
@@ -37,10 +54,13 @@ export default function InvoicesClient() {
 
   async function fetchItems() {
     try {
-      const res = await fetch("/api/invoices");
+      setLoading(true);
+      const filterStr = encodeURIComponent(JSON.stringify(advancedFilters));
+      const res = await fetch(`/api/invoices?page=${page}&limit=10&search=${search}&status=${statusFilter}&dateFrom=${dateFrom}&dateTo=${dateTo}&filters=${filterStr}`);
       if (res.ok) {
         const data = await res.json();
         setItems(data.invoices || []);
+        if (data.totalPages) setTotalPages(data.totalPages);
       }
     } catch (error) {
       console.error("Failed to fetch", error);
@@ -92,6 +112,114 @@ export default function InvoicesClient() {
     return targetStage.order < pipelineStages[currentIndex].order;
   };
 
+  const columns: ColumnDef<any>[] = [
+    { header: "Invoice #", accessorKey: "invoiceNumber", className: "font-medium text-gray-900" },
+    { header: "Amount", cell: (item) => formatCurrency(item.amount, item.currency || 'USD') },
+    { header: "Date Added", cell: (item) => <span className="text-gray-500 text-xs">{new Date(item.createdAt).toLocaleDateString()}</span> },
+    { header: "Status (Pipeline)", className: "min-w-[200px]", cell: (item) => (
+      pipelineStages.length > 0 ? (
+        <select
+          value={item.status}
+          onChange={(e) => updateStatus(item._id, e.target.value)}
+          className="w-full text-sm border-gray-300 rounded-lg shadow-sm py-1.5 pl-3 pr-8 focus:ring-pink-500 focus:border-pink-500 border bg-white text-gray-700 font-medium cursor-pointer"
+        >
+          {!pipelineStages.find(s => s.name === item.status) && (
+            <option value={item.status} disabled>{item.status}</option>
+          )}
+          
+          {pipelineStages.sort((a,b) => a.order - b.order).map(stage => (
+            <option 
+              key={stage.name} 
+              value={stage.name}
+              disabled={isStageDisabled(item.status, stage)}
+            >
+              {stage.name} {isStageDisabled(item.status, stage) ? '(Locked)' : ''}
+            </option>
+          ))}
+        </select>
+      ) : (
+        <span className="px-2.5 py-1 rounded-md text-xs font-semibold bg-pink-50 text-pink-700 border border-pink-200">
+          {item.status}
+        </span>
+      )
+    )},
+    { header: "Custom Data", cell: (item) => (
+      <div className="text-xs text-gray-500">
+        {item.customData && Object.keys(item.customData).length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(item.customData).map(([k, v]) => (
+              <span key={k} className="bg-gray-100 border border-gray-200 px-2 py-1 rounded text-gray-700">
+                <strong className="text-gray-900">{k}:</strong> {String(v)}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <span className="text-gray-400">None</span>
+        )}
+      </div>
+    )},
+    { header: "Actions", className: "text-right", cell: (item) => (
+      <button 
+        onClick={() => generateInvoicePDF(item)}
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-pink-50 text-pink-600 hover:text-pink-700 font-medium rounded-lg transition-colors text-xs"
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        PDF
+      </button>
+    )}
+  ];
+
+  const filterControls = (
+    <>
+      <select
+        value={statusFilter}
+        onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+        className="py-2 pl-3 pr-8 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none text-gray-700 bg-white"
+      >
+        <option value="">All Statuses</option>
+        {pipelineStages.sort((a,b) => a.order - b.order).map(stage => (
+          <option key={stage.name} value={stage.name}>{stage.name}</option>
+        ))}
+      </select>
+      
+      <div className="flex items-center gap-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-xl px-3 py-1.5 focus-within:ring-2 focus-within:ring-pink-500">
+        <label>From:</label>
+        <input 
+          type="date" 
+          value={dateFrom}
+          onChange={(e) => { setDateFrom(e.target.value); setPage(1); }}
+          className="bg-transparent border-none p-0 focus:ring-0 text-sm outline-none cursor-pointer"
+        />
+      </div>
+
+      <div className="flex items-center gap-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-xl px-3 py-1.5 focus-within:ring-2 focus-within:ring-pink-500">
+        <label>To:</label>
+        <input 
+          type="date" 
+          value={dateTo}
+          onChange={(e) => { setDateTo(e.target.value); setPage(1); }}
+          className="bg-transparent border-none p-0 focus:ring-0 text-sm outline-none cursor-pointer"
+        />
+      </div>
+
+      {(statusFilter || dateFrom || dateTo) && (
+        <button 
+          onClick={() => {
+            setStatusFilter("");
+            setDateFrom("");
+            setDateTo("");
+            setPage(1);
+          }}
+          className="text-sm text-red-600 hover:text-red-700 font-medium px-2 py-1 rounded hover:bg-red-50 transition-colors"
+        >
+          Clear Filters
+        </button>
+      )}
+    </>
+  );
+
   return (
     <div className="space-y-8 fade-in pb-12">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -112,134 +240,28 @@ export default function InvoicesClient() {
         )}
       </div>
 
-      
-      <>
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
-        <div className="relative w-full sm:w-96">
-          <input 
-            type="text" 
-            placeholder="Search..." 
-            value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-          />
-          <svg className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-        </div>
-      </div>
-      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-gray-700">
-            <thead className="bg-gray-50 text-xs uppercase text-gray-600 font-semibold border-b border-gray-200">
-              <tr>
-                <th className="px-6 py-4">Invoice #</th>
-                <th className="px-6 py-4">Amount</th>
-                <th className="px-6 py-4 min-w-[200px]">Status (Pipeline)</th>
-                <th className="px-6 py-4">Custom Data</th>
-                <th className="px-6 py-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {loading ? (
-                <tr><td colSpan={5} className="px-6 py-8 text-center text-gray-500">Loading...</td></tr>
-              ) : items.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="p-0">
-                    <EmptyState 
-                      title="No items found" 
-                      description="You haven't added any items yet. Create your first item to get started."
-                      action={<Button size="sm" onClick={() => setIsModalOpen(true)}>Add Item</Button>}
-                    />
-                  </td>
-                </tr>
-              ) : (
-                items.map((item) => (
-                  <tr key={item._id} className="hover:bg-gray-50/80 transition-colors">
-                    <td className="px-6 py-4">{item.invoiceNumber}</td>
-                    <td className="px-6 py-4">{formatCurrency(item.amount, item.currency || 'USD')}</td>
-                    <td className="px-6 py-4">
-                      {pipelineStages.length > 0 ? (
-                        <select
-                          value={item.status}
-                          onChange={(e) => updateStatus(item._id, e.target.value)}
-                          className="w-full text-sm border-gray-300 rounded-lg shadow-sm py-1.5 pl-3 pr-8 focus:ring-indigo-500 focus:border-indigo-500 border bg-white text-gray-700 font-medium cursor-pointer"
-                        >
-                          {!pipelineStages.find(s => s.name === item.status) && (
-                            <option value={item.status} disabled>{item.status}</option>
-                          )}
-                          
-                          {pipelineStages.sort((a,b) => a.order - b.order).map(stage => (
-                            <option 
-                              key={stage.name} 
-                              value={stage.name}
-                              disabled={isStageDisabled(item.status, stage)}
-                            >
-                              {stage.name} {isStageDisabled(item.status, stage) ? '(Locked)' : ''}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        <span className="px-2.5 py-1 rounded-md text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
-                          {item.status}
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-xs text-gray-500">
-                      {item.customData && Object.keys(item.customData).length > 0 ? (
-                        <div className="flex flex-wrap gap-2">
-                          {Object.entries(item.customData).map(([k, v]) => (
-                            <span key={k} className="bg-gray-100 border border-gray-200 px-2 py-1 rounded text-gray-700">
-                              <strong className="text-gray-900">{k}:</strong> {String(v)}
-                            </span>
-                          ))}
-                        </div>
-                      ) : (
-                        <span className="text-gray-400">None</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <button 
-                        onClick={() => generateInvoicePDF(item)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-indigo-50 text-indigo-600 hover:text-indigo-700 font-medium rounded-lg transition-colors text-xs"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        PDF
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-3 border-t border-gray-200 bg-gray-50">
-            <div className="text-sm text-gray-500">
-              Page <span className="font-medium text-gray-900">{page}</span> of <span className="font-medium text-gray-900">{totalPages}</span>
-            </div>
-            <div className="flex gap-2">
-              <button 
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="px-3 py-1 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Previous
-              </button>
-              <button 
-                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className="px-3 py-1 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-      </>
+      <DataTable 
+        data={items}
+        columns={columns}
+        loading={loading}
+        search={search}
+        onSearchChange={(val) => { setSearch(val); setPage(1); }}
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        filters={filterControls}
+        filterFields={filterFields}
+        advancedFilters={advancedFilters}
+        onAdvancedFiltersChange={setAdvancedFilters}
+        onApplyAdvancedFilters={fetchItems}
+        emptyTitle="No invoices found"
+        emptyDescription={search || statusFilter || dateFrom || dateTo || advancedFilters.length > 0 ? "No invoices matched your search or filters." : "You haven't added any invoices yet."}
+        emptyAction={
+          !search && !statusFilter && !dateFrom && !dateTo && advancedFilters.length === 0 ? 
+            <Button size="sm" onClick={() => setIsModalOpen(true)}>Add Invoice</Button> 
+            : null
+        }
+      />
 
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">

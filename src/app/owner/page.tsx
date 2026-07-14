@@ -76,12 +76,12 @@ function QuickAction({ title, desc, icon, color }: { title: string, desc: string
   return (
     <div className="group flex items-center gap-4 p-3 rounded-xl hover:bg-gray-100/50 cursor-pointer transition-all border border-transparent hover:border-gray-300/50">
       <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${colorMap[color]} shadow-lg flex items-center justify-center shrink-0`}>
-        <svg className="w-5 h-5 text-gray-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={icon} />
         </svg>
       </div>
       <div>
-        <h4 className="text-gray-200 font-medium group-hover:text-gray-900 transition-colors">{title}</h4>
+        <h4 className="text-gray-800 font-medium group-hover:text-gray-900 transition-colors">{title}</h4>
         <p className="text-xs text-gray-500">{desc}</p>
       </div>
       <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">

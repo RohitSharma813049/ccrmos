@@ -32,6 +32,7 @@ export async function POST(req: Request) {
     const newForm = await Form.create({
       ...body,
       companyId,
+      founderId: user.hierarchyLevel === 2 ? user.id : user.founderId,
       fields: body.fields || []
     });
 

@@ -5,6 +5,8 @@ import EmptyState from "@/components/ui/EmptyState";
 import Button from "@/components/ui/Button";
 import DynamicFormBuilder from "@/components/ui/DynamicFormBuilder";
 import KanbanBoard, { KanbanCard } from "@/components/ui/KanbanBoard";
+import { DataTable, ColumnDef } from "@/components/ui/DataTable";
+import FilterBuilder from "@/components/ui/FilterBuilder";
 
 export default function TasksClient() {
   const [items, setItems] = useState<any[]>([]);
@@ -12,19 +14,37 @@ export default function TasksClient() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState("");
+  
+  // New Filters
+  const [statusFilter, setStatusFilter] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [view, setView] = useState<"table" | "kanban">("kanban");
 
+  const [advancedFilters, setAdvancedFilters] = useState<any[]>([]);
+
+  // Configure fields that can be dynamically filtered
+  const filterFields = [
+    { name: "title", label: "Title", type: "string" as const },
+    { name: "status", label: "Status", type: "string" as const },
+    { name: "customData.priority", label: "Priority (Custom)", type: "string" as const },
+  ];
+
   useEffect(() => {
     fetchItems();
-  }, []);
+  }, [page, search, statusFilter, dateFrom, dateTo]);
 
   async function fetchItems() {
     try {
-      const res = await fetch("/api/tasks");
+      setLoading(true);
+      const filterStr = encodeURIComponent(JSON.stringify(advancedFilters));
+      const res = await fetch(`/api/tasks?page=${page}&limit=10&search=${search}&status=${statusFilter}&dateFrom=${dateFrom}&dateTo=${dateTo}&filters=${filterStr}`);
       if (res.ok) {
         const data = await res.json();
         setItems(data.tasks || []);
+        if (data.totalPages) setTotalPages(data.totalPages);
       }
     } catch (error) {
       console.error("Failed to fetch", error);
@@ -76,7 +96,81 @@ export default function TasksClient() {
     ...item
   }));
 
-  const columns = ["Active", "Pending", "Closed"];
+  const kanbanCols = ["Active", "Pending", "Closed"];
+
+  const columns: ColumnDef<any>[] = [
+    { header: "Title", accessorKey: "title", className: "font-medium text-gray-900" },
+    { header: "Date Added", cell: (item) => <span className="text-gray-500 text-xs">{new Date(item.createdAt).toLocaleDateString()}</span> },
+    { header: "Status", cell: (item) => (
+      <span className="px-2.5 py-1 rounded-md text-xs font-semibold bg-gray-100 text-gray-700 border border-gray-200">
+        {item.status || "Active"}
+      </span>
+    )},
+    { header: "Custom Data", cell: (item) => (
+      <div className="text-xs text-gray-500">
+        {item.customData && Object.keys(item.customData).length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(item.customData).map(([k, v]) => (
+              <span key={k} className="bg-gray-100 border border-gray-200 px-2 py-1 rounded text-gray-700">
+                <strong className="text-gray-900">{k}:</strong> {String(v)}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <span className="text-gray-400">None</span>
+        )}
+      </div>
+    )}
+  ];
+
+  const filterControls = (
+    <>
+      <select
+        value={statusFilter}
+        onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+        className="py-2 pl-3 pr-8 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-700 bg-white"
+      >
+        <option value="">All Statuses</option>
+        {kanbanCols.map(col => (
+          <option key={col} value={col}>{col}</option>
+        ))}
+      </select>
+      
+      <div className="flex items-center gap-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-xl px-3 py-1.5 focus-within:ring-2 focus-within:ring-indigo-500">
+        <label>From:</label>
+        <input 
+          type="date" 
+          value={dateFrom}
+          onChange={(e) => { setDateFrom(e.target.value); setPage(1); }}
+          className="bg-transparent border-none p-0 focus:ring-0 text-sm outline-none cursor-pointer"
+        />
+      </div>
+
+      <div className="flex items-center gap-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-xl px-3 py-1.5 focus-within:ring-2 focus-within:ring-indigo-500">
+        <label>To:</label>
+        <input 
+          type="date" 
+          value={dateTo}
+          onChange={(e) => { setDateTo(e.target.value); setPage(1); }}
+          className="bg-transparent border-none p-0 focus:ring-0 text-sm outline-none cursor-pointer"
+        />
+      </div>
+
+      {(statusFilter || dateFrom || dateTo) && (
+        <button 
+          onClick={() => {
+            setStatusFilter("");
+            setDateFrom("");
+            setDateTo("");
+            setPage(1);
+          }}
+          className="text-sm text-red-600 hover:text-red-700 font-medium px-2 py-1 rounded hover:bg-red-50 transition-colors"
+        >
+          Clear Filters
+        </button>
+      )}
+    </>
+  );
 
   return (
     <div className="space-y-8 fade-in pb-12">
@@ -110,89 +204,82 @@ export default function TasksClient() {
       </div>
 
       {view === "table" ? (
-        
-      <>
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
-        <div className="relative w-full sm:w-96">
-          <input 
-            type="text" 
-            placeholder="Search..." 
-            value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-          />
-          <svg className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-        </div>
-      </div>
-      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-gray-700">
-              <thead className="bg-gray-50 text-xs uppercase text-gray-600 font-semibold border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-4">Title</th><th className="px-6 py-4">Status</th>
-                  <th className="px-6 py-4">Custom Data</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {loading ? (
-                  <tr><td colSpan={3} className="px-6 py-8 text-center text-gray-500">Loading...</td></tr>
-                ) : items.length === 0 ? (
-                  <tr>
-                  <td colSpan={3} className="p-0">
-                    <EmptyState 
-                      title="No items found" 
-                      description="You haven't added any items yet. Create your first item to get started."
-                      action={<Button size="sm" onClick={() => setIsModalOpen(true)}>Add Item</Button>}
-                    />
-                  </td>
-                </tr>
-                ) : (
-                  items.map((item) => (
-                    <tr key={item._id} className="hover:bg-gray-50/80 transition-colors">
-                      <td className="px-6 py-4">{item.title}</td><td className="px-6 py-4">{item.status}</td>
-                      <td className="px-6 py-4 text-xs text-gray-500">
-                        {item.customData ? Object.entries(item.customData).map(([k, v]) => `${k}: ${v}`).join(', ') : 'None'}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-        </div>
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-3 border-t border-gray-200 bg-gray-50">
-            <div className="text-sm text-gray-500">
-              Page <span className="font-medium text-gray-900">{page}</span> of <span className="font-medium text-gray-900">{totalPages}</span>
-            </div>
-            <div className="flex gap-2">
-              <button 
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="px-3 py-1 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Previous
-              </button>
-              <button 
-                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className="px-3 py-1 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-      </>
+        <DataTable 
+          data={items}
+          columns={columns}
+          loading={loading}
+          search={search}
+          onSearchChange={(val) => { setSearch(val); setPage(1); }}
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+          filters={filterControls}
+          filterFields={filterFields}
+          advancedFilters={advancedFilters}
+          onAdvancedFiltersChange={setAdvancedFilters}
+          onApplyAdvancedFilters={fetchItems}
+          emptyTitle="No tasks found"
+          emptyDescription={search || statusFilter || dateFrom || dateTo || advancedFilters.length > 0 ? "No tasks matched your search or filters." : "You haven't added any tasks yet."}
+          emptyAction={
+            !search && !statusFilter && !dateFrom && !dateTo && advancedFilters.length === 0 ? 
+              <Button size="sm" onClick={() => setIsModalOpen(true)}>Add Task</Button> 
+              : null
+          }
+        />
       ) : (
-        <div className="h-[600px]">
-          {loading ? (
-             <div className="flex h-full items-center justify-center text-gray-500">Loading Kanban...</div>
-          ) : (
-            <KanbanBoard columns={columns} cards={kanbanCards} onCardMoved={handleCardMoved} />
+        <div className="space-y-4">
+          {/* Advanced Filter Tags for Kanban */}
+          {advancedFilters.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-2">
+              {advancedFilters.map(f => {
+                const fieldLabel = filterFields?.find(field => field.name === f.field)?.label || f.field;
+                return (
+                  <span key={f.id} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-200">
+                    {fieldLabel} {f.operator.replace('_', ' ')} {f.operator !== 'exists' && f.operator !== 'not_exists' && f.value}
+                    <button onClick={() => {
+                      const newFilters = advancedFilters.filter(flt => flt.id !== f.id);
+                      setAdvancedFilters(newFilters);
+                      // Let useEffect or a timeout trigger fetch
+                      setTimeout(() => fetchItems(), 0);
+                    }} className="ml-1 text-indigo-400 hover:text-indigo-600">
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                  </span>
+                );
+              })}
+            </div>
           )}
+
+          <div className="flex flex-wrap items-center gap-4 bg-white p-4 rounded-2xl border border-gray-200 shadow-sm">
+             <div className="relative w-full sm:w-64">
+                <input 
+                  type="text" 
+                  placeholder="Search Kanban..." 
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm transition-all"
+                />
+                <svg className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              {filterControls}
+              <div className="flex-shrink-0">
+                <FilterBuilder 
+                  fields={filterFields} 
+                  filters={advancedFilters} 
+                  onChange={setAdvancedFilters} 
+                  onApply={fetchItems} 
+                />
+              </div>
+          </div>
+          <div className="h-[600px]">
+            {loading ? (
+              <div className="flex h-full items-center justify-center text-gray-500">Loading Kanban...</div>
+            ) : (
+              <KanbanBoard columns={kanbanCols} cards={kanbanCards} onCardMoved={handleCardMoved} />
+            )}
+          </div>
         </div>
       )}
 
@@ -200,10 +287,15 @@ export default function TasksClient() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
           <div className="relative bg-white border border-gray-200 rounded-2xl shadow-xl w-full max-w-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-gray-100">
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
               <h2 className="text-xl font-bold text-gray-900">Add Task</h2>
+              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
-            <div className="p-6">
+            <div className="p-6 max-h-[80vh] overflow-y-auto custom-scrollbar">
               <DynamicFormBuilder 
                 targetModule="task" 
                 onSubmit={handleSave} 

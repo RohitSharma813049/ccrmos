@@ -3,6 +3,7 @@ import Order from '@/modules/orders/schemas/Order';
 import dbConnect from '@/lib/db';
 import { requireAuthenticatedUser, requirePermission } from '@/lib/auth-utils';
 import { buildTenantQuery } from '@/lib/access-control';
+import { parseFiltersToMongo } from "@/utils/parseFilters";
 
 export async function GET(req: Request) {
   try {
@@ -14,8 +15,28 @@ export async function GET(req: Request) {
     const page = parseInt(searchParams.get("page") || "1", 10);
     const limit = parseInt(searchParams.get("limit") || "10", 10);
     const search = searchParams.get("search") || "";
+    const filtersJson = searchParams.get("filters");
+    const dynamicQuery = parseFiltersToMongo(filtersJson);
+
+    const statusFilter = searchParams.get("status") || "";
+    const dateFrom = searchParams.get("dateFrom") || "";
+    const dateTo = searchParams.get("dateTo") || "";
     
-    const queryObj: any = { ...buildTenantQuery(user) };
+    const queryObj: any = { ...buildTenantQuery(user), ...dynamicQuery };
+
+    if (statusFilter) {
+      queryObj.status = statusFilter;
+    }
+
+    if (dateFrom || dateTo) {
+      queryObj.createdAt = {};
+      if (dateFrom) queryObj.createdAt.$gte = new Date(dateFrom);
+      if (dateTo) {
+        const toDate = new Date(dateTo);
+        toDate.setHours(23, 59, 59, 999);
+        queryObj.createdAt.$lte = toDate;
+      }
+    }
     
     if (search) {
       const searchRegex = { $regex: search, $options: "i" };

@@ -11,6 +11,8 @@ const FormFieldSchema = new mongoose.Schema({
 
 const FormSchema = new mongoose.Schema({
   companyId: { type: String, required: true, index: true },
+  founderId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  projectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Project' },
   title: { type: String, required: true },
   description: { type: String, default: "" },
   fields: [FormFieldSchema],
