@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { DataTable, ColumnDef } from "@/components/ui/DataTable";
 
 const HIERARCHY_LEVELS = [
   { level: 2, label: "Founder" },
@@ -15,6 +16,10 @@ export default function UsersClient() {
   const [roles, setRoles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [search, setSearch] = useState("");
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState<any>({
     name: "",
@@ -29,15 +34,19 @@ export default function UsersClient() {
 
   useEffect(() => {
     fetchUsers();
+  }, [page, search]);
+
+  useEffect(() => {
     fetchRoles();
   }, []);
 
   async function fetchUsers() {
     setLoading(true);
     try {
-      const res = await fetch("/api/users");
+      const res = await fetch(`/api/users?page=${page}&limit=10&search=${search}`);
       const data = await res.json();
       setUsers(data.users || []);
+      if (data.totalPages) setTotalPages(data.totalPages);
     } catch (e) {
       console.error(e);
     } finally {
@@ -130,6 +139,55 @@ export default function UsersClient() {
     return users.filter(u => u.hierarchyLevel === level);
   };
 
+  const columns: ColumnDef<any>[] = [
+    {
+      header: "Employee",
+      cell: (item) => (
+        <div>
+          <p className="font-semibold text-gray-900">{item.name || "N/A"}</p>
+          <p className="text-xs text-gray-500">{item.email}</p>
+        </div>
+      )
+    },
+    {
+      header: "Role",
+      cell: (item) => (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+          {item.role?.name || "No Role"}
+        </span>
+      )
+    },
+    {
+      header: "Hierarchy",
+      cell: (item) => (
+        <span className="font-medium">
+          {HIERARCHY_LEVELS.find(l => l.level === item.hierarchyLevel)?.label || `Level ${item.hierarchyLevel}`}
+        </span>
+      )
+    },
+    {
+      header: "Reports To",
+      cell: (item) => (
+        <div className="text-xs space-y-1">
+          {item.directorId && <p><span className="text-gray-500">Dir:</span> {item.directorId.name}</p>}
+          {item.managerId && <p><span className="text-gray-500">Mgr:</span> {item.managerId.name}</p>}
+          {item.teamLeaderId && <p><span className="text-gray-500">TL:</span> {item.teamLeaderId.name}</p>}
+          {!item.directorId && !item.managerId && !item.teamLeaderId && <span className="text-gray-400">None</span>}
+        </div>
+      )
+    },
+    {
+      header: "Actions",
+      className: "text-right",
+      cell: (item) => (
+        <div className="flex justify-end gap-3">
+          <button onClick={() => openModal(item)} className="text-indigo-600 hover:text-indigo-900 font-medium">Edit</button>
+          <button onClick={() => handleDelete(item._id)} className="text-red-600 hover:text-red-900 font-medium">Delete</button>
+        </div>
+      )
+    }
+  ];
+
   return (
     <div className="space-y-8 fade-in">
       <div className="flex justify-between items-center">
@@ -145,53 +203,18 @@ export default function UsersClient() {
         </button>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <table className="w-full text-left text-sm text-gray-700">
-          <thead className="bg-gray-50 border-b border-gray-200">
-            <tr>
-              <th className="px-6 py-4 font-semibold">Employee</th>
-              <th className="px-6 py-4 font-semibold">Role</th>
-              <th className="px-6 py-4 font-semibold">Hierarchy</th>
-              <th className="px-6 py-4 font-semibold">Reports To</th>
-              <th className="px-6 py-4 font-semibold text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {loading ? (
-              <tr><td colSpan={5} className="px-6 py-4 text-center text-gray-500">Loading users...</td></tr>
-            ) : users.length === 0 ? (
-              <tr><td colSpan={5} className="px-6 py-4 text-center text-gray-500">No users found.</td></tr>
-            ) : users.map((u) => (
-              <tr key={u._id} className="hover:bg-gray-50">
-                <td className="px-6 py-4">
-                  <p className="font-semibold text-gray-900">{u.name || "N/A"}</p>
-                  <p className="text-xs text-gray-500">{u.email}</p>
-                </td>
-                <td className="px-6 py-4">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    {u.role?.name || "No Role"}
-                  </span>
-                </td>
-                <td className="px-6 py-4 font-medium">
-                  {HIERARCHY_LEVELS.find(l => l.level === u.hierarchyLevel)?.label || `Level ${u.hierarchyLevel}`}
-                </td>
-                <td className="px-6 py-4">
-                  <div className="text-xs space-y-1">
-                    {u.directorId && <p><span className="text-gray-500">Dir:</span> {u.directorId.name}</p>}
-                    {u.managerId && <p><span className="text-gray-500">Mgr:</span> {u.managerId.name}</p>}
-                    {u.teamLeaderId && <p><span className="text-gray-500">TL:</span> {u.teamLeaderId.name}</p>}
-                    {!u.directorId && !u.managerId && !u.teamLeaderId && <span className="text-gray-400">None</span>}
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-right space-x-3">
-                  <button onClick={() => openModal(u)} className="text-indigo-600 hover:text-indigo-900 font-medium">Edit</button>
-                  <button onClick={() => handleDelete(u._id)} className="text-red-600 hover:text-red-900 font-medium">Delete</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <DataTable 
+        data={users}
+        columns={columns}
+        loading={loading}
+        search={search}
+        onSearchChange={(val) => { setSearch(val); setPage(1); }}
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        emptyTitle="No users found"
+        emptyDescription="There are no users matching your criteria."
+      />
 
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">

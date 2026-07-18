@@ -1,10 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { DataTable, ColumnDef } from "@/components/ui/DataTable";
 
 export default function ModulesClient() {
   const [modules, setModules] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [search, setSearch] = useState("");
 
   const [isBuildModalOpen, setIsBuildModalOpen] = useState(false);
   const [newModuleName, setNewModuleName] = useState("");
@@ -14,14 +19,16 @@ export default function ModulesClient() {
 
   useEffect(() => {
     fetchModules();
-  }, []);
+  }, [page, search]);
 
   async function fetchModules() {
+    setLoading(true);
     try {
-      const res = await fetch("/api/settings/modules");
+      const res = await fetch(`/api/settings/modules?page=${page}&limit=10&search=${search}`);
       if (res.ok) {
         const data = await res.json();
         setModules(data.modules || []);
+        if (data.totalPages) setTotalPages(data.totalPages);
       }
     } catch (error) {
       console.error(error);
@@ -105,6 +112,42 @@ export default function ModulesClient() {
     }
   };
 
+  const columns: ColumnDef<any>[] = [
+    {
+      header: "Module Name",
+      cell: (mod) => <span className="font-medium text-gray-900">{mod.name}</span>
+    },
+    {
+      header: "Status",
+      cell: (mod) => (
+        <button 
+          onClick={() => toggleStatus(mod)}
+          className={`px-2.5 py-1 rounded-md text-xs font-semibold border transition-colors ${mod.active ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'}`}
+        >
+          {mod.active ? 'Published' : 'Draft'}
+        </button>
+      )
+    },
+    {
+      header: "Fields",
+      cell: (mod) => <span className="text-gray-700">{mod.fields?.length || 0} configured</span>
+    },
+    {
+      header: "Actions",
+      className: "text-right",
+      cell: (mod) => (
+        <div className="flex justify-end">
+          <button 
+            onClick={() => openSchemaEditor(mod)} 
+            className="text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-lg font-medium transition-colors"
+          >
+            Edit Schema
+          </button>
+        </div>
+      )
+    }
+  ];
+
   return (
     <div className="space-y-8 fade-in pb-12">
       <div className="flex justify-between items-end">
@@ -120,48 +163,18 @@ export default function ModulesClient() {
         </button>
       </div>
 
-      <div className="bg-white/50 backdrop-blur-xl border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
-        <table className="w-full text-left text-sm text-gray-700">
-          <thead className="bg-gray-100/50 text-xs uppercase text-gray-600 font-semibold border-b border-gray-200">
-            <tr>
-              <th className="px-6 py-4">Module Name</th>
-              <th className="px-6 py-4">Status</th>
-              <th className="px-6 py-4">Fields</th>
-              <th className="px-6 py-4 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200/50">
-            {loading ? (
-              <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-500">Loading...</td></tr>
-            ) : modules.length === 0 ? (
-              <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-500">No custom modules created yet.</td></tr>
-            ) : (
-              modules.map((mod) => (
-                <tr key={mod._id} className="hover:bg-gray-100/30 transition-colors">
-                  <td className="px-6 py-4 font-medium text-gray-900">{mod.name}</td>
-                  <td className="px-6 py-4">
-                    <button 
-                      onClick={() => toggleStatus(mod)}
-                      className={`px-2.5 py-1 rounded-md text-xs font-semibold border transition-colors ${mod.active ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'}`}
-                    >
-                      {mod.active ? 'Published' : 'Draft'}
-                    </button>
-                  </td>
-                  <td className="px-6 py-4 text-gray-700">{mod.fields?.length || 0} configured</td>
-                  <td className="px-6 py-4 text-right">
-                    <button 
-                      onClick={() => openSchemaEditor(mod)} 
-                      className="text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-lg font-medium transition-colors"
-                    >
-                      Edit Schema
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+      <DataTable 
+        data={modules}
+        columns={columns}
+        loading={loading}
+        search={search}
+        onSearchChange={(val) => { setSearch(val); setPage(1); }}
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        emptyTitle="No custom modules created yet"
+        emptyDescription="Get started by building your first module."
+      />
 
       {/* Build New Module Modal */}
       {isBuildModalOpen && (

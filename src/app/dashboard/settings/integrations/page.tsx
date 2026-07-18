@@ -46,6 +46,14 @@ export default function IntegrationsPage() {
       color: "emerald"
     },
     {
+      id: "whatsapp-web",
+      name: "WhatsApp Web (Direct)",
+      description: "Scan QR code to automatically pull leads directly from your personal or business WhatsApp.",
+      actionLabel: "Connect Device",
+      icon: "M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z",
+      color: "emerald"
+    },
+    {
       id: "generic",
       name: "Generic Bulk Import API",
       description: "Use this endpoint to POST JSON arrays of leads from Zapier, Make.com, or custom scripts.",
@@ -75,6 +83,45 @@ export default function IntegrationsPage() {
     alert("Webhook URL copied to clipboard!");
   };
 
+  const [isWaModalOpen, setIsWaModalOpen] = useState(false);
+  const [waStatus, setWaStatus] = useState<any>(null);
+  const [waLoading, setWaLoading] = useState(false);
+
+  const fetchWaStatus = async () => {
+    try {
+      const res = await fetch("/api/settings/whatsapp");
+      const data = await res.json();
+      setWaStatus(data);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    let interval: any;
+    if (isWaModalOpen) {
+      fetchWaStatus();
+      interval = setInterval(fetchWaStatus, 3000);
+    }
+    return () => clearInterval(interval);
+  }, [isWaModalOpen]);
+
+  const handleWaAction = async (action: 'INITIALIZE' | 'DISCONNECT') => {
+    setWaLoading(true);
+    try {
+      await fetch("/api/settings/whatsapp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action })
+      });
+      await fetchWaStatus();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setWaLoading(false);
+    }
+  };
+
   return (
     <div className="max-w-6xl mx-auto space-y-8 fade-in pb-12">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -99,7 +146,7 @@ export default function IntegrationsPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {integrations.map((int) => (
-          <div key={int.id} className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+          <div key={int.id} className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-4">
                 <div className={`w-12 h-12 rounded-xl border flex items-center justify-center ${colorMap[int.color]}`}>
@@ -113,10 +160,10 @@ export default function IntegrationsPage() {
               </div>
             </div>
             
-            <p className="text-gray-600 mb-6">{int.description}</p>
+            <p className="text-gray-600 mb-6 flex-1">{int.description}</p>
             
             {int.webhookPath ? (
-              <div className="space-y-2">
+              <div className="space-y-2 mt-auto">
                 <label className="text-sm font-medium text-gray-700">Your Unique Webhook URL</label>
                 <div className="flex items-center gap-2">
                   <input 
@@ -134,13 +181,73 @@ export default function IntegrationsPage() {
                 </div>
               </div>
             ) : (
-              <button className="px-5 py-2.5 bg-gray-100 text-gray-900 border border-gray-300 font-medium rounded-lg hover:bg-gray-200 transition-colors">
-                {int.actionLabel}
-              </button>
+              <div className="mt-auto">
+                <button 
+                  onClick={() => int.id === 'whatsapp-web' ? setIsWaModalOpen(true) : null}
+                  className="px-5 py-2.5 bg-gray-100 text-gray-900 border border-gray-300 font-medium rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  {int.actionLabel}
+                </button>
+              </div>
             )}
           </div>
         ))}
       </div>
+
+      {isWaModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsWaModalOpen(false)} />
+          <div className="relative bg-white border border-gray-300 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200 text-center">
+            <div className="p-6 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900">WhatsApp Web Connection</h2>
+              <p className="text-sm text-gray-600 mt-1">Scan to connect your WhatsApp directly to CRM OS.</p>
+            </div>
+            
+            <div className="p-8 space-y-6 flex flex-col items-center min-h-[300px] justify-center">
+              {waLoading ? (
+                <div className="text-gray-500">Processing...</div>
+              ) : waStatus?.status === 'CONNECTED' ? (
+                <div className="text-emerald-600 font-bold text-xl flex flex-col items-center gap-4">
+                  <svg className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Device Connected Successfully!
+                  <button onClick={() => handleWaAction('DISCONNECT')} className="text-sm text-red-600 hover:underline mt-2">Disconnect Device</button>
+                </div>
+              ) : waStatus?.status === 'QR_READY' && waStatus.qr ? (
+                <div className="flex flex-col items-center">
+                  <img src={waStatus.qr} alt="WhatsApp QR Code" className="w-64 h-64 rounded-xl border border-gray-200 shadow-sm" />
+                  <p className="text-sm text-gray-500 mt-4">Open WhatsApp on your phone and scan this code.</p>
+                </div>
+              ) : waStatus?.status === 'INITIALIZING' ? (
+                <div className="text-gray-500 flex flex-col items-center gap-3">
+                  <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+                  Generating QR Code... Please wait.
+                </div>
+              ) : (
+                <div className="text-center">
+                  <p className="text-gray-600 mb-6">You are currently disconnected.</p>
+                  <button 
+                    onClick={() => handleWaAction('INITIALIZE')}
+                    className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-xl shadow-lg shadow-emerald-500/30 transition-all"
+                  >
+                    Generate QR Code
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-end">
+              <button 
+                onClick={() => setIsWaModalOpen(false)}
+                className="px-5 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -5,20 +5,47 @@ import Company from '@/modules/companies/schemas/Company';
 import SubscriptionPlan from '@/modules/settings/schemas/SubscriptionPlan';
 import { getSession } from "@/lib/auth-utils";
 
-export async function GET() {
+export async function GET(req: Request) {
   await dbConnect();
   try {
     const session = await getSession();
     const user = session?.user as any;
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+    const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get("page") || "1", 10);
+    const limit = parseInt(searchParams.get("limit") || "10", 10);
+    const search = searchParams.get("search") || "";
+
     const companyId = user.hierarchyLevel === 1 ? null : user.companyId;
     
     // For now, Platform Owner gets their global modules. Tenants get theirs + global ones.
-    const query = companyId ? { $or: [{ companyId }, { companyId: null }] } : { companyId: null };
+    const baseQuery = companyId ? { $or: [{ companyId }, { companyId: null }] } : { companyId: null };
     
-    const modules = await CustomModule.find(query).sort({ createdAt: -1 });
-    return NextResponse.json({ modules });
+    let query: any = { ...baseQuery };
+    if (search) {
+      const searchRegex = { $regex: search, $options: "i" };
+      query = {
+        $and: [
+          baseQuery,
+          {
+            $or: [
+              { name: searchRegex },
+              { description: searchRegex }
+            ]
+          }
+        ]
+      };
+    }
+
+    const skip = (page - 1) * limit;
+    const total = await CustomModule.countDocuments(query);
+    const modules = await CustomModule.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    return NextResponse.json({ modules, total, page, totalPages: Math.ceil(total / limit) });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

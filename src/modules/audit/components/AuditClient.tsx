@@ -1,10 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { DataTable, ColumnDef } from "@/components/ui/DataTable";
 
 export default function AuditClient() {
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [search, setSearch] = useState("");
 
   // Filtering state
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -15,6 +20,9 @@ export default function AuditClient() {
     setLoading(true);
     try {
       const params = new URLSearchParams();
+      params.append("page", page.toString());
+      params.append("limit", "10");
+      if (search) params.append("search", search);
       if (moduleFilter) params.append("module", moduleFilter);
       if (actionFilter) params.append("action", actionFilter);
 
@@ -22,6 +30,7 @@ export default function AuditClient() {
       if (res.ok) {
         const data = await res.json();
         setLogs(data.logs || []);
+        if (data.totalPages) setTotalPages(data.totalPages);
       }
     } catch (e) {
       console.error(e);
@@ -32,7 +41,7 @@ export default function AuditClient() {
 
   useEffect(() => {
     fetchLogs();
-  }, [moduleFilter, actionFilter]);
+  }, [page, search, moduleFilter, actionFilter]);
 
   const exportCSV = () => {
     if (logs.length === 0) {
@@ -67,6 +76,41 @@ export default function AuditClient() {
     window.URL.revokeObjectURL(url);
   };
 
+  const columns: ColumnDef<any>[] = [
+    {
+      header: "Timestamp",
+      cell: (log) => <span className="text-gray-600 font-mono text-xs">{new Date(log.createdAt).toLocaleString()}</span>
+    },
+    {
+      header: "User / Actor",
+      cell: (log) => (
+        <span className="text-blue-500 font-medium font-mono text-xs">
+          {log.userId?.email || log.userId?.name || "System"} 
+          {log.ipAddress && <span className="text-gray-400 text-[10px] ml-1">({log.ipAddress})</span>}
+        </span>
+      )
+    },
+    {
+      header: "Action Taken",
+      cell: (log) => <span className="text-gray-900 font-semibold font-mono text-xs">{log.action}</span>
+    },
+    {
+      header: "Target Resource",
+      cell: (log) => <span className="text-gray-600 font-mono text-xs">{log.recordId}</span>
+    },
+    {
+      header: "Module",
+      className: "text-right",
+      cell: (log) => (
+        <div className="flex justify-end">
+          <span className="px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider bg-gray-100 text-gray-600 border border-gray-200">
+            {log.module}
+          </span>
+        </div>
+      )
+    }
+  ];
+
   return (
     <div className="space-y-8 fade-in pb-12">
       <div className="flex justify-between items-end">
@@ -98,7 +142,7 @@ export default function AuditClient() {
               type="text" 
               placeholder="e.g., LEADS, SETTINGS" 
               value={moduleFilter}
-              onChange={(e) => setModuleFilter(e.target.value)}
+              onChange={(e) => { setModuleFilter(e.target.value); setPage(1); }}
               className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border outline-none"
             />
           </div>
@@ -108,13 +152,13 @@ export default function AuditClient() {
               type="text" 
               placeholder="e.g., UPDATE, DELETE" 
               value={actionFilter}
-              onChange={(e) => setActionFilter(e.target.value)}
+              onChange={(e) => { setActionFilter(e.target.value); setPage(1); }}
               className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border outline-none"
             />
           </div>
           <div className="flex items-end">
             <button 
-              onClick={() => { setModuleFilter(""); setActionFilter(""); }}
+              onClick={() => { setModuleFilter(""); setActionFilter(""); setPage(1); }}
               className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
             >
               Clear Filters
@@ -123,45 +167,18 @@ export default function AuditClient() {
         </div>
       )}
 
-      <div className="bg-white/50 backdrop-blur-xl border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-gray-700">
-            <thead className="bg-gray-100/50 text-xs uppercase text-gray-600 font-semibold border-b border-gray-200">
-              <tr>
-                <th className="px-6 py-4">Timestamp</th>
-                <th className="px-6 py-4">User / Actor</th>
-                <th className="px-6 py-4">Action Taken</th>
-                <th className="px-6 py-4">Target Resource</th>
-                <th className="px-6 py-4 text-right">Module</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200/50 font-mono text-xs">
-              {loading ? (
-                <tr><td colSpan={5} className="px-6 py-8 text-center text-gray-500">Loading logs...</td></tr>
-              ) : logs.length === 0 ? (
-                <tr><td colSpan={5} className="px-6 py-8 text-center text-gray-500">No logs found.</td></tr>
-              ) : (
-                logs.map((log) => (
-                  <tr key={log._id} className="hover:bg-gray-100/30 transition-colors">
-                    <td className="px-6 py-4 text-gray-600">{new Date(log.createdAt).toLocaleString()}</td>
-                    <td className="px-6 py-4 text-blue-500 font-medium">
-                      {log.userId?.email || log.userId?.name || "System"} 
-                      {log.ipAddress && <span className="text-gray-400 text-[10px] ml-1">({log.ipAddress})</span>}
-                    </td>
-                    <td className="px-6 py-4 text-gray-900 font-semibold">{log.action}</td>
-                    <td className="px-6 py-4 text-gray-600">{log.recordId}</td>
-                    <td className="px-6 py-4 text-right">
-                      <span className="px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider bg-gray-100 text-gray-600 border border-gray-200">
-                        {log.module}
-                      </span>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <DataTable 
+        data={logs}
+        columns={columns}
+        loading={loading}
+        search={search}
+        onSearchChange={(val) => { setSearch(val); setPage(1); }}
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        emptyTitle="No logs found"
+        emptyDescription="There are no audit logs matching your criteria."
+      />
     </div>
   );
 }

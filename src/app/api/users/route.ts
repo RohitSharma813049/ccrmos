@@ -12,6 +12,11 @@ export async function GET(req: Request) {
     
     const user = session.user as any;
     
+    const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get("page") || "1", 10);
+    const limit = parseInt(searchParams.get("limit") || "10", 10);
+    const search = searchParams.get("search") || "";
+    
     // Admins only (for now, simply requiring session and checking companyId)
     // We could enforce requirePermission("MANAGE_USERS") but for MVP we assume Founders/Directors access this
     
@@ -19,7 +24,7 @@ export async function GET(req: Request) {
     if (user.hierarchyLevel !== 1) {
       const targetFounderId = user.hierarchyLevel === 2 ? user.id : user.founderId;
       if (!targetFounderId) {
-        return NextResponse.json({ users: [] });
+        return NextResponse.json({ users: [], total: 0, page, totalPages: 0 });
       }
       query.founderId = targetFounderId;
       // Users can only see others who are strictly BELOW them in hierarchy, plus themselves
@@ -31,15 +36,25 @@ export async function GET(req: Request) {
       // Platform Owner is impersonating a tenant, only show that tenant's users
       query.founderId = user.impersonatedFounderId;
     }
+    
+    if (search) {
+      const searchRegex = { $regex: search, $options: "i" };
+      const searchOr = [{ name: searchRegex }, { email: searchRegex }];
+      query.$or = query.$or ? [...query.$or, ...searchOr] : searchOr;
+    }
 
+    const skip = (page - 1) * limit;
+    const total = await User.countDocuments(query);
     const users = await User.find(query)
       .populate("role", "name")
       .populate("directorId", "name email")
       .populate("managerId", "name email")
       .populate("teamLeaderId", "name email")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
-    return NextResponse.json({ users });
+    return NextResponse.json({ users, total, page, totalPages: Math.ceil(total / limit) });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

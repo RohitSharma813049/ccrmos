@@ -14,6 +14,9 @@ export async function GET(req: Request) {
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get("page") || "1", 10);
+    const limit = parseInt(searchParams.get("limit") || "10", 10);
+    const search = searchParams.get("search") || "";
     const moduleFilter = searchParams.get('module');
     const actionFilter = searchParams.get('action');
 
@@ -25,15 +28,23 @@ export async function GET(req: Request) {
     if (moduleFilter) query.module = moduleFilter;
     if (actionFilter) query.action = actionFilter;
 
+    if (search) {
+      const searchRegex = { $regex: search, $options: "i" };
+      query.$or = [{ action: searchRegex }, { module: searchRegex }];
+    }
+
     // Fetch logs and populate user data
     console.log("Audit API: Querying logs with", query);
+    const skip = (page - 1) * limit;
+    const total = await AuditLog.countDocuments(query);
     const logs = await AuditLog.find(query)
       .populate('userId', 'email name')
       .sort({ createdAt: -1 })
-      .limit(100);
+      .skip(skip)
+      .limit(limit);
 
     console.log("Audit API: Found", logs.length, "logs");
-    return NextResponse.json({ logs });
+    return NextResponse.json({ logs, total, page, totalPages: Math.ceil(total / limit) });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

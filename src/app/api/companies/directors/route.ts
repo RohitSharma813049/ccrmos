@@ -4,20 +4,39 @@ import dbConnect from '@/lib/db';
 import User from '@/modules/users/schemas/User';
 import { getSession } from "@/lib/auth-utils";
 
-export async function GET() {
+export async function GET(req: Request) {
   await dbConnect();
   try {
     const session = await getSession();
     const user = session?.user as any;
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    // Fetch Level 3 users (Directors) for the company
-    const directors = await User.find({ 
+    const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get("page") || "1", 10);
+    const limit = parseInt(searchParams.get("limit") || "10", 10);
+    const search = searchParams.get("search") || "";
+
+    const query: any = {
       companyId: user.companyId,
       hierarchyLevel: 3 
-    }).populate("role").sort({ createdAt: -1 });
+    };
 
-    return NextResponse.json({ directors });
+    if (search) {
+      const searchRegex = { $regex: search, $options: "i" };
+      query.$or = [{ name: searchRegex }, { email: searchRegex }];
+    }
+
+    const skip = (page - 1) * limit;
+    const total = await User.countDocuments(query);
+    
+    // Fetch Level 3 users (Directors) for the company
+    const directors = await User.find(query)
+      .populate("role")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    return NextResponse.json({ directors, total, page, totalPages: Math.ceil(total / limit) });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

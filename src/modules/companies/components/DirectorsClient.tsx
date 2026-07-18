@@ -1,10 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { DataTable, ColumnDef } from "@/components/ui/DataTable";
 
 export default function DirectorsClient() {
   const [directors, setDirectors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [search, setSearch] = useState("");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [firstName, setFirstName] = useState("");
@@ -14,15 +19,16 @@ export default function DirectorsClient() {
 
   useEffect(() => {
     fetchDirectors();
-  }, []);
+  }, [page, search]);
 
   async function fetchDirectors() {
     setLoading(true);
     try {
-      const res = await fetch("/api/companies/directors");
+      const res = await fetch(`/api/companies/directors?page=${page}&limit=10&search=${search}`);
       if (res.ok) {
         const data = await res.json();
         setDirectors(data.directors || []);
+        if (data.totalPages) setTotalPages(data.totalPages);
       }
     } catch (e) {
       console.error(e);
@@ -67,6 +73,51 @@ export default function DirectorsClient() {
     }
   }
 
+  const columns: ColumnDef<any>[] = [
+    {
+      header: "Director",
+      cell: (dir) => (
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-gray-700 to-gray-600 flex items-center justify-center font-bold text-xs text-white">
+            {dir.name?.charAt(0) || "D"}
+          </div>
+          <div>
+            <p className="font-medium text-gray-900">{dir.name}</p>
+            <p className="text-xs text-gray-500">{dir.email}</p>
+          </div>
+        </div>
+      )
+    },
+    {
+      header: "Department",
+      cell: (dir) => (
+        <span className="text-gray-700">{dir.role?.name || (typeof dir.role === 'string' ? dir.role : 'Unassigned')}</span>
+      )
+    },
+    {
+      header: "Status",
+      cell: (dir) => (
+        <span className={`px-2.5 py-1 rounded-md text-xs font-semibold border ${dir.isActive ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'}`}>
+          {dir.isActive ? 'Active' : 'Suspended'}
+        </span>
+      )
+    },
+    {
+      header: "Actions",
+      className: "text-right",
+      cell: (dir) => (
+        <div className="flex justify-end gap-3">
+          <button 
+            onClick={() => toggleStatus(dir)}
+            className={`${dir.isActive ? 'text-red-400 hover:text-red-600' : 'text-emerald-500 hover:text-emerald-600'} font-medium transition-colors`}
+          >
+            {dir.isActive ? 'Suspend Access' : 'Restore Access'}
+          </button>
+        </div>
+      )
+    }
+  ];
+
   return (
     <div className="space-y-8 fade-in pb-12">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -101,57 +152,18 @@ export default function DirectorsClient() {
         </div>
       </div>
 
-      <div className="bg-white/50 backdrop-blur-xl border border-gray-200 rounded-2xl overflow-hidden shadow-2xl">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-gray-700">
-            <thead className="bg-gray-100/50 text-xs uppercase text-gray-600 font-semibold border-b border-gray-200">
-              <tr>
-                <th className="px-6 py-4">Director</th>
-                <th className="px-6 py-4">Department</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200/50">
-              {loading ? (
-                <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-500">Loading directors...</td></tr>
-              ) : directors.length === 0 ? (
-                <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-500">No directors provisioned yet.</td></tr>
-              ) : (
-                directors.map((dir) => (
-                  <tr key={dir._id} className="hover:bg-gray-100/30 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-gray-700 to-gray-600 flex items-center justify-center font-bold text-xs text-white">
-                          {dir.name?.charAt(0) || "D"}
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-900">{dir.name}</p>
-                          <p className="text-xs text-gray-500">{dir.email}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-gray-700">{dir.role?.name || (typeof dir.role === 'string' ? dir.role : 'Unassigned')}</td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2.5 py-1 rounded-md text-xs font-semibold border ${dir.isActive ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'}`}>
-                        {dir.isActive ? 'Active' : 'Suspended'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <button 
-                        onClick={() => toggleStatus(dir)}
-                        className={`${dir.isActive ? 'text-red-400 hover:text-red-600' : 'text-emerald-500 hover:text-emerald-600'} font-medium transition-colors`}
-                      >
-                        {dir.isActive ? 'Suspend Access' : 'Restore Access'}
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <DataTable 
+        data={directors}
+        columns={columns}
+        loading={loading}
+        search={search}
+        onSearchChange={(val) => { setSearch(val); setPage(1); }}
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        emptyTitle="No directors provisioned yet"
+        emptyDescription="Get started by provisioning your first director."
+      />
 
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">

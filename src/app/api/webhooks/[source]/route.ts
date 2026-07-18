@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Lead from '@/modules/leads/schemas/Lead';
-import User from '@/modules/auth/schemas/User';
+import User from '@/modules/users/schemas/User';
 
 export async function POST(req: Request, { params }: { params: { source: string } }) {
   try {
