@@ -10,8 +10,18 @@ import ApiKey from "@/modules/settings/schemas/ApiKey";
 import nodemailer from "nodemailer";
 
 export class CompanyService {
-  static async getCompaniesWithUserCounts() {
-    const companies = await Company.find().populate("subscriptionPlanId").sort({ createdAt: -1 });
+  static async getCompaniesWithUserCounts(page: number = 1, limit: number = 10, search: string = "") {
+    const query: any = {};
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { adminEmail: { $regex: search, $options: "i" } }
+      ];
+    }
+    const skip = (page - 1) * limit;
+    const total = await Company.countDocuments(query);
+
+    const companies = await Company.find(query).populate("subscriptionPlanId").sort({ createdAt: -1 }).skip(skip).limit(limit);
     
     const companiesWithCounts = await Promise.all(
       companies.map(async (company) => {
@@ -25,7 +35,12 @@ export class CompanyService {
       })
     );
     
-    return companiesWithCounts;
+    return {
+      companies: companiesWithCounts,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit) || 1
+    };
   }
 
   static async registerTenant({ name, adminEmail, subscriptionPlanId, usersQuota, industryTemplateId }: { name: string, adminEmail: string, subscriptionPlanId?: string, usersQuota?: number, industryTemplateId?: string }) {

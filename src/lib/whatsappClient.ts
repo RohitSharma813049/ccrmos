@@ -34,6 +34,7 @@ export const initializeWhatsAppClient = async (companyId: string) => {
     authStrategy: new LocalAuth({ clientId: companyId }),
     puppeteer: {
       headless: true,
+      executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     }
   });
@@ -67,14 +68,16 @@ export const initializeWhatsAppClient = async (companyId: string) => {
       const phoneNumber = contact.number;
       const name = contact.pushname || contact.name || "WhatsApp Lead";
 
-      let lead = await Lead.findOne({ companyId, phoneNumber });
+      let lead = await Lead.findOne({ companyId, phone: phoneNumber });
 
       if (!lead) {
         console.log('Creating new WhatsApp lead:', name);
         lead = await Lead.create({
           companyId,
           firstName: name,
-          phoneNumber,
+          lastName: "WhatsApp", // lastName is required by schema
+          email: `${phoneNumber}@whatsapp.local`, // email is required by schema
+          phone: phoneNumber, // schema uses 'phone' not 'phoneNumber'
           status: "New",
           source: "WhatsApp Web",
           customData: {

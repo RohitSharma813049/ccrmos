@@ -6,7 +6,7 @@ import { CompanyService } from "@/modules/companies/services/company.service";
 
 // GET /api/companies
 // Fetch all companies (Tenant accounts)
-export async function GET() {
+export async function GET(req: Request) {
   try {
     await requirePermission(PERMISSIONS.MANAGE_COMPANIES);
     
@@ -14,9 +14,14 @@ export async function GET() {
       await mongoose.connect(process.env.MONGODB_URI!);
     }
     
-    const companiesWithCounts = await CompanyService.getCompaniesWithUserCounts();
+    const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get('page') || '1', 10);
+    const limit = parseInt(searchParams.get('limit') || '10', 10);
+    const search = searchParams.get('search') || '';
+
+    const result = await CompanyService.getCompaniesWithUserCounts(page, limit, search);
     
-    return NextResponse.json({ companies: companiesWithCounts }, { status: 200 });
+    return NextResponse.json(result, { status: 200 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

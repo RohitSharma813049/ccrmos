@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
+import { DataTable, ColumnDef } from "@/components/ui/DataTable";
+
 interface Company {
   _id: string;
   name: string;
@@ -18,6 +20,11 @@ interface Company {
 export default function ManageCompaniesPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [search, setSearch] = useState("");
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentCompanyId, setCurrentCompanyId] = useState<string | null>(null);
@@ -33,11 +40,21 @@ export default function ManageCompaniesPage() {
     status: "Active"
   });
 
+  const [stats, setStats] = useState({
+    total: 0,
+    active: 0,
+    suspended: 0,
+    avgUsers: 0
+  });
+
   useEffect(() => {
-    fetchCompanies();
     fetchPlans();
     fetchTemplates();
   }, []);
+
+  useEffect(() => {
+    fetchCompanies();
+  }, [page, search]);
 
   async function fetchPlans() {
     try {
@@ -66,10 +83,20 @@ export default function ManageCompaniesPage() {
   async function fetchCompanies() {
     setLoading(true);
     try {
-      const res = await fetch("/api/companies");
+      const res = await fetch(`/api/companies?page=${page}&limit=10&search=${search}`);
       if (res.ok) {
         const data = await res.json();
         setCompanies(data.companies || []);
+        if (data.totalPages) setTotalPages(data.totalPages);
+        
+        // Calculate basic stats from the current view or ideally an API endpoint,
+        // but for now we update it based on current data for simplicity (might not reflect total accurate stats globally)
+        setStats({
+          total: data.total || 0,
+          active: (data.companies || []).filter((c: any) => c.status === "Active").length,
+          suspended: (data.companies || []).filter((c: any) => c.status === "Suspended").length,
+          avgUsers: data.companies?.length > 0 ? Math.round(data.companies.reduce((acc: number, c: any) => acc + (c.users || 0), 0) / data.companies.length) : 0
+        });
       }
     } catch (error) {
       console.error("Failed to fetch companies", error);
@@ -141,12 +168,58 @@ export default function ManageCompaniesPage() {
     }
   };
 
-  const stats = {
-    total: companies.length,
-    active: companies.filter(c => c.status === "Active").length,
-    suspended: companies.filter(c => c.status === "Suspended").length,
-    avgUsers: companies.length > 0 ? Math.round(companies.reduce((acc, c) => acc + (c.users || 0), 0) / companies.length) : 0
-  };
+  const columns: ColumnDef<Company>[] = [
+    {
+      header: "Company Name",
+      cell: (company) => (
+        <Link href={`/owner/companies/${company._id}`} className="hover:text-blue-600 hover:underline font-medium text-gray-900">
+          {company.name}
+        </Link>
+      )
+    },
+    {
+      header: "Admin Email",
+      cell: (company) => <span className="text-gray-600">{company.adminEmail}</span>
+    },
+    {
+      header: "Plan",
+      cell: (company) => (
+        <span className="bg-purple-100 text-purple-700 px-2.5 py-1 rounded-md text-xs font-semibold">
+          {company.plan}
+        </span>
+      )
+    },
+    {
+      header: "Users",
+      cell: (company) => `${company.users || 0} / ${company.usersQuota}`
+    },
+    {
+      header: "Tenant Status",
+      cell: (company) => (
+        <span className={`px-2.5 py-1 rounded-md text-xs font-semibold border ${company.status === 'Active' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-red-100 text-red-700 border-red-200'}`}>
+          {company.status}
+        </span>
+      )
+    },
+    {
+      header: "Payment Status",
+      cell: (company) => (
+        <span className={`px-2.5 py-1 rounded-md text-xs font-bold ${company.subscriptionStatus === 'active' ? 'text-green-600 bg-green-50' : 'text-yellow-600 bg-yellow-50'}`}>
+          {company.subscriptionStatus?.toUpperCase() || 'TRIALING'}
+        </span>
+      )
+    },
+    {
+      header: "Actions",
+      className: "text-right",
+      cell: (company) => (
+        <div className="flex justify-end gap-3">
+          <button onClick={() => openEditModal(company)} className="text-blue-600 hover:text-blue-800 font-medium transition-colors">Edit</button>
+          <button onClick={() => handleDelete(company._id, company.name)} className="text-red-500 hover:text-red-700 font-medium transition-colors">Delete</button>
+        </div>
+      )
+    }
+  ];
 
   return (
     <div className="space-y-8 fade-in pb-12">
@@ -181,62 +254,18 @@ export default function ManageCompaniesPage() {
         <StatBox label="Avg Users/Tenant" value={stats.avgUsers.toString()} />
       </div>
 
-      {/* Data Table */}
-      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-gray-700">
-            <thead className="bg-gray-50 text-xs uppercase text-gray-600 font-semibold border-b border-gray-200">
-              <tr>
-                <th className="px-6 py-4">Company Name</th>
-                <th className="px-6 py-4">Admin Email</th>
-                <th className="px-6 py-4">Plan</th>
-                <th className="px-6 py-4">Users</th>
-                <th className="px-6 py-4">Tenant Status</th>
-                <th className="px-6 py-4">Payment Status</th>
-                <th className="px-6 py-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {loading ? (
-                <tr><td colSpan={6} className="px-6 py-8 text-center text-gray-500">Loading tenants...</td></tr>
-              ) : companies.length === 0 ? (
-                <tr><td colSpan={6} className="px-6 py-8 text-center text-gray-500">No tenants registered yet.</td></tr>
-              ) : (
-                companies.map((company) => (
-                  <tr key={company._id} className="hover:bg-gray-50/80 transition-colors">
-                    <td className="px-6 py-4 font-medium text-gray-900">
-                      <Link href={`/owner/companies/${company._id}`} className="hover:text-blue-600 hover:underline">
-                        {company.name}
-                      </Link>
-                    </td>
-                    <td className="px-6 py-4 text-gray-600">{company.adminEmail}</td>
-                    <td className="px-6 py-4">
-                      <span className="bg-purple-100 text-purple-700 px-2.5 py-1 rounded-md text-xs font-semibold">
-                        {company.plan}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">{company.users || 0} / {company.usersQuota}</td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2.5 py-1 rounded-md text-xs font-semibold border ${company.status === 'Active' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-red-100 text-red-700 border-red-200'}`}>
-                        {company.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2.5 py-1 rounded-md text-xs font-bold ${company.subscriptionStatus === 'active' ? 'text-green-600 bg-green-50' : 'text-yellow-600 bg-yellow-50'}`}>
-                        {company.subscriptionStatus?.toUpperCase() || 'TRIALING'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <button onClick={() => openEditModal(company)} className="text-blue-600 hover:text-blue-800 font-medium transition-colors mr-4">Edit</button>
-                      <button onClick={() => handleDelete(company._id, company.name)} className="text-red-500 hover:text-red-700 font-medium transition-colors">Delete</button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <DataTable 
+        data={companies}
+        columns={columns}
+        loading={loading}
+        search={search}
+        onSearchChange={(val) => { setSearch(val); setPage(1); }}
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        emptyTitle="No tenants registered yet"
+        emptyDescription="Get started by provisioning a new CRM instance for a client."
+      />
 
       {/* Registration / Edit Modal */}
       {isModalOpen && (
