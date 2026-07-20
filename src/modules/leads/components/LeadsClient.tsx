@@ -225,10 +225,40 @@ export default function LeadsClient() {
   };
 
   const columns: ColumnDef<any>[] = [
-    { header: "Name", cell: (item) => <span className="font-medium text-gray-900">{item.firstName} {item.lastName}</span> },
-    { header: "Email", accessorKey: "email", cell: (item) => <span className="text-gray-600">{item.email || '-'}</span> },
+    { header: "Lead Info", cell: (item) => {
+        const phone = item.phone || item.customData?.phoneNumber || item.phoneNumber;
+        const displayName = item.firstName === "WhatsApp Lead" || item.firstName === "Imported" 
+            ? phone || item.firstName 
+            : `${item.firstName} ${item.lastName !== "WhatsApp" && item.lastName !== "Lead" ? item.lastName : ""}`.trim();
+        return (
+          <div className="flex flex-col gap-1.5">
+            <span className="font-medium text-gray-900 text-sm">{displayName}</span>
+            {phone && (
+              <a 
+                href={`https://wa.me/${phone.replace(/[^0-9]/g, '')}`} 
+                target="_blank" 
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs text-green-700 hover:text-green-800 bg-green-50 hover:bg-green-100 px-2.5 py-1 rounded-full w-fit border border-green-200 transition-colors mt-0.5"
+              >
+                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 0C5.385 0 0 5.385 0 12.031c0 2.124.552 4.17 1.6 5.986L.045 24l6.147-1.554c1.737.95 3.693 1.45 5.839 1.45 6.646 0 12.031-5.385 12.031-12.031S18.677 0 12.031 0zm0 21.916c-1.802 0-3.57-.483-5.115-1.4l-.367-.217-3.8.966.98-3.7-.238-.378c-1.006-1.597-1.536-3.456-1.536-5.358 0-5.553 4.52-10.073 10.076-10.073 5.553 0 10.076 4.52 10.076 10.073 0 5.554-4.523 10.073-10.076 10.073zm5.526-7.55c-.303-.152-1.794-.886-2.072-.988-.278-.102-.48-.152-.682.152-.202.303-.782.988-.959 1.19-.177.202-.354.227-.657.076-1.844-.925-3.136-2.274-3.904-4.22-.076-.177.076-.278.227-.581.152-.303.303-.454.454-.757.076-.152.038-.278-.038-.429-.076-.152-.682-1.643-.935-2.25-.246-.593-.497-.512-.682-.52-.177-.008-.38-.008-.582-.008-.202 0-.53.076-.808.38C6.915 6.389 6 7.248 6 8.967c0 1.718 1.137 3.385 1.288 3.587.152.202 2.451 3.739 5.937 5.244.834.361 1.485.577 1.992.74.834.267 1.592.228 2.19.138.67-.101 2.072-.846 2.375-1.662.303-.816.303-1.516.215-1.662-.088-.146-.316-.222-.619-.374z"/></svg>
+                Chat
+              </a>
+            )}
+          </div>
+        ) 
+    }},
+    { header: "Contact Details", cell: (item) => (
+      <div className="flex flex-col text-sm text-gray-600 gap-1.5">
+        {item.email && !item.email.includes('@whatsapp.local') && <span>{item.email}</span>}
+        {item.source && (
+          <span className="inline-flex w-fit px-2 py-0.5 rounded text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-100">
+            {item.source}
+          </span>
+        )}
+      </div>
+    )},
     { header: "Date Added", cell: (item) => <span className="text-gray-500 text-xs">{new Date(item.createdAt).toLocaleDateString()}</span> },
-    { header: "Status (Pipeline)", className: "min-w-[200px]", cell: (item) => (
+    { header: "Status (Pipeline)", className: "min-w-[170px]", cell: (item) => (
       pipelineStages.length > 0 ? (
         <select
           value={item.status}
@@ -255,18 +285,29 @@ export default function LeadsClient() {
         </span>
       )
     )},
-    { header: "Custom Data", cell: (item) => (
-      <div className="text-xs text-gray-500">
-        {item.customData && Object.keys(item.customData).length > 0 ? (
-          <div className="flex flex-wrap gap-2">
-            {Object.entries(item.customData).map(([k, v]) => (
-              <span key={k} className="bg-gray-100 border border-gray-200 px-2 py-1 rounded text-gray-700">
-                <strong className="text-gray-900">{k}:</strong> {String(v)}
+    { header: "Incoming / Custom Data", cell: (item) => (
+      <div className="text-xs text-gray-500 max-w-sm">
+        {item.customData?.lastMessage && (
+          <div className="mb-2 p-2.5 bg-green-50 border border-green-200 text-green-900 rounded-lg whitespace-pre-wrap break-words shadow-sm">
+            <strong className="flex items-center gap-1.5 text-green-800 mb-1">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+              Latest Message
+            </strong>
+            <span className="text-[13px]">{item.customData.lastMessage}</span>
+          </div>
+        )}
+        {item.customData && Object.keys(item.customData).filter(k => k !== 'lastMessage' && k !== 'whatsappOptIn' && !k.startsWith('_')).length > 0 ? (
+          <div className="flex flex-wrap gap-1.5">
+            {Object.entries(item.customData)
+              .filter(([k]) => k !== 'lastMessage' && k !== 'whatsappOptIn' && !k.startsWith('_'))
+              .map(([k, v]) => (
+              <span key={k} className="bg-gray-100 border border-gray-200 px-2 py-1 rounded-md text-gray-700">
+                <strong className="text-gray-900 capitalize">{k.replace(/([A-Z])/g, ' $1').trim()}:</strong> {String(v)}
               </span>
             ))}
           </div>
         ) : (
-          <span className="text-gray-400">None</span>
+          !item.customData?.lastMessage && <span className="text-gray-400">No additional data</span>
         )}
       </div>
     )}
