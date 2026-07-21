@@ -31,6 +31,14 @@ export const initializeWhatsAppClient = async (companyId: string) => {
 
   global._whatsappStatus = 'INITIALIZING';
   
+  const initTimeout = setTimeout(() => {
+    if (global._whatsappStatus === 'INITIALIZING') {
+      console.error('WhatsApp initialization timed out');
+      global._whatsappStatus = 'DISCONNECTED';
+      global._whatsappClient = null;
+    }
+  }, 45000); // 45 seconds safety timeout
+  
   const isProd = process.env.NODE_ENV === 'production';
   const executablePath = isProd
     ? await chromium.executablePath()
@@ -120,7 +128,9 @@ export const initializeWhatsAppClient = async (companyId: string) => {
   
   try {
     await client.initialize();
+    clearTimeout(initTimeout);
   } catch (err: any) {
+    clearTimeout(initTimeout);
     console.error('Failed to initialize WhatsApp client:', err);
     global._whatsappStatus = 'DISCONNECTED';
     global._whatsappClient = null;

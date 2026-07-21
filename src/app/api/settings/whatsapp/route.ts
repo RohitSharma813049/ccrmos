@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { getSession } from "@/lib/auth-utils";
 import { getWhatsAppStatus, initializeWhatsAppClient, disconnectWhatsAppClient } from "@/lib/whatsappClient";
 
+export const maxDuration = 60; // Allow Vercel to run up to 60s for Chrome boot
+
 export async function GET(req: Request) {
   try {
     const session = await getSession();
