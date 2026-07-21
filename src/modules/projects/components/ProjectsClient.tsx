@@ -128,9 +128,17 @@ export default function ProjectsClient() {
   };
 
   const isStageDisabled = (currentStatus: string, targetStage: any) => {
-    const currentIndex = pipelineStages.findIndex(s => s.name === currentStatus);
-    if (currentIndex === -1) return false;
-    return targetStage.order < pipelineStages[currentIndex].order;
+    if (pipelineStages.length > 0) {
+      const currentIndex = pipelineStages.findIndex(s => s.name === currentStatus);
+      if (currentIndex === -1) return false;
+      return targetStage.order < pipelineStages[currentIndex].order;
+    } else {
+      const defaultStages = ["Planning", "In Progress", "Review", "Completed"];
+      const currentIndex = defaultStages.indexOf(currentStatus);
+      const targetIndex = defaultStages.indexOf(targetStage.name || targetStage);
+      if (currentIndex === -1) return false;
+      return targetIndex < currentIndex;
+    }
   };
 
   const kanbanCards: KanbanCard[] = items.map(item => ({
@@ -147,31 +155,25 @@ export default function ProjectsClient() {
     { header: "Name", accessorKey: "name", className: "font-medium text-gray-900" },
     { header: "Date Added", cell: (item) => <span className="text-gray-500 text-xs">{new Date(item.createdAt).toLocaleDateString()}</span> },
     { header: "Status (Pipeline)", className: "min-w-[200px]", cell: (item) => (
-      pipelineStages.length > 0 ? (
-        <select
-          value={item.status}
-          onChange={(e) => updateStatus(item._id, e.target.value)}
-          className="w-full text-sm border-gray-300 rounded-lg shadow-sm py-1.5 pl-3 pr-8 focus:ring-purple-500 focus:border-purple-500 border bg-white text-gray-700 font-medium cursor-pointer"
-        >
-          {!pipelineStages.find(s => s.name === item.status) && (
-            <option value={item.status} disabled>{item.status}</option>
-          )}
-          
-          {pipelineStages.sort((a,b) => a.order - b.order).map(stage => (
-            <option 
-              key={stage.name} 
-              value={stage.name}
-              disabled={isStageDisabled(item.status, stage)}
-            >
-              {stage.name} {isStageDisabled(item.status, stage) ? '(Locked)' : ''}
-            </option>
-          ))}
-        </select>
-      ) : (
-        <span className="px-2.5 py-1 rounded-md text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200">
-          {item.status}
-        </span>
-      )
+      <select
+        value={item.status}
+        onChange={(e) => updateStatus(item._id, e.target.value)}
+        className="w-full text-sm border-gray-300 rounded-lg shadow-sm py-1.5 pl-3 pr-8 focus:ring-purple-500 focus:border-purple-500 border bg-white text-gray-700 font-medium cursor-pointer"
+      >
+        {!kanbanCols.includes(item.status) && (
+          <option value={item.status} disabled>{item.status}</option>
+        )}
+        
+        {kanbanCols.map(stageName => (
+          <option 
+            key={stageName} 
+            value={stageName}
+            disabled={isStageDisabled(item.status, stageName)}
+          >
+            {stageName} {isStageDisabled(item.status, stageName) ? '(Locked)' : ''}
+          </option>
+        ))}
+      </select>
     )},
     { header: "Custom Data", cell: (item) => (
       <div className="text-xs text-gray-500">

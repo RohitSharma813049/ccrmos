@@ -108,7 +108,15 @@ export const initializeWhatsAppClient = async (companyId: string) => {
   });
 
   global._whatsappClient = client;
-  await client.initialize();
+  
+  try {
+    await client.initialize();
+  } catch (err: any) {
+    console.error('Failed to initialize WhatsApp client:', err);
+    global._whatsappStatus = 'DISCONNECTED';
+    global._whatsappClient = null;
+    global._whatsappQR = null;
+  }
 };
 
 export const disconnectWhatsAppClient = async () => {

@@ -1,0 +1,6 @@
+- `[x]` Fix the Schema (`src/modules/projects/schemas/Project.ts`)
+  - `[x]` Change `name: any` and `status: any` to `string` in the `IProject` interface
+  - `[x]` Change the default status from `'Active'` to `'Planning'`
+- `[x]` Fix the Table UI Fallback (`src/modules/projects/components/ProjectsClient.tsx`)
+  - `[x]` Ensure Table view uses default stages if `pipelineStages.length === 0`
+- `[x]` Verify changes

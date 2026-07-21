@@ -5,8 +5,8 @@ export interface IProject extends Document {
   displayId?: string;
   companyId?: mongoose.Types.ObjectId;
   founderId?: mongoose.Types.ObjectId;
-  name: any;
-  status: any;
+  name: string;
+  status: string;
   customData?: Record<string, any>;
 }
 
@@ -15,7 +15,7 @@ const ProjectSchema = new Schema<IProject>({
   companyId: { type: Schema.Types.ObjectId, ref: 'Company' },
   founderId: { type: Schema.Types.ObjectId, ref: 'User' },
   name: { type: String, required: true },
-  status: { type: String, default: 'Active' },
+  status: { type: String, default: 'Planning' },
   customData: { type: Schema.Types.Mixed, default: {} }
 }, { timestamps: true });
 

@@ -24,9 +24,12 @@ export async function POST(req: Request) {
     const body = await req.json();
     
     if (body.action === 'INITIALIZE') {
-      // Don't await initialization to prevent timeout, it runs in background
-      initializeWhatsAppClient(user.companyId).catch(console.error);
-      return NextResponse.json({ success: true, message: "Initializing WhatsApp client..." });
+      try {
+        await initializeWhatsAppClient(user.companyId);
+        return NextResponse.json({ success: true, message: "WhatsApp client initialized." });
+      } catch (err: any) {
+        return NextResponse.json({ error: err.message }, { status: 500 });
+      }
     }
     
     if (body.action === 'DISCONNECT') {

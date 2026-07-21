@@ -7,7 +7,7 @@ export interface IWorkflowCondition {
 }
 
 export interface IWorkflowAction {
-  type: "Create Task" | "Send Email" | "Assign User";
+  type: "Create Task" | "Send Email" | "Assign User" | "Canvas";
   payload: any;
 }
 
