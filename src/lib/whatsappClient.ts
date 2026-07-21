@@ -31,20 +31,20 @@ export const initializeWhatsAppClient = async (companyId: string) => {
 
   global._whatsappStatus = 'INITIALIZING';
   
-  const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV;
-  const executablePath = isVercel
+  const isProd = process.env.NODE_ENV === 'production';
+  const executablePath = isProd
     ? await chromium.executablePath()
     : 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 
   const client = new Client({
     authStrategy: new LocalAuth({ 
       clientId: companyId,
-      dataPath: isVercel ? '/tmp/.wwebjs_auth' : './.wwebjs_auth'
+      dataPath: isProd ? '/tmp/.wwebjs_auth' : './.wwebjs_auth'
     }),
     puppeteer: {
       headless: true,
       executablePath,
-      args: isVercel ? chromium.args : ['--no-sandbox', '--disable-setuid-sandbox'],
+      args: isProd ? chromium.args : ['--no-sandbox', '--disable-setuid-sandbox'],
     }
   });
 
