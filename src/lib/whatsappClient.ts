@@ -37,7 +37,10 @@ export const initializeWhatsAppClient = async (companyId: string) => {
     : 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 
   const client = new Client({
-    authStrategy: new LocalAuth({ clientId: companyId }),
+    authStrategy: new LocalAuth({ 
+      clientId: companyId,
+      dataPath: isVercel ? '/tmp/.wwebjs_auth' : './.wwebjs_auth'
+    }),
     puppeteer: {
       headless: true,
       executablePath,
