@@ -23,7 +23,7 @@ test('E2E: Full User Flow (Login -> Project -> Form -> Integrations)', async ({ 
   // 6. Navigate to Projects & Create a Project
   await page.goto('http://localhost:3000/dashboard/projects');
   await page.click('button:has-text("Add Project")');
-  const projectNameInput = page.locator('input[name="name"]');
+  const projectNameInput = page.locator('label:has-text("Project Name") ~ input, input[type="text"]').first();
   await projectNameInput.waitFor({ state: 'visible' });
   await projectNameInput.fill('Global Enterprise Expansion');
   // Assuming the submit button inside the modal says "Create" or similar.
@@ -32,11 +32,15 @@ test('E2E: Full User Flow (Login -> Project -> Form -> Integrations)', async ({ 
 
   // 7. Navigate to Forms & Create a Form
   await page.goto('http://localhost:3000/dashboard/forms');
-  await page.click('button:has-text("Create Form")');
-  const formNameInput = page.locator('input[name="name"]');
-  await formNameInput.waitFor({ state: 'visible' });
-  await formNameInput.fill('Global Marketing Lead Capture');
-  await page.keyboard.press('Enter'); 
+  
+  // Handle the window.prompt dialog
+  page.once('dialog', async dialog => {
+    await dialog.accept('Global Marketing Lead Capture');
+  });
+  await page.click('button:has-text("Create New Form")');
+  
+  // Wait for the form page redirection or let the test continue
+  await page.waitForTimeout(2000); 
 
   // 8. Verify the New Strict Integration Flow
   await page.goto('http://localhost:3000/dashboard/settings/integrations');
