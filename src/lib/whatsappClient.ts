@@ -1,5 +1,5 @@
 import { Client, LocalAuth } from 'whatsapp-web.js';
-import chromium from '@sparticuz/chromium';
+import chromium from '@sparticuz/chromium-min';
 import qrcode from 'qrcode';
 import dbConnect from './db';
 import Lead from '@/modules/leads/schemas/Lead';
@@ -42,7 +42,7 @@ export const initializeWhatsAppClient = async (companyId: string) => {
   try {
     const isProd = process.env.NODE_ENV === 'production';
     const executablePath = isProd
-      ? await chromium.executablePath()
+      ? await chromium.executablePath('https://github.com/Sparticuz/chromium/releases/download/v131.0.1/chromium-v131.0.1-pack.tar')
       : 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 
     const client = new Client({

@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
     "puppeteer",
     "@aws-sdk/client-s3",
     "otp-extractor",
-    "@sparticuz/chromium",
+    "@sparticuz/chromium-min",
   ],
 };
 

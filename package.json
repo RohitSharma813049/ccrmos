@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
-    "@sparticuz/chromium": "^149.0.0",
+    "@sparticuz/chromium-min": "^149.0.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/nodemailer": "^8.0.1",
     "@upstash/ratelimit": "^2.0.8",
