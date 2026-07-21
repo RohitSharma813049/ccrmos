@@ -39,94 +39,94 @@ export const initializeWhatsAppClient = async (companyId: string) => {
     }
   }, 45000); // 45 seconds safety timeout
   
-  const isProd = process.env.NODE_ENV === 'production';
-  const executablePath = isProd
-    ? await chromium.executablePath()
-    : 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
-
-  const client = new Client({
-    authStrategy: new LocalAuth({ 
-      clientId: companyId,
-      dataPath: isProd ? '/tmp/.wwebjs_auth' : './.wwebjs_auth'
-    }),
-    puppeteer: {
-      headless: true,
-      executablePath,
-      args: isProd ? chromium.args : ['--no-sandbox', '--disable-setuid-sandbox'],
-    }
-  });
-
-  client.on('qr', async (qr) => {
-    console.log('WhatsApp QR RECEIVED');
-    try {
-      global._whatsappQR = await qrcode.toDataURL(qr);
-      global._whatsappStatus = 'QR_READY';
-    } catch (err) {
-      console.error('Failed to generate QR code', err);
-    }
-  });
-
-  client.on('ready', () => {
-    console.log('WhatsApp Client is READY!');
-    global._whatsappStatus = 'CONNECTED';
-    global._whatsappQR = null;
-  });
-
-  client.on('message', async (msg) => {
-    console.log('WhatsApp MESSAGE RECEIVED', msg.body);
-    
-    // Only process messages from users, not status broadcasts or groups
-    if (msg.from === 'status@broadcast' || msg.from.includes('@g.us')) return;
-
-    try {
-      await dbConnect();
-      
-      const contact = await msg.getContact();
-      const phoneNumber = contact.number;
-      const name = contact.pushname || contact.name || "WhatsApp Lead";
-
-      let lead = await Lead.findOne({ companyId, phone: phoneNumber });
-
-      if (!lead) {
-        console.log('Creating new WhatsApp lead:', name);
-        lead = await Lead.create({
-          companyId,
-          firstName: name,
-          lastName: "WhatsApp", // lastName is required by schema
-          email: `${phoneNumber}@whatsapp.local`, // email is required by schema
-          phone: phoneNumber, // schema uses 'phone' not 'phoneNumber'
-          status: "New",
-          source: "WhatsApp Web",
-          customData: {
-            lastMessage: msg.body,
-            whatsappOptIn: true,
-            _importDate: new Date().toISOString()
-          }
-        });
-      } else {
-        console.log('Updating existing WhatsApp lead:', name);
-        lead.customData = { 
-          ...lead.customData, 
-          lastMessage: msg.body, 
-          whatsappOptIn: true
-        };
-        await lead.save();
-      }
-    } catch (error) {
-      console.error('Error processing WhatsApp message:', error);
-    }
-  });
-
-  client.on('disconnected', (reason) => {
-    console.log('WhatsApp Client was DISCONNECTED', reason);
-    global._whatsappStatus = 'DISCONNECTED';
-    global._whatsappClient = null;
-    global._whatsappQR = null;
-  });
-
-  global._whatsappClient = client;
-  
   try {
+    const isProd = process.env.NODE_ENV === 'production';
+    const executablePath = isProd
+      ? await chromium.executablePath()
+      : 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+
+    const client = new Client({
+      authStrategy: new LocalAuth({ 
+        clientId: companyId,
+        dataPath: isProd ? '/tmp/.wwebjs_auth' : './.wwebjs_auth'
+      }),
+      puppeteer: {
+        headless: true,
+        executablePath,
+        args: isProd ? chromium.args : ['--no-sandbox', '--disable-setuid-sandbox'],
+      }
+    });
+
+    client.on('qr', async (qr) => {
+      console.log('WhatsApp QR RECEIVED');
+      try {
+        global._whatsappQR = await qrcode.toDataURL(qr);
+        global._whatsappStatus = 'QR_READY';
+      } catch (err) {
+        console.error('Failed to generate QR code', err);
+      }
+    });
+
+    client.on('ready', () => {
+      console.log('WhatsApp Client is READY!');
+      global._whatsappStatus = 'CONNECTED';
+      global._whatsappQR = null;
+    });
+
+    client.on('message', async (msg) => {
+      console.log('WhatsApp MESSAGE RECEIVED', msg.body);
+      
+      // Only process messages from users, not status broadcasts or groups
+      if (msg.from === 'status@broadcast' || msg.from.includes('@g.us')) return;
+
+      try {
+        await dbConnect();
+        
+        const contact = await msg.getContact();
+        const phoneNumber = contact.number;
+        const name = contact.pushname || contact.name || "WhatsApp Lead";
+
+        let lead = await Lead.findOne({ companyId, phone: phoneNumber });
+
+        if (!lead) {
+          console.log('Creating new WhatsApp lead:', name);
+          lead = await Lead.create({
+            companyId,
+            firstName: name,
+            lastName: "WhatsApp",
+            email: `${phoneNumber}@whatsapp.local`,
+            phone: phoneNumber,
+            status: "New",
+            source: "WhatsApp Web",
+            customData: {
+              lastMessage: msg.body,
+              whatsappOptIn: true,
+              _importDate: new Date().toISOString()
+            }
+          });
+        } else {
+          console.log('Updating existing WhatsApp lead:', name);
+          lead.customData = { 
+            ...lead.customData, 
+            lastMessage: msg.body, 
+            whatsappOptIn: true
+          };
+          await lead.save();
+        }
+      } catch (error) {
+        console.error('Error processing WhatsApp message:', error);
+      }
+    });
+
+    client.on('disconnected', (reason) => {
+      console.log('WhatsApp Client was DISCONNECTED', reason);
+      global._whatsappStatus = 'DISCONNECTED';
+      global._whatsappClient = null;
+      global._whatsappQR = null;
+    });
+
+    global._whatsappClient = client;
+    
     await client.initialize();
     clearTimeout(initTimeout);
   } catch (err: any) {
@@ -135,6 +135,8 @@ export const initializeWhatsAppClient = async (companyId: string) => {
     global._whatsappStatus = 'DISCONNECTED';
     global._whatsappClient = null;
     global._whatsappQR = null;
+    // Rethrow to allow the API endpoint to catch and return the actual error string
+    throw new Error(err.message || 'Failed to initialize Chrome in serverless environment.');
   }
 };
 
