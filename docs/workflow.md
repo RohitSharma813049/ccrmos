@@ -32,3 +32,21 @@ To fully repair the Workflow module, we need to apply the following fixes:
 ## User Review Required
 
 Does this plan accurately cover the issues you've experienced with the workflow automations module? If you approve, I will go ahead and implement these fixes immediately and place this document in the `docs` folder.
+
+## Architectural & Development Rules
+
+To prevent future bugs and maintain a clean architecture in the Workflow module, all future developments must adhere to the following rules:
+
+1. **Single Source of Truth for APIs**
+   - All workflow-related API endpoints must reside exclusively in `/api/automation/workflows`. 
+   - Never create duplicate routing structures (e.g., `/api/workflows`).
+
+2. **Strict TypeScript Schemas**
+   - Any new node type, action, or condition added to the frontend `WorkflowBuilderClient.tsx` **must** be explicitly defined in the Mongoose schema (`IWorkflowAction` / `IWorkflowCondition`). 
+   - Avoid using `any` or casting types to bypass validation.
+
+3. **Validation at the Edge**
+   - API endpoints must validate incoming JSON payloads against the defined TypeScript schema before attempting to perform database operations.
+
+4. **Component Decoupling**
+   - The visual Canvas logic should remain decoupled from the database schema. If the Canvas state changes, map it cleanly to the `IWorkflowAction` and `IWorkflowCondition` structures before transmitting it to the backend.
