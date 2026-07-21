@@ -10,6 +10,8 @@ export default function IntegrationsPage() {
 
   const [projects, setProjects] = useState<any[]>([]);
   const [selectedProject, setSelectedProject] = useState<string>("");
+  const [forms, setForms] = useState<any[]>([]);
+  const [selectedForm, setSelectedForm] = useState<string>("");
   const [setupModalData, setSetupModalData] = useState<any>(null);
 
   useEffect(() => {
@@ -27,14 +29,36 @@ export default function IntegrationsPage() {
     fetchProjects();
   }, []);
 
+  useEffect(() => {
+    async function fetchForms() {
+      if (!selectedProject) {
+        setForms([]);
+        setSelectedForm("");
+        return;
+      }
+      try {
+        const res = await fetch(`/api/forms?projectId=${selectedProject}`);
+        if (res.ok) {
+          const data = await res.json();
+          setForms(data.forms || []);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    fetchForms();
+  }, [selectedProject]);
+
   const projectParam = selectedProject ? `&projectId=${selectedProject}` : "";
+  const formParam = selectedForm ? `&formId=${selectedForm}` : "";
+  const webhookParams = `?companyId=${companyId}${projectParam}${formParam}`;
 
   const integrations = [
     {
       id: "meta",
       name: "Meta (Facebook) Lead Ads",
       description: "Receive leads instantly from your Facebook & Instagram campaigns.",
-      webhookPath: `/api/webhooks/meta?companyId=${companyId}${projectParam}`,
+      webhookPath: `/api/webhooks/meta${webhookParams}`,
       icon: "M13 10V3L4 14h7v7l9-11h-7z",
       color: "blue",
       steps: [
@@ -50,7 +74,7 @@ export default function IntegrationsPage() {
       id: "whatsapp",
       name: "WhatsApp Business API",
       description: "Sync incoming messages and opt-ins as new leads in your CRM.",
-      webhookPath: `/api/webhooks/whatsapp?companyId=${companyId}${projectParam}`,
+      webhookPath: `/api/webhooks/whatsapp${webhookParams}`,
       icon: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z",
       color: "emerald",
       steps: [
@@ -81,7 +105,7 @@ export default function IntegrationsPage() {
       id: "generic",
       name: "Generic Bulk Import API",
       description: "Use this endpoint to POST JSON arrays of leads from Zapier, Make.com, or custom scripts.",
-      webhookPath: `/api/webhooks/generic?companyId=${companyId}${projectParam}`,
+      webhookPath: `/api/webhooks/generic${webhookParams}`,
       icon: "M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12",
       color: "purple",
       steps: [
@@ -199,18 +223,35 @@ export default function IntegrationsPage() {
           <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Third-Party Integrations</h1>
           <p className="text-gray-600 mt-1">Connect external platforms to sync leads into your CRM automatically.</p>
         </div>
-        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-center gap-3">
-          <label className="text-sm font-semibold text-gray-700 whitespace-nowrap">Assign to Project:</label>
-          <select 
-            value={selectedProject}
-            onChange={(e) => setSelectedProject(e.target.value)}
-            className="w-full md:w-64 bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
-          >
-            <option value="">None (Default)</option>
-            {projects.map(p => (
-              <option key={p._id} value={p._id}>{p.name}</option>
-            ))}
-          </select>
+        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col gap-3">
+          <div className="flex items-center gap-3">
+            <label className="text-sm font-semibold text-gray-700 whitespace-nowrap w-24">1. Project:</label>
+            <select 
+              value={selectedProject}
+              onChange={(e) => setSelectedProject(e.target.value)}
+              className="w-full md:w-64 bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+            >
+              <option value="">Select a Project first...</option>
+              {projects.map(p => (
+                <option key={p._id} value={p._id}>{p.name}</option>
+              ))}
+            </select>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <label className="text-sm font-semibold text-gray-700 whitespace-nowrap w-24">2. Form:</label>
+            <select 
+              value={selectedForm}
+              onChange={(e) => setSelectedForm(e.target.value)}
+              disabled={!selectedProject}
+              className="w-full md:w-64 bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none disabled:opacity-50"
+            >
+              <option value="">Select a Form (Optional)</option>
+              {forms.map(f => (
+                <option key={f._id} value={f._id}>{f.name}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 

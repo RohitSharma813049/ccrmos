@@ -4,79 +4,104 @@ import qrcode from 'qrcode';
 import dbConnect from './db';
 import Lead from '@/modules/leads/schemas/Lead';
 
-// Use a global variable to persist the client across hot reloads in Next.js development
+type WhatsAppStatus = 'DISCONNECTED' | 'INITIALIZING' | 'QR_READY' | 'CONNECTED';
+
+interface WhatsAppSession {
+  client: Client | null;
+  qr: string | null;
+  status: WhatsAppStatus;
+  timeoutId?: NodeJS.Timeout;
+}
+
+// Use a global variable to persist multiple clients across hot reloads
 declare global {
-  var _whatsappClient: Client | null;
-  var _whatsappQR: string | null;
-  var _whatsappStatus: 'DISCONNECTED' | 'INITIALIZING' | 'QR_READY' | 'CONNECTED';
+  var _whatsappSessions: Map<string, WhatsAppSession>;
 }
 
-if (!global._whatsappClient) {
-  global._whatsappClient = null;
-  global._whatsappQR = null;
-  global._whatsappStatus = 'DISCONNECTED';
+if (!global._whatsappSessions) {
+  global._whatsappSessions = new Map<string, WhatsAppSession>();
 }
 
-export const getWhatsAppStatus = () => {
+export const getWhatsAppStatus = (scopeId: string) => {
+  const session = global._whatsappSessions.get(scopeId) || { status: 'DISCONNECTED', qr: null, client: null };
   return {
-    status: global._whatsappStatus,
-    qr: global._whatsappQR,
+    status: session.status,
+    qr: session.qr,
   };
 };
 
-export const initializeWhatsAppClient = async (companyId: string) => {
-  if (global._whatsappStatus === 'INITIALIZING' || global._whatsappStatus === 'CONNECTED') {
+export const initializeWhatsAppClient = async (companyId: string, scopeId: string = companyId) => {
+  let session = global._whatsappSessions.get(scopeId);
+  
+  if (session && (session.status === 'INITIALIZING' || session.status === 'CONNECTED')) {
     return;
   }
 
-  global._whatsappStatus = 'INITIALIZING';
+  session = {
+    client: null,
+    qr: null,
+    status: 'INITIALIZING'
+  };
+  global._whatsappSessions.set(scopeId, session);
   
   const initTimeout = setTimeout(() => {
-    if (global._whatsappStatus === 'INITIALIZING') {
-      console.error('WhatsApp initialization timed out');
-      global._whatsappStatus = 'DISCONNECTED';
-      global._whatsappClient = null;
+    const s = global._whatsappSessions.get(scopeId);
+    if (s && s.status === 'INITIALIZING') {
+      console.error(`WhatsApp initialization timed out for scope: ${scopeId}`);
+      global._whatsappSessions.set(scopeId, { ...s, status: 'DISCONNECTED', client: null, qr: null });
     }
   }, 45000); // 45 seconds safety timeout
   
+  session.timeoutId = initTimeout;
+  
   try {
     const isProd = process.env.NODE_ENV === 'production';
-    const executablePath = isProd
-      ? await chromium.executablePath('https://github.com/Sparticuz/chromium/releases/download/v131.0.1/chromium-v131.0.1-pack.tar')
-      : 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+    let puppeteerConfig: any = { headless: true };
+    
+    // Add Browserless WebSocket support for Vercel
+    if (process.env.BROWSERLESS_TOKEN) {
+      puppeteerConfig.browserWSEndpoint = `wss://chrome.browserless.io?token=${process.env.BROWSERLESS_TOKEN}`;
+    } else {
+      const executablePath = isProd
+        ? await chromium.executablePath('https://github.com/Sparticuz/chromium/releases/download/v131.0.1/chromium-v131.0.1-pack.tar')
+        : 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+      
+      puppeteerConfig.executablePath = executablePath;
+      puppeteerConfig.args = isProd ? chromium.args : ['--no-sandbox', '--disable-setuid-sandbox'];
+    }
 
     const client = new Client({
       authStrategy: new LocalAuth({ 
-        clientId: companyId,
+        clientId: scopeId,
         dataPath: isProd ? '/tmp/.wwebjs_auth' : './.wwebjs_auth'
       }),
-      puppeteer: {
-        headless: true,
-        executablePath,
-        args: isProd ? chromium.args : ['--no-sandbox', '--disable-setuid-sandbox'],
-      }
+      puppeteer: puppeteerConfig
     });
 
     client.on('qr', async (qr) => {
-      console.log('WhatsApp QR RECEIVED');
+      console.log(`WhatsApp QR RECEIVED for ${scopeId}`);
       try {
-        global._whatsappQR = await qrcode.toDataURL(qr);
-        global._whatsappStatus = 'QR_READY';
+        const qrUrl = await qrcode.toDataURL(qr);
+        const s = global._whatsappSessions.get(scopeId);
+        if (s) {
+          global._whatsappSessions.set(scopeId, { ...s, qr: qrUrl, status: 'QR_READY' });
+        }
       } catch (err) {
-        console.error('Failed to generate QR code', err);
+        console.error(`Failed to generate QR code for ${scopeId}`, err);
       }
     });
 
     client.on('ready', () => {
-      console.log('WhatsApp Client is READY!');
-      global._whatsappStatus = 'CONNECTED';
-      global._whatsappQR = null;
+      console.log(`WhatsApp Client is READY for ${scopeId}!`);
+      const s = global._whatsappSessions.get(scopeId);
+      if (s) {
+        global._whatsappSessions.set(scopeId, { ...s, status: 'CONNECTED', qr: null });
+      }
     });
 
     client.on('message', async (msg) => {
-      console.log('WhatsApp MESSAGE RECEIVED', msg.body);
+      console.log(`WhatsApp MESSAGE RECEIVED for ${scopeId}`, msg.body);
       
-      // Only process messages from users, not status broadcasts or groups
       if (msg.from === 'status@broadcast' || msg.from.includes('@g.us')) return;
 
       try {
@@ -101,6 +126,7 @@ export const initializeWhatsAppClient = async (companyId: string) => {
             customData: {
               lastMessage: msg.body,
               whatsappOptIn: true,
+              integrationScopeId: scopeId,
               _importDate: new Date().toISOString()
             }
           });
@@ -119,32 +145,27 @@ export const initializeWhatsAppClient = async (companyId: string) => {
     });
 
     client.on('disconnected', (reason) => {
-      console.log('WhatsApp Client was DISCONNECTED', reason);
-      global._whatsappStatus = 'DISCONNECTED';
-      global._whatsappClient = null;
-      global._whatsappQR = null;
+      console.log(`WhatsApp Client was DISCONNECTED for ${scopeId}`, reason);
+      global._whatsappSessions.delete(scopeId);
     });
 
-    global._whatsappClient = client;
+    session.client = client;
+    global._whatsappSessions.set(scopeId, session);
     
     await client.initialize();
     clearTimeout(initTimeout);
   } catch (err: any) {
     clearTimeout(initTimeout);
-    console.error('Failed to initialize WhatsApp client:', err);
-    global._whatsappStatus = 'DISCONNECTED';
-    global._whatsappClient = null;
-    global._whatsappQR = null;
-    // Rethrow to allow the API endpoint to catch and return the actual error string
+    console.error(`Failed to initialize WhatsApp client for ${scopeId}:`, err);
+    global._whatsappSessions.delete(scopeId);
     throw new Error(err.message || 'Failed to initialize Chrome in serverless environment.');
   }
 };
 
-export const disconnectWhatsAppClient = async () => {
-  if (global._whatsappClient) {
-    await global._whatsappClient.destroy();
-    global._whatsappClient = null;
-    global._whatsappQR = null;
-    global._whatsappStatus = 'DISCONNECTED';
+export const disconnectWhatsAppClient = async (scopeId: string) => {
+  const session = global._whatsappSessions.get(scopeId);
+  if (session && session.client) {
+    await session.client.destroy();
+    global._whatsappSessions.delete(scopeId);
   }
 };

@@ -10,7 +10,10 @@ export async function GET(req: Request) {
     const user = session?.user as any;
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const status = getWhatsAppStatus();
+    const url = new URL(req.url);
+    const scopeId = url.searchParams.get('scopeId') || user.companyId;
+
+    const status = getWhatsAppStatus(scopeId);
     return NextResponse.json(status);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -27,7 +30,8 @@ export async function POST(req: Request) {
     
     if (body.action === 'INITIALIZE') {
       try {
-        await initializeWhatsAppClient(user.companyId);
+        const scopeId = body.scopeId || user.companyId;
+        await initializeWhatsAppClient(user.companyId, scopeId);
         return NextResponse.json({ success: true, message: "WhatsApp client initialized." });
       } catch (err: any) {
         return NextResponse.json({ error: err.message }, { status: 500 });
@@ -35,7 +39,8 @@ export async function POST(req: Request) {
     }
     
     if (body.action === 'DISCONNECT') {
-      await disconnectWhatsAppClient();
+      const scopeId = body.scopeId || user.companyId;
+      await disconnectWhatsAppClient(scopeId);
       return NextResponse.json({ success: true, message: "Disconnected WhatsApp client." });
     }
 
