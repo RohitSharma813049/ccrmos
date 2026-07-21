@@ -39,10 +39,9 @@ export const initializeWhatsAppClient = async (companyId: string) => {
   const client = new Client({
     authStrategy: new LocalAuth({ clientId: companyId }),
     puppeteer: {
-      headless: isVercel ? chromium.headless : true,
+      headless: true,
       executablePath,
       args: isVercel ? chromium.args : ['--no-sandbox', '--disable-setuid-sandbox'],
-      defaultViewport: chromium.defaultViewport,
     }
   });
 
