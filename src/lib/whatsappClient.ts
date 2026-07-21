@@ -1,4 +1,5 @@
 import { Client, LocalAuth } from 'whatsapp-web.js';
+import chromium from '@sparticuz/chromium';
 import qrcode from 'qrcode';
 import dbConnect from './db';
 import Lead from '@/modules/leads/schemas/Lead';
@@ -30,12 +31,18 @@ export const initializeWhatsAppClient = async (companyId: string) => {
 
   global._whatsappStatus = 'INITIALIZING';
   
+  const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV;
+  const executablePath = isVercel
+    ? await chromium.executablePath()
+    : 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+
   const client = new Client({
     authStrategy: new LocalAuth({ clientId: companyId }),
     puppeteer: {
-      headless: true,
-      executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+      headless: isVercel ? chromium.headless : true,
+      executablePath,
+      args: isVercel ? chromium.args : ['--no-sandbox', '--disable-setuid-sandbox'],
+      defaultViewport: chromium.defaultViewport,
     }
   });
 
