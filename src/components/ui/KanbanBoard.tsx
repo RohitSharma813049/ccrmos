@@ -15,9 +15,10 @@ export type KanbanBoardProps = {
   columns: string[];
   cards: KanbanCard[];
   onCardMoved: (cardId: string, newStatus: string) => void;
+  onCardClick?: (cardId: string) => void;
 };
 
-export default function KanbanBoard({ columns, cards, onCardMoved }: KanbanBoardProps) {
+export default function KanbanBoard({ columns, cards, onCardMoved, onCardClick }: KanbanBoardProps) {
   const [boardData, setBoardData] = useState<Record<string, KanbanCard[]>>({});
 
   useEffect(() => {
@@ -91,7 +92,8 @@ export default function KanbanBoard({ columns, cards, onCardMoved }: KanbanBoard
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
-                            className={`p-4 bg-white rounded-xl border transition-all ${snapshot.isDragging ? 'shadow-lg border-blue-400 rotate-2 scale-105' : 'shadow-sm border-gray-200 hover:border-gray-300'}`}
+                            className={`p-4 bg-white rounded-xl border cursor-pointer transition-all ${snapshot.isDragging ? 'shadow-lg border-blue-400 rotate-2 scale-105' : 'shadow-sm border-gray-200 hover:border-gray-300 hover:shadow-md'}`}
+                            onClick={() => onCardClick?.(card.id)}
                           >
                             <h4 className="font-semibold text-gray-900 mb-1">{card.title}</h4>
                             {card.subtitle && (

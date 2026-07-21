@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 
 export default function SettingsClient() {
   const [maintenanceMode, setMaintenanceMode] = useState(false);
@@ -183,9 +184,13 @@ export default function SettingsClient() {
                   <p className="font-semibold text-gray-900">{t.name}</p>
                   <p className="text-xs text-gray-600 mt-1">{t.description || "No description provided"}</p>
                 </div>
-                <div className="flex gap-3 items-center">
-                  <button onClick={() => openEditModal(t)} className="text-sm text-blue-400 hover:text-blue-300 font-medium">Edit Config</button>
-                  <button onClick={() => openDeleteModal(t)} className="text-sm text-red-400 hover:text-red-300 font-medium">Delete</button>
+                <div className="flex gap-3 items-center mt-3 pt-3 border-t border-blue-500/10">
+                  <span className="text-xs text-blue-600 font-medium bg-blue-100 px-2 py-0.5 rounded-full">{t.modules?.length || 0} Modules</span>
+                  <div className="ml-auto flex gap-3 items-center">
+                    <Link href={`/owner/settings/templates/${t._id}`} className="text-sm text-indigo-500 hover:text-indigo-400 font-medium">Configure Bundle</Link>
+                    <button onClick={() => openEditModal(t)} className="text-sm text-blue-400 hover:text-blue-300 font-medium">Edit Config</button>
+                    <button onClick={() => openDeleteModal(t)} className="text-sm text-red-400 hover:text-red-300 font-medium">Delete</button>
+                  </div>
                 </div>
               </div>
             ))}

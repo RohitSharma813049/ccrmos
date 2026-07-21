@@ -3,11 +3,14 @@ import { redirect } from "next/navigation";
 import dbConnect from "@/lib/db";
 import SystemSetting from "@/modules/settings/schemas/SystemSetting";
 import Company from "@/modules/companies/schemas/Company";
+import CustomModule from "@/modules/settings/schemas/CustomModule";
 import NotificationBell from "@/components/ui/NotificationBell";
 import ImpersonationBanner from "@/components/ui/ImpersonationBanner";
 import SubscriptionAlert from "@/components/ui/SubscriptionAlert";
 import { hasModulePermission } from "@/lib/permissions";
 import { getSession } from "@/lib/auth-utils";
+import User from "@/modules/users/schemas/User";
+import AICopilot from "@/components/ui/AICopilot";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
@@ -30,8 +33,16 @@ export default async function DashboardLayout({ children }: { children: React.Re
     }
   }
 
+  const customModules = await CustomModule.find({
+    active: true,
+    $or: [{ companyId: userCompanyId }, { companyId: null }]
+  }).select("_id name").lean();
+
   const isPlatformOwner = (session?.user as any)?.hierarchyLevel === 1;
   const isImpersonating = !!(session?.user as any)?.impersonatedFounderId;
+
+  const dbUser = await User.findById(session?.user?.id).select("avatarUrl").lean();
+  const avatarUrl = dbUser?.avatarUrl || null;
 
   return (
     <div className="h-screen bg-gray-50 text-gray-900 flex flex-col md:flex-row overflow-hidden">
@@ -96,6 +107,17 @@ export default async function DashboardLayout({ children }: { children: React.Re
             <NavItem href="/dashboard/tasks" label="Tasks" icon="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
           )}
 
+          {customModules.length > 0 && (
+            <>
+              <div className="pt-6 pb-2">
+                <p className="px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Custom Modules</p>
+              </div>
+              {customModules.map((mod: any) => (
+                <NavItem key={mod._id.toString()} href={`/dashboard/modules/${mod._id}`} label={mod.name} icon="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              ))}
+            </>
+          )}
+
             </>
           )}
 
@@ -113,6 +135,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
               <NavItem href="/dashboard/automations" label="Global Automations" icon="M13 10V3L4 14h7v7l9-11h-7z" />
               <NavItem href="/dashboard/settings/integrations" label="API & Integrations" icon="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
               <NavItem href="/dashboard/settings/billing" label="Billing & Plan" icon="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+              <NavItem href="/dashboard/settings/audit" label="Audit Logs" icon="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+              <NavItem href="/dashboard/settings/export" label="Export Data" icon="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
             </>
           )}
 
@@ -136,13 +160,19 @@ export default async function DashboardLayout({ children }: { children: React.Re
         {/* User Profile Footer */}
         <div className="p-4 border-t border-gray-200 bg-white/50">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-gray-700 to-gray-600 flex items-center justify-center font-bold text-sm shadow-inner border border-gray-500/30">
-              {session?.user?.email?.[0].toUpperCase()}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">{session?.user?.email}</p>
+            <Link href="/dashboard/settings/profile" className="shrink-0 hover:ring-2 hover:ring-indigo-500 rounded-full transition-all">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="Avatar" className="w-9 h-9 rounded-full object-cover shadow-inner border border-gray-500/30" />
+              ) : (
+                <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-gray-700 to-gray-600 flex items-center justify-center font-bold text-sm text-white shadow-inner border border-gray-500/30">
+                  {session?.user?.email?.[0].toUpperCase()}
+                </div>
+              )}
+            </Link>
+            <Link href="/dashboard/settings/profile" className="flex-1 min-w-0 group cursor-pointer">
+              <p className="text-sm font-medium text-gray-900 truncate group-hover:text-indigo-600 transition-colors">{session?.user?.email}</p>
               <p className="text-xs text-gray-500 uppercase font-semibold">{session?.user?.role}</p>
-            </div>
+            </Link>
             <Link href="/api/auth/signout" className="p-2 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors" title="Logout">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -182,6 +212,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </div>
         </div>
       </main>
+
+      <AICopilot />
     </div>
   );
 }

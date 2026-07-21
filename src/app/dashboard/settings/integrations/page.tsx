@@ -128,6 +128,21 @@ export default function IntegrationsPage() {
         "Click the 'Configure Keys' button below to securely store your credentials.",
         "Once configured, the system will run a nightly background job to fetch all leads."
       ]
+    },
+    {
+      id: "email",
+      name: "Email (SMTP / API)",
+      description: "Configure SMTP credentials (e.g. SendGrid, Amazon SES) to send emails directly from the CRM.",
+      actionLabel: "Configure Email",
+      icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
+      color: "blue",
+      steps: [
+        "Sign up for an SMTP provider like SendGrid, Resend, or use your own mail server.",
+        "Click the 'Configure Email' button below.",
+        "Enter your Host, Port, Username, and Password.",
+        "Use the 'Test Connection' button to ensure emails are sending successfully.",
+        "Save your configuration to enable outgoing emails across the platform."
+      ]
     }
   ];
 
@@ -178,6 +193,62 @@ export default function IntegrationsPage() {
       console.error(e);
     } finally {
       setJdSaving(false);
+    }
+  };
+
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+  const [emailConfig, setEmailConfig] = useState({ host: "", port: "", username: "", password: "", fromEmail: "" });
+  const [emailTestEmail, setEmailTestEmail] = useState("");
+  const [emailSaving, setEmailSaving] = useState(false);
+  const [emailTesting, setEmailTesting] = useState(false);
+
+  const fetchEmailConfig = async () => {
+    try {
+      const res = await fetch("/api/settings/email_config");
+      const data = await res.json();
+      if (data.value) setEmailConfig(data.value);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    if (isEmailModalOpen) fetchEmailConfig();
+  }, [isEmailModalOpen]);
+
+  const handleEmailTest = async () => {
+    if (!emailTestEmail) return alert("Please enter a test email address.");
+    setEmailTesting(true);
+    try {
+      const res = await fetch("/api/settings/email/test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...emailConfig, testEmail: emailTestEmail })
+      });
+      const data = await res.json();
+      if (res.ok) alert("Test email sent successfully!");
+      else alert(data.error || "Failed to send test email.");
+    } catch (e) {
+      console.error(e);
+      alert("An error occurred during testing.");
+    } finally {
+      setEmailTesting(false);
+    }
+  };
+
+  const handleEmailSave = async () => {
+    setEmailSaving(true);
+    try {
+      await fetch("/api/settings/email_config", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ value: emailConfig })
+      });
+      setIsEmailModalOpen(false);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setEmailSaving(false);
     }
   };
 
@@ -302,7 +373,11 @@ export default function IntegrationsPage() {
             ) : (
               <div className="mt-auto">
                 <button 
-                  onClick={() => int.id === 'whatsapp-web' ? setIsWaModalOpen(true) : int.id === 'justdial' ? setIsJdModalOpen(true) : null}
+                  onClick={() => {
+                    if (int.id === 'whatsapp-web') setIsWaModalOpen(true);
+                    else if (int.id === 'justdial') setIsJdModalOpen(true);
+                    else if (int.id === 'email') setIsEmailModalOpen(true);
+                  }}
                   className="px-5 py-2.5 bg-gray-100 text-gray-900 border border-gray-300 font-medium rounded-lg hover:bg-gray-200 transition-colors"
                 >
                   {int.actionLabel}

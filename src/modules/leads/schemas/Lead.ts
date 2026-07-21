@@ -22,6 +22,7 @@ export interface ILead extends Document {
   teamLeaderId?: mongoose.Types.ObjectId;
   assignedUserId?: mongoose.Types.ObjectId;
   
+  activities?: { type: string; description: string; timestamp: Date }[];
   customData?: any;
 }
 
@@ -37,6 +38,11 @@ const leadSchema = new Schema<ILead>({
   status: { type: String, default: 'new' },
   customData: { type: Schema.Types.Mixed, default: {} },
   createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
+  activities: [{
+    type: { type: String },
+    description: String,
+    timestamp: { type: Date, default: Date.now }
+  }],
   
   departmentId: { type: Schema.Types.ObjectId, ref: "Department" },
   directorId: { type: Schema.Types.ObjectId, ref: "User" },

@@ -50,7 +50,7 @@ export default function DynamicFieldsPage() {
     }
   };
 
-  const filteredFields = fields.filter(f => f.target === activeTab);
+  const filteredFields = activeTab === "all" ? fields : fields.filter(f => f.target === activeTab);
 
   const tabs = [
     { id: "lead", label: "Lead Fields" },

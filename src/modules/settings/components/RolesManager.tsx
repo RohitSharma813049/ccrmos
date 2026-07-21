@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from "react";
 
-const MODULES = ["Leads", "Customers", "Projects", "Orders", "Invoices", "Tasks", "Settings"];
+const SYSTEM_MODULES = ["Leads", "Customers", "Projects", "Orders", "Invoices", "Tasks", "Settings"];
 const ACTIONS = ["view", "create", "edit", "delete", "assign", "export", "import", "approve"];
 const SCOPES = ["Own", "Team", "Department", "Director", "Company", "Platform"];
 
 export default function RolesManager() {
   const [roles, setRoles] = useState<any[]>([]);
+  const [modules, setModules] = useState<string[]>(SYSTEM_MODULES);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   
@@ -24,9 +25,19 @@ export default function RolesManager() {
   async function fetchRoles() {
     setLoading(true);
     try {
+      // Fetch Roles
       const res = await fetch("/api/roles");
       const data = await res.json();
       setRoles(data.roles || []);
+
+      // Fetch Custom Modules to dynamically populate the matrix
+      const modRes = await fetch("/api/settings/modules?limit=100");
+      if (modRes.ok) {
+        const modData = await modRes.json();
+        const customModuleNames = (modData.modules || []).map((m: any) => m.name);
+        // Merge system modules with custom modules, removing duplicates just in case
+        setModules(Array.from(new Set([...SYSTEM_MODULES, ...customModuleNames])));
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -213,7 +224,7 @@ export default function RolesManager() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
-                        {MODULES.map(mod => (
+                        {modules.map(mod => (
                           <tr key={mod} className="hover:bg-gray-50 transition-colors">
                             <td className="px-4 py-4 font-medium text-gray-900">{mod}</td>
                             <td className="px-4 py-4">

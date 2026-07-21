@@ -8,14 +8,17 @@ export default function SecurityClient() {
   const [passwordRegex, setPasswordRegex] = useState("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$");
   const [rateLimit, setRateLimit] = useState(1000);
   const [apiKeys, setApiKeys] = useState<any[]>([]);
+  const [webhooks, setWebhooks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [newlyGeneratedKey, setNewlyGeneratedKey] = useState<{name: string, key: string} | null>(null);
+  const [newlyGeneratedWebhook, setNewlyGeneratedWebhook] = useState<{name: string, secret: string} | null>(null);
 
   async function fetchSettings() {
     try {
-      const [settingsRes, apiKeysRes] = await Promise.all([
+      const [settingsRes, apiKeysRes, webhooksRes] = await Promise.all([
         fetch("/api/settings/security"),
-        fetch("/api/settings/api-keys")
+        fetch("/api/settings/api-keys"),
+        fetch("/api/settings/webhooks")
       ]);
       
       if (settingsRes.ok) {
@@ -31,6 +34,11 @@ export default function SecurityClient() {
       if (apiKeysRes.ok) {
         const keysData = await apiKeysRes.json();
         if (keysData.keys) setApiKeys(keysData.keys);
+      }
+      
+      if (webhooksRes.ok) {
+        const whData = await webhooksRes.json();
+        if (whData.webhooks) setWebhooks(whData.webhooks);
       }
     } catch (e) {
       console.error(e);
@@ -123,6 +131,59 @@ export default function SecurityClient() {
     }
   };
 
+  const addWebhook = async () => {
+    const name = prompt("Enter a name for the Webhook (e.g. Zapier Integration):");
+    if (!name) return;
+    const endpointUrl = prompt("Enter the endpoint URL to receive POST events:");
+    if (!endpointUrl) return;
+    
+    try {
+      const res = await fetch("/api/settings/webhooks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, endpointUrl, events: ["*"] })
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        if (data.webhook) {
+          setNewlyGeneratedWebhook({ name: data.webhook.name, secret: data.webhook.secret });
+          fetchSettings();
+        }
+      } else {
+        alert("Failed to add Webhook");
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const deleteWebhook = async (id: string) => {
+    if (!confirm("Delete this Webhook? Integrations relying on it will break.")) return;
+    
+    try {
+      const res = await fetch(`/api/settings/webhooks?id=${id}`, {
+        method: "DELETE"
+      });
+      if (res.ok) fetchSettings();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const toggleWebhookStatus = async (id: string, currentStatus: boolean) => {
+    try {
+      const res = await fetch("/api/settings/webhooks", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, isActive: !currentStatus })
+      });
+      if (res.ok) fetchSettings();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   if (loading) return <div className="p-8 text-center text-gray-500">Loading settings...</div>;
 
   return (
@@ -204,6 +265,38 @@ export default function SecurityClient() {
                </div>
             </div>
           </div>
+
+          <div className="flex justify-between items-center mt-10 mb-6">
+            <h2 className="text-xl font-bold text-gray-900">Webhooks</h2>
+            <button onClick={addWebhook} className="text-sm bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-lg hover:bg-indigo-100 font-medium">
+              + Add Webhook
+            </button>
+          </div>
+          <div className="space-y-2">
+            {webhooks.map(wh => (
+              <div key={wh._id} className="p-4 border border-gray-200 bg-gray-50 rounded-xl flex justify-between items-start group">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-gray-900">{wh.name}</span>
+                    <span className={`text-[10px] uppercase font-bold px-1.5 py-0.5 rounded ${wh.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-gray-600'}`}>
+                      {wh.isActive ? "Active" : "Inactive"}
+                    </span>
+                  </div>
+                  <span className="text-xs text-gray-500 font-mono block mt-1 line-clamp-1">{wh.endpointUrl}</span>
+                  <span className="text-xs text-indigo-500 font-medium block mt-1">Events: {wh.events.join(", ")}</span>
+                </div>
+                <div className="flex flex-col items-end gap-2">
+                  <div className="flex items-center gap-3">
+                    <button onClick={() => toggleWebhookStatus(wh._id, wh.isActive)} className="text-indigo-600 hover:text-indigo-800 text-xs font-medium">
+                      {wh.isActive ? "Pause" : "Resume"}
+                    </button>
+                    <button onClick={() => deleteWebhook(wh._id)} className="text-red-500 hover:text-red-700 text-xs font-medium">Delete</button>
+                  </div>
+                </div>
+              </div>
+            ))}
+            {webhooks.length === 0 && <p className="text-sm text-gray-500 bg-white border border-dashed border-gray-300 p-4 rounded-xl text-center">No active webhooks. Add one to listen to real-time events.</p>}
+          </div>
         </div>
       </div>
 
@@ -241,6 +334,47 @@ export default function SecurityClient() {
                   className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-xl shadow-sm transition-all"
                 >
                   I have copied it safely
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {newlyGeneratedWebhook && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setNewlyGeneratedWebhook(null)} />
+          <div className="relative bg-white border border-gray-200 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <h2 className="text-xl font-bold text-gray-900">Webhook Created!</h2>
+              <p className="text-sm text-gray-600 mt-1">
+                Your webhook is now live. Please copy the <strong>Signing Secret</strong> below. You will use this to verify that incoming POST requests are actually coming from our platform.
+              </p>
+              
+              <div className="mt-6">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Signing Secret for: {newlyGeneratedWebhook.name}</label>
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    readOnly
+                    value={newlyGeneratedWebhook.secret}
+                    className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-gray-900 font-mono text-sm focus:outline-none focus:border-indigo-500" 
+                  />
+                  <button 
+                    onClick={() => navigator.clipboard.writeText(newlyGeneratedWebhook.secret).then(() => alert("Copied to clipboard!"))}
+                    className="absolute right-2 top-2 bottom-2 px-3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-semibold rounded-lg transition-colors"
+                  >
+                    Copy
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-8 flex justify-end">
+                <button 
+                  onClick={() => setNewlyGeneratedWebhook(null)} 
+                  className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl shadow-sm transition-all"
+                >
+                  I have copied the secret safely
                 </button>
               </div>
             </div>

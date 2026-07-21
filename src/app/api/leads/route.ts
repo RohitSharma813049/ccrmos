@@ -97,6 +97,12 @@ export async function POST(req: Request) {
       if (user.directorId) body.directorId = user.directorId;
     }
 
+    body.activities = [{
+      type: "Creation",
+      description: "Lead was created.",
+      timestamp: new Date()
+    }];
+
     const newLead = await Lead.create(body);
 
     if (companyId) {
@@ -159,6 +165,13 @@ export async function PUT(req: Request) {
         }
       }
       
+      lead.activities = lead.activities || [];
+      lead.activities.push({
+        type: "Status Change",
+        description: `Status changed from ${lead.status} to ${status}`,
+        timestamp: new Date()
+      });
+
       lead.status = status;
 
       // Workflow Hook

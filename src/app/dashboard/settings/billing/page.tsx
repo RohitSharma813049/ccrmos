@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import Company from "@/modules/companies/schemas/Company";
 import SubscriptionPlan from "@/modules/settings/schemas/SubscriptionPlan";
 import RazorpayCheckout from "@/modules/billing/components/RazorpayCheckout";
+import CancelSubscriptionButton from "@/modules/billing/components/CancelSubscriptionButton";
 
 export default async function BillingPage() {
   const user = await requireAuthenticatedUser();
@@ -28,18 +29,26 @@ export default async function BillingPage() {
       </div>
 
       {currentCompany && (
-        <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Current Status</h2>
-          <div className="flex items-center gap-4">
-            <div className={`px-4 py-2 rounded-lg font-bold text-sm ${currentCompany.subscriptionStatus === 'active' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-              Status: {currentCompany.subscriptionStatus?.toUpperCase() || "TRIALING"}
-            </div>
-            {currentCompany.subscriptionPlanId && (
-              <div className="text-gray-700 font-medium">
-                Current Plan: <span className="font-bold text-gray-900">{(currentCompany.subscriptionPlanId as any).name}</span>
+        <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Current Status</h2>
+            <div className="flex items-center gap-4">
+              <div className={`px-4 py-2 rounded-lg font-bold text-sm ${currentCompany.subscriptionStatus === 'active' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                Status: {currentCompany.subscriptionStatus?.toUpperCase() || "TRIALING"}
               </div>
-            )}
+              {currentCompany.subscriptionPlanId && (
+                <div className="text-gray-700 font-medium">
+                  Current Plan: <span className="font-bold text-gray-900">{(currentCompany.subscriptionPlanId as any).name}</span>
+                </div>
+              )}
+            </div>
           </div>
+          
+          {currentCompany.subscriptionStatus === 'active' && (
+            <div>
+              <CancelSubscriptionButton />
+            </div>
+          )}
         </div>
       )}
 

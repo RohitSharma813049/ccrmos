@@ -18,6 +18,13 @@ import {
   EdgeChange,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import ConditionNode from './nodes/ConditionNode';
+import ActionNode from './nodes/ActionNode';
+
+const nodeTypes = {
+  condition: ConditionNode,
+  action: ActionNode,
+};
 
 export default function WorkflowBuilderClient({ workflow }: { workflow: any }) {
   const [nodes, setNodes] = useState<Node[]>([]);
@@ -59,22 +66,36 @@ export default function WorkflowBuilderClient({ workflow }: { workflow: any }) {
     [setEdges]
   );
 
+  // Handle custom node data changes
+  const updateNodeData = useCallback((newData: any) => {
+    setNodes((nds) => 
+      nds.map((node) => {
+        if (node.id === newData.id) {
+          return { ...node, data: newData };
+        }
+        return node;
+      })
+    );
+  }, []);
+
   const addConditionNode = () => {
+    const id = `condition-${Date.now()}`;
     const newNode: Node = {
-      id: `condition-${Date.now()}`,
+      id,
+      type: 'condition',
       position: { x: 250, y: nodes.length * 100 + 50 },
-      data: { label: 'Condition (e.g. Field = Value)' },
-      style: { border: '2px solid #f59e0b', borderRadius: '8px', padding: '10px' }
+      data: { id, onChange: updateNodeData }
     };
     setNodes((nds) => [...nds, newNode]);
   };
 
   const addActionNode = () => {
+    const id = `action-${Date.now()}`;
     const newNode: Node = {
-      id: `action-${Date.now()}`,
+      id,
+      type: 'action',
       position: { x: 250, y: nodes.length * 100 + 50 },
-      data: { label: 'Action (e.g. Send Email)' },
-      style: { border: '2px solid #10b981', borderRadius: '8px', padding: '10px' }
+      data: { id, onChange: updateNodeData }
     };
     setNodes((nds) => [...nds, newNode]);
   };
@@ -82,8 +103,38 @@ export default function WorkflowBuilderClient({ workflow }: { workflow: any }) {
   const handleSave = async () => {
     setIsSaving(true);
     try {
+      // Compile nodes into backend schema
+      const compiledConditions: any[] = [];
+      const compiledActions: any[] = [];
+
+      nodes.forEach(node => {
+        if (node.type === 'condition' && node.data.field && node.data.operator && node.data.value) {
+          compiledConditions.push({
+            field: node.data.field,
+            operator: node.data.operator,
+            value: node.data.value
+          });
+        } else if (node.type === 'action' && node.data.actionType) {
+          compiledActions.push({
+            type: node.data.actionType,
+            payload: node.data.payload || {}
+          });
+        }
+      });
+
+      // Strip functions from node data before saving to DB
+      const safeNodes = nodes.map(n => {
+        const { onChange, ...safeData } = n.data as any;
+        return { ...n, data: safeData };
+      });
+
       const payload = {
-        actions: [{ type: "Canvas", payload: { nodes, edges } }]
+        conditions: compiledConditions,
+        actions: [
+          ...compiledActions,
+          // We save the visual canvas as a special Action so the UI can reconstruct it later
+          { type: "Canvas", payload: { nodes: safeNodes, edges } }
+        ]
       };
       
       const res = await fetch(`/api/automation/workflows/${workflow._id}`, {
@@ -130,11 +181,12 @@ export default function WorkflowBuilderClient({ workflow }: { workflow: any }) {
       
       <div className="flex-1 bg-white border border-gray-200 rounded-2xl shadow-inner overflow-hidden">
         <ReactFlow
-          nodes={nodes}
+          nodes={nodes.map(n => ({...n, data: { ...n.data, onChange: updateNodeData }}))} // re-inject function
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
+          nodeTypes={nodeTypes}
           fitView
         >
           <Controls />

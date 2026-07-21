@@ -3,7 +3,13 @@
 import { useState, useEffect } from "react";
 import { DataTable, ColumnDef } from "@/components/ui/DataTable";
 
-export default function AuditClient() {
+export default function AuditClient({ 
+  title = "Global Audit Logs", 
+  description = "Immutable record of all critical actions performed across the platform." 
+}: { 
+  title?: string, 
+  description?: string 
+}) {
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -115,8 +121,8 @@ export default function AuditClient() {
     <div className="space-y-8 fade-in pb-12">
       <div className="flex justify-between items-end">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Global Audit Logs</h1>
-          <p className="text-gray-600 mt-1">Immutable record of all critical actions performed across the platform.</p>
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">{title}</h1>
+          <p className="text-gray-600 mt-1">{description}</p>
         </div>
         <div className="flex gap-3">
           <button 

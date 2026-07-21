@@ -66,6 +66,16 @@ export async function evaluateWorkflows(companyId: string, triggerName: string, 
             } else if (action.type === "Send Email") {
               // Stub: In a real app, call email service
               console.log(`[Workflow Engine] Email sent to ${action.payload.to} with subject: ${action.payload.subject}`);
+            } else if (action.type === "Assign User") {
+              const { userId } = action.payload;
+              if (!userId) throw new Error("No User ID provided for assignment.");
+              if (triggerName.includes("Lead")) {
+                const Lead = require('@/modules/leads/schemas/Lead').default;
+                await Lead.findByIdAndUpdate(targetId, { assignedUserId: userId });
+              } else if (triggerName.includes("Project")) {
+                const Project = require('@/modules/projects/schemas/Project').default;
+                await Project.findByIdAndUpdate(targetId, { assignedUserId: userId });
+              }
             }
           } catch (err: any) {
             actionSuccess = false;

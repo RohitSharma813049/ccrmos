@@ -13,11 +13,21 @@ export default function WhitelabelClient() {
   ]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [isPlatformOwner, setIsPlatformOwner] = useState(false);
+  const [verifyingDomain, setVerifyingDomain] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     async function fetchSettings() {
       try {
+        const sessionRes = await fetch("/api/auth/session");
+        if (sessionRes.ok) {
+          const sessionData = await sessionRes.json();
+          if (sessionData?.user?.hierarchyLevel === 1) {
+            setIsPlatformOwner(true);
+          }
+        }
+
         const res = await fetch("/api/settings/whitelabel");
         if (res.ok) {
           const data = await res.json();
@@ -45,7 +55,7 @@ export default function WhitelabelClient() {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          global: true, // Assuming this user is a super admin
+          global: isPlatformOwner, // Platform owner saves globally, tenants save specifically for their company
           value: { platformName, primaryColor, logoUrl, domains }
         })
       });
@@ -99,12 +109,49 @@ export default function WhitelabelClient() {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          global: false, // domains are usually tenant-specific
+          global: isPlatformOwner, 
           value: { platformName, primaryColor, logoUrl, domains: newDomains }
         })
       });
     } catch (e) {
       console.error(e);
+    }
+  }
+
+  async function verifyDomain(domainName: string) {
+    setVerifyingDomain(domainName);
+    try {
+      const res = await fetch("/api/settings/domains/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ domain: domainName })
+      });
+      const data = await res.json();
+      
+      if (res.ok && data.status === "Active") {
+        const updatedDomains = domains.map(d => 
+          d.name === domainName ? { ...d, status: "Active" } : d
+        );
+        setDomains(updatedDomains);
+        
+        // Save the updated status to DB
+        await fetch("/api/settings/whitelabel", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            global: isPlatformOwner, 
+            value: { platformName, primaryColor, logoUrl, domains: updatedDomains }
+          })
+        });
+        alert(`Successfully verified DNS records for ${domainName}!`);
+      } else {
+        alert(data.error || "Failed to verify domain.");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error verifying domain.");
+    } finally {
+      setVerifyingDomain(null);
     }
   }
 
@@ -114,12 +161,17 @@ export default function WhitelabelClient() {
     <div className="space-y-8 fade-in pb-12">
       <div>
         <h1 className="text-3xl font-bold text-gray-900 tracking-tight">White-Label Management</h1>
-        <p className="text-gray-600 mt-1">Configure global branding, custom domains, and visual identities.</p>
+        <p className="text-gray-600 mt-1">Configure {isPlatformOwner ? 'global platform' : 'your tenant'} branding, custom domains, and visual identities.</p>
+        {!isPlatformOwner && (
+          <div className="mt-4 p-3 bg-indigo-50 border border-indigo-200 rounded-lg text-sm text-indigo-800">
+            <strong>Tenant Mode:</strong> Your branding configurations here will securely override the platform's default branding across all your customer-facing portals.
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="bg-white/50 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-xl">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Global Branding</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-6">{isPlatformOwner ? 'Global Branding' : 'Your Branding'}</h2>
           <div className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Platform Name</label>
@@ -187,10 +239,18 @@ export default function WhitelabelClient() {
               <div key={i} className={`p-4 border rounded-xl flex items-center justify-between ${domain.status === 'Active' ? 'border-blue-500/30 bg-blue-500/5' : 'border-gray-200 bg-gray-50'}`}>
                 <div>
                   <p className="font-semibold text-gray-900">{domain.name}</p>
-                  <p className={`text-xs mt-1 ${domain.status === 'Active' ? 'text-blue-400' : 'text-amber-500'}`}>Status: {domain.status}</p>
+                  <p className={`text-xs mt-1 flex items-center gap-1.5 ${domain.status === 'Active' ? 'text-blue-500 font-medium' : 'text-amber-500'}`}>
+                    {domain.status === 'Active' && <span className="w-2 h-2 rounded-full bg-blue-500"></span>}
+                    {domain.status === 'Pending DNS Verification' && <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>}
+                    Status: {domain.status}
+                  </p>
                 </div>
-                <button onClick={() => alert("Verification check simulated.")} className="text-sm text-gray-600 hover:text-gray-900">
-                  {domain.status === 'Active' ? 'Configure' : 'Verify'}
+                <button 
+                  onClick={() => domain.status === 'Active' ? null : verifyDomain(domain.name)} 
+                  disabled={verifyingDomain === domain.name}
+                  className={`text-sm font-medium transition-colors ${domain.status === 'Active' ? 'text-gray-400 cursor-default' : 'text-blue-600 hover:text-blue-800'} ${verifyingDomain === domain.name ? 'opacity-50' : ''}`}
+                >
+                  {verifyingDomain === domain.name ? 'Checking DNS...' : (domain.status === 'Active' ? 'Configured' : 'Verify DNS')}
                 </button>
               </div>
             ))}

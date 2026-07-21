@@ -1,5 +1,6 @@
 import { requirePermission } from "@/lib/auth-utils";
 import { PERMISSIONS } from "@/config/permissions";
+import SystemHealthChart from "@/components/ui/SystemHealthChart";
 
 export default async function OwnerDashboardPage() {
   // Extra verification inside the page itself, though the layout handles it too!
@@ -34,8 +35,8 @@ export default async function OwnerDashboardPage() {
 
         <div className="bg-white/50 backdrop-blur-md border border-gray-200 rounded-2xl p-6 shadow-xl">
           <h2 className="text-xl font-semibold mb-4 text-gray-900">System Health</h2>
-          <div className="flex items-center justify-center h-48 border-2 border-dashed border-gray-200 rounded-xl text-gray-500">
-            [Chart Area Placeholder]
+          <div className="h-64 border border-gray-200 bg-white/30 rounded-xl p-4">
+            <SystemHealthChart />
           </div>
           <div className="mt-4 flex justify-between text-sm text-gray-600">
             <span>API Latency: <span className="text-emerald-400 font-medium">42ms</span></span>
