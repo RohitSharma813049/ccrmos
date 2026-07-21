@@ -3,8 +3,9 @@ import dbConnect from '@/lib/db';
 import Lead from '@/modules/leads/schemas/Lead';
 import User from '@/modules/users/schemas/User';
 
-export async function POST(req: Request, { params }: { params: { source: string } }) {
+export async function POST(req: Request, { params }: { params: Promise<{ source: string }> }) {
   try {
+    const resolvedParams = await params;
     await dbConnect();
     
     const { searchParams } = new URL(req.url);
@@ -34,7 +35,7 @@ export async function POST(req: Request, { params }: { params: { source: string 
       lastName: item.lastName || item.last_name || item.name?.split(' ').slice(1).join(' ') || '',
       email: item.email || null,
       phone: item.phone || item.phone_number || null,
-      source: params.source || 'webhook', // 'meta', 'whatsapp', 'generic'
+      source: resolvedParams.source || 'webhook', // 'meta', 'whatsapp', 'generic'
       status: 'New',
       companyId: companyId,
       founderId: founder._id,

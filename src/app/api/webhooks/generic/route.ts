@@ -49,7 +49,7 @@ export async function POST(req: Request) {
     });
 
     // Trigger workflows for each inserted lead asynchronously
-    insertedLeads.forEach(lead => {
+    insertedLeads.forEach((lead: any) => {
       evaluateWorkflows(companyId, "Lead Created", lead._id.toString(), {
         ...lead.toObject(),
         ...lead.customData

@@ -36,7 +36,7 @@ export async function POST(req: Request) {
     if (email) {
       query.email = email;
     } else if (phone) {
-      query.phoneNumber = phone;
+      query.phone = phone;
     }
 
     let lead = await Lead.findOne(query);
@@ -46,7 +46,7 @@ export async function POST(req: Request) {
         companyId,
         firstName: name,
         email,
-        phoneNumber: phone,
+        phone: phone,
         status: "New",
         source: "Meta Ads",
         customData: {

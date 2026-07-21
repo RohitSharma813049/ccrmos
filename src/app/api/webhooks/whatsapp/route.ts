@@ -28,13 +28,13 @@ export async function POST(req: Request) {
     }
 
     // Check if lead already exists
-    let lead = await Lead.findOne({ companyId, phoneNumber });
+    let lead = await Lead.findOne({ companyId, phone: phoneNumber });
 
     if (!lead) {
       lead = await Lead.create({
         companyId,
         firstName: name,
-        phoneNumber,
+        phone: phoneNumber,
         status: "New",
         source: "WhatsApp",
         customData: {

@@ -9,7 +9,7 @@ export async function middleware(req: NextRequest) {
   // Rate Limiting on API routes (excluding auth endpoints)
   if (pathname.startsWith('/api') && !pathname.startsWith('/api/auth')) {
     try {
-      const ip = req.ip ?? req.headers.get('x-forwarded-for') ?? '127.0.0.1';
+      const ip = req.headers.get('x-forwarded-for') ?? '127.0.0.1';
       // For a real production app, you might fetch the global setting limit dynamically
       // Here we default to 1000 req / minute
       const ratelimit = getRateLimiter(1000);
