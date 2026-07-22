@@ -58,7 +58,7 @@ export default function IntegrationsPage() {
       id: "meta",
       name: "Meta (Facebook) Lead Ads",
       description: "Receive leads instantly from your Facebook & Instagram campaigns.",
-      webhookPath: `/api/webhooks/meta${webhookParams}`,
+      baseWebhookPath: `/api/webhooks/meta`,
       icon: "M13 10V3L4 14h7v7l9-11h-7z",
       color: "blue",
       steps: [
@@ -74,7 +74,7 @@ export default function IntegrationsPage() {
       id: "whatsapp",
       name: "WhatsApp Business API",
       description: "Sync incoming messages and opt-ins as new leads in your CRM.",
-      webhookPath: `/api/webhooks/whatsapp${webhookParams}`,
+      baseWebhookPath: `/api/webhooks/whatsapp`,
       icon: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z",
       color: "emerald",
       steps: [
@@ -105,7 +105,7 @@ export default function IntegrationsPage() {
       id: "generic",
       name: "Generic Bulk Import API",
       description: "Use this endpoint to POST JSON arrays of leads from Zapier, Make.com, or custom scripts.",
-      webhookPath: `/api/webhooks/generic${webhookParams}`,
+      baseWebhookPath: `/api/webhooks/generic`,
       icon: "M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12",
       color: "purple",
       steps: [
@@ -153,9 +153,54 @@ export default function IntegrationsPage() {
     orange: "bg-orange-50 text-orange-600 border-orange-200"
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
+  const [integrationLinks, setIntegrationLinks] = useState<any[]>([]);
+
+  const fetchIntegrationLinks = async () => {
+    try {
+      const res = await fetch("/api/settings/integration-links");
+      if (res.ok) {
+        const data = await res.json();
+        setIntegrationLinks(data.links || []);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    fetchIntegrationLinks();
+  }, []);
+
+  const copyWebhookUrl = async (intId: string, intName: string, url: string, projId?: string, frmId?: string) => {
+    navigator.clipboard.writeText(url);
     alert("Webhook URL copied to clipboard!");
+    
+    try {
+      await fetch("/api/settings/integration-links", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          integrationId: intId,
+          integrationName: intName,
+          projectId: projId,
+          formId: frmId,
+          url
+        })
+      });
+      fetchIntegrationLinks();
+    } catch (e) {
+      console.error("Failed to save integration link", e);
+    }
+  };
+
+  const deleteLink = async (id: string) => {
+    if (!confirm("Are you sure you want to remove this webhook from your history?")) return;
+    try {
+      await fetch(`/api/settings/integration-links?id=${id}`, { method: "DELETE" });
+      fetchIntegrationLinks();
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const [isWaModalOpen, setIsWaModalOpen] = useState(false);
@@ -287,6 +332,15 @@ export default function IntegrationsPage() {
     }
   };
 
+  const [selections, setSelections] = useState<Record<string, { project: string; form: string }>>({});
+
+  const handleSelection = (intId: string, type: "project" | "form", val: string) => {
+    setSelections(prev => ({
+      ...prev,
+      [intId]: { ...prev[intId], [type]: val }
+    }));
+  };
+
   return (
     <div className="max-w-6xl mx-auto space-y-8 fade-in pb-12">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -294,40 +348,17 @@ export default function IntegrationsPage() {
           <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Third-Party Integrations</h1>
           <p className="text-gray-600 mt-1">Connect external platforms to sync leads into your CRM automatically.</p>
         </div>
-        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col gap-3">
-          <div className="flex items-center gap-3">
-            <label className="text-sm font-semibold text-gray-700 whitespace-nowrap w-24">1. Project:</label>
-            <select 
-              value={selectedProject}
-              onChange={(e) => setSelectedProject(e.target.value)}
-              className="w-full md:w-64 bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
-            >
-              <option value="">Select a Project first...</option>
-              {projects.map(p => (
-                <option key={p._id} value={p._id}>{p.name}</option>
-              ))}
-            </select>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <label className="text-sm font-semibold text-gray-700 whitespace-nowrap w-24">2. Form:</label>
-            <select 
-              value={selectedForm}
-              onChange={(e) => setSelectedForm(e.target.value)}
-              disabled={!selectedProject}
-              className="w-full md:w-64 bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none disabled:opacity-50"
-            >
-              <option value="">Select a Form (Optional)</option>
-              {forms.map(f => (
-                <option key={f._id} value={f._id}>{f.name}</option>
-              ))}
-            </select>
-          </div>
-        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {integrations.map((int) => (
+        {integrations.map((int: any) => {
+          const sel = selections[int.id] || { project: "", form: "" };
+          const pParam = sel.project ? `&projectId=${sel.project}` : "";
+          const fParam = sel.form ? `&formId=${sel.form}` : "";
+          const webParams = `?companyId=${companyId}${pParam}${fParam}`;
+          const currentWebhookUrl = int.baseWebhookPath ? `${baseUrl}${int.baseWebhookPath}${webParams}` : null;
+
+          return (
           <div key={int.id} className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-4">
@@ -342,7 +373,7 @@ export default function IntegrationsPage() {
               </div>
               {int.steps && (
                 <button 
-                  onClick={() => setSetupModalData(int)}
+                  onClick={() => setSetupModalData({...int, webhookPath: currentWebhookUrl ? `${int.baseWebhookPath}${webParams}` : null})}
                   className="text-sm font-medium text-indigo-600 hover:text-indigo-700 bg-indigo-50 px-3 py-1 rounded-full transition-colors"
                 >
                   Setup Guide
@@ -352,22 +383,54 @@ export default function IntegrationsPage() {
             
             <p className="text-gray-600 mb-6 flex-1">{int.description}</p>
             
-            {int.webhookPath ? (
-              <div className="space-y-2 mt-auto">
-                <label className="text-sm font-medium text-gray-700">Your Unique Webhook URL</label>
-                <div className="flex items-center gap-2">
-                  <input 
-                    type="text" 
-                    readOnly 
-                    value={`${baseUrl}${int.webhookPath}`}
-                    className="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-2.5 text-sm text-gray-600 focus:outline-none"
-                  />
-                  <button 
-                    onClick={() => copyToClipboard(`${baseUrl}${int.webhookPath}`)}
-                    className="shrink-0 px-4 py-2.5 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-800 transition-colors"
-                  >
-                    Copy
-                  </button>
+            {int.baseWebhookPath ? (
+              <div className="space-y-4 mt-auto">
+                <div className="flex flex-col gap-2 p-3 bg-gray-50 rounded-xl border border-gray-200">
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs font-semibold text-gray-600 w-16">Project:</label>
+                    <select 
+                      value={sel.project}
+                      onChange={(e) => handleSelection(int.id, 'project', e.target.value)}
+                      className="w-full bg-white border border-gray-300 rounded-md px-2 py-1 text-xs focus:ring-1 focus:ring-indigo-500 outline-none"
+                    >
+                      <option value="">Select a Project...</option>
+                      {projects.map(p => (
+                        <option key={p._id} value={p._id}>{p.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs font-semibold text-gray-600 w-16">Form:</label>
+                    <select 
+                      value={sel.form}
+                      onChange={(e) => handleSelection(int.id, 'form', e.target.value)}
+                      disabled={!sel.project}
+                      className="w-full bg-white border border-gray-300 rounded-md px-2 py-1 text-xs focus:ring-1 focus:ring-indigo-500 outline-none disabled:opacity-50"
+                    >
+                      <option value="">Select a Form (Optional)</option>
+                      {forms.filter(f => f.projectId === sel.project).map(f => (
+                        <option key={f._id} value={f._id}>{f.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Your Unique Webhook URL</label>
+                  <div className="flex items-center gap-2">
+                    <input 
+                      type="text" 
+                      readOnly 
+                      value={currentWebhookUrl || ''}
+                      className="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-2.5 text-sm text-gray-600 focus:outline-none"
+                    />
+                    <button 
+                      onClick={() => copyWebhookUrl(int.id, int.name, currentWebhookUrl || '', sel.project, sel.form)}
+                      className="shrink-0 px-4 py-2.5 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-800 transition-colors"
+                    >
+                      Copy
+                    </button>
+                  </div>
                 </div>
               </div>
             ) : (
@@ -385,7 +448,7 @@ export default function IntegrationsPage() {
               </div>
             )}
           </div>
-        ))}
+        )})}
       </div>
 
       {isWaModalOpen && (
@@ -530,7 +593,10 @@ export default function IntegrationsPage() {
             <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
               {setupModalData.webhookPath && (
                 <button 
-                  onClick={() => copyToClipboard(`${baseUrl}${setupModalData.webhookPath}`)}
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${baseUrl}${setupModalData.webhookPath}`);
+                    alert("Webhook URL copied to clipboard!");
+                  }}
                   className="px-5 py-2 text-sm font-medium bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
                 >
                   Copy Webhook URL
@@ -542,6 +608,69 @@ export default function IntegrationsPage() {
               >
                 Close
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* History Table */}
+      {integrationLinks.length > 0 && (
+        <div className="mt-12">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 tracking-tight">Active Configured Webhooks</h2>
+          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Integration</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Project</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Form</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Webhook URL</th>
+                    <th className="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {integrationLinks.map((link) => (
+                    <tr key={link._id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="inline-flex items-center gap-1.5 font-medium text-gray-900">
+                          {link.integrationName}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {link.projectId?.name || <span className="text-gray-400 italic">None</span>}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {link.formId?.name || <span className="text-gray-400 italic">None</span>}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <div className="flex items-center gap-2 max-w-[300px] overflow-hidden text-ellipsis bg-gray-50 px-3 py-1.5 rounded border border-gray-200 text-gray-500" title={link.url}>
+                          {link.url}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div className="flex items-center justify-end gap-3">
+                          <button 
+                            onClick={() => {
+                              navigator.clipboard.writeText(link.url);
+                              alert("Copied!");
+                            }}
+                            className="text-indigo-600 hover:text-indigo-900"
+                          >
+                            Copy
+                          </button>
+                          <button 
+                            onClick={() => deleteLink(link._id)}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>

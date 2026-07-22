@@ -5,6 +5,7 @@ export interface IInvoice extends Document {
   displayId?: string;
   companyId?: mongoose.Types.ObjectId;
   founderId?: mongoose.Types.ObjectId;
+  createdBy?: mongoose.Types.ObjectId;
   invoiceNumber: any;
   amount: any;
   status: any;
@@ -15,6 +16,7 @@ const InvoiceSchema = new Schema<IInvoice>({
   displayId: { type: String, unique: true },
   companyId: { type: Schema.Types.ObjectId, ref: 'Company' },
   founderId: { type: Schema.Types.ObjectId, ref: 'User' },
+  createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
   invoiceNumber: { type: String, required: true },
   amount: { type: Number, required: true },
   status: { type: String, default: 'Unpaid' },

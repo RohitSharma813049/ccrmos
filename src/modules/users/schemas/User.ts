@@ -16,6 +16,9 @@ export interface IUser extends Document {
   avatarUrl?: string;
   phone?: string;
   bio?: string;
+  fcmTokens?: string[];
+  twoFactorEnabled?: boolean;
+  twoFactorSecret?: string;
 }
 
 const UserSchema: Schema<IUser> = new Schema({
@@ -47,6 +50,9 @@ const UserSchema: Schema<IUser> = new Schema({
   avatarUrl: { type: String },
   phone: { type: String },
   bio: { type: String },
+  fcmTokens: [{ type: String }],
+  twoFactorEnabled: { type: Boolean, default: false },
+  twoFactorSecret: { type: String },
 }, { timestamps: true });
 
 const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>("User", UserSchema);

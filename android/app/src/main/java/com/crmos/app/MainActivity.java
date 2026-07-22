@@ -1,0 +1,5 @@
+package com.crmos.app;
+
+import com.getcapacitor.BridgeActivity;
+
+public class MainActivity extends BridgeActivity {}

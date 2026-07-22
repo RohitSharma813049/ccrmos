@@ -15,16 +15,17 @@ async function seed() {
   await mongoose.connect(process.env.MONGODB_URI as string);
   console.log("Connected to MongoDB!");
 
-  // Change this to whatever email you want to use
-  const ownerEmail = "owner@crmos.com";
+  const owners = ["owner@crmos.com", "ss6019243@gmail.com"];
 
-  await User.findOneAndUpdate(
-    { email: ownerEmail },
-    { email: ownerEmail, hierarchyLevel: 1, role: "owner" },
-    { upsert: true, new: true }
-  );
+  for (const ownerEmail of owners) {
+    await User.findOneAndUpdate(
+      { email: ownerEmail },
+      { email: ownerEmail, hierarchyLevel: 1, role: "owner" },
+      { upsert: true, new: true }
+    );
+    console.log(`Successfully seeded Platform Owner: ${ownerEmail}`);
+  }
 
-  console.log(`Successfully seeded Platform Owner: ${ownerEmail}`);
   process.exit(0);
 }
 

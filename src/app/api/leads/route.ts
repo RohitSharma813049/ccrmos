@@ -8,6 +8,7 @@ import { buildTenantQuery } from "@/lib/access-control";
 import { logActivity } from "@/modules/audit/services/audit.service";
 import { getRecordScopeFilter, filterFields } from "@/lib/permissions";
 import { parseFiltersToMongo } from "@/utils/parseFilters";
+import { sendPushNotification } from "@/modules/notifications/services/notifications.service";
 
 function errorResponse(error: any) {
   const message = error?.message || "Internal server error";
@@ -121,6 +122,16 @@ export async function POST(req: Request) {
         ...newLead.toObject(),
         ...newLead.customData
       }).catch(console.error);
+
+      // Trigger Push Notification to assigned user if they are not the creator
+      if (newLead.assignedUserId && newLead.assignedUserId.toString() !== user.id) {
+        sendPushNotification(
+          newLead.assignedUserId.toString(),
+          "New Lead Assigned",
+          `A new lead (${newLead.firstName} ${newLead.lastName || ''}) has been assigned to you by ${user.name || 'a teammate'}.`,
+          { leadId: newLead._id.toString(), type: 'LEAD_ASSIGNED' }
+        ).catch(console.error);
+      }
     }
 
     return NextResponse.json({ lead: newLead }, { status: 201 });

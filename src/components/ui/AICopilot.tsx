@@ -52,9 +52,9 @@ export default function AICopilot() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed z-50" style={{ bottom: '24px', right: '24px' }}>
       {isOpen && (
-        <div className="absolute bottom-16 right-0 w-80 sm:w-96 bg-white border border-gray-200 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 fade-in duration-200" style={{ height: '500px', maxHeight: '80vh' }}>
+        <div className="absolute w-80 sm:w-96 bg-white border border-gray-200 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 fade-in duration-200" style={{ height: '500px', maxHeight: '80vh', bottom: '70px', right: '0' }}>
           <div className="bg-indigo-600 p-4 text-white flex justify-between items-center rounded-t-2xl shadow-sm z-10">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0">

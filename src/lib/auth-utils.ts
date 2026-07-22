@@ -30,7 +30,7 @@ export async function requireAuthenticatedUser() {
   return user as any;
 }
 
-import { PLATFORM_OWNER_PERMISSIONS } from "@/config/permissions";
+import { PLATFORM_OWNER_PERMISSIONS, FOUNDER_PERMISSIONS } from "@/config/permissions";
 
 /**
  * Checks if the current authenticated user has the required permission.
@@ -49,11 +49,22 @@ export async function requirePermission(permissionOrModule: string, action?: str
     return session.user; // Platform Owners have global access
   }
 
+  // Explicit bypass for Founders accessing Audit Logs so they don't need to re-login to refresh tokens
+  if (hierarchyLevel === 2 && permissionOrModule === "AUDIT_MANAGEMENT") {
+    return session.user;
+  }
+
   if (PLATFORM_OWNER_PERMISSIONS.includes(permissionOrModule) && hierarchyLevel !== 1) {
     throw new Error(`Forbidden: You lack the required permission (${permissionOrModule}).`);
   }
 
-  const userPermissions = (session.user as any).permissions || {};
+  let userPermissions = (session.user as any).permissions || {};
+  
+  // Ensure Founders always get their default permissions if the DB is missing them
+  if (hierarchyLevel === 2 && (!userPermissions || (Array.isArray(userPermissions) ? userPermissions.length === 0 : Object.keys(userPermissions).length === 0))) {
+    userPermissions = FOUNDER_PERMISSIONS;
+  }
+
   let hasAccess = false;
 
     const hasAll = userPermissions["all"] === true || Object.values(userPermissions).includes("all");
@@ -92,7 +103,11 @@ export async function hasPermission(permissionOrModule: string, action?: string)
     return false;
   }
 
-  const userPermissions = (session.user as any).permissions || {};
+  let userPermissions = (session.user as any).permissions || {};
+  
+  if (hierarchyLevel === 2 && (!userPermissions || (Array.isArray(userPermissions) ? userPermissions.length === 0 : Object.keys(userPermissions).length === 0))) {
+    userPermissions = FOUNDER_PERMISSIONS;
+  }
   
   const hasAll = userPermissions["all"] === true || Object.values(userPermissions).includes("all");
   

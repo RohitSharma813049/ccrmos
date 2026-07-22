@@ -78,8 +78,19 @@ export const initializeWhatsAppClient = async (companyId: string, scopeId: strin
       puppeteer: puppeteerConfig
     });
 
+    let qrCount = 0;
+    const MAX_QR_RETRIES = 5; // Usually generated every ~20 seconds
+
     client.on('qr', async (qr) => {
-      console.log(`WhatsApp QR RECEIVED for ${scopeId}`);
+      qrCount++;
+      if (qrCount > MAX_QR_RETRIES) {
+        console.log(`WhatsApp QR limit reached for ${scopeId}. Destroying client to save resources.`);
+        client.destroy();
+        global._whatsappSessions.delete(scopeId);
+        return;
+      }
+
+      console.log(`WhatsApp QR RECEIVED for ${scopeId} (Attempt ${qrCount}/${MAX_QR_RETRIES})`);
       try {
         const qrUrl = await qrcode.toDataURL(qr);
         const s = global._whatsappSessions.get(scopeId);

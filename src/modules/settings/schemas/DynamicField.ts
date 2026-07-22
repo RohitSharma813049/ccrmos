@@ -7,6 +7,7 @@ export interface IDynamicField extends Document {
   required: boolean;
   tenantScope: string;
   companyId?: mongoose.Types.ObjectId;
+  industryId?: mongoose.Types.ObjectId;
   section?: string;
   order?: number;
   options?: string[]; // For dropdown types
@@ -27,6 +28,7 @@ const dynamicFieldSchema = new Schema<IDynamicField>(
     required: { type: Boolean, default: false },
     tenantScope: { type: String, default: "Global" },
     companyId: { type: Schema.Types.ObjectId, ref: "Company", required: false },
+    industryId: { type: Schema.Types.ObjectId, ref: "Industry", required: false },
     section: { type: String, default: "General" },
     order: { type: Number, default: 0 },
     options: [{ type: String }],

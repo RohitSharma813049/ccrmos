@@ -9,9 +9,13 @@ export default function AIConfigClient() {
   const [anthropicKey, setAnthropicKey] = useState("");
   const [anthropicModel, setAnthropicModel] = useState("claude-3-opus-20240229");
 
+  const [groqKey, setGroqKey] = useState("");
+  const [groqModel, setGroqModel] = useState("llama-3.3-70b-versatile");
+
   const [loading, setLoading] = useState(true);
   const [testingOAI, setTestingOAI] = useState(false);
   const [testingANT, setTestingANT] = useState(false);
+  const [testingGROQ, setTestingGROQ] = useState(false);
   const [isPlatformOwner, setIsPlatformOwner] = useState(false);
 
   useEffect(() => {
@@ -37,6 +41,8 @@ export default function AIConfigClient() {
           if (data.value.openAIModel) setOpenAIModel(data.value.openAIModel);
           if (data.value.anthropicKey) setAnthropicKey(data.value.anthropicKey);
           if (data.value.anthropicModel) setAnthropicModel(data.value.anthropicModel);
+          if (data.value.groqKey) setGroqKey(data.value.groqKey);
+          if (data.value.groqModel) setGroqModel(data.value.groqModel);
         }
       }
     } catch (e) {
@@ -46,18 +52,19 @@ export default function AIConfigClient() {
     }
   }
 
-  async function testAndSave(provider: "openai" | "anthropic") {
-    const key = provider === "openai" ? openAIKey : anthropicKey;
-    const model = provider === "openai" ? openAIModel : anthropicModel;
+  async function testAndSave(provider: "openai" | "anthropic" | "groq") {
+    const key = provider === "openai" ? openAIKey : provider === "anthropic" ? anthropicKey : groqKey;
+    const model = provider === "openai" ? openAIModel : provider === "anthropic" ? anthropicModel : groqModel;
     
     if (!key) {
-      alert(`Please enter a valid ${provider === "openai" ? "OpenAI" : "Anthropic"} key first.`);
+      alert(`Please enter a valid ${provider === "openai" ? "OpenAI" : provider === "anthropic" ? "Anthropic" : "Groq"} key first.`);
       return;
     }
 
     // Set loading states
     if (provider === "openai") setTestingOAI(true);
-    else setTestingANT(true);
+    else if (provider === "anthropic") setTestingANT(true);
+    else setTestingGROQ(true);
 
     try {
       // 1. Test Connection
@@ -79,7 +86,7 @@ export default function AIConfigClient() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           global: isPlatformOwner, // Platform owners save globally, tenants save locally (BYOK)
-          value: { openAIKey, openAIModel, anthropicKey, anthropicModel }
+          value: { openAIKey, openAIModel, anthropicKey, anthropicModel, groqKey, groqModel }
         })
       });
 
@@ -93,7 +100,8 @@ export default function AIConfigClient() {
       alert("Error testing or saving configuration.");
     } finally {
       if (provider === "openai") setTestingOAI(false);
-      else setTestingANT(false);
+      else if (provider === "anthropic") setTestingANT(false);
+      else setTestingGROQ(false);
     }
   }
 
@@ -194,6 +202,53 @@ export default function AIConfigClient() {
               className="w-full py-3 bg-gray-900 hover:bg-gray-800 border border-gray-900 text-white font-semibold rounded-xl transition-all mt-4 disabled:opacity-70 flex justify-center items-center"
             >
               {testingANT ? (
+                <><svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Testing...</>
+              ) : "Test Connection & Save"}
+            </button>
+          </div>
+        </div>
+
+        {/* Groq Section */}
+        <div className="bg-white/50 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-xl lg:col-span-2 max-w-2xl mx-auto w-full">
+           <div className="flex items-center gap-3 mb-6">
+            <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center border border-orange-200">
+              <span className="text-orange-600 font-bold text-xs">GRQ</span>
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">Groq Integration (Free AI)</h2>
+              <p className="text-xs text-gray-500 mt-1">Get a free API key at <a href="https://console.groq.com" target="_blank" className="text-indigo-600 hover:underline">console.groq.com</a></p>
+            </div>
+          </div>
+          
+          <div className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">API Key</label>
+              <input 
+                type="password" 
+                placeholder="gsk_..." 
+                value={groqKey}
+                onChange={(e) => setGroqKey(e.target.value)}
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all font-mono text-sm" 
+              />
+            </div>
+             <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Default Llama Model</label>
+              <select 
+                value={groqModel}
+                onChange={(e) => setGroqModel(e.target.value)}
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all appearance-none"
+              >
+                <option value="llama-3.3-70b-versatile">Llama 3.3 70B (Recommended)</option>
+                <option value="llama-3.1-8b-instant">Llama 3.1 8B (Fast)</option>
+                <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
+              </select>
+            </div>
+            <button 
+              onClick={() => testAndSave("groq")} 
+              disabled={testingGROQ}
+              className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-xl transition-all mt-4 disabled:opacity-70 flex justify-center items-center shadow-lg shadow-orange-500/20"
+            >
+              {testingGROQ ? (
                 <><svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Testing...</>
               ) : "Test Connection & Save"}
             </button>

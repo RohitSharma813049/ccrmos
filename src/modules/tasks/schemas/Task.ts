@@ -5,8 +5,10 @@ export interface ITask extends Document {
   displayId?: string;
   companyId?: mongoose.Types.ObjectId;
   founderId?: mongoose.Types.ObjectId;
-  title: any;
-  status: any;
+  createdBy?: mongoose.Types.ObjectId;
+  title: string;
+  description: string;
+  status: string;
   customData?: Record<string, any>;
 }
 
@@ -14,6 +16,7 @@ const TaskSchema = new Schema<ITask>({
   displayId: { type: String, unique: true },
   companyId: { type: Schema.Types.ObjectId, ref: 'Company' },
   founderId: { type: Schema.Types.ObjectId, ref: 'User' },
+  createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
   title: { type: String, required: true },
   status: { type: String, default: 'Pending' },
   customData: { type: Schema.Types.Mixed, default: {} }

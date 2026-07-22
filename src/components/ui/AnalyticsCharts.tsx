@@ -20,13 +20,24 @@ export default function AnalyticsCharts() {
   useEffect(() => {
     async function fetchData() {
       try {
+        const fetchJson = async (url: string) => {
+          try {
+            const res = await fetch(url);
+            if (!res.ok) return {};
+            const text = await res.text();
+            return text ? JSON.parse(text) : {};
+          } catch (e) {
+            return {};
+          }
+        };
+
         const [leadsRes, customersRes, projectsRes, tasksRes, ordersRes, invoicesRes] = await Promise.all([
-          fetch("/api/leads").then(res => res.json()),
-          fetch("/api/customers").then(res => res.json()),
-          fetch("/api/projects").then(res => res.json()),
-          fetch("/api/tasks").then(res => res.json()),
-          fetch("/api/orders").then(res => res.json()),
-          fetch("/api/invoices").then(res => res.json())
+          fetchJson("/api/leads"),
+          fetchJson("/api/customers"),
+          fetchJson("/api/projects"),
+          fetchJson("/api/tasks"),
+          fetchJson("/api/orders"),
+          fetchJson("/api/invoices")
         ]);
         
         const leads = leadsRes.leads || [];
@@ -160,7 +171,7 @@ export default function AnalyticsCharts() {
                   outerRadius={90}
                   paddingAngle={5}
                   dataKey="value"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
                 >
                   {leadsByStatus.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

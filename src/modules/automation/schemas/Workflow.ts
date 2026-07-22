@@ -25,7 +25,7 @@ export interface IWorkflow extends Document {
 
 const workflowSchema = new Schema<IWorkflow>(
   {
-    companyId: { type: Schema.Types.ObjectId, ref: "Company", required: true },
+    companyId: { type: Schema.Types.ObjectId, ref: "Company", required: false },
     title: { type: String, required: true },
     description: { type: String, default: "" },
     active: { type: Boolean, default: true },

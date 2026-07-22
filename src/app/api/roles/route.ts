@@ -17,6 +17,16 @@ export async function GET() {
   let query: any = {};
   if (hLevel > 1) {
     query.companyId = companyId; // Non-platform owners only see their company's roles
+  } else if (user.impersonatedFounderId) {
+    // Platform owner is impersonating a tenant, they should see the tenant's roles
+    // Wait, roles are linked to companyId. If impersonating, we need the tenant's companyId.
+    // If the session has impersonatedCompanyId, use it. Otherwise, we might have to look it up.
+    // Let's assume the session has it or we just use user.companyId if not?
+    // User session contains companyId of the impersonated user if it was updated during impersonation.
+    query.companyId = companyId; 
+  } else {
+    // Platform owner managing their own internal roles
+    query.companyId = companyId;
   }
 
   let roles = await RoleService.getRoles(query.companyId);
@@ -31,6 +41,15 @@ export async function GET() {
     team_leader: 5,
     employee: 6
   };
+
+  // Always hide top-level owner/founder roles from the company roles management UI
+  roles = roles.filter(r => {
+    const name = r.name.toLowerCase();
+    if (name === 'owner' || name === 'founder' || name === 'platform owner') {
+      return false;
+    }
+    return true;
+  });
 
   if (hLevel > 1) {
     roles = roles.filter(r => {

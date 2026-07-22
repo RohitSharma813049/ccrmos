@@ -275,15 +275,15 @@ export default function SecurityClient() {
           <div className="space-y-2">
             {webhooks.map(wh => (
               <div key={wh._id} className="p-4 border border-gray-200 bg-gray-50 rounded-xl flex justify-between items-start group">
-                <div>
+                <div className="flex-1 min-w-0 pr-4">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-gray-900">{wh.name}</span>
-                    <span className={`text-[10px] uppercase font-bold px-1.5 py-0.5 rounded ${wh.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-gray-600'}`}>
+                    <span className="text-sm font-semibold text-gray-900 truncate">{wh.name}</span>
+                    <span className={`text-[10px] uppercase font-bold px-1.5 py-0.5 rounded flex-shrink-0 ${wh.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-gray-600'}`}>
                       {wh.isActive ? "Active" : "Inactive"}
                     </span>
                   </div>
-                  <span className="text-xs text-gray-500 font-mono block mt-1 line-clamp-1">{wh.endpointUrl}</span>
-                  <span className="text-xs text-indigo-500 font-medium block mt-1">Events: {wh.events.join(", ")}</span>
+                  <span className="text-xs text-gray-500 font-mono block mt-1 truncate">{wh.endpointUrl}</span>
+                  <span className="text-xs text-indigo-500 font-medium block mt-1 truncate">Events: {wh.events.join(", ")}</span>
                 </div>
                 <div className="flex flex-col items-end gap-2">
                   <div className="flex items-center gap-3">

@@ -55,6 +55,27 @@ export async function POST(req: Request) {
 
       return NextResponse.json({ success: true });
     }
+    else if (provider === "groq") {
+      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${key}`
+        },
+        body: JSON.stringify({
+          model: model || "llama-3.3-70b-versatile",
+          messages: [{ role: "user", content: "Hello" }],
+          max_tokens: 5
+        })
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        return NextResponse.json({ error: err.error?.message || "Invalid Groq Key" }, { status: 400 });
+      }
+
+      return NextResponse.json({ success: true });
+    }
     
     return NextResponse.json({ error: "Unknown provider." }, { status: 400 });
 

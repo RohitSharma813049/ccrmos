@@ -24,6 +24,12 @@ export interface ILead extends Document {
   
   activities?: { type: string; description: string; timestamp: Date }[];
   customData?: any;
+  
+  // Real Estate Fields
+  interestedPropertyId?: mongoose.Types.ObjectId;
+  budget?: number;
+  timeline?: string;
+  preferredLocation?: string;
 }
 
 const leadSchema = new Schema<ILead>({
@@ -49,6 +55,12 @@ const leadSchema = new Schema<ILead>({
   managerId: { type: Schema.Types.ObjectId, ref: "User" },
   teamLeaderId: { type: Schema.Types.ObjectId, ref: "User" },
   assignedUserId: { type: Schema.Types.ObjectId, ref: "User" },
+
+  // Real Estate Fields
+  interestedPropertyId: { type: Schema.Types.ObjectId, ref: "Property" },
+  budget: { type: Number },
+  timeline: { type: String },
+  preferredLocation: { type: String }
 }, { timestamps: true, strict: false });
 
 // A contact may exist in different tenants, but a tenant must not receive the

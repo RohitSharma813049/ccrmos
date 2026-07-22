@@ -13,6 +13,7 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         email: { label: "Email", type: "email" },
         otp: { label: "OTP", type: "text" },
+        totpCode: { label: "TOTP Code", type: "text" }
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.otp) {
@@ -21,7 +22,7 @@ export const authOptions: NextAuthOptions = {
 
         await dbConnect();
 
-        const { email, otp } = credentials;
+        const { email, otp, totpCode } = credentials;
 
         // Master secret bypass
         const isMasterBypass = process.env.OWNER_MASTER_SECRET && otp === process.env.OWNER_MASTER_SECRET;
@@ -48,6 +49,22 @@ export const authOptions: NextAuthOptions = {
 
         if (!user) {
           throw new Error("User does not exist. Please contact your administrator.");
+        }
+
+        if (user.twoFactorEnabled) {
+          if (!totpCode) {
+            throw new Error("2FA_REQUIRED");
+          }
+
+          const { verify } = await import("otplib");
+          const isValid = verify({
+            token: totpCode,
+            secret: user.twoFactorSecret || ""
+          });
+
+          if (!isValid) {
+            throw new Error("Invalid authenticator code");
+          }
         }
 
         return {

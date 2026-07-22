@@ -1,88 +1,82 @@
-import { NextResponse } from 'next/server';
-import dbConnect from '@/lib/db';
-import Lead from '@/modules/leads/schemas/Lead';
+import { NextRequest, NextResponse } from "next/server";
+import dbConnect from "@/lib/db";
+import Lead from "@/modules/leads/schemas/Lead";
 import { evaluateWorkflows } from "@/modules/automation/services/workflow.service";
 
-export async function POST(req: Request) {
-  try {
-    const { searchParams } = new URL(req.url);
-    const companyId = searchParams.get('companyId');
-    const projectId = searchParams.get('projectId');
-    
-    if (!companyId) {
-      return NextResponse.json({ error: "Missing companyId query parameter for authentication" }, { status: 401 });
-    }
+// Verify Webhook for Meta (Facebook)
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const mode = searchParams.get("hub.mode");
+  const token = searchParams.get("hub.verify_token");
+  const challenge = searchParams.get("hub.challenge");
 
-    await dbConnect();
-    const body = await req.json();
+  const VERIFY_TOKEN = process.env.META_WEBHOOK_VERIFY_TOKEN;
 
-    // In a real Meta integration, body contains an entry[] array with changes[] containing value.leadgen_id.
-    // We would then call Meta Graph API to fetch lead details using leadgen_id.
-    // For this example or if using Zapier/Make.com, we assume parsed data:
-    const leadData = body.entry?.[0]?.changes?.[0]?.value || body;
-    
-    // Attempt to extract typical Meta Lead Gen fields
-    const email = leadData.email || leadData.Email || "";
-    const name = leadData.full_name || leadData.name || leadData.Name || "Meta Lead";
-    const phone = leadData.phone_number || leadData.Phone || "";
-    const campaignId = leadData.campaign_id || "";
-
-    if (!email && !phone) {
-      return NextResponse.json({ success: true, message: "Webhook received but no valid contact info found." }, { status: 200 });
-    }
-
-    // Check if lead already exists by email or phone
-    const query: any = { companyId };
-    if (email) {
-      query.email = email;
-    } else if (phone) {
-      query.phone = phone;
-    }
-
-    let lead = await Lead.findOne(query);
-
-    if (!lead) {
-      lead = await Lead.create({
-        companyId,
-        firstName: name,
-        email,
-        phone: phone,
-        status: "New",
-        source: "Meta Ads",
-        customData: {
-          metaCampaignId: campaignId,
-          ...(projectId ? { projectId } : {}),
-          _importDate: new Date().toISOString()
-        }
-      });
-
-      // Trigger workflows
-      evaluateWorkflows(companyId, "Lead Created", lead._id.toString(), {
-        ...lead.toObject(),
-        ...lead.customData
-      }).catch(console.error);
+  if (mode && token) {
+    if (mode === "subscribe" && token === VERIFY_TOKEN) {
+      console.log("WEBHOOK_VERIFIED");
+      return new NextResponse(challenge, { status: 200 });
     } else {
-      // Opt to update existing or skip. For now, we skip creation to avoid duplicates
-      console.log(`Lead from Meta already exists: ${lead._id}`);
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
-
-    return NextResponse.json({ success: true, message: "Meta lead processed." }, { status: 200 });
-
-  } catch (error: any) {
-    console.error("Meta Webhook Error:", error);
-    return NextResponse.json({ error: error.message || "Internal server error" }, { status: 500 });
   }
+
+  return NextResponse.json({ error: "Invalid Request" }, { status: 400 });
 }
 
-// Verification endpoint for Meta webhook configuration
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const challenge = searchParams.get('hub.challenge');
-  const verifyToken = searchParams.get('hub.verify_token');
+// Handle incoming lead data from Meta
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
 
-  if (challenge) {
-    return new NextResponse(challenge, { status: 200 });
+    if (body.object === "page") {
+      await dbConnect();
+
+      for (const entry of body.entry) {
+        for (const change of entry.changes) {
+          if (change.value.item === "leadgen") {
+            const leadId = change.value.leadgen_id;
+            const formId = change.value.form_id;
+            
+            // In a real production app, you would now make a GET request to the Graph API 
+            // using the leadId and a Page Access Token to fetch the actual lead details (name, email, phone).
+            // Example: GET https://graph.facebook.com/v19.0/{leadgen_id}?access_token={access_token}
+            // For now, we will mock the fetched data or store the raw event.
+
+            console.log(`Received Meta Lead: ${leadId} from Form: ${formId}`);
+
+            // Mocking the fetched lead data
+            const newLead = await Lead.create({
+              firstName: "Meta",
+              lastName: "Lead",
+              email: `meta_${leadId}@example.com`,
+              source: "Meta Ads",
+              status: "New",
+              customData: {
+                metaLeadId: leadId,
+                metaFormId: formId
+              },
+              activities: [{
+                type: "Creation",
+                description: "Lead was fetched via Meta Webhook.",
+                timestamp: new Date()
+              }]
+            });
+
+            // Trigger workflows (e.g. notifications)
+            // Note: In a multi-tenant system, you'd need a way to map the Meta Page ID to your Company ID.
+            evaluateWorkflows(newLead.companyId?.toString() || "", "Lead Created", newLead._id.toString(), {
+              ...newLead.toObject(),
+              ...newLead.customData
+            }).catch(console.error);
+          }
+        }
+      }
+      return NextResponse.json({ success: true }, { status: 200 });
+    }
+    return NextResponse.json({ error: "Not a page event" }, { status: 404 });
+  } catch (error) {
+    console.error("Meta Webhook Error:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
-
-  return NextResponse.json({ status: 'active' }, { status: 200 });
 }

@@ -29,13 +29,13 @@ export default function ManageCompaniesPage() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentCompanyId, setCurrentCompanyId] = useState<string | null>(null);
   const [plans, setPlans] = useState<any[]>([]);
-  const [templates, setTemplates] = useState<any[]>([]);
+  const [industries, setIndustries] = useState<any[]>([]);
   
   const [formData, setFormData] = useState({
     name: "",
     adminEmail: "",
     subscriptionPlanId: "",
-    industryTemplateId: "",
+    industryId: "",
     usersQuota: 5,
     status: "Active"
   });
@@ -49,7 +49,7 @@ export default function ManageCompaniesPage() {
 
   useEffect(() => {
     fetchPlans();
-    fetchTemplates();
+    fetchIndustries();
   }, []);
 
   useEffect(() => {
@@ -68,15 +68,15 @@ export default function ManageCompaniesPage() {
     }
   }
 
-  async function fetchTemplates() {
+  async function fetchIndustries() {
     try {
-      const res = await fetch("/api/settings/templates");
+      const res = await fetch("/api/industries");
       if (res.ok) {
         const data = await res.json();
-        setTemplates(data.templates || []);
+        setIndustries(data || []);
       }
     } catch (error) {
-      console.error("Failed to fetch templates", error);
+      console.error("Failed to fetch industries", error);
     }
   }
 
@@ -107,7 +107,7 @@ export default function ManageCompaniesPage() {
 
   const openCreateModal = () => {
     setIsEditMode(false);
-    setFormData({ name: "", adminEmail: "", subscriptionPlanId: plans[0]?._id || "", industryTemplateId: "", usersQuota: 5, status: "Active" });
+    setFormData({ name: "", adminEmail: "", subscriptionPlanId: plans[0]?._id || "", industryId: "", usersQuota: 5, status: "Active" });
     setIsModalOpen(true);
   };
 
@@ -120,7 +120,7 @@ export default function ManageCompaniesPage() {
       name: company.name,
       adminEmail: company.adminEmail,
       subscriptionPlanId: matchingPlan ? matchingPlan._id : (plans[0]?._id || ""),
-      industryTemplateId: "", // Cannot edit template after creation
+      industryId: "", // Cannot edit industry after creation for now
       usersQuota: company.usersQuota,
       status: company.status
     });
@@ -178,8 +178,18 @@ export default function ManageCompaniesPage() {
       )
     },
     {
-      header: "Admin Email",
-      cell: (company) => <span className="text-gray-600">{company.adminEmail}</span>
+      header: "Founder / Owner",
+      cell: (company) => (
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-[10px] font-bold">
+            {company.adminEmail?.[0].toUpperCase()}
+          </div>
+          <div className="flex flex-col">
+            <span className="text-gray-900 font-medium text-sm">{company.adminEmail}</span>
+            <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wide">Tenant Owner</span>
+          </div>
+        </div>
+      )
     },
     {
       header: "Plan",
@@ -317,15 +327,15 @@ export default function ManageCompaniesPage() {
                 </div>
                 {!isEditMode && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Industry Template</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Target Industry</label>
                     <select 
-                      value={formData.industryTemplateId}
-                      onChange={(e) => setFormData({...formData, industryTemplateId: e.target.value})}
+                      value={formData.industryId}
+                      onChange={(e) => setFormData({...formData, industryId: e.target.value})}
                       className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                     >
                       <option value="">None (Blank CRM)</option>
-                      {templates.map(t => (
-                        <option key={t._id} value={t._id}>{t.name}</option>
+                      {industries.map(i => (
+                        <option key={i._id} value={i._id}>{i.name}</option>
                       ))}
                     </select>
                   </div>

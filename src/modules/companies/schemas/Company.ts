@@ -7,11 +7,12 @@ export interface ICompany extends Document {
   usersQuota: number;
   country?: string;
   currency?: string;
+  industryId?: mongoose.Types.ObjectId | string;
   status: "Active" | "Suspended";
   subscriptionPlanId?: mongoose.Types.ObjectId | string;
   subscriptionStatus?: "pending_payment" | "trialing" | "active" | "past_due" | "canceled";
-  razorpayCustomerId?: string;
-  razorpaySubscriptionId?: string;
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
   checkoutToken?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -25,11 +26,12 @@ const companySchema = new Schema<ICompany>(
     usersQuota: { type: Number, default: 5 },
     country: { type: String, default: "US" },
     currency: { type: String, default: "USD" },
+    industryId: { type: Schema.Types.ObjectId, ref: 'Industry' },
     status: { type: String, enum: ["Active", "Suspended"], default: "Active" },
     subscriptionPlanId: { type: Schema.Types.ObjectId, ref: 'SubscriptionPlan' },
     subscriptionStatus: { type: String, enum: ["pending_payment", "trialing", "active", "past_due", "canceled"], default: "trialing" },
-    razorpayCustomerId: { type: String },
-    razorpaySubscriptionId: { type: String },
+    stripeCustomerId: { type: String },
+    stripeSubscriptionId: { type: String },
     checkoutToken: { type: String },
   },
   { timestamps: true }

@@ -2,7 +2,7 @@ import { requireAuthenticatedUser } from "@/lib/auth-utils";
 import mongoose from "mongoose";
 import Company from "@/modules/companies/schemas/Company";
 import SubscriptionPlan from "@/modules/settings/schemas/SubscriptionPlan";
-import RazorpayCheckout from "@/modules/billing/components/RazorpayCheckout";
+import StripeCheckoutClient from "@/modules/billing/components/StripeCheckoutClient";
 import CancelSubscriptionButton from "@/modules/billing/components/CancelSubscriptionButton";
 
 export default async function BillingPage() {
@@ -44,7 +44,7 @@ export default async function BillingPage() {
             </div>
           </div>
           
-          {currentCompany.subscriptionStatus === 'active' && (
+          {currentCompany.subscriptionStatus === 'active' && user.hierarchyLevel <= 2 && (
             <div>
               <CancelSubscriptionButton />
             </div>
@@ -84,7 +84,7 @@ export default async function BillingPage() {
                   Current Plan
                 </button>
               ) : (
-                <RazorpayCheckout 
+                <StripeCheckoutClient 
                   planId={plan._id.toString()} 
                   planName={plan.name}
                   planPrice={plan.price}

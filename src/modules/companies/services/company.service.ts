@@ -43,7 +43,7 @@ export class CompanyService {
     };
   }
 
-  static async registerTenant({ name, adminEmail, subscriptionPlanId, usersQuota, industryTemplateId }: { name: string, adminEmail: string, subscriptionPlanId?: string, usersQuota?: number, industryTemplateId?: string }) {
+  static async registerTenant({ name, adminEmail, subscriptionPlanId, usersQuota, industryId }: { name: string, adminEmail: string, subscriptionPlanId?: string, usersQuota?: number, industryId?: string }) {
     if (!name || !adminEmail) {
       throw new Error("Name and Admin Email are required.");
     }
@@ -67,17 +67,18 @@ export class CompanyService {
       adminEmail: normalizedEmail,
       subscriptionPlanId: subscriptionPlanId || undefined,
       usersQuota: usersQuota || 5,
+      industryId: industryId || undefined,
       status: "Suspended",
       subscriptionStatus: "pending_payment",
       checkoutToken
     });
 
-    // Automatically create the founder user account
-    const founderRole: any = await Role.findOne({ name: "founder" });
-    
-    if (!founderRole) {
-      throw new Error("Founder role not found.");
-    }
+    // Automatically create the founder role and user account for this new tenant
+    const founderRole = await Role.create({
+      name: "Founder",
+      companyId: newCompany._id,
+      permissions: {} // Founders typically bypass permission checks, but you can add full permissions if needed
+    });
 
     const founder = await User.create({
       email: normalizedEmail,
@@ -88,33 +89,22 @@ export class CompanyService {
     founder.founderId = founder._id;
     await founder.save();
     
-    // Scaffold Industry Template if provided
-    if (industryTemplateId) {
-      const template = await IndustryTemplate.findById(industryTemplateId).lean();
-      if (template) {
-        // Clone Modules
-        if (template.modules && template.modules.length > 0) {
-          const newModules = template.modules.map((mod: any) => ({
-            ...mod,
-            _id: undefined, // Let mongoose generate a new ID
-            companyId: newCompany._id,
-            createdAt: undefined,
-            updatedAt: undefined
-          }));
-          await CustomModule.insertMany(newModules);
-        }
-        
-        // Clone Fields
-        if (template.fields && template.fields.length > 0) {
-          const newFields = template.fields.map((field: any) => ({
-            ...field,
-            _id: undefined, // Let mongoose generate a new ID
-            companyId: newCompany._id,
-            createdAt: undefined,
-            updatedAt: undefined
-          }));
-          await DynamicField.insertMany(newFields);
-        }
+    // Provision Industry-Specific Dynamic Fields
+    if (industryId) {
+      // Find all global dynamic fields tied to this industry
+      const industryFields = await DynamicField.find({ industryId, tenantScope: "Global" }).lean();
+      
+      if (industryFields && industryFields.length > 0) {
+        const newFields = industryFields.map((field: any) => ({
+          ...field,
+          _id: undefined, // Let mongoose generate a new ID
+          companyId: newCompany._id,
+          tenantScope: "Local", // Convert to local so company can edit
+          industryId: undefined, // No longer globally tied
+          createdAt: undefined,
+          updatedAt: undefined
+        }));
+        await DynamicField.insertMany(newFields);
       }
     }
     

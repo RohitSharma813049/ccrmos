@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from "next";
+import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-
+import dbConnect from "@/lib/db";
+import mongoose from "mongoose";
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -15,15 +16,47 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Prompt is required" }, { status: 400 });
     }
 
-    // Note: We would normally fetch the tenant's AI Config from the database here
-    // e.g. const aiConfig = await SystemSetting.findOne({ type: 'ai_config' });
-    // And then use the API key to call OpenAI / Anthropic.
+    await dbConnect();
+    
+    // We fetch SystemSettings from the mongoose connection
+    const db = mongoose.connection.db;
+    const settingsColl = db?.collection("systemsettings");
+    let aiConfig: any = null;
+    if (settingsColl) {
+      const companyId = (session.user as any).companyId ? new mongoose.Types.ObjectId((session.user as any).companyId) : null;
+      aiConfig = await settingsColl.findOne({ key: "ai_config", companyId });
+      if (!aiConfig) {
+        aiConfig = await settingsColl.findOne({ key: "ai_config", companyId: null });
+      }
+    }
 
-    // For this prototype, we'll provide a mock intelligent response based on the prompt.
-    // We'll simulate a slight network delay to make it feel real.
+    const groqKey = aiConfig?.value?.groqKey;
+    const groqModel = aiConfig?.value?.groqModel || "llama-3.3-70b-versatile";
+
+    if (groqKey) {
+      // Call Groq API
+      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${groqKey}`
+        },
+        body: JSON.stringify({
+          model: groqModel,
+          messages: [{ role: "system", content: "You are a helpful CRM assistant." }, { role: "user", content: prompt }]
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const reply = data.choices[0]?.message?.content || "I couldn't generate a response.";
+        return NextResponse.json({ reply });
+      }
+    }
+
+    // Fallback if no keys
     await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 500));
-
-    let reply = "I'm a prototype AI Co-Pilot! Please configure an OpenAI API key in the Control Center to enable real responses.";
+    let reply = "I'm a prototype AI Co-Pilot! Please configure an AI API key (like Groq) in the Control Center to enable real responses.";
 
     const p = prompt.toLowerCase();
     if (p.includes("draft") && p.includes("email")) {

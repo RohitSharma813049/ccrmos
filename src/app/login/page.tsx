@@ -7,7 +7,8 @@ import { useRouter } from "next/navigation";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
-  const [step, setStep] = useState<"email" | "otp">("email");
+  const [totpCode, setTotpCode] = useState("");
+  const [step, setStep] = useState<"email" | "otp" | "totp">("email");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
@@ -47,14 +48,26 @@ export default function LoginPage() {
         redirect: false,
         email,
         otp,
+        ...(step === "totp" ? { totpCode } : {})
       });
 
       if (res?.error) {
+        if (res.error === "2FA_REQUIRED") {
+          setStep("totp");
+          return;
+        }
         throw new Error(res.error);
       }
 
-      // Default redirect, you might want to redirect based on role
-      router.push("/dashboard");
+      // Fetch session to determine role-based redirect
+      const sessionRes = await fetch("/api/auth/session");
+      const sessionData = await sessionRes.json();
+      
+      if (sessionData?.user?.hierarchyLevel === 1) {
+        router.push("/owner");
+      } else {
+        router.push("/dashboard");
+      }
       router.refresh();
     } catch (err: any) {
       setError(err.message);
@@ -97,7 +110,7 @@ export default function LoginPage() {
               {loading ? "Sending..." : "Send OTP"}
             </button>
           </form>
-        ) : (
+        ) : step === "otp" ? (
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-1">Enter OTP</label>
@@ -125,6 +138,36 @@ export default function LoginPage() {
               className="w-full text-sm text-gray-600 hover:text-gray-900 transition-colors mt-2"
             >
               Use a different email
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">Authenticator Code (2FA)</label>
+              <p className="text-xs text-gray-500 mb-3">Enter the 6-digit code from your authenticator app</p>
+              <input
+                type="text"
+                value={totpCode}
+                onChange={(e) => setTotpCode(e.target.value)}
+                required
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all outline-none tracking-widest text-center text-xl"
+                placeholder="000000"
+                maxLength={6}
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50"
+            >
+              {loading ? "Verifying..." : "Verify 2FA"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setStep("email")}
+              className="w-full text-sm text-gray-600 hover:text-gray-900 transition-colors mt-2"
+            >
+              Cancel
             </button>
           </form>
         )}

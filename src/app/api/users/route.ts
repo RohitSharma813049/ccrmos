@@ -21,26 +21,57 @@ export async function GET(req: Request) {
     // We could enforce requirePermission("MANAGE_USERS") but for MVP we assume Founders/Directors access this
     
     const query: any = {};
+    
+    // Find roles that should be hidden from general management
+    const hiddenRoles = await mongoose.models.Role.find({
+      name: { $regex: /^(owner|founder|platform owner)$/i }
+    }).select('_id');
+    const hiddenRoleIds = hiddenRoles.map(r => r._id);
+    
+    // Exclude users who have these top-level admin roles
+    query.role = { $nin: hiddenRoleIds };
+    
     if (user.hierarchyLevel !== 1) {
       const targetFounderId = user.hierarchyLevel === 2 ? user.id : user.founderId;
       if (!targetFounderId) {
         return NextResponse.json({ users: [], total: 0, page, totalPages: 0 });
       }
       query.founderId = targetFounderId;
-      // Users can only see others who are strictly BELOW them in hierarchy, plus themselves
+      // Users can only see others who are strictly BELOW them in hierarchy
+      query.hierarchyLevel = { $gt: user.hierarchyLevel };
+      
+      // Also allow them to see themselves (we'll use an $or)
+      const baseHierarchyCondition = query.hierarchyLevel;
+      delete query.hierarchyLevel;
+      
       query.$or = [
-        { hierarchyLevel: { $gt: user.hierarchyLevel } },
+        { hierarchyLevel: baseHierarchyCondition },
         { _id: user.id } // Can see themselves
       ];
     } else if (user.impersonatedFounderId) {
       // Platform Owner is impersonating a tenant, only show that tenant's users
       query.founderId = user.impersonatedFounderId;
+      query.hierarchyLevel = { $gt: 2 }; // Hide founders when impersonating
+    } else {
+      // Platform Owner managing their own internal platform employees
+      query.companyId = user.companyId;
+      // Hide other platform owners if they exist, or just hide founders
+      query.hierarchyLevel = { $gt: 2 }; 
     }
     
     if (search) {
       const searchRegex = { $regex: search, $options: "i" };
       const searchOr = [{ name: searchRegex }, { email: searchRegex }];
-      query.$or = query.$or ? [...query.$or, ...searchOr] : searchOr;
+      
+      if (query.$or) {
+        query.$and = [
+          { $or: query.$or },
+          { $or: searchOr }
+        ];
+        delete query.$or;
+      } else {
+        query.$or = searchOr;
+      }
     }
 
     const skip = (page - 1) * limit;

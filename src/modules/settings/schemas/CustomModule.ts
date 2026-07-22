@@ -11,6 +11,8 @@ export interface ICustomModule extends Document {
   name: string;
   active: boolean;
   fields: ICustomField[];
+  tenantScope: string;
+  industryId?: mongoose.Types.ObjectId | null;
   companyId?: mongoose.Types.ObjectId | null;
 }
 
@@ -25,7 +27,9 @@ const customModuleSchema = new Schema<ICustomModule>({
   name: { type: String, required: true },
   active: { type: Boolean, default: false },
   fields: { type: [customFieldSchema], default: [] },
-  companyId: { type: Schema.Types.ObjectId, ref: 'Company', default: null }, // Null means global template
+  tenantScope: { type: String, default: "Global" },
+  industryId: { type: Schema.Types.ObjectId, ref: 'Industry', default: null },
+  companyId: { type: Schema.Types.ObjectId, ref: 'Company', default: null }, // Null means global or industry template
 }, { timestamps: true });
 
 const CustomModule: Model<ICustomModule> = mongoose.models.CustomModule || mongoose.model<ICustomModule>('CustomModule', customModuleSchema);

@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { requireAuthenticatedUser } from "@/lib/auth-utils";
 import dbConnect from "@/lib/db";
 import Company from "@/modules/companies/schemas/Company";
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
+  apiVersion: "2024-04-10" as any,
+});
 
 export async function POST(req: Request) {
   try {
@@ -24,7 +29,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "No active subscription found to cancel." }, { status: 400 });
     }
 
-    // Cancel the subscription
+    // Cancel the subscription in Stripe if ID exists
+    if (company.stripeSubscriptionId) {
+      await stripe.subscriptions.cancel(company.stripeSubscriptionId);
+    }
+
+    // Cancel the subscription locally
     company.subscriptionStatus = "canceled";
     await company.save();
 
