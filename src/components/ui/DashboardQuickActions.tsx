@@ -75,6 +75,7 @@ export default function DashboardQuickActions() {
   }
 
   const pinnedShortcuts = shortcuts.filter(s => s.isPinned).sort((a, b) => a.order - b.order);
+  const basePath = session?.user?.hierarchyLevel === 1 ? '/owner' : '/dashboard';
 
   return (
     <div className="bg-card border border-border rounded-xl p-5 mb-8 shadow-sm">
@@ -95,7 +96,7 @@ export default function DashboardQuickActions() {
         <div className="flex flex-wrap gap-3">
           {pinnedShortcuts.length > 0 ? (
             pinnedShortcuts.map(s => (
-              <Link key={s.id} href={s.url} className="flex items-center gap-2 bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground border border-primary/20 px-4 py-2 rounded-xl text-sm font-semibold transition-all">
+              <Link key={s.id} href={`${basePath}${s.url}`} className="flex items-center gap-2 bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground border border-primary/20 px-4 py-2 rounded-xl text-sm font-semibold transition-all">
                 <span className="w-5 h-5 flex items-center justify-center bg-background/50 rounded text-[10px]">{s.icon}</span>
                 {s.name}
               </Link>
