@@ -8,7 +8,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ key: str
   await dbConnect();
   try {
     const user = await requireAuthenticatedUser();
-    await requirePermission(PERMISSIONS.GLOBAL_SETTINGS, 'view');
+    if (user.hierarchyLevel > 2) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
 
     const key = (await params).key;
 
@@ -32,7 +34,9 @@ export async function PUT(req: Request, { params }: { params: Promise<{ key: str
   await dbConnect();
   try {
     const user = await requireAuthenticatedUser();
-    await requirePermission(PERMISSIONS.GLOBAL_SETTINGS, 'edit');
+    if (user.hierarchyLevel > 2) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
 
     const key = (await params).key;
     const body = await req.json();

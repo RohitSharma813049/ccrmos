@@ -102,12 +102,24 @@ export function buildQueryScope(user: any, recordScope: string = "Own") {
 /** Restricts a query to the current tenant. Use for every record lookup by ID. */
 export function buildTenantQuery(user: any) {
   if (!user) return { _id: null };
+  
   if (user.hierarchyLevel === 1) {
+    if (user.impersonatedCompanyId) {
+      return { companyId: user.impersonatedCompanyId };
+    }
     if (user.impersonatedFounderId) {
       return { founderId: user.impersonatedFounderId };
     }
     return {};
   }
+  
   const targetFounderId = user.hierarchyLevel === 2 ? user.id : user.founderId;
-  return targetFounderId ? { founderId: targetFounderId } : { _id: null };
+  if (!targetFounderId) return { _id: null };
+  
+  const query: any = { founderId: targetFounderId };
+  if (user.companyId) {
+    query.companyId = user.companyId;
+  }
+  
+  return query;
 }
