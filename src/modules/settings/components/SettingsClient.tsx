@@ -13,6 +13,7 @@ export default function SettingsClient() {
   // Modal State
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"create" | "edit" | "delete">("create");
+  const [deleteConfirmation, setDeleteConfirmation] = useState("");
   const [activeTemplate, setActiveTemplate] = useState<any>(null);
   const [formData, setFormData] = useState({ name: "", description: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -121,10 +122,16 @@ export default function SettingsClient() {
           alert("Failed to update template");
         }
       } else if (modalMode === "delete") {
+        if (deleteConfirmation !== "DELETE") {
+          alert("Please type DELETE to confirm.");
+          setIsSubmitting(false);
+          return;
+        }
         const res = await fetch(`/api/settings/templates/${activeTemplate._id}`, { method: "DELETE" });
         if (res.ok) {
           setTemplates(templates.filter(t => t._id !== activeTemplate._id));
           setModalOpen(false);
+          setDeleteConfirmation("");
         }
       }
     } catch (error) {
@@ -226,10 +233,24 @@ export default function SettingsClient() {
             <div className="p-6">
               {modalMode === "delete" ? (
                 <div>
-                  <p className="text-muted-foreground mb-6">Are you sure you want to permanently delete the template <strong className="text-foreground">{activeTemplate?.name}</strong>? This action cannot be undone.</p>
+                  <p className="text-muted-foreground mb-4">Are you sure you want to permanently delete the template <strong className="text-foreground">{activeTemplate?.name}</strong>? This action cannot be undone.</p>
+                  
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-foreground mb-1">
+                      Type <strong>DELETE</strong> to confirm
+                    </label>
+                    <input 
+                      type="text" 
+                      value={deleteConfirmation}
+                      onChange={(e) => setDeleteConfirmation(e.target.value)}
+                      className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-destructive outline-none shadow-sm transition-colors"
+                      placeholder="DELETE"
+                    />
+                  </div>
+
                   <div className="flex justify-end gap-3">
-                    <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 text-sm font-medium text-muted-foreground bg-muted hover:bg-muted/80 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Cancel</button>
-                    <button type="button" onClick={handleModalSubmit} disabled={isSubmitting} className="px-4 py-2 text-sm font-medium text-destructive-foreground bg-destructive hover:bg-destructive/90 rounded-lg transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive">
+                    <button type="button" onClick={() => { setModalOpen(false); setDeleteConfirmation(""); }} className="px-4 py-2 text-sm font-medium text-muted-foreground bg-muted hover:bg-muted/80 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Cancel</button>
+                    <button type="button" onClick={handleModalSubmit} disabled={isSubmitting || deleteConfirmation !== 'DELETE'} className="px-4 py-2 text-sm font-medium text-destructive-foreground bg-destructive hover:bg-destructive/90 rounded-lg transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive">
                       {isSubmitting ? "Deleting..." : "Delete Template"}
                     </button>
                   </div>

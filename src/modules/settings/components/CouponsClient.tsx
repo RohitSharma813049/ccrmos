@@ -143,7 +143,8 @@ export default function CouponsClient() {
   };
 
   const handleDelete = async (id: string, code: string) => {
-    if (confirm(`Are you sure you want to permanently delete the "${code}" coupon? This action cannot be undone.`)) {
+    const confirmation = window.prompt(`Are you sure you want to permanently delete the "${code}" coupon? This action cannot be undone.\n\nType DELETE to confirm:`);
+    if (confirmation === "DELETE") {
       try {
         const res = await fetch(`/api/coupons/${id}`, { method: "DELETE" });
         if (res.ok) {

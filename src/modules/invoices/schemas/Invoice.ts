@@ -14,6 +14,7 @@ export interface IInvoice extends Document {
   approvedBy?: mongoose.Types.ObjectId;
   approvedAt?: Date;
   customData?: Record<string, any>;
+  shareToken?: string;
 }
 
 const InvoiceSchema = new Schema<IInvoice>({
@@ -28,7 +29,8 @@ const InvoiceSchema = new Schema<IInvoice>({
   approvalStatus: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' },
   approvedBy: { type: Schema.Types.ObjectId, ref: 'User' },
   approvedAt: { type: Date },
-  customData: { type: Schema.Types.Mixed, default: {} }
+  customData: { type: Schema.Types.Mixed, default: {} },
+  shareToken: { type: String, unique: true, sparse: true }
 }, { timestamps: true });
 
 InvoiceSchema.pre('save', async function (this: IInvoice) {

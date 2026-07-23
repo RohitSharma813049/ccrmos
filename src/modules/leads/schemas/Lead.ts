@@ -23,6 +23,7 @@ export interface ILead extends Document {
   teamLeaderId?: mongoose.Types.ObjectId;
   assignedUserId?: mongoose.Types.ObjectId;
   
+  leadScore?: number;
   activities?: { type: string; description: string; timestamp: Date }[];
   customData?: any;
   
@@ -43,6 +44,7 @@ const leadSchema = new Schema<ILead>({
   phone: { type: String },
   company: { type: String },
   status: { type: String, default: 'new' },
+  leadScore: { type: Number, min: 1, max: 10, default: 5 },
   customData: { type: Schema.Types.Mixed, default: {} },
   createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
   updatedBy: { type: Schema.Types.ObjectId, ref: 'User' },

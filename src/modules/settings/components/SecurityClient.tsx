@@ -159,7 +159,8 @@ export default function SecurityClient() {
   };
 
   const deleteWebhook = async (id: string) => {
-    if (!confirm("Delete this Webhook? Integrations relying on it will break.")) return;
+    const confirmation = window.prompt("Are you sure you want to permanently delete this webhook?\n\nType DELETE to confirm:");
+    if (confirmation !== "DELETE") return;
     
     try {
       const res = await fetch(`/api/settings/webhooks?id=${id}`, {

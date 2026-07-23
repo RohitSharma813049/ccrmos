@@ -15,11 +15,11 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     }
     
     const { id } = await params;
-    const { name, adminEmail, plan, usersQuota, status } = await req.json();
+    const { name, adminEmail, plan, usersQuota, status, industryId, enabledModules } = await req.json();
     
     const updatedCompany = await Company.findByIdAndUpdate(
       id,
-      { name, adminEmail, plan, usersQuota, status },
+      { name, adminEmail, plan, usersQuota, status, industryId, enabledModules },
       { new: true, runValidators: true }
     );
     

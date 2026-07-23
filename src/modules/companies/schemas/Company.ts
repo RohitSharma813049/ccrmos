@@ -14,6 +14,7 @@ export interface ICompany extends Document {
   stripeCustomerId?: string;
   stripeSubscriptionId?: string;
   checkoutToken?: string;
+  enabledModules?: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -33,6 +34,7 @@ const companySchema = new Schema<ICompany>(
     stripeCustomerId: { type: String },
     stripeSubscriptionId: { type: String },
     checkoutToken: { type: String },
+    enabledModules: [{ type: String }],
   },
   { timestamps: true }
 );

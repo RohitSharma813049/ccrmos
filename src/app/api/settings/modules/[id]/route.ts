@@ -11,10 +11,14 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await req.json();
-    const companyId = user.hierarchyLevel === 1 ? null : user.companyId;
     const { id } = await params;
 
-    const moduleDoc = await CustomModule.findOne({ _id: id, companyId });
+    const query: any = { _id: id };
+    if (user.hierarchyLevel !== 1) {
+      query.companyId = user.companyId;
+    }
+
+    const moduleDoc = await CustomModule.findOne(query);
     if (!moduleDoc) {
       return NextResponse.json({ error: "Module not found or unauthorized" }, { status: 404 });
     }
@@ -35,10 +39,14 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     const user = session?.user as any;
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const companyId = user.hierarchyLevel === 1 ? null : user.companyId;
     const { id } = await params;
 
-    const deleted = await CustomModule.findOneAndDelete({ _id: id, companyId });
+    const query: any = { _id: id };
+    if (user.hierarchyLevel !== 1) {
+      query.companyId = user.companyId;
+    }
+
+    const deleted = await CustomModule.findOneAndDelete(query);
     if (!deleted) {
       return NextResponse.json({ error: "Module not found or unauthorized" }, { status: 404 });
     }

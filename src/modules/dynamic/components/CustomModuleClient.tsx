@@ -74,7 +74,8 @@ export default function CustomModuleClient({ moduleSchema }: { moduleSchema: any
   }
 
   async function deleteRecord(recordId: string) {
-    if (!confirm("Are you sure you want to delete this record?")) return;
+    const confirmation = window.prompt("Are you sure you want to delete this record?\n\nType DELETE to confirm:");
+    if (confirmation !== "DELETE") return;
     try {
       await fetch(`/api/custom-modules/${moduleSchema._id}/records/${recordId}`, {
         method: "DELETE"
@@ -105,19 +106,36 @@ export default function CustomModuleClient({ moduleSchema }: { moduleSchema: any
     )
   });
 
+  function copyPublicLink() {
+    const url = `${window.location.origin}/f/${moduleSchema._id}`;
+    navigator.clipboard.writeText(url);
+    alert("Public Form Link copied to clipboard!\n\n" + url);
+  }
+
   return (
-    <div className="space-y-8 fade-in pb-12">
-      <PageHeader 
-        title={moduleSchema.name} 
-        description="Manage data for your custom module."
-      >
-        <button 
-          onClick={openCreateModal}
-          className="px-6 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl shadow-sm transition-all w-full sm:w-auto flex items-center justify-center gap-2"
-        >
-          + Add New {moduleSchema.name}
-        </button>
-      </PageHeader>
+    <div className="space-y-6 fade-in pb-12">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-4">
+        <PageHeader 
+          title={moduleSchema.name} 
+          description={moduleSchema.description || `Manage records for ${moduleSchema.name}`} 
+        />
+        <div className="flex gap-3 w-full sm:w-auto">
+          <button 
+            onClick={copyPublicLink}
+            className="px-5 py-2.5 bg-secondary text-secondary-foreground hover:bg-secondary/80 font-medium rounded-xl shadow-sm transition-all focus:ring-2 focus:ring-ring focus:outline-none flex-1 sm:flex-none flex items-center justify-center gap-2 border border-border"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+            Share Form Link
+          </button>
+          <button 
+            onClick={openCreateModal}
+            className="px-5 py-2.5 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold rounded-xl shadow-sm transition-all focus:ring-2 focus:ring-primary focus:outline-none flex-1 sm:flex-none flex items-center justify-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+            Add Record
+          </button>
+        </div>
+      </div>
 
       <DataTable 
         data={records}

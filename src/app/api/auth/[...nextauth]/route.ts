@@ -1,5 +1,6 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import { cookies } from "next/headers";
+import { NextRequest } from "next/server";
 import CredentialsProvider from "next-auth/providers/credentials";
 import dbConnect from "@/lib/db";
 import User from "@/modules/users/schemas/User";
@@ -128,7 +129,7 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
 };
 
-async function auth(req: Request, context: any) {
+async function auth(req: NextRequest, context: any) {
   const cookieHeader = req.headers.get("cookie") || "";
   const impersonatedFounderId = cookieHeader.match(/impersonatedFounderId=([^;]+)/)?.[1];
   const impersonatedCompanyId = cookieHeader.match(/impersonatedCompanyId=([^;]+)/)?.[1];

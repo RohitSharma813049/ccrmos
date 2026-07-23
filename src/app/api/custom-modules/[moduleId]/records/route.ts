@@ -10,7 +10,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ moduleId
   try {
     const session = await getSession();
     const user = session?.user as any;
-    if (!user || !user.companyId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const effectiveCompanyId = user?.companyId || user?.impersonatedFounderId;
+    if (!user || !effectiveCompanyId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { moduleId } = await params;
     
@@ -18,7 +19,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ moduleId
     const moduleDoc = await CustomModule.findOne({
       _id: moduleId,
       active: true,
-      $or: [{ companyId: user.companyId }, { companyId: null }]
+      $or: [{ companyId: effectiveCompanyId }, { companyId: null }]
     });
 
     if (!moduleDoc) {
@@ -30,7 +31,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ moduleId
     const limit = parseInt(searchParams.get("limit") || "20", 10);
     const skip = (page - 1) * limit;
 
-    const query = { moduleId, companyId: user.companyId };
+    const query = { moduleId, companyId: effectiveCompanyId };
     
     const total = await CustomRecord.countDocuments(query);
     const records = await CustomRecord.find(query)
@@ -49,7 +50,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ moduleI
   try {
     const session = await getSession();
     const user = session?.user as any;
-    if (!user || !user.companyId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const effectiveCompanyId = user?.companyId || user?.impersonatedFounderId;
+    if (!user || !effectiveCompanyId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { moduleId } = await params;
     const body = await req.json();
@@ -57,7 +59,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ moduleI
     const moduleDoc = await CustomModule.findOne({
       _id: moduleId,
       active: true,
-      $or: [{ companyId: user.companyId }, { companyId: null }]
+      $or: [{ companyId: effectiveCompanyId }, { companyId: null }]
     });
 
     if (!moduleDoc) {
@@ -73,7 +75,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ moduleI
 
     const newRecord = await CustomRecord.create({
       moduleId,
-      companyId: user.companyId,
+      companyId: effectiveCompanyId,
       data: body.data || {}
     });
 

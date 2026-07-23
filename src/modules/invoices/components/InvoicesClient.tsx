@@ -24,7 +24,7 @@ export default function InvoicesClient() {
   const [dateTo, setDateTo] = useState("");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { hasPermission } = usePermissions();
+  const { hasPermission, session } = usePermissions();
 
   const [advancedFilters, setAdvancedFilters] = useState<any[]>([]);
 
@@ -113,9 +113,53 @@ export default function InvoicesClient() {
     return targetStage.order < pipelineStages[currentIndex].order;
   };
 
+  const handleApproveReject = async (id: string, newApprovalStatus: string) => {
+    try {
+      const res = await fetch("/api/invoices", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ _id: id, approvalStatus: newApprovalStatus })
+      });
+      if (res.ok) {
+        fetchItems();
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to update approval status");
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleShare = async (id: string) => {
+    try {
+      const res = await fetch(`/api/invoices/${id}/share`, { method: "POST" });
+      if (res.ok) {
+        const data = await res.json();
+        navigator.clipboard.writeText(data.shareUrl);
+        alert(`Share link copied to clipboard:\n${data.shareUrl}`);
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to generate share link");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error sharing invoice");
+    }
+  };
+
   const columns: ColumnDef<any>[] = [
     { header: "Invoice #", accessorKey: "invoiceNumber", className: "font-medium text-foreground" },
     { header: "Amount", cell: (item) => formatCurrency(item.amount, item.currency || 'USD') },
+    { header: "Approval", cell: (item) => (
+      <span className={`px-2.5 py-1 rounded-md text-xs font-semibold border ${
+        item.approvalStatus === 'Approved' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' :
+        item.approvalStatus === 'Rejected' ? 'bg-destructive/10 text-destructive border-destructive/20' :
+        'bg-amber-500/10 text-amber-600 border-amber-500/20'
+      }`}>
+        {item.approvalStatus || 'Pending'}
+      </span>
+    )},
     { header: "Date Added", cell: (item) => <span className="text-muted-foreground text-xs">{new Date(item.createdAt).toLocaleDateString()}</span> },
     { header: "Status (Pipeline)", className: "min-w-[200px]", cell: (item) => (
       pipelineStages.length > 0 ? (
@@ -160,15 +204,34 @@ export default function InvoicesClient() {
       </div>
     )},
     { header: "Actions", className: "text-right", cell: (item) => (
-      <button 
-        onClick={() => generateInvoicePDF(item)}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-muted hover:bg-primary/10 text-primary hover:text-primary/80 font-medium rounded-lg transition-colors text-xs"
-      >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-        PDF
-      </button>
+      <div className="flex items-center justify-end gap-2">
+        <button 
+          onClick={() => handleShare(item._id)}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-muted hover:bg-primary/10 text-primary hover:text-primary/80 font-medium rounded-lg transition-colors text-xs border border-transparent hover:border-primary/20"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+          Share
+        </button>
+        <button 
+          onClick={() => generateInvoicePDF(item)}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-muted hover:bg-primary/10 text-primary hover:text-primary/80 font-medium rounded-lg transition-colors text-xs border border-transparent hover:border-primary/20"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          PDF
+        </button>
+        {session?.user?.hierarchyLevel <= 2 && (!item.approvalStatus || item.approvalStatus === 'Pending') && (
+          <div className="flex items-center gap-1 ml-1 pl-2 border-l border-border">
+            <button onClick={() => handleApproveReject(item._id, "Approved")} className="p-1.5 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 rounded-md">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+            </button>
+            <button onClick={() => handleApproveReject(item._id, "Rejected")} className="p-1.5 bg-destructive/10 text-destructive hover:bg-destructive/20 rounded-md">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          </div>
+        )}
+      </div>
     )}
   ];
 

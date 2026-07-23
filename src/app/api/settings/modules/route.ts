@@ -96,8 +96,13 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     let effectiveCompanyId = undefined;
-    if (body.tenantScope === "Company") {
-      if (user.hierarchyLevel === 1 && body.companyId) {
+    
+    if (user.hierarchyLevel !== 1) {
+      // Founders can ONLY create company-scoped modules
+      body.tenantScope = "Company";
+      effectiveCompanyId = user.companyId;
+    } else if (body.tenantScope === "Company") {
+      if (body.companyId) {
         effectiveCompanyId = body.companyId;
       } else {
         effectiveCompanyId = user.companyId || user.impersonatedFounderId;

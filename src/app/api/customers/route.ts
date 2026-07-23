@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Customer from '@/modules/customers/schemas/Customer';
 import Pipeline from '@/modules/settings/schemas/Pipeline';
+import LoyaltyProfile from '@/modules/rewards/schemas/LoyaltyProfile';
 import { requireAuthenticatedUser, requirePermission } from '@/lib/auth-utils';
 import { buildTenantQuery } from "@/lib/access-control";
 import { parseFiltersToMongo } from "@/utils/parseFilters";
@@ -69,6 +70,16 @@ export async function POST(req: Request) {
     }
 
     const newCustomer = await Customer.create(body);
+
+    // Auto-create loyalty profile for new customer
+    await LoyaltyProfile.create({
+      customerId: newCustomer._id,
+      pointsBalance: 0,
+      lifetimePoints: 0,
+      tier: 'Bronze',
+      history: []
+    });
+
     return NextResponse.json({ customer: newCustomer }, { status: 201 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

@@ -4,9 +4,11 @@ import React, { useState, useEffect } from "react";
 import EmptyState from "@/components/ui/EmptyState";
 import FilterBuilder from "@/components/ui/FilterBuilder";
 import { FilterRule } from "@/utils/parseFilters";
+import { Skeleton } from "@/components/ui/Skeleton";
 
 export interface ColumnDef<T> {
-  header: string;
+  id?: string;
+  header: React.ReactNode;
   accessorKey?: keyof T;
   cell?: (item: T) => React.ReactNode;
   className?: string;
@@ -38,6 +40,7 @@ export interface DataTableProps<T> {
   onSelectionChange?: (ids: string[]) => void;
   actions?: React.ReactNode; // Additional actions (like Export)
   itemIdAccessor?: (item: T) => string;
+  bulkActions?: { label: string; onClick: (selectedIds: string[]) => void; variant?: "default" | "destructive" }[];
 }
 
 export function DataTable<T>({
@@ -65,6 +68,7 @@ export function DataTable<T>({
   onSelectionChange,
   actions,
   itemIdAccessor = (item: any) => item._id || item.id,
+  bulkActions = [],
 }: DataTableProps<T>) {
   // Use a local state for fast typing, debounce the prop update
   const [localSearch, setLocalSearch] = useState(search || "");
@@ -154,6 +158,29 @@ export function DataTable<T>({
         </div>
       )}
 
+      {selectable && selectedIds.length > 0 && bulkActions.length > 0 && (
+        <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 flex items-center justify-between animate-in fade-in zoom-in duration-200">
+          <span className="text-sm font-medium text-primary ml-2">
+            {selectedIds.length} item{selectedIds.length > 1 ? "s" : ""} selected
+          </span>
+          <div className="flex gap-2">
+            {bulkActions.map((action, idx) => (
+              <button
+                key={idx}
+                onClick={() => action.onClick(selectedIds)}
+                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+                  action.variant === "destructive" 
+                    ? "bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground" 
+                    : "bg-primary text-primary-foreground hover:bg-primary/90"
+                }`}
+              >
+                {action.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm text-foreground">
@@ -185,14 +212,20 @@ export function DataTable<T>({
             </thead>
             <tbody className="divide-y divide-border/50">
               {loading ? (
-                <tr>
-                  <td colSpan={columns.length} className="px-6 py-8 text-center text-muted-foreground">
-                    <div className="flex items-center justify-center space-x-2">
-                      <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-                      <span>Loading...</span>
-                    </div>
-                  </td>
-                </tr>
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={`skeleton-${i}`}>
+                    {selectable && (
+                      <td className="px-6 py-4 w-12 text-center">
+                        <Skeleton className="w-4 h-4 rounded mx-auto" />
+                      </td>
+                    )}
+                    {columns.map((col, colIdx) => (
+                      <td key={`skeleton-col-${colIdx}`} className={`px-6 py-4 ${col.className || ""}`}>
+                        <Skeleton className="h-4 w-full max-w-[80%] rounded" />
+                      </td>
+                    ))}
+                  </tr>
+                ))
               ) : data.length === 0 ? (
                 <tr>
                   <td colSpan={columns.length} className="p-0">

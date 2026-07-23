@@ -5,10 +5,12 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   LineChart, Line, PieChart, Pie, Cell, AreaChart, Area, Legend
 } from "recharts";
+import { Skeleton } from "@/components/ui/Skeleton";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8", "#e11d48", "#10b981", "#3b82f6"];
 
 export default function AnalyticsCharts() {
+  const [loading, setLoading] = useState(true);
   const [data, setData] = useState({
     leads: 0, customers: 0, projects: 0, tasks: 0, orders: 0, invoices: 0
   });
@@ -87,6 +89,8 @@ export default function AnalyticsCharts() {
 
       } catch (e) {
         console.error("Failed to fetch dashboard metrics");
+      } finally {
+        setLoading(false);
       }
     }
     fetchData();
@@ -110,12 +114,19 @@ export default function AnalyticsCharts() {
     <div className="space-y-8">
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        {barData.map((item, index) => (
-          <div key={index} className="bg-card p-4 rounded-xl border border-border shadow-sm flex flex-col items-center justify-center">
-            <span className="text-muted-foreground text-sm font-medium">{item.name}</span>
-            <span className="text-3xl font-bold text-foreground mt-2">{item.count}</span>
-          </div>
-        ))}
+        {loading
+          ? Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="bg-card p-4 rounded-xl border border-border shadow-sm flex flex-col items-center justify-center">
+                <Skeleton className="h-4 w-16 mb-2" />
+                <Skeleton className="h-8 w-10" />
+              </div>
+            ))
+          : barData.map((item, index) => (
+              <div key={index} className="bg-card p-4 rounded-xl border border-border shadow-sm flex flex-col items-center justify-center">
+                <span className="text-muted-foreground text-sm font-medium">{item.name}</span>
+                <span className="text-3xl font-bold text-foreground mt-2">{item.count}</span>
+              </div>
+            ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -123,15 +134,19 @@ export default function AnalyticsCharts() {
         <div className="bg-card p-6 rounded-2xl border border-border shadow-sm">
           <h3 className="text-lg font-bold text-foreground mb-6">Entity Distribution</h3>
           <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={barData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} />
-                <YAxis axisLine={false} tickLine={false} />
-                <Tooltip cursor={{ fill: '#f9fafb' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                <Bar dataKey="count" fill="#4f46e5" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            {loading ? (
+              <Skeleton className="w-full h-full rounded-xl" />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={barData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} />
+                  <YAxis axisLine={false} tickLine={false} />
+                  <Tooltip cursor={{ fill: '#f9fafb' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                  <Bar dataKey="count" fill="#4f46e5" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
 
@@ -139,21 +154,25 @@ export default function AnalyticsCharts() {
         <div className="bg-card p-6 rounded-2xl border border-border shadow-sm">
           <h3 className="text-lg font-bold text-foreground mb-6">Lead Growth Over Time</h3>
           <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={growthData}>
-                <defs>
-                  <linearGradient id="colorLeads" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                <XAxis dataKey="date" axisLine={false} tickLine={false} />
-                <YAxis axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                <Area type="monotone" dataKey="leads" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorLeads)" />
-              </AreaChart>
-            </ResponsiveContainer>
+            {loading ? (
+              <Skeleton className="w-full h-full rounded-xl" />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={growthData}>
+                  <defs>
+                    <linearGradient id="colorLeads" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                  <XAxis dataKey="date" axisLine={false} tickLine={false} />
+                  <YAxis axisLine={false} tickLine={false} />
+                  <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                  <Area type="monotone" dataKey="leads" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorLeads)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
 
@@ -161,25 +180,29 @@ export default function AnalyticsCharts() {
         <div className="bg-card p-6 rounded-2xl border border-border shadow-sm">
           <h3 className="text-lg font-bold text-foreground mb-6">Leads by Status</h3>
           <div className="h-72 flex items-center justify-center">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={leadsByStatus}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={90}
-                  paddingAngle={5}
-                  dataKey="value"
-                  label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
-                >
-                  {leadsByStatus.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip contentStyle={{ borderRadius: '12px', border: 'none' }} />
-              </PieChart>
-            </ResponsiveContainer>
+            {loading ? (
+              <Skeleton className="w-48 h-48 rounded-full" />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={leadsByStatus}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={90}
+                    paddingAngle={5}
+                    dataKey="value"
+                    label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
+                  >
+                    {leadsByStatus.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip contentStyle={{ borderRadius: '12px', border: 'none' }} />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
 
@@ -187,15 +210,19 @@ export default function AnalyticsCharts() {
         <div className="bg-card p-6 rounded-2xl border border-border shadow-sm">
           <h3 className="text-lg font-bold text-foreground mb-6">Tasks by Status</h3>
           <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={tasksByStatus} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f0f0f0" />
-                <XAxis type="number" axisLine={false} tickLine={false} />
-                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} width={100} />
-                <Tooltip cursor={{ fill: '#f9fafb' }} contentStyle={{ borderRadius: '12px', border: 'none' }} />
-                <Bar dataKey="count" fill="#f59e0b" radius={[0, 4, 4, 0]} barSize={24} />
-              </BarChart>
-            </ResponsiveContainer>
+            {loading ? (
+              <Skeleton className="w-full h-full rounded-xl" />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={tasksByStatus} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f0f0f0" />
+                  <XAxis type="number" axisLine={false} tickLine={false} />
+                  <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} width={100} />
+                  <Tooltip cursor={{ fill: '#f9fafb' }} contentStyle={{ borderRadius: '12px', border: 'none' }} />
+                  <Bar dataKey="count" fill="#f59e0b" radius={[0, 4, 4, 0]} barSize={24} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
       </div>

@@ -43,7 +43,7 @@ export class CompanyService {
     };
   }
 
-  static async registerTenant({ name, adminEmail, subscriptionPlanId, usersQuota, industryId }: { name: string, adminEmail: string, subscriptionPlanId?: string, usersQuota?: number, industryId?: string }) {
+  static async registerTenant({ name, adminEmail, subscriptionPlanId, usersQuota, industryId, enabledModules }: { name: string, adminEmail: string, subscriptionPlanId?: string, usersQuota?: number, industryId?: string, enabledModules?: string[] }) {
     if (!name || !adminEmail) {
       throw new Error("Name and Admin Email are required.");
     }
@@ -70,7 +70,8 @@ export class CompanyService {
       industryId: industryId || undefined,
       status: "Suspended",
       subscriptionStatus: "pending_payment",
-      checkoutToken
+      checkoutToken,
+      enabledModules: enabledModules || []
     });
 
     // Automatically create the founder role and user account for this new tenant

@@ -1,5 +1,9 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 import Counter from '@/modules/core/schemas/Counter';
+import Project from '@/modules/projects/schemas/Project';
+import Invoice from '@/modules/invoices/schemas/Invoice';
+import Task from '@/modules/tasks/schemas/Task';
+import Order from '@/modules/orders/schemas/Order';
 
 export interface ICustomer extends Document {
   displayId?: string;
@@ -55,6 +59,17 @@ customerSchema.pre('save', async function (this: ICustomer) {
       { new: true, upsert: true }
     );
     this.displayId = `CRT-${String(counter.seq).padStart(4, '0')}`;
+  }
+});
+
+customerSchema.pre('findOneAndDelete', async function() {
+  const docToUpdate = await this.model.findOne(this.getQuery());
+  if (docToUpdate) {
+    const customerIdStr = docToUpdate._id.toString();
+    await Project.deleteMany({ "customData.customerId": customerIdStr });
+    await Invoice.deleteMany({ "customData.customerId": customerIdStr });
+    await Task.deleteMany({ "customData.customerId": customerIdStr });
+    await Order.deleteMany({ "customData.customerId": customerIdStr });
   }
 });
 

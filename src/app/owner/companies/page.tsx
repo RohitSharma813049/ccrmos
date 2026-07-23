@@ -14,8 +14,15 @@ interface Company {
   status: string;
   subscriptionStatus?: string;
   users?: number;
+  industryId?: string;
+  enabledModules?: string[];
   createdAt: string;
 }
+
+const AVAILABLE_MODULES = [
+  "Leads", "Customers", "Projects", "Orders", "Invoices", 
+  "Tasks", "Support", "Rewards"
+];
 
 export default function ManageCompaniesPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -36,9 +43,33 @@ export default function ManageCompaniesPage() {
     adminEmail: "",
     subscriptionPlanId: "",
     industryId: "",
+    enabledModules: [] as string[],
     usersQuota: 5,
     status: "Active"
   });
+
+  const handleIndustryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedId = e.target.value;
+    const selectedIndustry = industries.find(i => i._id === selectedId);
+    
+    setFormData(prev => ({
+      ...prev,
+      industryId: selectedId,
+      // Auto-fill modules if an industry is selected, otherwise keep existing
+      enabledModules: selectedIndustry && selectedIndustry.defaultModules 
+        ? selectedIndustry.defaultModules 
+        : prev.enabledModules
+    }));
+  };
+
+  const toggleModule = (mod: string) => {
+    setFormData(prev => ({
+      ...prev,
+      enabledModules: prev.enabledModules.includes(mod) 
+        ? prev.enabledModules.filter(m => m !== mod)
+        : [...prev.enabledModules, mod]
+    }));
+  };
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -120,22 +151,30 @@ export default function ManageCompaniesPage() {
 
   const openCreateModal = () => {
     setIsEditMode(false);
-    setFormData({ name: "", adminEmail: "", subscriptionPlanId: plans[0]?._id || "", industryId: "", usersQuota: 5, status: "Active" });
+    setCurrentCompanyId(null);
+    setFormData({
+      name: "",
+      adminEmail: "",
+      subscriptionPlanId: plans.length > 0 ? plans[0]._id : "",
+      industryId: "",
+      enabledModules: [],
+      usersQuota: 5,
+      status: "Active"
+    });
     setIsModalOpen(true);
   };
 
   const openEditModal = (company: Company) => {
     setIsEditMode(true);
     setCurrentCompanyId(company._id);
-    // Find the plan ID that matches the company's plan name, or default to the first one
-    const matchingPlan = plans.find(p => p.name === company.plan);
     setFormData({
       name: company.name,
       adminEmail: company.adminEmail,
-      subscriptionPlanId: matchingPlan ? matchingPlan._id : (plans[0]?._id || ""),
-      industryId: "", // Cannot edit industry after creation for now
-      usersQuota: company.usersQuota,
-      status: company.status
+      subscriptionPlanId: company.plan || "", 
+      industryId: company.industryId || "",
+      enabledModules: company.enabledModules || [],
+      usersQuota: company.usersQuota || 5,
+      status: company.status || "Active"
     });
     setIsModalOpen(true);
   };
@@ -350,9 +389,8 @@ export default function ManageCompaniesPage() {
                   <label className="block text-sm font-medium text-foreground mb-1.5">Target Industry</label>
                   <select 
                     value={formData.industryId}
-                    onChange={(e) => setFormData({...formData, industryId: e.target.value})}
-                    disabled={isEditMode}
-                    className={`w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none transition-all ${isEditMode ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    onChange={handleIndustryChange}
+                    className={`w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none transition-all`}
                   >
                     <option value="">None (Blank CRM)</option>
                     {industries.map(i => (
@@ -370,6 +408,29 @@ export default function ManageCompaniesPage() {
                     onChange={(e) => setFormData({...formData, usersQuota: parseInt(e.target.value) || 1})}
                     className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" 
                   />
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <label className="block text-sm font-medium text-foreground mb-2">Enabled Modules</label>
+                <div className="flex flex-wrap gap-2">
+                  {AVAILABLE_MODULES.map(mod => {
+                    const isSelected = formData.enabledModules.includes(mod);
+                    return (
+                      <button
+                        key={mod}
+                        type="button"
+                        onClick={() => toggleModule(mod)}
+                        className={`px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors ${
+                          isSelected 
+                            ? "bg-primary border-primary text-primary-foreground" 
+                            : "bg-background border-border text-muted-foreground hover:border-primary/50"
+                        }`}
+                      >
+                        {mod}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 

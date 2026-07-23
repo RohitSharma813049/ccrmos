@@ -9,6 +9,7 @@ import KanbanBoard, { KanbanCard } from "@/components/ui/KanbanBoard";
 import { usePermissions } from "@/hooks/usePermissions";
 import { DataTable, ColumnDef } from "@/components/ui/DataTable";
 import FilterBuilder from "@/components/ui/FilterBuilder";
+import { Tooltip } from "@/components/ui/Tooltip";
 
 export default function ProjectsClient() {
   const [items, setItems] = useState<any[]>([]);
@@ -24,8 +25,9 @@ export default function ProjectsClient() {
   const [dateTo, setDateTo] = useState("");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [cloningData, setCloningData] = useState<any>(null);
   const [view, setView] = useState<"table" | "kanban">("kanban");
-  const { hasPermission } = usePermissions();
+  const { hasPermission, session } = usePermissions();
 
   const [advancedFilters, setAdvancedFilters] = useState<any[]>([]);
 
@@ -72,6 +74,9 @@ export default function ProjectsClient() {
 
   const handleSave = async (formData: any) => {
     try {
+      const isClone = formData._id === "CLONING";
+      if (isClone) delete formData._id; // strip mock ID before saving
+
       const res = await fetch("/api/projects", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -79,6 +84,7 @@ export default function ProjectsClient() {
       });
       if (res.ok) {
         setIsModalOpen(false);
+        setCloningData(null);
         fetchItems();
       } else {
         const err = await res.json();
@@ -87,6 +93,12 @@ export default function ProjectsClient() {
     } catch (e) {
       console.error(e);
     }
+  };
+
+  const handleClone = (item: any) => {
+    const clone = { ...item, name: `${item.name} (Copy)`, _id: "CLONING" };
+    setCloningData(clone);
+    setIsModalOpen(true);
   };
 
   const updateStatus = async (id: string, newStatus: string) => {
@@ -101,6 +113,24 @@ export default function ProjectsClient() {
       } else {
         const err = await res.json();
         alert(err.error || "Failed to update status");
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleApproveReject = async (id: string, newApprovalStatus: string) => {
+    try {
+      const res = await fetch("/api/projects", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ _id: id, approvalStatus: newApprovalStatus })
+      });
+      if (res.ok) {
+        fetchItems();
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to update approval status");
       }
     } catch (e) {
       console.error(e);
@@ -154,6 +184,15 @@ export default function ProjectsClient() {
 
   const columns: ColumnDef<any>[] = [
     { header: "Name", accessorKey: "name", className: "font-medium text-foreground" },
+    { header: "Approval", cell: (item) => (
+      <span className={`px-2.5 py-1 rounded-md text-xs font-semibold border ${
+        item.approvalStatus === 'Approved' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' :
+        item.approvalStatus === 'Rejected' ? 'bg-destructive/10 text-destructive border-destructive/20' :
+        'bg-amber-500/10 text-amber-600 border-amber-500/20'
+      }`}>
+        {item.approvalStatus || 'Pending'}
+      </span>
+    )},
     { header: "Date Added", cell: (item) => <span className="text-muted-foreground text-xs">{new Date(item.createdAt).toLocaleDateString()}</span> },
     { header: "Status (Pipeline)", className: "min-w-[200px]", cell: (item) => (
       <select
@@ -192,13 +231,32 @@ export default function ProjectsClient() {
       </div>
     )},
     { header: "Actions", cell: (item) => (
-      <a 
-        href={`/dashboard/leads?filters=${encodeURIComponent(JSON.stringify([{ id: "proj_link", field: "customData.projectId", operator: "equals", value: item._id }]))}`}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary text-xs font-semibold rounded-lg transition-colors whitespace-nowrap"
-      >
-        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-        View Leads
-      </a>
+      <div className="flex items-center gap-2">
+        <a 
+          href={`/dashboard/leads?filters=${encodeURIComponent(JSON.stringify([{ id: "proj_link", field: "customData.projectId", operator: "equals", value: item._id }]))}`}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary text-xs font-semibold rounded-lg transition-colors whitespace-nowrap"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+          Leads
+        </a>
+        <button
+          onClick={() => handleClone(item)}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-muted hover:bg-muted/80 text-foreground text-xs font-semibold rounded-lg transition-colors whitespace-nowrap border border-border"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" /></svg>
+          Clone
+        </button>
+        {session?.user?.hierarchyLevel <= 2 && (!item.approvalStatus || item.approvalStatus === 'Pending') && (
+          <div className="flex items-center gap-1">
+            <button onClick={() => handleApproveReject(item._id, "Approved")} className="p-1.5 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 rounded-md">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+            </button>
+            <button onClick={() => handleApproveReject(item._id, "Rejected")} className="p-1.5 bg-destructive/10 text-destructive hover:bg-destructive/20 rounded-md">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          </div>
+        )}
+      </div>
     )}
   ];
 
@@ -271,17 +329,18 @@ export default function ProjectsClient() {
               Table
             </button>
           </div>
-          {hasPermission("Projects", "Create") && (
+          <Tooltip content="You do not have permission to create projects" disabled={hasPermission("Projects", "Create")}>
             <button 
               onClick={() => setIsModalOpen(true)}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl shadow-lg transition-all"
+              disabled={!hasPermission("Projects", "Create")}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
               Add Project
             </button>
-          )}
+          </Tooltip>
       </PageHeader>
 
       {view === "table" ? (
@@ -369,13 +428,14 @@ export default function ProjectsClient() {
           <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
           <div className="relative bg-card border border-border rounded-2xl shadow-xl w-full max-w-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="p-6 border-b border-border bg-muted/30">
-              <h2 className="text-xl font-bold text-foreground">Add Project</h2>
+              <h2 className="text-xl font-bold text-foreground">{cloningData ? "Clone Project" : "Add Project"}</h2>
             </div>
             <div className="p-6 max-h-[80vh] overflow-y-auto custom-scrollbar">
               <DynamicFormBuilder 
                 targetModule="project" 
+                initialData={cloningData}
                 onSubmit={handleSave} 
-                onCancel={() => setIsModalOpen(false)} 
+                onCancel={() => { setIsModalOpen(false); setCloningData(null); }} 
               />
             </div>
           </div>

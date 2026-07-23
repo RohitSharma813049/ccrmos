@@ -28,12 +28,24 @@ export default async function DashboardLayout({ children }: { children: React.Re
   // Fetch company status for subscription enforcement
   const userCompanyId = (session.user as any).companyId || (session.user as any).impersonatedFounderId;
   let subscriptionStatus = "active";
+  let enabledModules: string[] = [];
   if (userCompanyId) {
-    const company = await Company.findById(userCompanyId).select("subscriptionStatus");
-    if (company && company.subscriptionStatus) {
-      subscriptionStatus = company.subscriptionStatus;
+    const company = await Company.findById(userCompanyId).select("subscriptionStatus enabledModules");
+    if (company) {
+      if (company.subscriptionStatus) subscriptionStatus = company.subscriptionStatus;
+      if (company.enabledModules) enabledModules = company.enabledModules;
     }
   }
+
+  const isModuleEnabled = (moduleName: string) => {
+    // If no userCompanyId (super admin viewing dashboard), maybe allow all? Or just default true for now
+    if (!userCompanyId) return true; 
+    // If enabledModules array is empty, we can assume it's a legacy company or default to allowing all for backward compatibility, OR strictly deny. The requirement is strict control, so we should check inclusion.
+    // However, to prevent completely locking out old accounts, let's say if enabledModules is missing/empty, we allow all for now, or just strictly check. 
+    // Let's strictly check if enabledModules exists and has length > 0.
+    if (!enabledModules || enabledModules.length === 0) return true; // Legacy fallback
+    return enabledModules.includes(moduleName);
+  };
 
   const customModules = await CustomModule.find({
     active: true,
@@ -66,22 +78,25 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <div className="pt-6 pb-2">
             <p className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Workspace</p>
           </div>
-          {hasModulePermission(session.user as any, "Leads", "view") && (
+          {isModuleEnabled("Leads") && hasModulePermission(session.user as any, "Leads", "view") && (
             <NavItem href="/dashboard/leads" label="Lead Management" icon="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
           )}
-          {hasModulePermission(session.user as any, "Customers", "view") && (
+          {isModuleEnabled("Customers") && hasModulePermission(session.user as any, "Customers", "view") && (
             <NavItem href="/dashboard/customers" label="Customers" icon="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
           )}
-          {hasModulePermission(session.user as any, "Projects", "view") && (
+          {isModuleEnabled("Rewards") && hasModulePermission(session.user as any, "Customers", "view") && (
+            <NavItem href="/dashboard/rewards" label="Royalty & Rewards" icon="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          )}
+          {isModuleEnabled("Projects") && hasModulePermission(session.user as any, "Projects", "view") && (
             <NavItem href="/dashboard/projects" label="Projects" icon="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
           )}
-          {hasModulePermission(session.user as any, "Orders", "view") && (
+          {isModuleEnabled("Orders") && hasModulePermission(session.user as any, "Orders", "view") && (
             <NavItem href="/dashboard/orders" label="Orders" icon="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
           )}
-          {hasModulePermission(session.user as any, "Invoices", "view") && (
+          {isModuleEnabled("Invoices") && hasModulePermission(session.user as any, "Invoices", "view") && (
             <NavItem href="/dashboard/invoices" label="Invoices" icon="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           )}
-          {hasModulePermission(session.user as any, "Tasks", "view") && (
+          {isModuleEnabled("Tasks") && hasModulePermission(session.user as any, "Tasks", "view") && (
             <NavItem href="/dashboard/tasks" label="Tasks" icon="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
           )}
 
@@ -103,7 +118,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
                 <p className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">System Settings</p>
               </div>
 
-              <NavItem href="/dashboard/forms" label="Forms" icon="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              <NavItem href="/dashboard/settings/custom-modules" label="Custom Modules" icon="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
               <NavItem href="/dashboard/settings/module-fields" label="Module Fields" icon="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
               <NavItem href="/dashboard/settings/roles" label="Roles & Permissions" icon="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               <NavItem href="/dashboard/users" label="User Management" icon="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -152,13 +167,21 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <NavItem href="/dashboard/workbench" label="Workbench" icon="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
           {hasModulePermission(session.user as any, "Leads", "view") && <NavItem href="/dashboard/leads" label="Lead Management" icon="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />}
           {hasModulePermission(session.user as any, "Customers", "view") && <NavItem href="/dashboard/customers" label="Customers" icon="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />}
+          {hasModulePermission(session.user as any, "Customers", "view") && <NavItem href="/dashboard/rewards" label="Royalty & Rewards" icon="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />}
           {hasModulePermission(session.user as any, "Projects", "view") && <NavItem href="/dashboard/projects" label="Projects" icon="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />}
           {hasModulePermission(session.user as any, "Orders", "view") && <NavItem href="/dashboard/orders" label="Orders" icon="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />}
           {hasModulePermission(session.user as any, "Invoices", "view") && <NavItem href="/dashboard/invoices" label="Invoices" icon="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />}
           {hasModulePermission(session.user as any, "Tasks", "view") && <NavItem href="/dashboard/tasks" label="Tasks" icon="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />}
-          {customModules.length > 0 && customModules.map((mod: any) => (
-            <NavItem key={mod._id.toString()} href={`/dashboard/modules/${mod._id}`} label={mod.name} icon="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-          ))}
+          {customModules.length > 0 && (
+            <>
+              <div className="pt-6 pb-2">
+                <p className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Custom Modules</p>
+              </div>
+              {customModules.map((mod: any) => (
+                <NavItem key={mod._id.toString()} href={`/dashboard/modules/${mod._id}`} label={mod.name} icon="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              ))}
+            </>
+          )}
 
           {((session?.user?.hierarchyLevel === 2) || isPlatformOwner) && (
             <>
@@ -166,7 +189,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
                 <p className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">System Settings</p>
               </div>
 
-              <NavItem href="/dashboard/forms" label="Forms" icon="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              <NavItem href="/dashboard/settings/custom-modules" label="Custom Modules" icon="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
               <NavItem href="/dashboard/settings/module-fields" label="Form Designer" icon="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
               <NavItem href="/dashboard/settings/dynamic-fields" label="Dynamic Fields" icon="M4 6h16M4 12h16m-7 6h7" />
               <NavItem href="/dashboard/settings/roles" label="Roles & Permissions" icon="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />

@@ -23,10 +23,11 @@ export default function LeadsClient() {
   const [statusFilter, setStatusFilter] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [showRecycleBin, setShowRecycleBin] = useState(false);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedLeadForDetails, setSelectedLeadForDetails] = useState<any | null>(null);
-  const { hasPermission } = usePermissions();
+  const { hasPermission, session } = usePermissions();
 
   const [advancedFilters, setAdvancedFilters] = useState<any[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -84,7 +85,8 @@ export default function LeadsClient() {
       setLoading(true);
       const filterStr = encodeURIComponent(JSON.stringify(advancedFilters));
       const limit = viewMode === "board" ? 200 : 10;
-      const res = await fetch(`/api/leads?page=${page}&limit=${limit}&search=${search}&status=${statusFilter}&dateFrom=${dateFrom}&dateTo=${dateTo}&filters=${filterStr}`);
+      const appliedStatus = showRecycleBin ? "Archived" : statusFilter;
+      const res = await fetch(`/api/leads?page=${page}&limit=${limit}&search=${search}&status=${appliedStatus}&dateFrom=${dateFrom}&dateTo=${dateTo}&filters=${filterStr}`);
       if (res.ok) {
         const data = await res.json();
         setLeads(data.leads || []);
@@ -137,7 +139,21 @@ export default function LeadsClient() {
   const isStageDisabled = (currentStatus: string, targetStage: any) => {
     const currentIndex = pipelineStages.findIndex(s => s.name === currentStatus);
     if (currentIndex === -1) return false;
-    return targetStage.order < pipelineStages[currentIndex].order;
+    // Allow moving to next stages, or backwards. For now, allow all.
+    return false;
+  };
+
+  const getStageColorClass = (stageName: string, allStages: any[]) => {
+    if (stageName === 'Archived') return 'bg-gray-500/10 text-gray-600 border-gray-500/20';
+    if (!allStages || allStages.length === 0) return 'bg-primary/10 text-primary border-primary/20';
+    const sorted = [...allStages].sort((a,b) => a.order - b.order);
+    const index = sorted.findIndex(s => s.name === stageName);
+    if (index === -1) return 'bg-primary/10 text-primary border-primary/20';
+    
+    const progress = index / (sorted.length - 1);
+    if (progress <= 0.33) return 'bg-blue-500/10 text-blue-600 border-blue-500/20';
+    if (progress <= 0.66) return 'bg-amber-500/10 text-amber-600 border-amber-500/20';
+    return 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20';
   };
 
   const handleExport = () => {
@@ -171,6 +187,55 @@ export default function LeadsClient() {
     document.body.removeChild(link);
   };
 
+  const handleBulkDelete = async (ids: string[]) => {
+    const confirmation = window.prompt(`Are you sure you want to permanently delete ${ids.length} leads?\n\nType DELETE to confirm:`);
+    if (confirmation !== "DELETE") return;
+    
+    try {
+      const res = await fetch("/api/leads/bulk", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids })
+      });
+      if (res.ok) {
+        setSelectedIds([]);
+        fetchLeads();
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to bulk delete leads");
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleBulkStatusChange = async (ids: string[]) => {
+    const newStatus = window.prompt(`Enter new status for ${ids.length} leads:\n(Available statuses: ${pipelineStages.map(s => s.name).join(", ")})`);
+    if (!newStatus) return;
+    
+    if (!pipelineStages.some(s => s.name.toLowerCase() === newStatus.toLowerCase())) {
+      alert("Invalid status entered.");
+      return;
+    }
+    
+    try {
+      const res = await fetch("/api/leads/bulk", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids, data: { status: pipelineStages.find(s => s.name.toLowerCase() === newStatus.toLowerCase())?.name } })
+      });
+      if (res.ok) {
+        setSelectedIds([]);
+        fetchLeads();
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to bulk update leads");
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const handleImportSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -185,7 +250,6 @@ export default function LeadsClient() {
       
       const headers = rows[0].split(',').map(h => h.trim().replace(/"/g, ''));
       const importedLeads = rows.slice(1).map(row => {
-        // Simple naive CSV splitting
         const cols = row.split(',').map(c => c.trim().replace(/"/g, ''));
         const lead: any = { customData: {} };
         headers.forEach((h, i) => {
@@ -197,9 +261,8 @@ export default function LeadsClient() {
           else if (hLower.includes('email')) lead.email = val;
           else if (hLower.includes('phone')) lead.phone = val;
           else if (hLower.includes('status')) lead.status = val;
-          else lead.customData[h] = val; // everything else goes to custom data
+          else lead.customData[h] = val; 
         });
-        // fallback required fields
         if (!lead.firstName) lead.firstName = "Imported";
         if (!lead.lastName) lead.lastName = "Lead";
         if (selectedProjectForImport) {
@@ -230,55 +293,78 @@ export default function LeadsClient() {
   };
 
   const columns: ColumnDef<any>[] = [
-    { header: "Lead Info", cell: (item) => {
-        const phone = item.phone || item.customData?.phoneNumber || item.phoneNumber;
-        const displayName = item.firstName === "WhatsApp Lead" || item.firstName === "Imported" 
-            ? phone || item.firstName 
-            : `${item.firstName} ${item.lastName !== "WhatsApp" && item.lastName !== "Lead" ? item.lastName : ""}`.trim();
-        return (
-          <div className="flex flex-col gap-1.5">
-            <button 
-              onClick={() => setSelectedLeadForDetails(item)}
-              className="font-medium text-primary hover:text-primary/80 text-sm text-left transition-colors cursor-pointer"
-            >
-              {displayName}
-            </button>
-            {phone && (
-              <a 
-                href={`https://wa.me/${phone.replace(/[^0-9]/g, '')}`} 
-                target="_blank" 
-                rel="noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs text-green-700 hover:text-green-800 bg-green-50 hover:bg-green-100 px-2.5 py-1 rounded-full w-fit border border-green-200 transition-colors mt-0.5"
-              >
-                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 0C5.385 0 0 5.385 0 12.031c0 2.124.552 4.17 1.6 5.986L.045 24l6.147-1.554c1.737.95 3.693 1.45 5.839 1.45 6.646 0 12.031-5.385 12.031-12.031S18.677 0 12.031 0zm0 21.916c-1.802 0-3.57-.483-5.115-1.4l-.367-.217-3.8.966.98-3.7-.238-.378c-1.006-1.597-1.536-3.456-1.536-5.358 0-5.553 4.52-10.073 10.076-10.073 5.553 0 10.076 4.52 10.076 10.073 0 5.554-4.523 10.073-10.076 10.073zm5.526-7.55c-.303-.152-1.794-.886-2.072-.988-.278-.102-.48-.152-.682.152-.202.303-.782.988-.959 1.19-.177.202-.354.227-.657.076-1.844-.925-3.136-2.274-3.904-4.22-.076-.177.076-.278.227-.581.152-.303.303-.454.454-.757.076-.152.038-.278-.038-.429-.076-.152-.682-1.643-.935-2.25-.246-.593-.497-.512-.682-.52-.177-.008-.38-.008-.582-.008-.202 0-.53.076-.808.38C6.915 6.389 6 7.248 6 8.967c0 1.718 1.137 3.385 1.288 3.587.152.202 2.451 3.739 5.937 5.244.834.361 1.485.577 1.992.74.834.267 1.592.228 2.19.138.67-.101 2.072-.846 2.375-1.662.303-.816.303-1.516.215-1.662-.088-.146-.316-.222-.619-.374z"/></svg>
-                Chat
-              </a>
-            )}
-          </div>
-        ) 
-    }},
+    {
+      id: "select",
+      header: (
+        <input 
+          type="checkbox" 
+          onChange={(e) => {
+            if (e.target.checked) {
+              setSelectedIds(leads.map(l => l._id));
+            } else {
+              setSelectedIds([]);
+            }
+          }}
+          checked={selectedIds.length > 0 && selectedIds.length === leads.length}
+          className="rounded border-border text-primary focus:ring-primary/20"
+        />
+      ),
+      cell: (item) => (
+        <input 
+          type="checkbox"
+          checked={selectedIds.includes(item._id)}
+          onChange={(e) => {
+            if (e.target.checked) setSelectedIds(prev => [...prev, item._id]);
+            else setSelectedIds(prev => prev.filter(id => id !== item._id));
+          }}
+          className="rounded border-border text-primary focus:ring-primary/20"
+        />
+      )
+    },
+    { header: "Lead Info", cell: (item) => (
+      <div>
+        <div className="font-medium text-primary hover:underline cursor-pointer" onClick={() => setSelectedLeadForDetails(item)}>
+          {item.firstName} {item.lastName}
+        </div>
+        <div className="text-xs text-muted-foreground mt-0.5">
+          Score: <span className="font-semibold text-foreground">{item.leadScore || 5}/10</span>
+        </div>
+      </div>
+    )},
     { header: "Contact Details", cell: (item) => (
-      <div className="flex flex-col text-sm text-muted-foreground gap-1.5">
-        {item.email && !item.email.includes('@whatsapp.local') && <span>{item.email}</span>}
-        {item.source && (
-          <span className="inline-flex w-fit px-2 py-0.5 rounded text-[11px] font-medium bg-primary/10 text-primary border border-primary/20">
-            {item.source}
-          </span>
-        )}
+      <div className="flex flex-col gap-1 text-sm text-foreground">
+        <span>{item.email}</span>
+        {item.phone && <span className="text-muted-foreground">{item.phone}</span>}
+        <div className="flex gap-2 mt-1">
+          {item.phone && (
+            <>
+              <a href={`tel:${item.phone}`} title="Call" className="text-muted-foreground hover:text-blue-500 transition-colors">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+              </a>
+              <a href={`https://wa.me/${item.phone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" title="WhatsApp" className="text-muted-foreground hover:text-emerald-500 transition-colors">
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+              </a>
+            </>
+          )}
+          {item.email && (
+            <a href={`mailto:${item.email}`} title="Email" className="text-muted-foreground hover:text-rose-500 transition-colors">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+            </a>
+          )}
+        </div>
       </div>
     )},
     { header: "Date Added", cell: (item) => <span className="text-muted-foreground text-xs">{new Date(item.createdAt).toLocaleDateString()}</span> },
-    { header: "Status (Pipeline)", className: "min-w-[170px]", cell: (item) => (
+    { header: "Status (Pipeline)", className: "min-w-[200px]", cell: (item) => (
       pipelineStages.length > 0 ? (
         <select
           value={item.status}
           onChange={(e) => updateLeadStatus(item._id, e.target.value)}
-          className="w-full text-sm border-border rounded-lg shadow-sm py-1.5 pl-3 pr-8 focus:ring-primary focus:border-primary border bg-card text-foreground font-medium cursor-pointer"
+          className={`w-full text-xs font-semibold rounded-lg shadow-sm py-1.5 pl-3 pr-8 focus:ring-2 focus:ring-primary focus:border-primary border cursor-pointer ${getStageColorClass(item.status, pipelineStages)}`}
         >
           {!pipelineStages.find(s => s.name === item.status) && (
             <option value={item.status} disabled>{item.status}</option>
           )}
-          
           {pipelineStages.sort((a,b) => a.order - b.order).map(stage => (
             <option 
               key={stage.name} 
@@ -290,7 +376,7 @@ export default function LeadsClient() {
           ))}
         </select>
       ) : (
-        <span className="px-2.5 py-1 rounded-md text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
+        <span className={`px-2.5 py-1 rounded-md text-xs font-semibold border ${getStageColorClass(item.status, [])}`}>
           {item.status}
         </span>
       )
@@ -336,6 +422,13 @@ export default function LeadsClient() {
         ))}
       </select>
       
+      <button 
+        onClick={() => setShowRecycleBin(!showRecycleBin)}
+        className={`px-3 py-1.5 rounded-xl text-sm font-medium transition-colors border ${showRecycleBin ? 'bg-destructive text-destructive-foreground border-destructive' : 'bg-card text-muted-foreground border-border hover:bg-muted'}`}
+      >
+        {showRecycleBin ? "Exit Recycle Bin" : "Recycle Bin"}
+      </button>
+
       <div className="flex items-center gap-2 text-sm text-muted-foreground bg-card border border-border rounded-xl px-3 py-1.5 focus-within:ring-2 focus-within:ring-primary">
         <label>From:</label>
         <input 
@@ -433,6 +526,10 @@ export default function LeadsClient() {
           selectable={true}
           selectedIds={selectedIds}
           onSelectionChange={setSelectedIds}
+          bulkActions={[
+            { label: "Update Status", onClick: handleBulkStatusChange },
+            { label: "Delete Selected", onClick: handleBulkDelete, variant: "destructive" }
+          ]}
           actions={
             selectedIds.length > 0 && (
               <button 

@@ -7,7 +7,13 @@ interface Industry {
   name: string;
   description?: string;
   isActive: boolean;
+  defaultModules: string[];
 }
+
+const AVAILABLE_MODULES = [
+  "Leads", "Customers", "Projects", "Orders", "Invoices", 
+  "Tasks", "Support", "Rewards"
+];
 
 export default function IndustriesClient() {
   const [industries, setIndustries] = useState<Industry[]>([]);
@@ -18,8 +24,18 @@ export default function IndustriesClient() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
-    description: ""
+    description: "",
+    defaultModules: [] as string[]
   });
+
+  const toggleModule = (mod: string) => {
+    setFormData(prev => ({
+      ...prev,
+      defaultModules: prev.defaultModules.includes(mod) 
+        ? prev.defaultModules.filter(m => m !== mod)
+        : [...prev.defaultModules, mod]
+    }));
+  };
 
   // Escape key to close modal
   useEffect(() => {
@@ -52,7 +68,7 @@ export default function IndustriesClient() {
   }
 
   const openCreateModal = () => {
-    setFormData({ name: "", description: "" });
+    setFormData({ name: "", description: "", defaultModules: [] });
     setIsModalOpen(true);
   };
 
@@ -112,7 +128,16 @@ export default function IndustriesClient() {
             <div key={industry._id} className="bg-card/60 backdrop-blur-md border border-border rounded-2xl p-6 shadow-sm hover:shadow-md transition-all">
               <h3 className="text-lg font-bold text-foreground mb-2">{industry.name}</h3>
               {industry.description && (
-                <p className="text-sm text-muted-foreground">{industry.description}</p>
+                <p className="text-sm text-muted-foreground mb-3">{industry.description}</p>
+              )}
+              {industry.defaultModules && industry.defaultModules.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {industry.defaultModules.map(mod => (
+                    <span key={mod} className="px-2 py-1 bg-primary/10 text-primary rounded text-xs font-medium border border-primary/20">
+                      {mod}
+                    </span>
+                  ))}
+                </div>
               )}
             </div>
           ))}
@@ -151,6 +176,34 @@ export default function IndustriesClient() {
                   />
                 </div>
                 
+                <div>
+                  <label className="block text-sm font-semibold text-foreground mb-2">
+                    Default Enabled Modules
+                  </label>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    Select the modules that will be automatically enabled for companies in this industry.
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {AVAILABLE_MODULES.map(mod => {
+                      const isSelected = formData.defaultModules.includes(mod);
+                      return (
+                        <button
+                          key={mod}
+                          type="button"
+                          onClick={() => toggleModule(mod)}
+                          className={`px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors ${
+                            isSelected 
+                              ? "bg-primary border-primary text-primary-foreground" 
+                              : "bg-background border-border text-muted-foreground hover:border-primary/50"
+                          }`}
+                        >
+                          {mod}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 <div>
                   <label className="block text-sm font-semibold text-foreground mb-2">Description <span className="text-muted-foreground font-normal">(Optional)</span></label>
                   <textarea 

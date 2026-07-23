@@ -17,6 +17,26 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       body.approvedAt = new Date();
     }
 
+    // State transition validation
+    if (body.status) {
+      const existing = await Invoice.findOne({ _id: (await params).id, ...buildTenantQuery(user) });
+      if (!existing) {
+        return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
+      }
+      
+      const currentStatus = existing.status;
+      const newStatus = body.status;
+      
+      if (currentStatus !== newStatus) {
+        if (currentStatus === 'Unpaid' && newStatus === 'Refunded') {
+          return NextResponse.json({ error: 'Cannot refund an unpaid invoice.' }, { status: 400 });
+        }
+        if (currentStatus === 'Cancelled' && newStatus === 'Paid') {
+          return NextResponse.json({ error: 'Cannot pay a cancelled invoice.' }, { status: 400 });
+        }
+      }
+    }
+
     const item = await Invoice.findOneAndUpdate({ _id: (await params).id, ...buildTenantQuery(user) }, body, { new: true, runValidators: true });
     return NextResponse.json({ message: 'Updated successfully', invoice: item }, { status: 200 });
   } catch (error: any) {

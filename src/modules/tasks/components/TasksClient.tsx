@@ -8,6 +8,8 @@ import DynamicFormBuilder from "@/components/ui/DynamicFormBuilder";
 import KanbanBoard, { KanbanCard } from "@/components/ui/KanbanBoard";
 import { DataTable, ColumnDef } from "@/components/ui/DataTable";
 import FilterBuilder from "@/components/ui/FilterBuilder";
+import { usePermissions } from "@/hooks/usePermissions";
+import { Tooltip } from "@/components/ui/Tooltip";
 
 export default function TasksClient() {
   const [items, setItems] = useState<any[]>([]);
@@ -22,7 +24,9 @@ export default function TasksClient() {
   const [dateTo, setDateTo] = useState("");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [cloningData, setCloningData] = useState<any>(null);
   const [view, setView] = useState<"table" | "kanban">("kanban");
+  const { hasPermission } = usePermissions();
 
   const [advancedFilters, setAdvancedFilters] = useState<any[]>([]);
 
@@ -56,6 +60,9 @@ export default function TasksClient() {
 
   const handleSave = async (formData: any) => {
     try {
+      const isClone = formData._id === "CLONING";
+      if (isClone) delete formData._id;
+
       const res = await fetch("/api/tasks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -63,6 +70,7 @@ export default function TasksClient() {
       });
       if (res.ok) {
         setIsModalOpen(false);
+        setCloningData(null);
         fetchItems();
       } else {
         const err = await res.json();
@@ -71,6 +79,12 @@ export default function TasksClient() {
     } catch (e) {
       console.error(e);
     }
+  };
+
+  const handleClone = (item: any) => {
+    const clone = { ...item, title: `${item.title} (Copy)`, _id: "CLONING" };
+    setCloningData(clone);
+    setIsModalOpen(true);
   };
 
   const handleCardMoved = async (cardId: string, newStatus: string) => {
@@ -121,6 +135,15 @@ export default function TasksClient() {
           <span className="text-muted-foreground/50">None</span>
         )}
       </div>
+    )},
+    { header: "Actions", cell: (item) => (
+      <button
+        onClick={() => handleClone(item)}
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-muted hover:bg-muted/80 text-foreground text-xs font-semibold rounded-lg transition-colors whitespace-nowrap border border-border"
+      >
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" /></svg>
+        Clone
+      </button>
     )}
   ];
 
@@ -193,12 +216,15 @@ export default function TasksClient() {
               Table
             </button>
           </div>
-          <button 
-            onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center gap-2 px-6 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-          >
-            Add Task
-          </button>
+          <Tooltip content="You do not have permission to create tasks" disabled={hasPermission("Tasks", "Create")}>
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              disabled={!hasPermission("Tasks", "Create")}
+              className="inline-flex items-center gap-2 px-6 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Add Task
+            </button>
+          </Tooltip>
       </PageHeader>
 
       {view === "table" ? (
@@ -283,11 +309,11 @@ export default function TasksClient() {
 
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => { setIsModalOpen(false); setCloningData(null); }} />
           <div className="relative bg-card border border-border rounded-2xl shadow-xl w-full max-w-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="p-6 border-b border-border flex justify-between items-center bg-muted/30">
-              <h2 className="text-xl font-bold text-foreground">Add Task</h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-muted-foreground hover:text-foreground">
+              <h2 className="text-xl font-bold text-foreground">{cloningData ? "Clone Task" : "Add Task"}</h2>
+              <button onClick={() => { setIsModalOpen(false); setCloningData(null); }} className="text-muted-foreground hover:text-foreground">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -296,8 +322,9 @@ export default function TasksClient() {
             <div className="p-6 max-h-[80vh] overflow-y-auto custom-scrollbar">
               <DynamicFormBuilder 
                 targetModule="task" 
+                initialData={cloningData}
                 onSubmit={handleSave} 
-                onCancel={() => setIsModalOpen(false)} 
+                onCancel={() => { setIsModalOpen(false); setCloningData(null); }} 
               />
             </div>
           </div>
