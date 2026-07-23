@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import EmptyState from "@/components/ui/EmptyState";
+import PageHeader from "@/components/ui/PageHeader";
 import Button from "@/components/ui/Button";
 import DynamicFormBuilder from "@/components/ui/DynamicFormBuilder";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -114,16 +115,16 @@ export default function CustomersClient() {
   };
 
   const columns: ColumnDef<any>[] = [
-    { header: "Company", accessorKey: "companyName", className: "font-medium text-gray-900" },
+    { header: "Company", accessorKey: "companyName", className: "font-medium text-foreground" },
     { header: "Contact", accessorKey: "contactName" },
-    { header: "Email", accessorKey: "email", cell: (item) => <span className="text-gray-600">{item.email || '-'}</span> },
-    { header: "Date Added", cell: (item) => <span className="text-gray-500 text-xs">{new Date(item.createdAt).toLocaleDateString()}</span> },
+    { header: "Email", accessorKey: "email", cell: (item) => <span className="text-muted-foreground">{item.email || '-'}</span> },
+    { header: "Date Added", cell: (item) => <span className="text-muted-foreground text-xs">{new Date(item.createdAt).toLocaleDateString()}</span> },
     { header: "Status (Pipeline)", cell: (item) => (
       pipelineStages.length > 0 ? (
         <select
           value={item.status}
           onChange={(e) => updateCustomerStatus(item._id, e.target.value)}
-          className="w-full text-sm border-gray-300 rounded-lg shadow-sm py-1.5 pl-3 pr-8 focus:ring-emerald-500 focus:border-emerald-500 border bg-white text-gray-700 font-medium cursor-pointer"
+          className="w-full text-sm border-border rounded-lg shadow-sm py-1.5 pl-3 pr-8 focus:ring-primary focus:border-primary border bg-card text-foreground font-medium cursor-pointer"
         >
           {!pipelineStages.find(s => s.name === item.status) && (
             <option value={item.status} disabled>{item.status}</option>
@@ -140,23 +141,23 @@ export default function CustomersClient() {
           ))}
         </select>
       ) : (
-        <span className="px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+        <span className="px-2.5 py-1 rounded-md text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
           {item.status}
         </span>
       )
     )},
     { header: "Custom Data", cell: (item) => (
-      <div className="text-xs text-gray-500">
+      <div className="text-xs text-muted-foreground">
         {item.customData && Object.keys(item.customData).length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {Object.entries(item.customData).map(([k, v]) => (
-              <span key={k} className="bg-gray-100 border border-gray-200 px-2 py-1 rounded text-gray-700">
-                <strong className="text-gray-900">{k}:</strong> {String(v)}
+              <span key={k} className="bg-muted border border-border px-2 py-1 rounded text-foreground">
+                <strong className="text-foreground">{k}:</strong> {String(v)}
               </span>
             ))}
           </div>
         ) : (
-          <span className="text-gray-400">None</span>
+          <span className="text-muted-foreground/50">None</span>
         )}
       </div>
     )}
@@ -167,7 +168,7 @@ export default function CustomersClient() {
       <select
         value={statusFilter}
         onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-        className="py-2 pl-3 pr-8 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-gray-700 bg-white"
+        className="py-2 pl-3 pr-8 border border-border rounded-xl text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none text-foreground bg-card"
       >
         <option value="">All Statuses</option>
         {pipelineStages.sort((a,b) => a.order - b.order).map(stage => (
@@ -175,7 +176,7 @@ export default function CustomersClient() {
         ))}
       </select>
       
-      <div className="flex items-center gap-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-xl px-3 py-1.5 focus-within:ring-2 focus-within:ring-emerald-500">
+      <div className="flex items-center gap-2 text-sm text-muted-foreground bg-card border border-border rounded-xl px-3 py-1.5 focus-within:ring-2 focus-within:ring-primary">
         <label>From:</label>
         <input 
           type="date" 
@@ -185,7 +186,7 @@ export default function CustomersClient() {
         />
       </div>
 
-      <div className="flex items-center gap-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-xl px-3 py-1.5 focus-within:ring-2 focus-within:ring-emerald-500">
+      <div className="flex items-center gap-2 text-sm text-muted-foreground bg-card border border-border rounded-xl px-3 py-1.5 focus-within:ring-2 focus-within:ring-primary">
         <label>To:</label>
         <input 
           type="date" 
@@ -203,7 +204,7 @@ export default function CustomersClient() {
             setDateTo("");
             setPage(1);
           }}
-          className="text-sm text-red-600 hover:text-red-700 font-medium px-2 py-1 rounded hover:bg-red-50 transition-colors"
+          className="text-sm text-destructive hover:text-destructive/80 font-medium px-2 py-1 rounded hover:bg-destructive/10 transition-colors"
         >
           Clear Filters
         </button>
@@ -213,15 +214,14 @@ export default function CustomersClient() {
 
   return (
     <div className="space-y-8 fade-in pb-12">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Customers</h1>
-          <p className="text-gray-600 mt-1">Manage your customer base and dynamic fields.</p>
-        </div>
+      <PageHeader 
+        title="Customers"
+        description="Manage your customer base and dynamic fields."
+      >
         {hasPermission("Customers", "Create") && (
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl shadow-lg transition-all"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl shadow-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -229,7 +229,7 @@ export default function CustomersClient() {
             Add Customer
           </button>
         )}
-      </div>
+      </PageHeader>
 
       <DataTable 
         data={customers}
@@ -256,11 +256,11 @@ export default function CustomersClient() {
 
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
-          <div className="relative bg-white border border-gray-200 rounded-2xl shadow-xl w-full max-w-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-              <h2 className="text-xl font-bold text-gray-900">Add Customer</h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
+          <div className="relative bg-card border border-border rounded-2xl shadow-xl w-full max-w-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-border flex justify-between items-center bg-muted/30">
+              <h2 className="text-xl font-bold text-foreground">Add Customer</h2>
+              <button onClick={() => setIsModalOpen(false)} className="text-muted-foreground hover:text-foreground">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>

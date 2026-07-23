@@ -65,6 +65,7 @@ export async function POST(req: Request) {
     if (user) {
       body.companyId = user.companyId;
       body.founderId = user.hierarchyLevel === 2 ? user.id : user.founderId;
+      body.createdBy = user._id;
     }
 
     const newProject = await Project.create(body);

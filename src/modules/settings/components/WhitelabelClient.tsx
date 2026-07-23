@@ -12,6 +12,7 @@ export default function WhitelabelClient() {
     { name: "portal.globex.io", status: "Pending DNS Verification" }
   ]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [isPlatformOwner, setIsPlatformOwner] = useState(false);
   const [verifyingDomain, setVerifyingDomain] = useState<string | null>(null);
@@ -50,6 +51,7 @@ export default function WhitelabelClient() {
 
 
   async function saveBranding() {
+    setSaving(true);
     try {
       const res = await fetch("/api/settings/whitelabel", {
         method: "PUT",
@@ -65,6 +67,8 @@ export default function WhitelabelClient() {
     } catch (e) {
       console.error(e);
       alert("Failed to save branding");
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -155,51 +159,51 @@ export default function WhitelabelClient() {
     }
   }
 
-  if (loading) return <div className="p-8 text-center text-gray-500">Loading settings...</div>;
+  if (loading) return <div className="p-8 text-center text-muted-foreground">Loading settings...</div>;
 
   return (
-    <div className="space-y-8 fade-in pb-12">
+    <div className="space-y-6 md:space-y-8 fade-in pb-12">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 tracking-tight">White-Label Management</h1>
-        <p className="text-gray-600 mt-1">Configure {isPlatformOwner ? 'global platform' : 'your tenant'} branding, custom domains, and visual identities.</p>
+        <h1 className="text-3xl font-bold text-foreground tracking-tight">White-Label Management</h1>
+        <p className="text-muted-foreground mt-1">Configure {isPlatformOwner ? 'global platform' : 'your tenant'} branding, custom domains, and visual identities.</p>
         {!isPlatformOwner && (
-          <div className="mt-4 p-3 bg-indigo-50 border border-indigo-200 rounded-lg text-sm text-indigo-800">
+          <div className="mt-4 p-3 bg-primary/10 border border-primary/20 rounded-lg text-sm text-primary">
             <strong>Tenant Mode:</strong> Your branding configurations here will securely override the platform's default branding across all your customer-facing portals.
           </div>
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white/50 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-xl">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">{isPlatformOwner ? 'Global Branding' : 'Your Branding'}</h2>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8">
+        <div className="bg-card/50 backdrop-blur-xl border border-border rounded-2xl p-4 md:p-6 shadow-xl">
+          <h2 className="text-xl font-bold text-foreground mb-6">{isPlatformOwner ? 'Global Branding' : 'Your Branding'}</h2>
           <div className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Platform Name</label>
+              <label className="block text-sm font-medium text-foreground mb-2">Platform Name</label>
               <input 
                 type="text" 
                 value={platformName}
                 onChange={(e) => setPlatformName(e.target.value)}
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" 
+                className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:ring-2 focus:ring-ring focus:border-transparent outline-none transition-all" 
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Primary Color (Hex)</label>
+              <label className="block text-sm font-medium text-foreground mb-2">Primary Color (Hex)</label>
               <div className="flex gap-3">
                 <input 
                   type="text" 
                   value={primaryColor}
                   onChange={(e) => setPrimaryColor(e.target.value)}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" 
+                  className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:ring-2 focus:ring-primary outline-none transition-all" 
                 />
-                <div className="w-12 h-12 rounded-xl shrink-0 border border-gray-300" style={{ backgroundColor: primaryColor }}></div>
+                <div className="w-12 h-12 rounded-xl shrink-0 border border-border shadow-sm" style={{ backgroundColor: primaryColor }}></div>
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Logo Upload</label>
+              <label className="block text-sm font-medium text-foreground mb-2">Logo Upload</label>
               
               <div className="flex flex-col gap-4">
                 {logoUrl && (
-                  <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 flex justify-center">
+                  <div className="p-4 bg-background rounded-xl border border-border flex justify-center">
                     <img src={logoUrl} alt="Logo Preview" className="max-h-24 object-contain" />
                   </div>
                 )}
@@ -213,34 +217,44 @@ export default function WhitelabelClient() {
                 />
                 <div 
                   onClick={() => fileInputRef.current?.click()}
-                  className={`border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-gray-500 transition-colors cursor-pointer ${uploading ? 'opacity-50 pointer-events-none' : ''}`}
+                  className={`border-2 border-dashed border-border rounded-xl p-8 text-center hover:border-muted-foreground transition-colors cursor-pointer ${uploading ? 'opacity-50 pointer-events-none' : ''}`}
                 >
-                  <svg className="w-8 h-8 text-gray-500 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-8 h-8 text-muted-foreground mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                   </svg>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-muted-foreground">
                     {uploading ? 'Uploading...' : 'Click to upload or drag and drop SVG/PNG'}
                   </p>
                 </div>
               </div>
             </div>
-            <button onClick={saveBranding} className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-blue-500/20">
-              Save Branding Options
+            <button 
+              onClick={saveBranding}
+              disabled={saving || uploading}
+              className="w-full py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl transition-all shadow-lg shadow-primary/20 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary flex items-center justify-center gap-2"
+            >
+              {saving && (
+                <svg className="animate-spin h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              )}
+              {saving ? 'Saving...' : 'Save Branding Options'}
             </button>
           </div>
         </div>
 
-        <div className="bg-white/50 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-xl">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Custom Domains</h2>
-          <p className="text-sm text-gray-600 mb-6">Allow tenant companies to map their own domains to your application.</p>
+        <div className="bg-card/50 backdrop-blur-xl border border-border rounded-2xl p-4 md:p-6 shadow-xl">
+          <h2 className="text-xl font-bold text-foreground mb-6">Custom Domains</h2>
+          <p className="text-sm text-muted-foreground mb-6">Allow tenant companies to map their own domains to your application.</p>
           
           <div className="space-y-4">
             {domains.map((domain, i) => (
-              <div key={i} className={`p-4 border rounded-xl flex items-center justify-between ${domain.status === 'Active' ? 'border-blue-500/30 bg-blue-500/5' : 'border-gray-200 bg-gray-50'}`}>
+              <div key={i} className={`p-4 border rounded-xl flex items-center justify-between ${domain.status === 'Active' ? 'border-primary/30 bg-primary/5' : 'border-border bg-background'}`}>
                 <div>
-                  <p className="font-semibold text-gray-900">{domain.name}</p>
-                  <p className={`text-xs mt-1 flex items-center gap-1.5 ${domain.status === 'Active' ? 'text-blue-500 font-medium' : 'text-amber-500'}`}>
-                    {domain.status === 'Active' && <span className="w-2 h-2 rounded-full bg-blue-500"></span>}
+                  <p className="font-semibold text-foreground">{domain.name}</p>
+                  <p className={`text-xs mt-1 flex items-center gap-1.5 ${domain.status === 'Active' ? 'text-primary font-medium' : 'text-amber-500'}`}>
+                    {domain.status === 'Active' && <span className="w-2 h-2 rounded-full bg-primary"></span>}
                     {domain.status === 'Pending DNS Verification' && <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>}
                     Status: {domain.status}
                   </p>
@@ -248,14 +262,14 @@ export default function WhitelabelClient() {
                 <button 
                   onClick={() => domain.status === 'Active' ? null : verifyDomain(domain.name)} 
                   disabled={verifyingDomain === domain.name}
-                  className={`text-sm font-medium transition-colors ${domain.status === 'Active' ? 'text-gray-400 cursor-default' : 'text-blue-600 hover:text-blue-800'} ${verifyingDomain === domain.name ? 'opacity-50' : ''}`}
+                  className={`text-sm font-medium transition-colors focus-visible:outline-none focus-visible:underline ${domain.status === 'Active' ? 'text-muted-foreground/50 cursor-default' : 'text-primary hover:text-primary/80 hover:underline'} ${verifyingDomain === domain.name ? 'opacity-50' : ''}`}
                 >
                   {verifyingDomain === domain.name ? 'Checking DNS...' : (domain.status === 'Active' ? 'Configured' : 'Verify DNS')}
                 </button>
               </div>
             ))}
             
-            <button onClick={registerDomain} className="w-full py-3 border border-dashed border-gray-300 text-gray-600 hover:text-gray-900 hover:border-gray-500 font-medium rounded-xl transition-all">
+            <button onClick={registerDomain} className="w-full py-3 border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-muted-foreground font-medium rounded-xl transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
               + Register New Domain
             </button>
           </div>

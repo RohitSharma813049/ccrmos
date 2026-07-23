@@ -14,6 +14,7 @@ export interface ICustomer extends Document {
   status: string;
   customData: Record<string, any>;
   createdBy?: mongoose.Types.ObjectId;
+  updatedBy?: mongoose.Types.ObjectId;
   
   // Ownership Chain
   departmentId?: mongoose.Types.ObjectId;
@@ -36,6 +37,7 @@ const customerSchema = new Schema<ICustomer>({
   status: { type: String, default: 'active' },
   customData: { type: Schema.Types.Mixed, default: {} },
   createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
+  updatedBy: { type: Schema.Types.ObjectId, ref: 'User' },
   
   departmentId: { type: Schema.Types.ObjectId, ref: "Department" },
   directorId: { type: Schema.Types.ObjectId, ref: "User" },

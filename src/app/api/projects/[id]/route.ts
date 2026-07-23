@@ -10,6 +10,13 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     const user = await requireAuthenticatedUser();
     await requirePermission('Projects', 'edit');
     const body = await req.json();
+    body.updatedBy = user._id;
+
+    if (body.approvalStatus && body.approvalStatus !== 'Pending') {
+      body.approvedBy = user._id;
+      body.approvedAt = new Date();
+    }
+
     const item = await Project.findOneAndUpdate({ _id: (await params).id, ...buildTenantQuery(user) }, body, { new: true, runValidators: true });
     return NextResponse.json({ message: 'Updated successfully', project: item }, { status: 200 });
   } catch (error: any) {

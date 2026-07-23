@@ -14,6 +14,7 @@ export interface ILead extends Document {
   source?: string;
   notes?: string;
   createdBy?: mongoose.Types.ObjectId;
+  updatedBy?: mongoose.Types.ObjectId;
   
   // Ownership Chain
   departmentId?: mongoose.Types.ObjectId;
@@ -44,6 +45,7 @@ const leadSchema = new Schema<ILead>({
   status: { type: String, default: 'new' },
   customData: { type: Schema.Types.Mixed, default: {} },
   createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
+  updatedBy: { type: Schema.Types.ObjectId, ref: 'User' },
   activities: [{
     type: { type: String },
     description: String,

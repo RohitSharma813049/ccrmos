@@ -6,8 +6,12 @@ export interface IProject extends Document {
   companyId?: mongoose.Types.ObjectId;
   founderId?: mongoose.Types.ObjectId;
   createdBy?: mongoose.Types.ObjectId;
+  updatedBy?: mongoose.Types.ObjectId;
   name: string;
   status: string;
+  approvalStatus?: 'Pending' | 'Approved' | 'Rejected';
+  approvedBy?: mongoose.Types.ObjectId;
+  approvedAt?: Date;
   customData?: Record<string, any>;
 }
 
@@ -16,8 +20,12 @@ const ProjectSchema = new Schema<IProject>({
   companyId: { type: Schema.Types.ObjectId, ref: 'Company' },
   founderId: { type: Schema.Types.ObjectId, ref: 'User' },
   createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
+  updatedBy: { type: Schema.Types.ObjectId, ref: 'User' },
   name: { type: String, required: true },
   status: { type: String, default: 'Planning' },
+  approvalStatus: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' },
+  approvedBy: { type: Schema.Types.ObjectId, ref: 'User' },
+  approvedAt: { type: Date },
   customData: { type: Schema.Types.Mixed, default: {} }
 }, { timestamps: true });
 

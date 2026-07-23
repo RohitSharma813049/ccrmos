@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import PageHeader from "@/components/ui/PageHeader";
 
 export default function AutomationsClient() {
   const [workflows, setWorkflows] = useState<any[]>([]);
@@ -83,13 +84,13 @@ export default function AutomationsClient() {
 
   return (
     <div className="space-y-8 fade-in pb-12">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Company Automations</h1>
-        <p className="text-gray-600 mt-1">Design event triggers, execution queues, and background jobs for your company.</p>
-      </div>
+      <PageHeader
+        title="Company Automations"
+        description="Design event triggers, execution queues, and background jobs for your company."
+      />
 
       <div className="bg-white/50 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-xl">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
           <h2 className="text-xl font-bold text-gray-900">Execution Pipelines</h2>
           <button 
             onClick={() => setIsModalOpen(true)} 

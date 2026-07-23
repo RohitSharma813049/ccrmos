@@ -105,10 +105,16 @@ export const authOptions: NextAuthOptions = {
           (session.user as any).hierarchyLevel = token.hierarchyLevel;
 
           if (token.hierarchyLevel === 1) {
-            const cookieStore = await cookies();
-            const impersonated = cookieStore.get("impersonatedFounderId")?.value;
-            if (impersonated) {
-              (session.user as any).impersonatedFounderId = impersonated;
+            // We pass the parsed cookies from the request wrapper
+            const impersonatedFounderId = (token as any)._impersonatedFounderId;
+            const impersonatedCompanyId = (token as any)._impersonatedCompanyId;
+            
+            if (impersonatedFounderId) {
+              (session.user as any).impersonatedFounderId = impersonatedFounderId;
+              if (impersonatedCompanyId) {
+                (session.user as any).impersonatedCompanyId = impersonatedCompanyId;
+                (session.user as any).companyId = impersonatedCompanyId;
+              }
             }
           }
         }
@@ -122,6 +128,30 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
 };
 
-const handler = NextAuth(authOptions);
+async function auth(req: Request, context: any) {
+  const cookieHeader = req.headers.get("cookie") || "";
+  const impersonatedFounderId = cookieHeader.match(/impersonatedFounderId=([^;]+)/)?.[1];
+  const impersonatedCompanyId = cookieHeader.match(/impersonatedCompanyId=([^;]+)/)?.[1];
 
-export { handler as GET, handler as POST };
+  return await NextAuth(req, context, {
+    ...authOptions,
+    callbacks: {
+      ...authOptions.callbacks,
+      async jwt({ token, user, account, profile, isNewUser }) {
+        let finalToken = token;
+        if (authOptions.callbacks?.jwt) {
+          finalToken = await authOptions.callbacks.jwt({ token, user, account, profile, isNewUser }) as any;
+        }
+        if (impersonatedFounderId) {
+          (finalToken as any)._impersonatedFounderId = impersonatedFounderId;
+        }
+        if (impersonatedCompanyId) {
+          (finalToken as any)._impersonatedCompanyId = impersonatedCompanyId;
+        }
+        return finalToken;
+      }
+    }
+  });
+}
+
+export { auth as GET, auth as POST };

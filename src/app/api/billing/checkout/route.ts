@@ -4,9 +4,15 @@ import { getSession } from "@/lib/auth-utils";
 import dbConnect from "@/lib/db";
 import Company from "@/modules/companies/schemas/Company";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2024-04-10" as any, // use latest or fixed version
-});
+let stripeClient: Stripe;
+function getStripe() {
+  if (!stripeClient) {
+    stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_placeholder", {
+      apiVersion: "2024-04-10" as any,
+    });
+  }
+  return stripeClient;
+}
 
 export async function POST(req: Request) {
   try {
@@ -22,6 +28,9 @@ export async function POST(req: Request) {
     }
 
     await dbConnect();
+    if (!session || !session.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     const company = await Company.findById(session.user.companyId);
     if (!company) {
       return NextResponse.json({ error: "Company not found" }, { status: 404 });
@@ -30,6 +39,7 @@ export async function POST(req: Request) {
     // Create or retrieve Stripe Customer
     let customerId = company.stripeCustomerId;
     if (!customerId) {
+      const stripe = getStripe();
       const customer = await stripe.customers.create({
         email: company.adminEmail,
         name: company.name,
@@ -44,6 +54,7 @@ export async function POST(req: Request) {
     }
 
     // Create Checkout Session
+    const stripe = getStripe();
     const checkoutSession = await stripe.checkout.sessions.create({
       customer: customerId,
       mode: "subscription",

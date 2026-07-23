@@ -8,7 +8,7 @@ export default async function SecurityPage() {
   return (
     <div className="space-y-8">
       <SecurityClient />
-      <div className="border-t border-gray-200 my-8"></div>
+      <div className="border-t border-border my-8"></div>
       <TwoFactorClient />
     </div>
   );

@@ -23,6 +23,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     const user = await requireAuthenticatedUser();
     await requirePermission('Leads', 'edit');
     const body = await req.json();
+    body.updatedBy = user._id;
     const updatedLead = await Lead.findOneAndUpdate({ _id: (await params).id, ...buildTenantQuery(user) }, body, { new: true, runValidators: true });
     if (!updatedLead) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     return NextResponse.json({ lead: updatedLead });

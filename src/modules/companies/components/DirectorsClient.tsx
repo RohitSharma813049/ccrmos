@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import PageHeader from "@/components/ui/PageHeader";
 import { DataTable, ColumnDef } from "@/components/ui/DataTable";
 
 export default function DirectorsClient() {
@@ -77,8 +78,8 @@ export default function DirectorsClient() {
     {
       header: "Director",
       cell: (dir) => (
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-gray-700 to-gray-600 flex items-center justify-center font-bold text-xs text-white">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-xs text-primary border border-primary/30">
             {dir.name?.charAt(0) || "D"}
           </div>
           <div>
@@ -120,22 +121,20 @@ export default function DirectorsClient() {
 
   return (
     <div className="space-y-8 fade-in pb-12">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Director Management</h1>
-          <p className="text-gray-600 mt-1">Provision and manage top-level leadership for your company.</p>
-        </div>
-        
+      <PageHeader
+        title="Director Management"
+        description="Provision and manage top-level leadership for your company."
+      >
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/20 transition-all border border-emerald-500/30"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl shadow-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
           </svg>
           Provision Director
         </button>
-      </div>
+      </PageHeader>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white/40 backdrop-blur-md border border-gray-200 rounded-2xl p-6 shadow-lg">

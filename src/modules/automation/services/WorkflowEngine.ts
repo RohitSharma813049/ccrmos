@@ -24,10 +24,10 @@ export class WorkflowEngine {
       const log = await WorkflowLog.create({
         workflowId: wf._id,
         companyId,
-        triggerEvent: triggerName,
-        payload,
+        trigger: triggerName,
+        targetId: String(payload.id || payload._id || "unknown"),
         status: passed ? "completed" : "failed",
-        errorMessage: passed ? undefined : "Conditions not met",
+        details: passed ? "Conditions met" : "Conditions not met",
       });
 
       if (passed) {

@@ -17,6 +17,18 @@ export default function RolesManager() {
   const [roleName, setRoleName] = useState("");
   const [roleDesc, setRoleDesc] = useState("");
   const [permissions, setPermissions] = useState<any>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Escape key to close modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isModalOpen) {
+        setIsModalOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isModalOpen]);
 
   useEffect(() => {
     fetchRoles();
@@ -67,6 +79,7 @@ export default function RolesManager() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       const payload = {
         id: currentRole?._id,
@@ -92,6 +105,8 @@ export default function RolesManager() {
       }
     } catch (e) {
       console.error(e);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -127,14 +142,14 @@ export default function RolesManager() {
 
   return (
     <div className="space-y-8 fade-in">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Custom Roles & Permissions</h2>
-          <p className="text-gray-600 mt-1">Define granular access control for your team.</p>
+          <h2 className="text-2xl font-bold text-foreground">Custom Roles & Permissions</h2>
+          <p className="text-muted-foreground mt-1">Define granular access control for your team.</p>
         </div>
         <button 
           onClick={() => openModal()}
-          className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg font-medium shadow-sm"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
           + Create Role
         </button>
@@ -142,30 +157,30 @@ export default function RolesManager() {
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {loading ? (
-          <p>Loading...</p>
+          <p className="text-muted-foreground animate-pulse">Loading...</p>
         ) : roles.map((r) => (
-          <div key={r._id} className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-between">
+          <div key={r._id} className="bg-card p-6 rounded-xl border border-border shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
             <div>
               <div className="flex justify-between items-start">
-                <h3 className="font-bold text-gray-900 text-lg">{r.name}</h3>
+                <h3 className="font-bold text-foreground text-lg">{r.name}</h3>
                 {r.isSystem && (
-                  <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-semibold">System</span>
+                  <span className="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full font-semibold">System</span>
                 )}
               </div>
-              <p className="text-sm text-gray-500 mt-2 line-clamp-2">{r.description || "No description provided."}</p>
+              <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{r.description || "No description provided."}</p>
             </div>
             
             <div className="mt-6 flex gap-3">
               <button 
                 onClick={() => openModal(r)}
-                className="flex-1 px-4 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 transition-colors"
+                className="flex-1 px-4 py-2 bg-background hover:bg-muted border border-border rounded-lg text-sm font-medium text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               >
                 Edit Matrix
               </button>
               {!r.isSystem && (
                 <button 
                   onClick={() => handleDelete(r._id, r.isSystem)}
-                  className="px-4 py-2 text-red-600 hover:bg-red-50 border border-transparent rounded-lg text-sm font-medium transition-colors"
+                  className="px-4 py-2 text-destructive hover:bg-destructive/10 border border-transparent rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive"
                 >
                   Delete
                 </button>
@@ -176,45 +191,49 @@ export default function RolesManager() {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
-          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-6xl max-h-[90vh] flex flex-col">
-            <div className="p-6 border-b border-gray-100 flex-shrink-0">
-              <h2 className="text-xl font-bold text-gray-900">{currentRole ? "Edit Role" : "Create New Role"}</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
+          <div className="relative bg-card rounded-2xl shadow-xl w-full max-w-6xl max-h-[90vh] flex flex-col border border-border animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-border flex-shrink-0">
+              <h2 id="modal-title" className="text-xl font-bold text-foreground">{currentRole ? "Edit Role" : "Create New Role"}</h2>
             </div>
             
-            <div className="p-6 overflow-y-auto flex-1">
+            <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
               <form id="role-form" onSubmit={handleSave} className="space-y-6">
                 <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Role Name</label>
+                    <label className="block text-sm font-medium text-foreground mb-1">
+                      Role Name <span className="text-destructive">*</span>
+                    </label>
                     <input 
                       required
                       type="text" 
                       value={roleName}
                       onChange={e => setRoleName(e.target.value)}
-                      className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                      className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-foreground shadow-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       placeholder="e.g. Sales Manager"
                       disabled={currentRole?.isSystem}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <label className="block text-sm font-medium text-foreground mb-1">
+                      Description <span className="text-muted-foreground font-normal">(Optional)</span>
+                    </label>
                     <input 
                       type="text" 
                       value={roleDesc}
                       onChange={e => setRoleDesc(e.target.value)}
-                      className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                      className="w-full bg-background border border-border rounded-lg px-4 py-2.5 text-foreground shadow-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
                       placeholder="Role responsibilities..."
                     />
                   </div>
                 </div>
 
                 <div className="pt-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">Permission Matrix</h3>
-                  <div className="border border-gray-200 rounded-xl overflow-x-auto">
-                    <table className="w-full text-left text-sm text-gray-700 whitespace-nowrap">
-                      <thead className="bg-gray-50 border-b border-gray-200">
+                  <h3 className="text-lg font-bold text-foreground mb-4">Permission Matrix</h3>
+                  <div className="border border-border rounded-xl overflow-x-auto">
+                    <table className="w-full text-left text-sm text-foreground whitespace-nowrap">
+                      <thead className="bg-muted/50 border-b border-border">
                         <tr>
                           <th className="px-4 py-3 font-semibold">Module</th>
                           <th className="px-4 py-3 font-semibold">Record Scope</th>
@@ -223,15 +242,15 @@ export default function RolesManager() {
                           ))}
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-100">
+                      <tbody className="divide-y divide-border">
                         {modules.map(mod => (
-                          <tr key={mod} className="hover:bg-gray-50 transition-colors">
-                            <td className="px-4 py-4 font-medium text-gray-900">{mod}</td>
+                          <tr key={mod} className="hover:bg-muted/30 transition-colors">
+                            <td className="px-4 py-4 font-medium text-foreground">{mod}</td>
                             <td className="px-4 py-4">
                               <select 
                                 value={permissions[mod]?.recordScope || "Own"}
                                 onChange={(e) => handleScopeChange(mod, e.target.value)}
-                                className="border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm py-1"
+                                className="bg-background border border-border rounded-md shadow-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-sm py-1.5 px-3"
                               >
                                 {SCOPES.map(scope => (
                                   <option key={scope} value={scope}>{scope}</option>
@@ -246,7 +265,7 @@ export default function RolesManager() {
                                     type="checkbox"
                                     checked={isChecked}
                                     onChange={() => handlePermissionToggle(mod, action)}
-                                    className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer"
+                                    className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-2 focus:ring-primary cursor-pointer"
                                   />
                                 </td>
                               )
@@ -260,19 +279,26 @@ export default function RolesManager() {
               </form>
             </div>
             
-            <div className="p-6 border-t border-gray-100 flex justify-end gap-3 flex-shrink-0">
+            <div className="p-6 border-t border-border bg-muted/30 flex justify-end gap-3 flex-shrink-0 rounded-b-2xl">
               <button 
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-5 py-2.5 border border-border bg-background text-foreground font-medium rounded-lg hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary shadow-sm"
               >
                 Cancel
               </button>
               <button 
                 type="submit"
                 form="role-form"
-                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-lg shadow-sm transition-colors"
+                disabled={isSubmitting}
+                className="px-6 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50 font-medium rounded-lg shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary inline-flex items-center gap-2"
               >
+                {isSubmitting && (
+                  <svg className="animate-spin h-4 w-4 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                )}
                 Save Role
               </button>
             </div>

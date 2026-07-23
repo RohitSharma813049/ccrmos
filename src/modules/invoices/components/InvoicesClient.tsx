@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import EmptyState from "@/components/ui/EmptyState";
+import PageHeader from "@/components/ui/PageHeader";
 import Button from "@/components/ui/Button";
 import DynamicFormBuilder from "@/components/ui/DynamicFormBuilder";
 import { formatCurrency } from "@/utils/currency";
@@ -113,15 +114,15 @@ export default function InvoicesClient() {
   };
 
   const columns: ColumnDef<any>[] = [
-    { header: "Invoice #", accessorKey: "invoiceNumber", className: "font-medium text-gray-900" },
+    { header: "Invoice #", accessorKey: "invoiceNumber", className: "font-medium text-foreground" },
     { header: "Amount", cell: (item) => formatCurrency(item.amount, item.currency || 'USD') },
-    { header: "Date Added", cell: (item) => <span className="text-gray-500 text-xs">{new Date(item.createdAt).toLocaleDateString()}</span> },
+    { header: "Date Added", cell: (item) => <span className="text-muted-foreground text-xs">{new Date(item.createdAt).toLocaleDateString()}</span> },
     { header: "Status (Pipeline)", className: "min-w-[200px]", cell: (item) => (
       pipelineStages.length > 0 ? (
         <select
           value={item.status}
           onChange={(e) => updateStatus(item._id, e.target.value)}
-          className="w-full text-sm border-gray-300 rounded-lg shadow-sm py-1.5 pl-3 pr-8 focus:ring-pink-500 focus:border-pink-500 border bg-white text-gray-700 font-medium cursor-pointer"
+          className="w-full text-sm border-border rounded-lg shadow-sm py-1.5 pl-3 pr-8 focus:ring-primary focus:border-primary border bg-card text-foreground font-medium cursor-pointer"
         >
           {!pipelineStages.find(s => s.name === item.status) && (
             <option value={item.status} disabled>{item.status}</option>
@@ -138,30 +139,30 @@ export default function InvoicesClient() {
           ))}
         </select>
       ) : (
-        <span className="px-2.5 py-1 rounded-md text-xs font-semibold bg-pink-50 text-pink-700 border border-pink-200">
+        <span className="px-2.5 py-1 rounded-md text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
           {item.status}
         </span>
       )
     )},
     { header: "Custom Data", cell: (item) => (
-      <div className="text-xs text-gray-500">
+      <div className="text-xs text-muted-foreground">
         {item.customData && Object.keys(item.customData).length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {Object.entries(item.customData).map(([k, v]) => (
-              <span key={k} className="bg-gray-100 border border-gray-200 px-2 py-1 rounded text-gray-700">
-                <strong className="text-gray-900">{k}:</strong> {String(v)}
+              <span key={k} className="bg-muted border border-border px-2 py-1 rounded text-foreground">
+                <strong className="text-foreground">{k}:</strong> {String(v)}
               </span>
             ))}
           </div>
         ) : (
-          <span className="text-gray-400">None</span>
+          <span className="text-muted-foreground/50">None</span>
         )}
       </div>
     )},
     { header: "Actions", className: "text-right", cell: (item) => (
       <button 
         onClick={() => generateInvoicePDF(item)}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-pink-50 text-pink-600 hover:text-pink-700 font-medium rounded-lg transition-colors text-xs"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-muted hover:bg-primary/10 text-primary hover:text-primary/80 font-medium rounded-lg transition-colors text-xs"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -176,7 +177,7 @@ export default function InvoicesClient() {
       <select
         value={statusFilter}
         onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-        className="py-2 pl-3 pr-8 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none text-gray-700 bg-white"
+        className="py-2 pl-3 pr-8 border border-border rounded-xl text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none text-foreground bg-card"
       >
         <option value="">All Statuses</option>
         {pipelineStages.sort((a,b) => a.order - b.order).map(stage => (
@@ -184,7 +185,7 @@ export default function InvoicesClient() {
         ))}
       </select>
       
-      <div className="flex items-center gap-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-xl px-3 py-1.5 focus-within:ring-2 focus-within:ring-pink-500">
+      <div className="flex items-center gap-2 text-sm text-muted-foreground bg-card border border-border rounded-xl px-3 py-1.5 focus-within:ring-2 focus-within:ring-primary">
         <label>From:</label>
         <input 
           type="date" 
@@ -194,7 +195,7 @@ export default function InvoicesClient() {
         />
       </div>
 
-      <div className="flex items-center gap-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-xl px-3 py-1.5 focus-within:ring-2 focus-within:ring-pink-500">
+      <div className="flex items-center gap-2 text-sm text-muted-foreground bg-card border border-border rounded-xl px-3 py-1.5 focus-within:ring-2 focus-within:ring-primary">
         <label>To:</label>
         <input 
           type="date" 
@@ -212,7 +213,7 @@ export default function InvoicesClient() {
             setDateTo("");
             setPage(1);
           }}
-          className="text-sm text-red-600 hover:text-red-700 font-medium px-2 py-1 rounded hover:bg-red-50 transition-colors"
+          className="text-sm text-destructive hover:text-destructive/80 font-medium px-2 py-1 rounded hover:bg-destructive/10 transition-colors"
         >
           Clear Filters
         </button>
@@ -222,15 +223,14 @@ export default function InvoicesClient() {
 
   return (
     <div className="space-y-8 fade-in pb-12">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Invoices</h1>
-          <p className="text-gray-600 mt-1">Manage invoices and dynamic fields.</p>
-        </div>
+      <PageHeader
+        title="Invoices"
+        description="Manage invoices and dynamic fields."
+      >
         {hasPermission("Invoices", "Create") && (
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-pink-600 hover:bg-pink-500 text-white font-semibold rounded-xl shadow-lg transition-all"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl shadow-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -238,7 +238,7 @@ export default function InvoicesClient() {
             Add Invoice
           </button>
         )}
-      </div>
+      </PageHeader>
 
       <DataTable 
         data={items}
@@ -265,11 +265,11 @@ export default function InvoicesClient() {
 
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
-          <div className="relative bg-white border border-gray-200 rounded-2xl shadow-xl w-full max-w-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-              <h2 className="text-xl font-bold text-gray-900">Add Invoice</h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
+          <div className="relative bg-card border border-border rounded-2xl shadow-xl w-full max-w-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-border flex justify-between items-center bg-muted/30">
+              <h2 className="text-xl font-bold text-foreground">Add Invoice</h2>
+              <button onClick={() => setIsModalOpen(false)} className="text-muted-foreground hover:text-foreground">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>

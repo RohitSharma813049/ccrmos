@@ -23,13 +23,13 @@ export default function SidebarWrapper({
   return (
     <>
       {/* Desktop CRM Sidebar */}
-      <aside className="hidden md:flex relative z-0 w-64 bg-white border-r border-gray-200 h-full flex-col shrink-0 overflow-hidden">
+      <aside className="hidden md:flex relative z-0 w-64 bg-card border-r border-border h-full flex-col shrink-0 overflow-hidden">
         {/* Desktop Header */}
         <div className="p-6 relative z-10 flex items-center gap-3">
           {logoUrl ? (
             <img src={logoUrl} alt={platformName} className="max-h-12 w-auto object-contain" />
           ) : (
-            <h2 className="font-bold text-xl tracking-tight text-gray-900">{platformName}</h2>
+            <h2 className="font-bold text-xl tracking-tight text-foreground">{platformName}</h2>
           )}
         </div>
         

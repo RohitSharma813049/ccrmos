@@ -155,8 +155,8 @@ export default function FormBuilderClient() {
   if (hierarchyLevel === null) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-        <span className="ml-3 text-gray-500">Checking permissions...</span>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <span className="ml-3 text-muted-foreground">Checking permissions...</span>
       </div>
     );
   }
@@ -164,12 +164,12 @@ export default function FormBuilderClient() {
   if (hierarchyLevel > 2) {
     return (
       <div className="flex flex-col items-center justify-center py-20 px-4">
-        <div className="bg-red-50 text-red-600 p-6 rounded-2xl max-w-lg text-center border border-red-100 shadow-sm">
+        <div className="bg-destructive/10 text-destructive p-6 rounded-2xl max-w-lg text-center border border-destructive/20 shadow-sm">
           <svg className="w-12 h-12 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
           <h2 className="text-xl font-bold mb-2">Access Restricted</h2>
-          <p className="text-red-700/80 font-medium">Database schema modification is restricted to Platform Owners.</p>
+          <p className="text-destructive/80 font-medium">Database schema modification is restricted to Platform Owners.</p>
         </div>
       </div>
     );
@@ -177,18 +177,18 @@ export default function FormBuilderClient() {
 
   return (
     <div className="space-y-8 fade-in pb-12">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Form Builder</h1>
-          <p className="text-gray-600 mt-1">Design custom forms for your CRM modules (Platform Owner only).</p>
+          <h1 className="text-3xl font-bold text-foreground tracking-tight">Form Builder</h1>
+          <p className="text-muted-foreground mt-1">Design custom forms for your CRM modules (Platform Owner only).</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <button 
             onClick={() => {
               setCurrentStep(0);
               setIsPreviewOpen(true);
             }}
-            className="bg-white hover:bg-gray-50 text-gray-800 border border-gray-300 px-5 py-2.5 rounded-xl font-semibold shadow-sm transition-colors"
+            className="bg-background hover:bg-muted text-foreground border border-border px-5 py-2.5 rounded-xl font-semibold shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
             Live Preview
           </button>
@@ -197,25 +197,25 @@ export default function FormBuilderClient() {
               setFormData({ name: "", type: "Text String", required: false, section: "General", options: "", customCss: "" });
               setIsModalOpen(true);
             }}
-            className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl font-semibold shadow-sm transition-colors"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground px-5 py-2.5 rounded-xl font-semibold shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
             + Add Custom Field
           </button>
         </div>
       </div>
 
-      <div className="flex border-b border-gray-200">
+      <div className="flex border-b border-border overflow-x-auto">
         {["lead", "customer", "project", "invoice"].map((tab) => (
           <button 
             key={tab}
             onClick={() => setActiveTab(tab as any)}
-            className={`px-6 py-4 text-sm font-medium capitalize transition-colors relative ${
-              activeTab === tab ? "text-indigo-600" : "text-gray-600 hover:text-gray-900"
+            className={`px-6 py-4 text-sm font-medium capitalize transition-colors relative whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+              activeTab === tab ? "text-primary" : "text-muted-foreground hover:text-foreground"
             }`}
           >
             {tab} Forms
             {activeTab === tab && (
-              <div className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600" />
+              <div className="absolute bottom-0 left-0 w-full h-0.5 bg-primary" />
             )}
           </button>
         ))}
@@ -223,23 +223,23 @@ export default function FormBuilderClient() {
 
       {loading ? (
         <div className="flex justify-center items-center h-48">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600"></div>
-          <span className="ml-3 text-gray-500 font-medium">Loading form designer...</span>
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+          <span className="ml-3 text-muted-foreground font-medium">Loading form designer...</span>
         </div>
       ) : (
         <div className="space-y-8">
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-            <h3 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b border-gray-100">Form Configuration</h3>
-            <div className="flex gap-6">
+          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+            <h3 className="text-lg font-bold text-foreground mb-4 pb-2 border-b border-border/50">Form Configuration</h3>
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input 
                   type="radio" 
                   name="formStyle" 
                   checked={formStyle === "single"} 
                   onChange={() => saveFormStyle("single")} 
-                  className="w-4 h-4 text-indigo-600"
+                  className="w-4 h-4 text-primary focus:ring-primary border-border bg-background"
                 />
-                <span className="text-gray-700 font-medium">Single Page Form</span>
+                <span className="text-foreground font-medium">Single Page Form</span>
               </label>
               <label className="flex items-center gap-3 cursor-pointer">
                 <input 
@@ -247,9 +247,9 @@ export default function FormBuilderClient() {
                   name="formStyle" 
                   checked={formStyle === "steps"} 
                   onChange={() => saveFormStyle("steps")} 
-                  className="w-4 h-4 text-indigo-600"
+                  className="w-4 h-4 text-primary focus:ring-primary border-border bg-background"
                 />
-                <span className="text-gray-700 font-medium">Step-by-step Wizard (Group by Section)</span>
+                <span className="text-foreground font-medium">Step-by-step Wizard (Group by Section)</span>
               </label>
             </div>
           </div>
@@ -257,8 +257,8 @@ export default function FormBuilderClient() {
           <DragDropContext onDragEnd={onDragEnd}>
             <div className="space-y-8">
               {sections.map(sectionName => (
-                <div key={sectionName} className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b border-gray-100">{sectionName}</h3>
+                <div key={sectionName} className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+                  <h3 className="text-lg font-bold text-foreground mb-4 pb-2 border-b border-border/50">{sectionName}</h3>
                   
                   <Droppable droppableId={sectionName}>
                     {(provided) => (
@@ -270,24 +270,24 @@ export default function FormBuilderClient() {
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
-                                className={`p-4 border rounded-xl bg-gray-50 flex items-center justify-between ${snapshot.isDragging ? 'shadow-md border-indigo-400' : 'border-gray-200'}`}
+                                className={`p-4 border rounded-xl bg-background flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${snapshot.isDragging ? 'shadow-md border-primary' : 'border-border'}`}
                               >
-                                <div className="flex items-center gap-3">
-                                  <div className="text-gray-400 cursor-grab">
+                                <div className="flex items-start sm:items-center gap-3 w-full sm:w-auto min-w-0">
+                                  <div className="text-muted-foreground cursor-grab shrink-0">
                                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
                                     </svg>
                                   </div>
-                                  <div>
-                                    <p className="font-semibold text-gray-900">{field.name} {field.required && <span className="text-red-500">*</span>}</p>
-                                    <p className="text-xs text-gray-500 font-medium mt-1">
+                                  <div className="min-w-0 flex-1">
+                                    <p className="font-semibold text-foreground truncate">{field.name} {field.required && <span className="text-destructive">*</span>}</p>
+                                    <p className="text-xs text-muted-foreground font-medium mt-1 truncate">
                                       Type: {field.type} | Scope: {field.tenantScope} {field.customCss && `| CSS: ${field.customCss}`}
                                     </p>
                                   </div>
                                 </div>
                                 <button 
                                   onClick={() => handleDelete(field._id, field.tenantScope)}
-                                  className="text-sm text-red-500 hover:text-red-700 font-medium"
+                                  className="text-sm text-destructive hover:text-destructive/80 font-medium focus-visible:outline-none focus-visible:underline"
                                 >
                                   Remove
                                 </button>
@@ -309,17 +309,17 @@ export default function FormBuilderClient() {
       {/* Field Editor Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
-          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto custom-scrollbar">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">Add Custom Field</h2>
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
+          <div className="relative bg-card rounded-2xl shadow-xl border border-border w-full max-w-md p-6 max-h-[90vh] overflow-y-auto custom-scrollbar slide-up">
+            <h2 className="text-xl font-bold text-foreground mb-6">Add Custom Field</h2>
             <form onSubmit={handleFormSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Field Name</label>
-                <input required type="text" name="name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full border-gray-300 rounded-lg px-3 py-2 border outline-none focus:border-indigo-500" />
+                <label className="block text-sm font-medium text-foreground mb-1">Field Name</label>
+                <input required type="text" name="name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full bg-background border-border rounded-lg px-3 py-2 border outline-none focus:ring-2 focus:ring-primary text-foreground shadow-sm" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Data Type</label>
-                <select name="type" value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})} className="w-full border-gray-300 rounded-lg px-3 py-2 border outline-none focus:border-indigo-500">
+                <label className="block text-sm font-medium text-foreground mb-1">Data Type</label>
+                <select name="type" value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})} className="w-full bg-background border-border rounded-lg px-3 py-2 border outline-none focus:ring-2 focus:ring-primary text-foreground shadow-sm">
                   <option>Text String</option>
                   <option>Number</option>
                   <option>Dropdown (Select)</option>
@@ -330,30 +330,30 @@ export default function FormBuilderClient() {
               
               {formData.type === "Dropdown (Select)" && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Options (comma separated)</label>
-                  <input required type="text" placeholder="Yes, No, Maybe" value={formData.options} onChange={e => setFormData({...formData, options: e.target.value})} className="w-full border-gray-300 rounded-lg px-3 py-2 border outline-none focus:border-indigo-500" />
+                  <label className="block text-sm font-medium text-foreground mb-1">Options (comma separated)</label>
+                  <input required type="text" placeholder="Yes, No, Maybe" value={formData.options} onChange={e => setFormData({...formData, options: e.target.value})} className="w-full bg-background border-border rounded-lg px-3 py-2 border outline-none focus:ring-2 focus:ring-primary text-foreground shadow-sm" />
                 </div>
               )}
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Section (Used for Wizard Steps)</label>
-                <input type="text" placeholder="e.g. General, Medical Info" value={formData.section} onChange={e => setFormData({...formData, section: e.target.value})} className="w-full border-gray-300 rounded-lg px-3 py-2 border outline-none focus:border-indigo-500" />
+                <label className="block text-sm font-medium text-foreground mb-1">Section (Used for Wizard Steps)</label>
+                <input type="text" placeholder="e.g. General, Medical Info" value={formData.section} onChange={e => setFormData({...formData, section: e.target.value})} className="w-full bg-background border-border rounded-lg px-3 py-2 border outline-none focus:ring-2 focus:ring-primary text-foreground shadow-sm" />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Custom CSS Class (Optional)</label>
-                <input type="text" placeholder="e.g. col-span-2 text-blue-500" value={formData.customCss} onChange={e => setFormData({...formData, customCss: e.target.value})} className="w-full border-gray-300 rounded-lg px-3 py-2 border outline-none focus:border-indigo-500" />
-                <p className="text-xs text-gray-500 mt-1">Apply Tailwind classes to style this field specifically.</p>
+                <label className="block text-sm font-medium text-foreground mb-1">Custom CSS Class (Optional)</label>
+                <input type="text" placeholder="e.g. col-span-2 text-primary" value={formData.customCss} onChange={e => setFormData({...formData, customCss: e.target.value})} className="w-full bg-background border-border rounded-lg px-3 py-2 border outline-none focus:ring-2 focus:ring-primary text-foreground shadow-sm" />
+                <p className="text-xs text-muted-foreground mt-1">Apply Tailwind classes to style this field specifically.</p>
               </div>
               
               <div className="flex items-center gap-2 pt-2">
-                <input type="checkbox" id="req" checked={formData.required} onChange={e => setFormData({...formData, required: e.target.checked})} className="rounded text-indigo-600" />
-                <label htmlFor="req" className="text-sm text-gray-700">Make this field mandatory</label>
+                <input type="checkbox" id="req" checked={formData.required} onChange={e => setFormData({...formData, required: e.target.checked})} className="rounded text-primary focus:ring-primary border-border bg-background" />
+                <label htmlFor="req" className="text-sm text-foreground">Make this field mandatory</label>
               </div>
               
-              <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg">Cancel</button>
-                <button type="submit" className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg">Save Field</button>
+              <div className="flex justify-end gap-3 pt-4 border-t border-border/50">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-muted-foreground hover:bg-muted rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">Cancel</button>
+                <button type="submit" className="px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">Save Field</button>
               </div>
             </form>
           </div>
@@ -363,33 +363,33 @@ export default function FormBuilderClient() {
       {/* Form Preview Modal */}
       {isPreviewOpen && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsPreviewOpen(false)} />
-          <div className="relative bg-gray-50 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
-            <div className="px-6 py-4 border-b border-gray-200 bg-white flex justify-between items-center">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setIsPreviewOpen(false)} />
+          <div className="relative bg-background rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col border border-border slide-up">
+            <div className="px-6 py-4 border-b border-border bg-card flex justify-between items-center">
               <div>
-                <h2 className="text-xl font-bold text-gray-900">Live Form Preview</h2>
-                <p className="text-xs text-gray-500">{activeTab.toUpperCase()} FORM &bull; {formStyle === 'steps' ? 'WIZARD MODE' : 'SINGLE PAGE MODE'}</p>
+                <h2 className="text-xl font-bold text-foreground">Live Form Preview</h2>
+                <p className="text-xs text-muted-foreground">{activeTab.toUpperCase()} FORM &bull; {formStyle === 'steps' ? 'WIZARD MODE' : 'SINGLE PAGE MODE'}</p>
               </div>
-              <button onClick={() => setIsPreviewOpen(false)} className="p-2 text-gray-400 hover:text-gray-600 bg-gray-100 rounded-full">
+              <button onClick={() => setIsPreviewOpen(false)} className="p-2 text-muted-foreground hover:text-foreground bg-muted hover:bg-muted/80 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
             
-            <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
-              <div className="bg-white p-8 rounded-xl border border-gray-200 shadow-sm">
+            <div className="flex-1 overflow-y-auto p-8 custom-scrollbar bg-muted/30">
+              <div className="bg-card p-8 rounded-xl border border-border shadow-sm">
                 
                 {formStyle === "steps" && sections.length > 1 && (
                   <div className="mb-8">
                     <div className="flex justify-between items-center mb-2">
                       {sections.map((sec, i) => (
-                        <div key={sec} className={`text-xs font-semibold uppercase tracking-wider ${i === currentStep ? 'text-indigo-600' : i < currentStep ? 'text-green-500' : 'text-gray-400'}`}>
+                        <div key={sec} className={`text-xs font-semibold uppercase tracking-wider ${i === currentStep ? 'text-primary' : i < currentStep ? 'text-emerald-500' : 'text-muted-foreground'}`}>
                           {sec}
                         </div>
                       ))}
                     </div>
-                    <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden flex">
+                    <div className="h-2 w-full bg-muted rounded-full overflow-hidden flex">
                       {sections.map((_, i) => (
-                        <div key={i} className={`h-full flex-1 border-r border-white transition-colors duration-300 ${i <= currentStep ? 'bg-indigo-500' : 'bg-transparent'}`} />
+                        <div key={i} className={`h-full flex-1 border-r border-background transition-colors duration-300 ${i <= currentStep ? 'bg-primary' : 'bg-transparent'}`} />
                       ))}
                     </div>
                   </div>
@@ -398,24 +398,24 @@ export default function FormBuilderClient() {
                 <div className="space-y-6">
                   {formStyle === "steps" ? (
                     <div>
-                      <h3 className="text-xl font-bold text-gray-800 mb-6 border-b pb-2">{sections[currentStep]}</h3>
+                      <h3 className="text-xl font-bold text-foreground mb-6 border-b border-border pb-2">{sections[currentStep]}</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {fields.filter(f => f.section === sections[currentStep]).map(field => (
                           <div key={field._id} className={field.customCss || "col-span-1 md:col-span-2"}>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1">
-                              {field.name} {field.required && <span className="text-red-500">*</span>}
+                            <label className="block text-sm font-semibold text-foreground mb-1">
+                              {field.name} {field.required && <span className="text-destructive">*</span>}
                             </label>
                             {field.type === "Dropdown (Select)" ? (
-                              <select className="w-full border-gray-300 rounded-lg px-4 py-2.5 border outline-none focus:border-indigo-500 bg-gray-50">
+                              <select className="w-full bg-background border border-border rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-primary text-foreground shadow-sm">
                                 <option>Select...</option>
                                 {field.options?.map(opt => <option key={opt}>{opt}</option>)}
                               </select>
                             ) : field.type === "Checkbox" ? (
-                              <input type="checkbox" className="w-5 h-5 rounded text-indigo-600" />
+                              <input type="checkbox" className="w-5 h-5 rounded text-primary border-border bg-background focus:ring-primary" />
                             ) : field.type === "Date" ? (
-                              <input type="date" className="w-full border-gray-300 rounded-lg px-4 py-2.5 border outline-none focus:border-indigo-500 bg-gray-50" />
+                              <input type="date" className="w-full bg-background border border-border rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-primary text-foreground shadow-sm" />
                             ) : (
-                              <input type="text" placeholder={`Enter ${field.name}`} className="w-full border-gray-300 rounded-lg px-4 py-2.5 border outline-none focus:border-indigo-500 bg-gray-50" />
+                              <input type="text" placeholder={`Enter ${field.name}`} className="w-full bg-background border border-border rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-primary text-foreground shadow-sm" />
                             )}
                           </div>
                         ))}
@@ -424,24 +424,24 @@ export default function FormBuilderClient() {
                   ) : (
                     sections.map(section => (
                       <div key={section} className="mb-10">
-                        <h3 className="text-lg font-bold text-gray-800 mb-6 border-b pb-2">{section}</h3>
+                        <h3 className="text-lg font-bold text-foreground mb-6 border-b border-border pb-2">{section}</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           {fields.filter(f => f.section === section).map(field => (
                             <div key={field._id} className={field.customCss || "col-span-1 md:col-span-2"}>
-                              <label className="block text-sm font-semibold text-gray-700 mb-1">
-                                {field.name} {field.required && <span className="text-red-500">*</span>}
+                              <label className="block text-sm font-semibold text-foreground mb-1">
+                                {field.name} {field.required && <span className="text-destructive">*</span>}
                               </label>
                               {field.type === "Dropdown (Select)" ? (
-                                <select className="w-full border-gray-300 rounded-lg px-4 py-2.5 border outline-none focus:border-indigo-500 bg-gray-50">
+                                <select className="w-full bg-background border border-border rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-primary text-foreground shadow-sm">
                                   <option>Select...</option>
                                   {field.options?.map(opt => <option key={opt}>{opt}</option>)}
                                 </select>
                               ) : field.type === "Checkbox" ? (
-                                <input type="checkbox" className="w-5 h-5 rounded text-indigo-600" />
+                                <input type="checkbox" className="w-5 h-5 rounded text-primary border-border bg-background focus:ring-primary" />
                               ) : field.type === "Date" ? (
-                                <input type="date" className="w-full border-gray-300 rounded-lg px-4 py-2.5 border outline-none focus:border-indigo-500 bg-gray-50" />
+                                <input type="date" className="w-full bg-background border border-border rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-primary text-foreground shadow-sm" />
                               ) : (
-                                <input type="text" placeholder={`Enter ${field.name}`} className="w-full border-gray-300 rounded-lg px-4 py-2.5 border outline-none focus:border-indigo-500 bg-gray-50" />
+                                <input type="text" placeholder={`Enter ${field.name}`} className="w-full bg-background border border-border rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-primary text-foreground shadow-sm" />
                               )}
                             </div>
                           ))}
@@ -451,18 +451,18 @@ export default function FormBuilderClient() {
                   )}
                 </div>
 
-                <div className="mt-8 flex justify-end gap-3 pt-6 border-t border-gray-100">
+                <div className="mt-8 flex justify-end gap-3 pt-6 border-t border-border/50">
                   {formStyle === "steps" && currentStep > 0 && (
-                    <button onClick={() => setCurrentStep(prev => prev - 1)} className="px-6 py-2.5 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200">
+                    <button onClick={() => setCurrentStep(prev => prev - 1)} className="px-6 py-2.5 bg-muted text-foreground font-semibold rounded-xl hover:bg-muted/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
                       Previous
                     </button>
                   )}
                   {formStyle === "steps" && currentStep < sections.length - 1 ? (
-                    <button onClick={() => setCurrentStep(prev => prev + 1)} className="px-6 py-2.5 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-500 shadow-md shadow-indigo-500/20">
+                    <button onClick={() => setCurrentStep(prev => prev + 1)} className="px-6 py-2.5 bg-primary text-primary-foreground font-semibold rounded-xl hover:bg-primary/90 shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
                       Next Step
                     </button>
                   ) : (
-                    <button className="px-8 py-2.5 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-500 shadow-md shadow-indigo-500/20">
+                    <button className="px-8 py-2.5 bg-primary text-primary-foreground font-semibold rounded-xl hover:bg-primary/90 shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
                       Submit Form
                     </button>
                   )}

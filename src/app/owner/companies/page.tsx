@@ -40,12 +40,25 @@ export default function ManageCompaniesPage() {
     status: "Active"
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [stats, setStats] = useState({
     total: 0,
     active: 0,
     suspended: 0,
     avgUsers: 0
   });
+
+  // Escape key to close modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isModalOpen) {
+        setIsModalOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isModalOpen]);
 
   useEffect(() => {
     fetchPlans();
@@ -129,6 +142,7 @@ export default function ManageCompaniesPage() {
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     
     try {
       const url = isEditMode && currentCompanyId ? `/api/companies/${currentCompanyId}` : "/api/companies";
@@ -149,6 +163,8 @@ export default function ManageCompaniesPage() {
       }
     } catch (error) {
       console.error("Save error", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -172,7 +188,7 @@ export default function ManageCompaniesPage() {
     {
       header: "Company Name",
       cell: (company) => (
-        <Link href={`/owner/companies/${company._id}`} className="hover:text-blue-600 hover:underline font-medium text-gray-900">
+        <Link href={`/owner/companies/${company._id}`} className="hover:text-primary hover:underline font-medium text-foreground">
           {company.name}
         </Link>
       )
@@ -181,12 +197,12 @@ export default function ManageCompaniesPage() {
       header: "Founder / Owner",
       cell: (company) => (
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-[10px] font-bold">
+          <div className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-[10px] font-bold">
             {company.adminEmail?.[0].toUpperCase()}
           </div>
           <div className="flex flex-col">
-            <span className="text-gray-900 font-medium text-sm">{company.adminEmail}</span>
-            <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wide">Tenant Owner</span>
+            <span className="text-foreground font-medium text-sm">{company.adminEmail}</span>
+            <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wide">Tenant Owner</span>
           </div>
         </div>
       )
@@ -194,7 +210,7 @@ export default function ManageCompaniesPage() {
     {
       header: "Plan",
       cell: (company) => (
-        <span className="bg-purple-100 text-purple-700 px-2.5 py-1 rounded-md text-xs font-semibold">
+        <span className="bg-purple-500/20 text-purple-500 px-2.5 py-1 rounded-md text-xs font-semibold">
           {company.plan}
         </span>
       )
@@ -206,7 +222,7 @@ export default function ManageCompaniesPage() {
     {
       header: "Tenant Status",
       cell: (company) => (
-        <span className={`px-2.5 py-1 rounded-md text-xs font-semibold border ${company.status === 'Active' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-red-100 text-red-700 border-red-200'}`}>
+        <span className={`px-2.5 py-1 rounded-md text-xs font-semibold border ${company.status === 'Active' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-destructive/10 text-destructive border-destructive/20'}`}>
           {company.status}
         </span>
       )
@@ -214,7 +230,7 @@ export default function ManageCompaniesPage() {
     {
       header: "Payment Status",
       cell: (company) => (
-        <span className={`px-2.5 py-1 rounded-md text-xs font-bold ${company.subscriptionStatus === 'active' ? 'text-green-600 bg-green-50' : 'text-yellow-600 bg-yellow-50'}`}>
+        <span className={`px-2.5 py-1 rounded-md text-xs font-bold ${company.subscriptionStatus === 'active' ? 'text-green-500 bg-green-500/10' : 'text-yellow-500 bg-yellow-500/10'}`}>
           {company.subscriptionStatus?.toUpperCase() || 'TRIALING'}
         </span>
       )
@@ -224,8 +240,8 @@ export default function ManageCompaniesPage() {
       className: "text-right",
       cell: (company) => (
         <div className="flex justify-end gap-3">
-          <button onClick={() => openEditModal(company)} className="text-blue-600 hover:text-blue-800 font-medium transition-colors">Edit</button>
-          <button onClick={() => handleDelete(company._id, company.name)} className="text-red-500 hover:text-red-700 font-medium transition-colors">Delete</button>
+          <button onClick={() => openEditModal(company)} className="text-primary hover:text-primary/80 font-medium transition-colors">Edit</button>
+          <button onClick={() => handleDelete(company._id, company.name)} className="text-destructive hover:text-destructive/80 font-medium transition-colors">Delete</button>
         </div>
       )
     }
@@ -235,21 +251,21 @@ export default function ManageCompaniesPage() {
     <div className="space-y-8 fade-in pb-12">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <Link href="/owner" className="inline-flex items-center text-sm text-blue-400 hover:text-blue-500 transition-colors mb-2 font-medium">
-            <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <Link href="/owner" className="inline-flex items-center text-sm text-primary hover:text-primary/80 transition-colors mb-2 font-medium">
+            <svg className="w-4 h-4 mr-1" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
             Back to Overview
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Manage Companies</h1>
-          <p className="text-gray-600 mt-1">View, provision, and manage tenant accounts globally.</p>
+          <h1 className="text-3xl font-bold text-foreground tracking-tight">Manage Companies</h1>
+          <p className="text-muted-foreground mt-1">View, provision, and manage tenant accounts globally.</p>
         </div>
         
         <button 
           onClick={openCreateModal}
-          className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl shadow-lg transition-all"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl shadow-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="w-5 h-5" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
           Register New Tenant
@@ -260,7 +276,7 @@ export default function ManageCompaniesPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <StatBox label="Total Tenants" value={stats.total.toString()} />
         <StatBox label="Active Accounts" value={stats.active.toString()} />
-        <StatBox label="Suspended" value={stats.suspended.toString()} color="text-red-500" />
+        <StatBox label="Suspended" value={stats.suspended.toString()} color="text-destructive" />
         <StatBox label="Avg Users/Tenant" value={stats.avgUsers.toString()} />
       </div>
 
@@ -279,86 +295,91 @@ export default function ManageCompaniesPage() {
 
       {/* Registration / Edit Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
-          <div className="relative bg-white border border-gray-200 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-gray-100">
-              <h2 className="text-xl font-bold text-gray-900">{isEditMode ? "Edit Tenant" : "Register New Tenant"}</h2>
-              <p className="text-sm text-gray-600 mt-1">{isEditMode ? "Modify existing tenant details." : "Provision a new CRM instance for a client."}</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
+          <div className="relative bg-card border border-border rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-border">
+              <h2 id="modal-title" className="text-xl font-bold text-foreground">{isEditMode ? "Edit Tenant" : "Register New Tenant"}</h2>
+              <p className="text-sm text-muted-foreground mt-1">{isEditMode ? "Modify existing tenant details." : "Provision a new CRM instance for a client."}</p>
             </div>
             
             <form className="p-6 space-y-5" onSubmit={handleFormSubmit}>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Company Name</label>
+                <label className="block text-sm font-medium text-foreground mb-1.5">
+                  Company Name <span className="text-destructive">*</span>
+                </label>
                 <input 
                   type="text" 
                   required 
                   value={formData.name}
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" 
+                  className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" 
                   placeholder="e.g. Acme Corp" 
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Primary Admin Email</label>
+                <label className="block text-sm font-medium text-foreground mb-1.5">
+                  Primary Admin Email <span className="text-destructive">*</span>
+                </label>
                 <input 
                   type="email" 
                   required 
                   value={formData.adminEmail}
                   onChange={(e) => setFormData({...formData, adminEmail: e.target.value})}
-                  className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" 
+                  className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" 
                   placeholder="admin@company.com" 
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Subscription Plan</label>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">Subscription Plan</label>
                   <select 
                     value={formData.subscriptionPlanId}
                     onChange={(e) => setFormData({...formData, subscriptionPlanId: e.target.value})}
-                    className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                    className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none transition-all"
                   >
                     {plans.map(p => (
                       <option key={p._id} value={p._id}>{p.name} (₹{p.price})</option>
                     ))}
                   </select>
                 </div>
-                {!isEditMode && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Target Industry</label>
-                    <select 
-                      value={formData.industryId}
-                      onChange={(e) => setFormData({...formData, industryId: e.target.value})}
-                      className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                    >
-                      <option value="">None (Blank CRM)</option>
-                      {industries.map(i => (
-                        <option key={i._id} value={i._id}>{i.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-                <div className={isEditMode ? "col-span-2" : ""}>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Users Quota</label>
+                
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">Target Industry</label>
+                  <select 
+                    value={formData.industryId}
+                    onChange={(e) => setFormData({...formData, industryId: e.target.value})}
+                    disabled={isEditMode}
+                    className={`w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none transition-all ${isEditMode ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    <option value="">None (Blank CRM)</option>
+                    {industries.map(i => (
+                      <option key={i._id} value={i._id}>{i.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium text-foreground mb-1.5">Users Quota</label>
                   <input 
                     type="number" 
                     min={1} 
                     value={formData.usersQuota}
                     onChange={(e) => setFormData({...formData, usersQuota: parseInt(e.target.value) || 1})}
-                    className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" 
+                    className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" 
                   />
                 </div>
               </div>
 
               {isEditMode && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Account Status</label>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">Account Status</label>
                   <select 
                     value={formData.status}
                     onChange={(e) => setFormData({...formData, status: e.target.value})}
-                    className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                    className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none transition-all"
                   >
                     <option value="Active">Active</option>
                     <option value="Suspended">Suspended</option>
@@ -367,10 +388,20 @@ export default function ManageCompaniesPage() {
               )}
 
               <div className="pt-4 flex items-center justify-end gap-3">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 text-sm font-medium text-foreground hover:bg-muted bg-background border border-border rounded-xl transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
                   Cancel
                 </button>
-                <button type="submit" className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-xl shadow-sm transition-all">
+                <button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="px-6 py-2.5 bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground text-sm font-semibold rounded-xl shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary inline-flex items-center gap-2"
+                >
+                  {isSubmitting && (
+                    <svg className="animate-spin h-4 w-4 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  )}
                   {isEditMode ? "Save Changes" : "Provision Tenant"}
                 </button>
               </div>
@@ -382,10 +413,10 @@ export default function ManageCompaniesPage() {
   );
 }
 
-function StatBox({ label, value, color = "text-gray-900" }: { label: string, value: string, color?: string }) {
+function StatBox({ label, value, color = "text-foreground" }: { label: string, value: string, color?: string }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
-      <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-1">{label}</p>
+    <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
+      <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider mb-1">{label}</p>
       <p className={`text-2xl font-bold ${color}`}>{value}</p>
     </div>
   );

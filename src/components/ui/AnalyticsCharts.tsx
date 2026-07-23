@@ -111,17 +111,17 @@ export default function AnalyticsCharts() {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {barData.map((item, index) => (
-          <div key={index} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col items-center justify-center">
-            <span className="text-gray-500 text-sm font-medium">{item.name}</span>
-            <span className="text-3xl font-bold text-gray-900 mt-2">{item.count}</span>
+          <div key={index} className="bg-card p-4 rounded-xl border border-border shadow-sm flex flex-col items-center justify-center">
+            <span className="text-muted-foreground text-sm font-medium">{item.name}</span>
+            <span className="text-3xl font-bold text-foreground mt-2">{item.count}</span>
           </div>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Bar Chart */}
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-          <h3 className="text-lg font-bold text-gray-800 mb-6">Entity Distribution</h3>
+        <div className="bg-card p-6 rounded-2xl border border-border shadow-sm">
+          <h3 className="text-lg font-bold text-foreground mb-6">Entity Distribution</h3>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={barData}>
@@ -136,8 +136,8 @@ export default function AnalyticsCharts() {
         </div>
 
         {/* Growth Area Chart */}
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-          <h3 className="text-lg font-bold text-gray-800 mb-6">Lead Growth Over Time</h3>
+        <div className="bg-card p-6 rounded-2xl border border-border shadow-sm">
+          <h3 className="text-lg font-bold text-foreground mb-6">Lead Growth Over Time</h3>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={growthData}>
@@ -158,8 +158,8 @@ export default function AnalyticsCharts() {
         </div>
 
         {/* Leads by Status */}
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-          <h3 className="text-lg font-bold text-gray-800 mb-6">Leads by Status</h3>
+        <div className="bg-card p-6 rounded-2xl border border-border shadow-sm">
+          <h3 className="text-lg font-bold text-foreground mb-6">Leads by Status</h3>
           <div className="h-72 flex items-center justify-center">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -184,8 +184,8 @@ export default function AnalyticsCharts() {
         </div>
 
         {/* Tasks by Status */}
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-          <h3 className="text-lg font-bold text-gray-800 mb-6">Tasks by Status</h3>
+        <div className="bg-card p-6 rounded-2xl border border-border shadow-sm">
+          <h3 className="text-lg font-bold text-foreground mb-6">Tasks by Status</h3>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={tasksByStatus} layout="vertical">

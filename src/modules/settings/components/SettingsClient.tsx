@@ -134,35 +134,35 @@ export default function SettingsClient() {
     }
   };
 
-  if (loading) return <div className="p-8 text-center text-gray-500">Loading settings...</div>;
+  if (loading) return <div className="p-8 text-center text-muted-foreground">Loading settings...</div>;
 
   return (
     <div className="space-y-8 fade-in pb-12 relative">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Global Settings & Templates</h1>
-        <p className="text-gray-600 mt-1">Configure systemic variables, maintenance modes, and industry templates.</p>
+        <h1 className="text-3xl font-bold text-foreground tracking-tight">Global Settings & Templates</h1>
+        <p className="text-muted-foreground mt-1">Configure systemic variables, maintenance modes, and industry templates.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white/50 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-xl">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">System Configuration</h2>
+        <div className="bg-card/50 backdrop-blur-xl border border-border rounded-2xl p-6 shadow-xl">
+          <h2 className="text-xl font-bold text-foreground mb-6">System Configuration</h2>
           <div className="space-y-5">
             <div className="flex items-center justify-between p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl">
               <div>
                 <p className="font-semibold text-amber-500">Maintenance Mode</p>
                 <p className="text-xs text-amber-400/80 mt-1">Locks all non-owners out of the CRM.</p>
               </div>
-              <button onClick={toggleMaintenance} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${maintenanceMode ? 'bg-amber-500' : 'bg-gray-200'}`}>
-                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${maintenanceMode ? 'translate-x-6' : 'translate-x-1'}`} />
+              <button onClick={toggleMaintenance} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${maintenanceMode ? 'bg-amber-500' : 'bg-muted'}`}>
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-background transition-transform ${maintenanceMode ? 'translate-x-6' : 'translate-x-1'}`} />
               </button>
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Default Global Currency</label>
+              <label className="block text-sm font-medium text-foreground mb-2">Default Global Currency</label>
               <select 
                 value={globalCurrency}
                 onChange={handleCurrencyChange}
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none appearance-none"
+                className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:ring-2 focus:ring-primary outline-none appearance-none shadow-sm transition-colors"
               >
                 <option value="USD ($)">USD ($)</option>
                 <option value="EUR (€)">EUR (€)</option>
@@ -173,35 +173,35 @@ export default function SettingsClient() {
           </div>
         </div>
 
-        <div className="bg-white/50 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-xl">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Industry Templates</h2>
-          <p className="text-sm text-gray-600 mb-6">Pre-packaged modules and dynamic fields designed for specific verticals.</p>
+        <div className="bg-card/50 backdrop-blur-xl border border-border rounded-2xl p-6 shadow-xl">
+          <h2 className="text-xl font-bold text-foreground mb-6">Industry Templates</h2>
+          <p className="text-sm text-muted-foreground mb-6">Pre-packaged modules and dynamic fields designed for specific verticals.</p>
           
           <div className="space-y-4">
             {templates.map((t: any) => (
-              <div key={t._id} className="p-4 border border-blue-500/30 bg-blue-500/5 rounded-xl flex items-center justify-between">
+              <div key={t._id} className="p-4 border border-primary/20 bg-primary/5 rounded-xl flex flex-col">
                 <div>
-                  <p className="font-semibold text-gray-900">{t.name}</p>
-                  <p className="text-xs text-gray-600 mt-1">{t.description || "No description provided"}</p>
+                  <p className="font-semibold text-foreground">{t.name}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{t.description || "No description provided"}</p>
                 </div>
-                <div className="flex gap-3 items-center mt-3 pt-3 border-t border-blue-500/10">
-                  <span className="text-xs text-blue-600 font-medium bg-blue-100 px-2 py-0.5 rounded-full">{t.modules?.length || 0} Modules</span>
-                  <div className="ml-auto flex gap-3 items-center">
-                    <Link href={`/owner/settings/templates/${t._id}`} className="text-sm text-indigo-500 hover:text-indigo-400 font-medium">Configure Bundle</Link>
-                    <button onClick={() => openEditModal(t)} className="text-sm text-blue-400 hover:text-blue-300 font-medium">Edit Config</button>
-                    <button onClick={() => openDeleteModal(t)} className="text-sm text-red-400 hover:text-red-300 font-medium">Delete</button>
+                <div className="flex flex-col sm:flex-row gap-4 sm:items-center mt-4 pt-4 border-t border-primary/10">
+                  <span className="text-xs text-primary font-medium bg-primary/10 px-3 py-1 rounded-full w-fit">{t.modules?.length || 0} Modules</span>
+                  <div className="sm:ml-auto flex flex-wrap gap-4 items-center">
+                    <Link href={`/owner/settings/templates/${t._id}`} className="text-sm text-primary hover:text-primary/80 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded">Configure Bundle</Link>
+                    <button onClick={() => openEditModal(t)} className="text-sm text-muted-foreground hover:text-foreground font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded">Edit Config</button>
+                    <button onClick={() => openDeleteModal(t)} className="text-sm text-destructive/70 hover:text-destructive font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive rounded">Delete</button>
                   </div>
                 </div>
               </div>
             ))}
             
             {templates.length === 0 && (
-              <div className="p-4 text-center text-sm text-gray-500 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+              <div className="p-4 text-center text-sm text-muted-foreground bg-muted/50 rounded-xl border border-dashed border-border">
                 No custom templates exist yet.
               </div>
             )}
             
-            <button onClick={openCreateModal} className="w-full py-3 border border-dashed border-gray-300 text-gray-600 hover:text-gray-900 hover:border-gray-500 font-medium rounded-xl transition-all">
+            <button onClick={openCreateModal} className="w-full py-3 border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/50 font-medium rounded-xl transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
               + Scaffold New Template
             </button>
           </div>
@@ -210,15 +210,15 @@ export default function SettingsClient() {
 
       {/* Modern Modal Overlay */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm fade-in">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col slide-up">
-            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-              <h3 className="text-lg font-bold text-gray-900">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm fade-in" role="dialog" aria-modal="true">
+          <div className="bg-card rounded-2xl shadow-2xl border border-border w-full max-w-md overflow-hidden flex flex-col slide-up">
+            <div className="px-6 py-4 border-b border-border flex justify-between items-center bg-muted/30">
+              <h3 className="text-lg font-bold text-foreground">
                 {modalMode === "create" && "Create New Template"}
                 {modalMode === "edit" && "Edit Template Configuration"}
                 {modalMode === "delete" && "Confirm Deletion"}
               </h3>
-              <button onClick={() => setModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+              <button onClick={() => setModalOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
@@ -226,10 +226,10 @@ export default function SettingsClient() {
             <div className="p-6">
               {modalMode === "delete" ? (
                 <div>
-                  <p className="text-gray-600 mb-6">Are you sure you want to permanently delete the template <strong className="text-gray-900">{activeTemplate?.name}</strong>? This action cannot be undone.</p>
+                  <p className="text-muted-foreground mb-6">Are you sure you want to permanently delete the template <strong className="text-foreground">{activeTemplate?.name}</strong>? This action cannot be undone.</p>
                   <div className="flex justify-end gap-3">
-                    <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">Cancel</button>
-                    <button type="button" onClick={handleModalSubmit} disabled={isSubmitting} className="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50">
+                    <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 text-sm font-medium text-muted-foreground bg-muted hover:bg-muted/80 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Cancel</button>
+                    <button type="button" onClick={handleModalSubmit} disabled={isSubmitting} className="px-4 py-2 text-sm font-medium text-destructive-foreground bg-destructive hover:bg-destructive/90 rounded-lg transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive">
                       {isSubmitting ? "Deleting..." : "Delete Template"}
                     </button>
                   </div>
@@ -237,28 +237,34 @@ export default function SettingsClient() {
               ) : (
                 <form onSubmit={handleModalSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Template Name</label>
+                    <label className="block text-sm font-medium text-foreground mb-1">Template Name</label>
                     <input 
                       type="text" 
                       required
                       value={formData.name}
                       onChange={(e) => setFormData({...formData, name: e.target.value})}
-                      className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none"
+                      className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:ring-2 focus:ring-primary outline-none shadow-sm transition-colors"
                       placeholder="e.g. Real Estate CRM"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <label className="block text-sm font-medium text-foreground mb-1">Description</label>
                     <textarea 
                       value={formData.description}
                       onChange={(e) => setFormData({...formData, description: e.target.value})}
-                      className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none h-24 resize-none"
+                      className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:ring-2 focus:ring-primary outline-none h-24 resize-none shadow-sm transition-colors"
                       placeholder="Briefly describe what this template is for..."
                     />
                   </div>
                   <div className="pt-2 flex justify-end gap-3">
-                    <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">Cancel</button>
-                    <button type="submit" disabled={isSubmitting} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50">
+                    <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 text-sm font-medium text-muted-foreground bg-muted hover:bg-muted/80 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Cancel</button>
+                    <button type="submit" disabled={isSubmitting} className="px-4 py-2 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 rounded-lg transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary flex items-center gap-2">
+                      {isSubmitting && (
+                        <svg className="animate-spin h-4 w-4 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                      )}
                       {isSubmitting ? "Saving..." : "Save Template"}
                     </button>
                   </div>

@@ -3,9 +3,15 @@ import Stripe from "stripe";
 import dbConnect from "@/lib/db";
 import Company from "@/modules/companies/schemas/Company";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2024-04-10" as any,
-});
+let stripeClient: Stripe;
+function getStripe() {
+  if (!stripeClient) {
+    stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_placeholder", {
+      apiVersion: "2024-04-10" as any,
+    });
+  }
+  return stripeClient;
+}
 
 export async function POST(req: Request) {
   const payload = await req.text();
@@ -18,6 +24,7 @@ export async function POST(req: Request) {
   let event: Stripe.Event;
 
   try {
+    const stripe = getStripe();
     event = stripe.webhooks.constructEvent(
       payload,
       signature,

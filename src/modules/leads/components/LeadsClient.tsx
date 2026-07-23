@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import DynamicFormBuilder from "@/components/ui/DynamicFormBuilder";
 import EmptyState from "@/components/ui/EmptyState";
+import PageHeader from "@/components/ui/PageHeader";
 import Button from "@/components/ui/Button";
 import { usePermissions } from "@/hooks/usePermissions";
 import { DataTable, ColumnDef } from "@/components/ui/DataTable";
@@ -238,7 +239,7 @@ export default function LeadsClient() {
           <div className="flex flex-col gap-1.5">
             <button 
               onClick={() => setSelectedLeadForDetails(item)}
-              className="font-medium text-indigo-600 hover:text-indigo-800 text-sm text-left transition-colors cursor-pointer"
+              className="font-medium text-primary hover:text-primary/80 text-sm text-left transition-colors cursor-pointer"
             >
               {displayName}
             </button>
@@ -257,22 +258,22 @@ export default function LeadsClient() {
         ) 
     }},
     { header: "Contact Details", cell: (item) => (
-      <div className="flex flex-col text-sm text-gray-600 gap-1.5">
+      <div className="flex flex-col text-sm text-muted-foreground gap-1.5">
         {item.email && !item.email.includes('@whatsapp.local') && <span>{item.email}</span>}
         {item.source && (
-          <span className="inline-flex w-fit px-2 py-0.5 rounded text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-100">
+          <span className="inline-flex w-fit px-2 py-0.5 rounded text-[11px] font-medium bg-primary/10 text-primary border border-primary/20">
             {item.source}
           </span>
         )}
       </div>
     )},
-    { header: "Date Added", cell: (item) => <span className="text-gray-500 text-xs">{new Date(item.createdAt).toLocaleDateString()}</span> },
+    { header: "Date Added", cell: (item) => <span className="text-muted-foreground text-xs">{new Date(item.createdAt).toLocaleDateString()}</span> },
     { header: "Status (Pipeline)", className: "min-w-[170px]", cell: (item) => (
       pipelineStages.length > 0 ? (
         <select
           value={item.status}
           onChange={(e) => updateLeadStatus(item._id, e.target.value)}
-          className="w-full text-sm border-gray-300 rounded-lg shadow-sm py-1.5 pl-3 pr-8 focus:ring-indigo-500 focus:border-indigo-500 border bg-white text-gray-700 font-medium cursor-pointer"
+          className="w-full text-sm border-border rounded-lg shadow-sm py-1.5 pl-3 pr-8 focus:ring-primary focus:border-primary border bg-card text-foreground font-medium cursor-pointer"
         >
           {!pipelineStages.find(s => s.name === item.status) && (
             <option value={item.status} disabled>{item.status}</option>
@@ -289,16 +290,16 @@ export default function LeadsClient() {
           ))}
         </select>
       ) : (
-        <span className="px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+        <span className="px-2.5 py-1 rounded-md text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
           {item.status}
         </span>
       )
     )},
     { header: "Incoming / Custom Data", cell: (item) => (
-      <div className="text-xs text-gray-500 max-w-sm">
+      <div className="text-xs text-muted-foreground max-w-sm">
         {item.customData?.lastMessage && (
-          <div className="mb-2 p-2.5 bg-green-50 border border-green-200 text-green-900 rounded-lg whitespace-pre-wrap break-words shadow-sm">
-            <strong className="flex items-center gap-1.5 text-green-800 mb-1">
+          <div className="mb-2 p-2.5 bg-accent/10 border border-accent/20 text-accent-foreground rounded-lg whitespace-pre-wrap break-words shadow-sm">
+            <strong className="flex items-center gap-1.5 text-accent-foreground mb-1">
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
               Latest Message
             </strong>
@@ -310,13 +311,13 @@ export default function LeadsClient() {
             {Object.entries(item.customData)
               .filter(([k]) => k !== 'lastMessage' && k !== 'whatsappOptIn' && !k.startsWith('_'))
               .map(([k, v]) => (
-              <span key={k} className="bg-gray-100 border border-gray-200 px-2 py-1 rounded-md text-gray-700">
-                <strong className="text-gray-900 capitalize">{k.replace(/([A-Z])/g, ' $1').trim()}:</strong> {String(v)}
+              <span key={k} className="bg-muted border border-border px-2 py-1 rounded-md text-foreground">
+                <strong className="text-foreground capitalize">{k.replace(/([A-Z])/g, ' $1').trim()}:</strong> {String(v)}
               </span>
             ))}
           </div>
         ) : (
-          !item.customData?.lastMessage && <span className="text-gray-400">No additional data</span>
+          !item.customData?.lastMessage && <span className="text-muted-foreground/50">No additional data</span>
         )}
       </div>
     )}
@@ -327,7 +328,7 @@ export default function LeadsClient() {
       <select
         value={statusFilter}
         onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-        className="py-2 pl-3 pr-8 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-700 bg-white"
+        className="py-2 pl-3 pr-8 border border-border rounded-xl text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none text-foreground bg-card"
       >
         <option value="">All Statuses</option>
         {pipelineStages.sort((a,b) => a.order - b.order).map(stage => (
@@ -335,7 +336,7 @@ export default function LeadsClient() {
         ))}
       </select>
       
-      <div className="flex items-center gap-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-xl px-3 py-1.5 focus-within:ring-2 focus-within:ring-indigo-500">
+      <div className="flex items-center gap-2 text-sm text-muted-foreground bg-card border border-border rounded-xl px-3 py-1.5 focus-within:ring-2 focus-within:ring-primary">
         <label>From:</label>
         <input 
           type="date" 
@@ -345,7 +346,7 @@ export default function LeadsClient() {
         />
       </div>
 
-      <div className="flex items-center gap-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-xl px-3 py-1.5 focus-within:ring-2 focus-within:ring-indigo-500">
+      <div className="flex items-center gap-2 text-sm text-muted-foreground bg-card border border-border rounded-xl px-3 py-1.5 focus-within:ring-2 focus-within:ring-primary">
         <label>To:</label>
         <input 
           type="date" 
@@ -363,7 +364,7 @@ export default function LeadsClient() {
             setDateTo("");
             setPage(1);
           }}
-          className="text-sm text-red-600 hover:text-red-700 font-medium px-2 py-1 rounded hover:bg-red-50 transition-colors"
+          className="text-sm text-destructive hover:text-destructive/80 font-medium px-2 py-1 rounded hover:bg-destructive/10 transition-colors"
         >
           Clear Filters
         </button>
@@ -373,23 +374,20 @@ export default function LeadsClient() {
 
   return (
     <div className="space-y-8 fade-in pb-12">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Sales Leads</h1>
-          <p className="text-gray-600 mt-1">Manage your pipeline and dynamic lead data.</p>
-        </div>
-        
-        <div className="flex items-center gap-3">
-          <div className="flex bg-gray-100 p-1 rounded-xl">
+      <PageHeader 
+        title="Sales Leads"
+        description="Manage your pipeline and dynamic lead data."
+      >
+          <div className="flex bg-muted p-1 rounded-xl">
             <button
               onClick={() => { setViewMode("list"); setPage(1); }}
-              className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${viewMode === 'list' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${viewMode === 'list' ? 'bg-card shadow text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
             >
               List View
             </button>
             <button
               onClick={() => { setViewMode("board"); setPage(1); }}
-              className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${viewMode === 'board' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${viewMode === 'board' ? 'bg-card shadow text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
             >
               Board View
             </button>
@@ -398,7 +396,7 @@ export default function LeadsClient() {
           {hasPermission("Leads", "Create") && (
             <button 
               onClick={() => setIsImportModalOpen(true)}
-              className="px-4 py-2 bg-white border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all shadow-sm text-sm"
+              className="px-4 py-2 bg-card border border-border text-foreground font-medium rounded-xl hover:bg-muted transition-all shadow-sm text-sm"
             >
               Import CSV
             </button>
@@ -407,7 +405,7 @@ export default function LeadsClient() {
           {hasPermission("Leads", "Create") && (
             <button 
               onClick={() => setIsModalOpen(true)}
-              className="inline-flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl shadow-lg transition-all"
+              className="inline-flex items-center gap-2 px-6 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl shadow-lg transition-all"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -415,8 +413,7 @@ export default function LeadsClient() {
               Add Lead
             </button>
           )}
-        </div>
-      </div>
+      </PageHeader>
 
       {viewMode === "list" ? (
         <DataTable 
@@ -440,7 +437,7 @@ export default function LeadsClient() {
             selectedIds.length > 0 && (
               <button 
                 onClick={handleExport}
-                className="text-sm font-medium px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700 shadow-sm"
+                className="text-sm font-medium px-4 py-2 bg-card border border-border rounded-lg hover:bg-muted text-foreground shadow-sm"
               >
                 Export Selected ({selectedIds.length})
               </button>
@@ -455,12 +452,12 @@ export default function LeadsClient() {
           }
         />
       ) : (
-        <div className="bg-white rounded-2xl border border-gray-200 p-6">
-          <div className="mb-6 flex gap-4">
+        <div className="bg-card rounded-2xl border border-border p-6">
+          <div className="mb-6 flex flex-col sm:flex-row flex-wrap gap-4">
             {filterControls}
           </div>
           {loading ? (
-            <div className="p-12 text-center text-gray-500">Loading board...</div>
+            <div className="p-12 text-center text-muted-foreground">Loading board...</div>
           ) : (
             <KanbanBoard 
               columns={pipelineStages.sort((a,b) => a.order - b.order).map(s => s.name)}
@@ -488,11 +485,11 @@ export default function LeadsClient() {
 
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
-          <div className="relative bg-white border border-gray-200 rounded-2xl shadow-xl w-full max-w-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-              <h2 className="text-xl font-bold text-gray-900">Create New Lead</h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
+          <div className="relative bg-card border border-border rounded-2xl shadow-xl w-full max-w-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-border flex justify-between items-center bg-muted/30">
+              <h2 className="text-xl font-bold text-foreground">Create New Lead</h2>
+              <button onClick={() => setIsModalOpen(false)} className="text-muted-foreground hover:text-foreground">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -511,11 +508,11 @@ export default function LeadsClient() {
 
       {isImportModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsImportModalOpen(false)} />
-          <div className="relative bg-white border border-gray-200 rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-              <h2 className="text-xl font-bold text-gray-900">Import Leads from CSV</h2>
-              <button onClick={() => setIsImportModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setIsImportModalOpen(false)} />
+          <div className="relative bg-card border border-border rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-border flex justify-between items-center bg-muted/30">
+              <h2 className="text-xl font-bold text-foreground">Import Leads from CSV</h2>
+              <button onClick={() => setIsImportModalOpen(false)} className="text-muted-foreground hover:text-foreground">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -523,18 +520,18 @@ export default function LeadsClient() {
             </div>
             <div className="p-6">
               <form onSubmit={handleImportSubmit} className="space-y-4">
-                <div className="p-4 bg-blue-50 text-blue-800 text-sm rounded-lg border border-blue-100">
+                <div className="p-4 bg-primary/10 text-primary-foreground text-sm rounded-lg border border-primary/20">
                   <p>Upload a CSV file with your leads.</p>
                   <p className="mt-1 font-medium">Standard columns:</p>
                   <p className="text-xs">First Name, Last Name, Email, Phone, Status</p>
-                  <p className="mt-1 text-xs text-blue-600">Any other columns will be stored automatically in custom data!</p>
+                  <p className="mt-1 text-xs text-primary">Any other columns will be stored automatically in custom data!</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Assign to Project (Optional)</label>
+                  <label className="block text-sm font-medium text-foreground mb-1">Assign to Project (Optional)</label>
                   <select
                     value={selectedProjectForImport}
                     onChange={(e) => setSelectedProjectForImport(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary bg-card"
                   >
                     <option value="">None (Standalone)</option>
                     {projects.map(p => (
@@ -543,20 +540,20 @@ export default function LeadsClient() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Select CSV File</label>
+                  <label className="block text-sm font-medium text-foreground mb-1">Select CSV File</label>
                   <input 
                     type="file" 
                     name="file" 
                     accept=".csv"
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                    className="w-full px-3 py-2 border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 bg-card"
                   />
                 </div>
-                <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-6">
-                  <button type="button" onClick={() => setIsImportModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                <div className="flex justify-end gap-3 pt-4 border-t border-border mt-6">
+                  <button type="button" onClick={() => setIsImportModalOpen(false)} className="px-4 py-2 text-sm font-medium text-foreground hover:bg-muted rounded-lg transition-colors">
                     Cancel
                   </button>
-                  <button type="submit" disabled={importing} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2">
+                  <button type="submit" disabled={importing} className="px-6 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2">
                     {importing ? (
                       <>
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -573,36 +570,36 @@ export default function LeadsClient() {
 
       {selectedLeadForDetails && (
         <div className="fixed inset-0 z-50 flex justify-end">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" onClick={() => setSelectedLeadForDetails(null)} />
-          <div className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm transition-opacity" onClick={() => setSelectedLeadForDetails(null)} />
+          <div className="relative w-full max-w-md bg-card h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
+            <div className="p-6 border-b border-border flex justify-between items-center bg-muted/30">
               <div>
-                <h2 className="text-xl font-bold text-gray-900">{selectedLeadForDetails.firstName} {selectedLeadForDetails.lastName}</h2>
-                <p className="text-sm text-gray-500 mt-1">{selectedLeadForDetails.email}</p>
+                <h2 className="text-xl font-bold text-foreground">{selectedLeadForDetails.firstName} {selectedLeadForDetails.lastName}</h2>
+                <p className="text-sm text-muted-foreground mt-1">{selectedLeadForDetails.email}</p>
               </div>
-              <button onClick={() => setSelectedLeadForDetails(null)} className="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-full transition-colors">
+              <button onClick={() => setSelectedLeadForDetails(null)} className="text-muted-foreground hover:text-foreground p-2 hover:bg-muted rounded-full transition-colors">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto p-6 bg-white custom-scrollbar">
-              <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-6 flex items-center gap-2">
-                <svg className="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <div className="flex-1 overflow-y-auto p-6 bg-card custom-scrollbar">
+              <h3 className="text-sm font-bold text-foreground uppercase tracking-wider mb-6 flex items-center gap-2">
+                <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 Activity Timeline
               </h3>
               
-              <div className="relative border-l-2 border-gray-100 ml-3 space-y-8 pb-8">
+              <div className="relative border-l-2 border-border ml-3 space-y-8 pb-8">
                 {(!selectedLeadForDetails.activities || selectedLeadForDetails.activities.length === 0) ? (
-                  <div className="ml-6 text-sm text-gray-500 italic">No activities recorded yet.</div>
+                  <div className="ml-6 text-sm text-muted-foreground italic">No activities recorded yet.</div>
                 ) : (
                   [...selectedLeadForDetails.activities].reverse().map((activity: any, index: number) => (
                     <div key={index} className="relative ml-6">
-                      <span className="absolute -left-[35px] top-1 flex h-4 w-4 items-center justify-center rounded-full ring-4 ring-white bg-indigo-500"></span>
+                      <span className="absolute -left-[35px] top-1 flex h-4 w-4 items-center justify-center rounded-full ring-4 ring-card bg-primary"></span>
                       <div className="flex flex-col gap-1">
-                        <span className="text-sm font-semibold text-gray-900">{activity.type}</span>
-                        <span className="text-sm text-gray-600">{activity.description}</span>
-                        <span className="text-xs font-medium text-gray-400 mt-1 flex items-center gap-1.5">
+                        <span className="text-sm font-semibold text-foreground">{activity.type}</span>
+                        <span className="text-sm text-muted-foreground">{activity.description}</span>
+                        <span className="text-xs font-medium text-muted-foreground/70 mt-1 flex items-center gap-1.5">
                           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                           {new Date(activity.timestamp).toLocaleString()}
                         </span>
@@ -612,10 +609,10 @@ export default function LeadsClient() {
                 )}
               </div>
             </div>
-            <div className="p-6 border-t border-gray-100 bg-gray-50/50 shrink-0">
+            <div className="p-6 border-t border-border bg-muted/30 shrink-0">
               <button 
                 onClick={() => setSelectedLeadForDetails(null)} 
-                className="w-full px-4 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium rounded-xl shadow-sm transition-colors text-sm"
+                className="w-full px-4 py-2 bg-card border border-border hover:bg-muted text-foreground font-medium rounded-xl shadow-sm transition-colors text-sm"
               >
                 Close Panel
               </button>

@@ -30,6 +30,18 @@ export default function SubscriptionsClient() {
     users: "Up to 5",
     features: [""] // Start with one empty feature input
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Escape key to close modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isModalOpen) {
+        setIsModalOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isModalOpen]);
 
   useEffect(() => {
     fetchPlans();
@@ -93,6 +105,7 @@ export default function SubscriptionsClient() {
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     
     // Clean up empty features before sending
     const cleanedFeatures = formData.features.filter(f => f.trim() !== "");
@@ -117,6 +130,8 @@ export default function SubscriptionsClient() {
       }
     } catch (error) {
       console.error("Save error", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -145,23 +160,23 @@ export default function SubscriptionsClient() {
     <div className="space-y-8 fade-in pb-12">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Subscription Management</h1>
-          <p className="text-gray-600 mt-1">Manage global SaaS pricing tiers and billing cycles.</p>
+          <h1 className="text-3xl font-bold text-foreground tracking-tight">Subscription Management</h1>
+          <p className="text-muted-foreground mt-1">Manage global SaaS pricing tiers and billing cycles.</p>
         </div>
         <div className="flex flex-col sm:flex-row items-center gap-4">
-          <label className="flex items-center gap-2 cursor-pointer bg-white/50 px-4 py-2 rounded-xl border border-gray-200 shadow-sm">
+          <label className="flex items-center gap-2 cursor-pointer bg-card/50 px-4 py-2 rounded-xl border border-border shadow-sm">
             <div className="relative">
               <input type="checkbox" className="sr-only" checked={showInactive} onChange={(e) => setShowInactive(e.target.checked)} />
-              <div className={`block w-10 h-6 rounded-full transition-colors ${showInactive ? 'bg-blue-500' : 'bg-gray-300'}`}></div>
+              <div className={`block w-10 h-6 rounded-full transition-colors ${showInactive ? 'bg-primary' : 'bg-muted'}`}></div>
               <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${showInactive ? 'translate-x-4' : ''}`}></div>
             </div>
-            <span className="text-sm font-medium text-gray-700">Show Inactive</span>
+            <span className="text-sm font-medium text-foreground">Show Inactive</span>
           </label>
           <button 
             onClick={openCreateModal} 
-            className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl shadow-lg transition-all"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl shadow-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-5 h-5" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
             Create New Tier
@@ -170,28 +185,28 @@ export default function SubscriptionsClient() {
       </div>
 
       {loading ? (
-        <div className="text-center py-20 border-2 border-dashed border-gray-200 rounded-2xl bg-white/50">
-          <p className="text-gray-500 font-medium animate-pulse">Loading pricing tiers...</p>
+        <div className="text-center py-20 border-2 border-dashed border-border rounded-2xl bg-card/50">
+          <p className="text-muted-foreground font-medium animate-pulse">Loading pricing tiers...</p>
         </div>
       ) : plans.length === 0 ? (
-        <div className="text-center py-20 border-2 border-dashed border-gray-200 rounded-2xl bg-white/50">
-          <p className="text-gray-500 font-medium">No active subscription plans found. Create one to get started.</p>
+        <div className="text-center py-20 border-2 border-dashed border-border rounded-2xl bg-card/50">
+          <p className="text-muted-foreground font-medium">No active subscription plans found. Create one to get started.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {plans.map(plan => (
-            <div key={plan._id} className={`bg-white/60 backdrop-blur-md border border-gray-200 rounded-3xl p-8 shadow-xl flex flex-col hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 relative group overflow-hidden ${plan.isActive === false ? 'opacity-70 grayscale-[0.5]' : ''}`}>
+            <div key={plan._id} className={`bg-card/60 backdrop-blur-md border border-border rounded-3xl p-8 shadow-xl flex flex-col hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 relative group overflow-hidden ${plan.isActive === false ? 'opacity-70 grayscale-[0.5]' : ''}`}>
               {plan.isActive === false && (
-                <div className="absolute top-4 left-4 bg-red-100 text-red-700 text-xs font-bold px-3 py-1 rounded-full shadow-sm z-10">INACTIVE</div>
+                <div className="absolute top-4 left-4 bg-destructive/10 text-destructive text-xs font-bold px-3 py-1 rounded-full shadow-sm z-10">INACTIVE</div>
               )}
               <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 z-10">
-                <button onClick={() => openEditModal(plan)} className="p-2 bg-gray-100 hover:bg-white text-gray-600 hover:text-blue-600 rounded-lg shadow-sm transition-all border border-gray-200" title="Edit">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <button onClick={() => openEditModal(plan)} className="p-2 bg-background hover:bg-muted text-muted-foreground hover:text-primary rounded-lg shadow-sm transition-all border border-border" title="Edit">
+                  <svg className="w-4 h-4" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                   </svg>
                 </button>
-                <button onClick={() => handleToggleActive(plan)} className={`p-2 rounded-lg shadow-sm transition-all border ${plan.isActive === false ? 'bg-green-50 hover:bg-green-100 text-green-600 border-green-200' : 'bg-red-50 hover:bg-red-100 text-red-500 border-red-100'}`} title={plan.isActive === false ? "Activate" : "Deactivate"}>
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <button onClick={() => handleToggleActive(plan)} className={`p-2 rounded-lg shadow-sm transition-all border ${plan.isActive === false ? 'bg-success/10 hover:bg-success/20 text-success border-success/20' : 'bg-destructive/10 hover:bg-destructive/20 text-destructive border-destructive/20'}`} title={plan.isActive === false ? "Activate" : "Deactivate"}>
+                  <svg className="w-4 h-4" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     {plan.isActive === false ? (
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     ) : (
@@ -201,19 +216,19 @@ export default function SubscriptionsClient() {
                 </button>
               </div>
 
-              <h3 className="text-xl font-bold text-gray-900 mt-2">{plan.name}</h3>
-              <div className="mt-4 flex items-baseline text-4xl font-extrabold text-gray-900">
+              <h3 className="text-xl font-bold text-foreground mt-2">{plan.name}</h3>
+              <div className="mt-4 flex items-baseline text-4xl font-extrabold text-foreground">
                 ${plan.price}
-                <span className="ml-1 text-xl font-medium text-gray-500">/{plan.billing === "Monthly" ? "mo" : "yr"}</span>
+                <span className="ml-1 text-xl font-medium text-muted-foreground">/{plan.billing === "Monthly" ? "mo" : "yr"}</span>
               </div>
-              <p className="mt-4 text-sm text-blue-600 font-bold bg-blue-50 inline-block px-3 py-1 rounded-full">{plan.users} Users</p>
+              <p className="mt-4 text-sm text-primary font-bold bg-primary/10 inline-block px-3 py-1 rounded-full">{plan.users} Users</p>
               
-              <div className="mt-8 pt-6 border-t border-gray-100 flex-1">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Included Features</p>
+              <div className="mt-8 pt-6 border-t border-border flex-1">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">Included Features</p>
                 <ul className="space-y-4">
                   {plan.features.map((feature, idx) => (
-                    <li key={idx} className="flex gap-3 text-sm text-gray-700 font-medium">
-                      <svg className="h-5 w-5 text-blue-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <li key={idx} className="flex gap-3 text-sm text-foreground font-medium">
+                      <svg className="h-5 w-5 text-primary shrink-0" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                       {feature}
@@ -228,16 +243,16 @@ export default function SubscriptionsClient() {
 
       {/* Slide-over Modal for Create/Edit */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" onClick={() => setIsModalOpen(false)} />
-          <div className="relative w-full max-w-md bg-white h-full shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col">
-            <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+        <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-labelledby="slide-over-title">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm transition-opacity" onClick={() => setIsModalOpen(false)} />
+          <div className="relative w-full max-w-md bg-card h-full shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col border-l border-border">
+            <div className="px-6 py-5 border-b border-border flex justify-between items-center bg-muted/30">
               <div>
-                <h2 className="text-xl font-bold text-gray-900">{isEditMode ? "Edit Subscription Tier" : "Create Subscription Tier"}</h2>
-                <p className="text-sm text-gray-500 mt-0.5">Configure pricing and features.</p>
+                <h2 id="slide-over-title" className="text-xl font-bold text-foreground">{isEditMode ? "Edit Subscription Tier" : "Create Subscription Tier"}</h2>
+                <p className="text-sm text-muted-foreground mt-0.5">Configure pricing and features.</p>
               </div>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-200">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <button type="button" onClick={() => setIsModalOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors p-2 rounded-full hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                <svg className="w-5 h-5" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -246,20 +261,24 @@ export default function SubscriptionsClient() {
             <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
               <form id="plan-form" onSubmit={handleFormSubmit} className="space-y-6">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">Plan Name</label>
+                  <label className="block text-sm font-semibold text-foreground mb-2">
+                    Plan Name <span className="text-destructive">*</span>
+                  </label>
                   <input 
                     type="text" 
                     required 
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all shadow-sm" 
+                    className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none transition-all shadow-sm" 
                     placeholder="e.g. Professional" 
                   />
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">Price ($)</label>
+                    <label className="block text-sm font-semibold text-foreground mb-2">
+                      Price ($) <span className="text-destructive">*</span>
+                    </label>
                     <input 
                       type="number" 
                       required
@@ -267,16 +286,16 @@ export default function SubscriptionsClient() {
                       step="0.01"
                       value={formData.price}
                       onChange={(e) => setFormData({...formData, price: parseFloat(e.target.value) || 0})}
-                      className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all shadow-sm" 
+                      className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none transition-all shadow-sm" 
                       placeholder="0.00" 
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">Billing Cycle</label>
+                    <label className="block text-sm font-semibold text-foreground mb-2">Billing Cycle</label>
                     <select 
                       value={formData.billing}
                       onChange={(e) => setFormData({...formData, billing: e.target.value as "Monthly" | "Yearly"})}
-                      className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all shadow-sm"
+                      className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none transition-all shadow-sm"
                     >
                       <option value="Monthly">Monthly</option>
                       <option value="Yearly">Yearly</option>
@@ -285,21 +304,23 @@ export default function SubscriptionsClient() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">User Quota</label>
+                  <label className="block text-sm font-semibold text-foreground mb-2">
+                    User Quota <span className="text-destructive">*</span>
+                  </label>
                   <input 
                     type="text" 
                     required 
                     value={formData.users}
                     onChange={(e) => setFormData({...formData, users: e.target.value})}
-                    className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all shadow-sm" 
+                    className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none transition-all shadow-sm" 
                     placeholder="e.g. Up to 20, Unlimited" 
                   />
                 </div>
 
-                <div className="pt-4 border-t border-gray-100">
+                <div className="pt-4 border-t border-border">
                   <div className="flex items-center justify-between mb-4">
-                    <label className="block text-sm font-semibold text-gray-900">Included Features</label>
-                    <button type="button" onClick={addFeatureField} className="text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors">
+                    <label className="block text-sm font-semibold text-foreground">Included Features</label>
+                    <button type="button" onClick={addFeatureField} className="text-xs font-bold text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
                       + Add Feature
                     </button>
                   </div>
@@ -311,11 +332,11 @@ export default function SubscriptionsClient() {
                           type="text" 
                           value={feature}
                           onChange={(e) => handleFeatureChange(idx, e.target.value)}
-                          className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all" 
+                          className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary outline-none transition-all" 
                           placeholder="e.g. Custom Workflows" 
                         />
-                        <button type="button" onClick={() => removeFeatureField(idx)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <button type="button" onClick={() => removeFeatureField(idx)} className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive">
+                          <svg className="w-5 h-5" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                           </svg>
                         </button>
@@ -326,11 +347,22 @@ export default function SubscriptionsClient() {
               </form>
             </div>
             
-            <div className="p-6 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-3 shrink-0">
-              <button onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 text-sm font-semibold text-gray-700 hover:text-gray-900 bg-white border border-gray-300 hover:bg-gray-50 rounded-xl transition-colors shadow-sm">
+            <div className="p-6 border-t border-border bg-muted/30 flex justify-end gap-3 shrink-0">
+              <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 text-sm font-semibold text-foreground hover:bg-muted bg-background border border-border rounded-xl transition-colors shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
                 Cancel
               </button>
-              <button form="plan-form" type="submit" className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-xl shadow-lg transition-all">
+              <button 
+                form="plan-form" 
+                type="submit" 
+                disabled={isSubmitting}
+                className="px-6 py-2.5 bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground text-sm font-semibold rounded-xl shadow-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary inline-flex items-center gap-2"
+              >
+                {isSubmitting && (
+                  <svg className="animate-spin h-4 w-4 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                )}
                 {isEditMode ? "Save Changes" : "Create Tier"}
               </button>
             </div>

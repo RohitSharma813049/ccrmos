@@ -6,9 +6,13 @@ export interface IInvoice extends Document {
   companyId?: mongoose.Types.ObjectId;
   founderId?: mongoose.Types.ObjectId;
   createdBy?: mongoose.Types.ObjectId;
+  updatedBy?: mongoose.Types.ObjectId;
   invoiceNumber: any;
   amount: any;
   status: any;
+  approvalStatus?: 'Pending' | 'Approved' | 'Rejected';
+  approvedBy?: mongoose.Types.ObjectId;
+  approvedAt?: Date;
   customData?: Record<string, any>;
 }
 
@@ -17,9 +21,13 @@ const InvoiceSchema = new Schema<IInvoice>({
   companyId: { type: Schema.Types.ObjectId, ref: 'Company' },
   founderId: { type: Schema.Types.ObjectId, ref: 'User' },
   createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
+  updatedBy: { type: Schema.Types.ObjectId, ref: 'User' },
   invoiceNumber: { type: String, required: true },
   amount: { type: Number, required: true },
   status: { type: String, default: 'Unpaid' },
+  approvalStatus: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' },
+  approvedBy: { type: Schema.Types.ObjectId, ref: 'User' },
+  approvedAt: { type: Date },
   customData: { type: Schema.Types.Mixed, default: {} }
 }, { timestamps: true });
 

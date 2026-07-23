@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import PageHeader from "@/components/ui/PageHeader";
 import { DataTable, ColumnDef } from "@/components/ui/DataTable";
 
 export default function AuditClient({ 
@@ -85,31 +86,31 @@ export default function AuditClient({
   const columns: ColumnDef<any>[] = [
     {
       header: "Timestamp",
-      cell: (log) => <span className="text-gray-600 font-mono text-xs">{new Date(log.createdAt).toLocaleString()}</span>
+      cell: (log) => <span className="text-muted-foreground font-mono text-xs">{new Date(log.createdAt).toLocaleString()}</span>
     },
     {
       header: "User / Actor",
       cell: (log) => (
-        <span className="text-blue-500 font-medium font-mono text-xs">
+        <span className="text-primary font-medium font-mono text-xs">
           {log.userId?.email || log.userId?.name || "System"} 
-          {log.ipAddress && <span className="text-gray-400 text-[10px] ml-1">({log.ipAddress})</span>}
+          {log.ipAddress && <span className="text-muted-foreground/60 text-[10px] ml-1">({log.ipAddress})</span>}
         </span>
       )
     },
     {
       header: "Action Taken",
-      cell: (log) => <span className="text-gray-900 font-semibold font-mono text-xs">{log.action}</span>
+      cell: (log) => <span className="text-foreground font-semibold font-mono text-xs">{log.action}</span>
     },
     {
       header: "Target Resource",
-      cell: (log) => <span className="text-gray-600 font-mono text-xs">{log.recordId}</span>
+      cell: (log) => <span className="text-muted-foreground font-mono text-xs">{log.recordId}</span>
     },
     {
       header: "Module",
       className: "text-right",
       cell: (log) => (
         <div className="flex justify-end">
-          <span className="px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider bg-gray-100 text-gray-600 border border-gray-200">
+          <span className="px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider bg-muted text-muted-foreground border border-border">
             {log.module}
           </span>
         </div>
@@ -119,53 +120,50 @@ export default function AuditClient({
 
   return (
     <div className="space-y-8 fade-in pb-12">
-      <div className="flex justify-between items-end">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">{title}</h1>
-          <p className="text-gray-600 mt-1">{description}</p>
-        </div>
-        <div className="flex gap-3">
+      <PageHeader
+        title={title}
+        description={description}
+      >
           <button 
             onClick={exportCSV} 
-            className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-sm font-medium text-white rounded-lg transition-colors border border-gray-900"
+            className="px-4 py-2 bg-foreground hover:bg-foreground/90 text-sm font-medium text-background rounded-lg transition-colors border border-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
             Export CSV
           </button>
           <button 
             onClick={() => setIsFilterOpen(!isFilterOpen)} 
-            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors border ${isFilterOpen ? 'bg-blue-50 text-blue-600 border-blue-200' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${isFilterOpen ? 'bg-primary/10 text-primary border-primary/20' : 'bg-background text-foreground border-border hover:bg-muted'}`}
           >
             Filter Logs
           </button>
-        </div>
-      </div>
+      </PageHeader>
 
       {isFilterOpen && (
-        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex gap-4 animate-in fade-in slide-in-from-top-2">
+        <div className="bg-card p-4 rounded-xl border border-border shadow-sm flex gap-4 animate-in fade-in slide-in-from-top-2">
           <div className="flex-1">
-            <label className="block text-xs font-medium text-gray-500 mb-1">Module Filter</label>
+            <label className="block text-xs font-medium text-muted-foreground mb-1">Module Filter</label>
             <input 
               type="text" 
               placeholder="e.g., LEADS, SETTINGS" 
               value={moduleFilter}
               onChange={(e) => { setModuleFilter(e.target.value); setPage(1); }}
-              className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border outline-none"
+              className="w-full bg-background border-border text-foreground rounded-lg shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-3 py-2 border outline-none transition-colors"
             />
           </div>
           <div className="flex-1">
-            <label className="block text-xs font-medium text-gray-500 mb-1">Action Filter</label>
+            <label className="block text-xs font-medium text-muted-foreground mb-1">Action Filter</label>
             <input 
               type="text" 
               placeholder="e.g., UPDATE, DELETE" 
               value={actionFilter}
               onChange={(e) => { setActionFilter(e.target.value); setPage(1); }}
-              className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border outline-none"
+              className="w-full bg-background border-border text-foreground rounded-lg shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-3 py-2 border outline-none transition-colors"
             />
           </div>
           <div className="flex items-end">
             <button 
               onClick={() => { setModuleFilter(""); setActionFilter(""); setPage(1); }}
-              className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              className="px-4 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               Clear Filters
             </button>

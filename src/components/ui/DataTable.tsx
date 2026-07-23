@@ -99,9 +99,9 @@ export function DataTable<T>({
           {advancedFilters.map(f => {
             const fieldLabel = filterFields?.find(field => field.name === f.field)?.label || f.field;
             return (
-              <span key={f.id} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-200">
+              <span key={f.id} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium bg-primary/10 text-primary border border-primary/20">
                 {fieldLabel} {f.operator.replace('_', ' ')} {f.operator !== 'exists' && f.operator !== 'not_exists' && f.value}
-                <button onClick={() => removeAdvancedFilter(f.id)} className="ml-1 text-indigo-400 hover:text-indigo-600">
+                <button onClick={() => removeAdvancedFilter(f.id)} className="ml-1 text-primary/70 hover:text-primary focus-visible:outline-none">
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
               </span>
@@ -111,8 +111,8 @@ export function DataTable<T>({
       )}
 
       {(onSearchChange || filters || filterFields) && (
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div className="flex flex-col sm:flex-row w-full gap-4 items-center">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="flex flex-col sm:flex-row w-full gap-4 items-start sm:items-center">
             {onSearchChange && (
               <div className="relative w-full sm:w-96">
                 <input 
@@ -120,9 +120,9 @@ export function DataTable<T>({
                   placeholder="Search..." 
                   value={localSearch}
                   onChange={(e) => setLocalSearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                  className="w-full pl-10 pr-4 py-2 bg-background text-foreground border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all placeholder:text-muted-foreground"
                 />
-                <svg className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-5 h-5 text-muted-foreground absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
@@ -154,16 +154,16 @@ export function DataTable<T>({
         </div>
       )}
 
-      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+      <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-gray-700">
-            <thead className="bg-gray-50 text-xs uppercase text-gray-600 font-semibold border-b border-gray-200">
+          <table className="w-full text-left text-sm text-foreground">
+            <thead className="bg-muted/50 text-xs uppercase text-muted-foreground font-semibold border-b border-border">
               <tr>
                 {selectable && (
                   <th className="px-6 py-4 w-12 text-center">
                     <input 
                       type="checkbox" 
-                      className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                      className="rounded border-border bg-background text-primary focus:ring-primary cursor-pointer"
                       checked={data.length > 0 && selectedIds.length === data.length}
                       onChange={(e) => {
                         if (!onSelectionChange) return;
@@ -183,12 +183,12 @@ export function DataTable<T>({
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border/50">
               {loading ? (
                 <tr>
-                  <td colSpan={columns.length} className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan={columns.length} className="px-6 py-8 text-center text-muted-foreground">
                     <div className="flex items-center justify-center space-x-2">
-                      <div className="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                      <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
                       <span>Loading...</span>
                     </div>
                   </td>
@@ -209,12 +209,12 @@ export function DataTable<T>({
                   const isSelected = selectedIds.includes(itemId);
                   
                   return (
-                    <tr key={rowIdx} className={`hover:bg-gray-50/80 transition-colors ${isSelected ? 'bg-indigo-50/40' : ''}`}>
+                    <tr key={rowIdx} className={`hover:bg-muted/30 transition-colors ${isSelected ? 'bg-primary/5' : ''}`}>
                       {selectable && (
                         <td className="px-6 py-4 w-12 text-center">
                           <input 
                             type="checkbox" 
-                            className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                            className="rounded border-border bg-background text-primary focus:ring-primary cursor-pointer"
                             checked={isSelected}
                             onChange={(e) => {
                               if (!onSelectionChange) return;
@@ -241,22 +241,22 @@ export function DataTable<T>({
         </div>
 
         {totalPages !== undefined && totalPages > 1 && onPageChange && (
-          <div className="flex items-center justify-between px-6 py-3 border-t border-gray-200 bg-gray-50">
-            <div className="text-sm text-gray-500">
-              Page <span className="font-medium text-gray-900">{page}</span> of <span className="font-medium text-gray-900">{totalPages}</span>
+          <div className="flex items-center justify-between px-6 py-3 border-t border-border bg-muted/20">
+            <div className="text-sm text-muted-foreground">
+              Page <span className="font-medium text-foreground">{page}</span> of <span className="font-medium text-foreground">{totalPages}</span>
             </div>
             <div className="flex gap-2">
               <button 
                 onClick={() => onPageChange(Math.max(1, (page || 1) - 1))}
                 disabled={page === 1}
-                className="px-3 py-1 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-3 py-1 text-sm font-medium border border-border bg-background text-foreground rounded-lg hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Previous
               </button>
               <button 
                 onClick={() => onPageChange(Math.min(totalPages, (page || 1) + 1))}
                 disabled={page === totalPages}
-                className="px-3 py-1 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-3 py-1 text-sm font-medium border border-border bg-background text-foreground rounded-lg hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Next
               </button>

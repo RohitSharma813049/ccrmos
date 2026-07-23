@@ -180,7 +180,7 @@ export default function ModulesClient() {
   const columns: ColumnDef<any>[] = [
     {
       header: "Module Name",
-      cell: (mod) => <span className="font-medium text-gray-900">{mod.name}</span>
+      cell: (mod) => <span className="font-medium text-foreground">{mod.name}</span>
     },
     {
       header: "Status",
@@ -188,16 +188,16 @@ export default function ModulesClient() {
         <div className="flex flex-col gap-1">
           <button 
             onClick={() => toggleStatus(mod)}
-            className={`px-2.5 py-1 rounded-md text-xs font-semibold border transition-colors ${mod.active ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'}`}
+            className={`px-2.5 py-1 rounded-md text-xs font-semibold border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${mod.active ? 'bg-primary/10 text-primary border-primary/20 hover:bg-primary/20' : 'bg-muted text-muted-foreground border-border hover:bg-muted/80'}`}
           >
             {mod.active ? 'Published' : 'Draft'}
           </button>
           <div className="flex gap-1 mt-1">
-            <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600 border border-gray-200">
+            <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-muted text-muted-foreground border border-border">
               {mod.tenantScope || "Global"}
             </span>
             {mod.tenantScope === "Industry" && mod.industryId && (
-              <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-600 border border-blue-200 truncate max-w-[120px]" title={mod.industryId?.name}>
+              <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-primary/10 text-primary border border-primary/20 truncate max-w-[120px]" title={mod.industryId?.name}>
                 {mod.industryId?.name || "Industry"}
               </span>
             )}
@@ -207,7 +207,7 @@ export default function ModulesClient() {
     },
     {
       header: "Fields",
-      cell: (mod) => <span className="text-gray-700">{mod.fields?.length || 0} configured</span>
+      cell: (mod) => <span className="text-muted-foreground">{mod.fields?.length || 0} configured</span>
     },
     {
       header: "Actions",
@@ -216,7 +216,7 @@ export default function ModulesClient() {
         <div className="flex justify-end">
           <button 
             onClick={() => openSchemaEditor(mod)} 
-            className="text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-lg font-medium transition-colors"
+            className="text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
             Edit Schema
           </button>
@@ -227,22 +227,22 @@ export default function ModulesClient() {
 
   return (
     <div className="space-y-8 fade-in pb-12">
-      <div className="flex justify-between items-end">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Dynamic Module Builder</h1>
-          <p className="text-gray-600 mt-1">Create custom systemic modules that tenants can subscribe to.</p>
+          <h1 className="text-3xl font-bold text-foreground tracking-tight">Dynamic Module Builder</h1>
+          <p className="text-muted-foreground mt-1">Create custom systemic modules that tenants can subscribe to.</p>
         </div>
         <button 
           onClick={openBuildModal}
-          className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg transition-all"
+          className="px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary w-full sm:w-auto"
         >
           Build New Module
         </button>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4 items-center bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+      <div className="flex flex-col md:flex-row gap-4 items-center bg-card p-4 rounded-xl border border-border shadow-sm">
         <div className="relative w-full md:w-96">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <input
@@ -253,19 +253,19 @@ export default function ModulesClient() {
               setSearch(e.target.value);
               setPage(1);
             }}
-            className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none transition-all text-gray-800"
+            className="w-full pl-10 pr-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary outline-none transition-all text-foreground"
           />
         </div>
         
-        <div className="flex items-center gap-2 w-full md:w-auto">
-          <label className="text-sm font-medium text-gray-600">Scope:</label>
+        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+          <label className="text-sm font-medium text-muted-foreground">Scope:</label>
           <select 
             value={scopeFilter}
             onChange={(e) => {
               setScopeFilter(e.target.value);
               setPage(1);
             }}
-            className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:ring-2 focus:ring-purple-500 outline-none"
+            className="bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary outline-none min-w-[120px]"
           >
             <option value="All">All Scopes</option>
             <option value="Global">Global</option>
@@ -274,15 +274,15 @@ export default function ModulesClient() {
         </div>
 
         {scopeFilter === "Industry" && (
-          <div className="flex items-center gap-2 w-full md:w-auto ml-0 md:ml-2">
-            <label className="text-sm font-medium text-gray-600">Filter Industry:</label>
+          <div className="flex flex-wrap items-center gap-2 w-full md:w-auto ml-0 md:ml-2">
+            <label className="text-sm font-medium text-muted-foreground">Filter Industry:</label>
             <select 
               value={industryFilter}
               onChange={(e) => {
                 setIndustryFilter(e.target.value);
                 setPage(1);
               }}
-              className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:ring-2 focus:ring-purple-500 outline-none"
+              className="bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary outline-none min-w-[150px]"
             >
               <option value="All">All Industries</option>
               {industries.map(i => (
@@ -297,8 +297,6 @@ export default function ModulesClient() {
         data={modules}
         columns={columns}
         loading={loading}
-        search=""
-        onSearchChange={() => {}}
         page={page}
         totalPages={totalPages}
         onPageChange={setPage}
@@ -308,25 +306,25 @@ export default function ModulesClient() {
 
       {/* Build New Module Modal */}
       {isBuildModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsBuildModalOpen(false)} />
-          <div className="relative bg-white border border-gray-200 rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200 p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Create New Module</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setIsBuildModalOpen(false)} />
+          <div className="relative bg-card border border-border rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200 p-6">
+            <h2 className="text-xl font-bold text-foreground mb-4">Create New Module</h2>
             <div className="space-y-4 mb-4">
               <input 
                 type="text" 
                 placeholder="Module Name (e.g., Inventory, Tickets)" 
                 value={newModuleName}
                 onChange={(e) => setNewModuleName(e.target.value)}
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:ring-2 focus:ring-purple-500 outline-none transition-all"
+                className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:ring-2 focus:ring-primary outline-none transition-all shadow-sm"
               />
               
               <div className="mb-4">
-                <label className="block mb-2 font-medium">Scope</label>
+                <label className="block mb-2 font-medium text-foreground text-sm">Scope</label>
                 <select
                   value={newModuleScope}
                   onChange={(e) => setNewModuleScope(e.target.value)}
-                  className="w-full border p-2 rounded text-gray-900"
+                  className="w-full bg-background border border-border px-4 py-3 rounded-xl text-foreground focus:ring-2 focus:ring-primary outline-none shadow-sm"
                 >
                   <option value="Global">Global Scope (All Companies)</option>
                   <option value="Industry">Industry Scope</option>
@@ -339,7 +337,7 @@ export default function ModulesClient() {
                   <select 
                     value={newModuleIndustryId} 
                     onChange={(e) => setNewModuleIndustryId(e.target.value)}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:ring-2 focus:ring-purple-500 outline-none transition-all"
+                    className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:ring-2 focus:ring-primary outline-none transition-all shadow-sm"
                     required
                   >
                     <option value="" disabled>Select Industry...</option>
@@ -355,7 +353,7 @@ export default function ModulesClient() {
                   <select 
                     value={newModuleCompanyId} 
                     onChange={(e) => setNewModuleCompanyId(e.target.value)}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:ring-2 focus:ring-purple-500 outline-none transition-all"
+                    className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:ring-2 focus:ring-primary outline-none transition-all shadow-sm"
                     required
                   >
                     <option value="" disabled>Select Company...</option>
@@ -368,11 +366,11 @@ export default function ModulesClient() {
             </div>
 
             <div className="flex justify-end gap-3">
-              <button onClick={() => setIsBuildModalOpen(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancel</button>
+              <button onClick={() => setIsBuildModalOpen(false)} className="px-4 py-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors">Cancel</button>
               <button 
                 onClick={createModule} 
                 disabled={!newModuleName.trim() || (newModuleScope === "Industry" && !newModuleIndustryId) || (newModuleScope === "Company" && !newModuleCompanyId)} 
-                className="px-4 py-2 bg-purple-600 disabled:opacity-50 hover:bg-purple-500 text-white rounded-lg font-medium shadow"
+                className="px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50 rounded-lg font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               >
                 Create
               </button>
@@ -383,47 +381,47 @@ export default function ModulesClient() {
 
       {/* Schema Editor Modal */}
       {isSchemaModalOpen && activeModule && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsSchemaModalOpen(false)} />
-          <div className="relative bg-white border border-gray-200 rounded-2xl shadow-xl w-full max-w-3xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[85vh]">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setIsSchemaModalOpen(false)} />
+          <div className="relative bg-card border border-border rounded-2xl shadow-xl w-full max-w-3xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[85vh]">
+            <div className="p-6 border-b border-border flex justify-between items-center">
               <div>
-                <h2 className="text-xl font-bold text-gray-900">Schema Editor</h2>
-                <p className="text-sm text-gray-500">Configure fields for {activeModule.name}</p>
+                <h2 className="text-xl font-bold text-foreground">Schema Editor</h2>
+                <p className="text-sm text-muted-foreground">Configure fields for {activeModule.name}</p>
               </div>
-              <button onClick={() => setIsSchemaModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+              <button onClick={() => setIsSchemaModalOpen(false)} className="text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded">
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
             
-            <div className="p-6 overflow-y-auto flex-1 bg-gray-50/50">
+            <div className="p-6 overflow-y-auto flex-1 bg-muted/30">
               {activeModule.fields.length === 0 ? (
-                <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-300">
-                  <p className="text-gray-500">No fields defined yet.</p>
-                  <button onClick={addField} className="mt-3 text-purple-600 font-medium hover:text-purple-700">+ Add First Field</button>
+                <div className="text-center py-12 bg-card rounded-xl border border-dashed border-border">
+                  <p className="text-muted-foreground">No fields defined yet.</p>
+                  <button onClick={addField} className="mt-3 text-primary font-medium hover:text-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded">+ Add First Field</button>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {activeModule.fields.map((field: any, idx: number) => (
-                    <div key={idx} className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-start gap-4">
-                      <div className="flex-1 space-y-3">
-                        <div className="flex gap-4">
+                    <div key={idx} className="bg-card p-4 rounded-xl border border-border shadow-sm flex flex-col sm:flex-row items-start gap-4">
+                      <div className="flex-1 space-y-3 w-full">
+                        <div className="flex flex-col sm:flex-row gap-4">
                           <div className="flex-1">
-                            <label className="block text-xs font-medium text-gray-500 mb-1">Field Name</label>
+                            <label className="block text-xs font-medium text-muted-foreground mb-1">Field Name</label>
                             <input 
                               type="text" 
                               value={field.name}
                               onChange={(e) => updateField(idx, "name", e.target.value)}
                               placeholder="e.g., SKU Number"
-                              className="w-full border-gray-300 rounded-lg shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm px-3 py-2 border"
+                              className="w-full bg-background border-border text-foreground rounded-lg shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-3 py-2 border transition-colors"
                             />
                           </div>
-                          <div className="w-1/3">
-                            <label className="block text-xs font-medium text-gray-500 mb-1">Field Type</label>
+                          <div className="w-full sm:w-1/3">
+                            <label className="block text-xs font-medium text-muted-foreground mb-1">Field Type</label>
                             <select 
                               value={field.type}
                               onChange={(e) => updateField(idx, "type", e.target.value)}
-                              className="w-full border-gray-300 rounded-lg shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm px-3 py-2 border"
+                              className="w-full bg-background border-border text-foreground rounded-lg shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-3 py-2 border transition-colors"
                             >
                               <option value="text">Short Text</option>
                               <option value="textarea">Long Text</option>
@@ -436,7 +434,7 @@ export default function ModulesClient() {
 
                         {field.type === 'select' && (
                           <div>
-                            <label className="block text-xs font-medium text-gray-500 mb-1">Options (comma separated)</label>
+                            <label className="block text-xs font-medium text-muted-foreground mb-1">Options (comma separated)</label>
                             <input 
                               type="text" 
                               value={(field.options || []).join(", ")}
@@ -445,7 +443,7 @@ export default function ModulesClient() {
                                 updateField(idx, "options", arr);
                               }}
                               placeholder="e.g., High, Medium, Low"
-                              className="w-full border-gray-300 rounded-lg shadow-sm focus:border-purple-500 focus:ring-purple-500 sm:text-sm px-3 py-2 border"
+                              className="w-full bg-background border-border text-foreground rounded-lg shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-3 py-2 border transition-colors"
                             />
                           </div>
                         )}
@@ -455,27 +453,27 @@ export default function ModulesClient() {
                             type="checkbox" 
                             checked={field.required}
                             onChange={(e) => updateField(idx, "required", e.target.checked)}
-                            className="rounded border-gray-300 text-purple-600 focus:ring-purple-500" 
+                            className="rounded border-border text-primary focus:ring-primary" 
                           />
-                          <span className="text-sm text-gray-600">Required field</span>
+                          <span className="text-sm text-foreground">Required field</span>
                         </div>
                       </div>
                       
-                      <button onClick={() => removeField(idx)} className="text-red-400 hover:text-red-500 p-2 hover:bg-red-50 rounded-lg transition-colors mt-5">
+                      <button onClick={() => removeField(idx)} className="text-destructive/70 hover:text-destructive p-2 hover:bg-destructive/10 rounded-lg transition-colors mt-0 sm:mt-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive self-end sm:self-auto">
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                       </button>
                     </div>
                   ))}
-                  <button onClick={addField} className="w-full py-3 border border-dashed border-gray-300 text-gray-600 hover:text-gray-900 hover:border-gray-400 font-medium rounded-xl transition-all">
+                  <button onClick={addField} className="w-full py-3 border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/50 hover:bg-primary/5 font-medium rounded-xl transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
                     + Add Field
                   </button>
                 </div>
               )}
             </div>
 
-            <div className="p-4 border-t border-gray-100 bg-white flex justify-end gap-3">
-              <button onClick={() => setIsSchemaModalOpen(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-medium transition-colors">Cancel</button>
-              <button onClick={saveSchema} className="px-6 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg font-medium shadow transition-colors">Save Schema</button>
+            <div className="p-4 border-t border-border bg-card flex justify-end gap-3">
+              <button onClick={() => setIsSchemaModalOpen(false)} className="px-4 py-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Cancel</button>
+              <button onClick={saveSchema} className="px-6 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">Save Schema</button>
             </div>
           </div>
         </div>

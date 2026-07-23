@@ -10,6 +10,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     const user = await requireAuthenticatedUser();
     await requirePermission('Orders', 'edit');
     const body = await req.json();
+    body.updatedBy = user._id;
     const item = await Order.findOneAndUpdate({ _id: (await params).id, ...buildTenantQuery(user) }, body, { new: true, runValidators: true });
     return NextResponse.json({ message: 'Updated successfully', order: item }, { status: 200 });
   } catch (error: any) {

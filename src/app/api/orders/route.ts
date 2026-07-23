@@ -60,8 +60,11 @@ export async function POST(req: Request) {
     const user = await requireAuthenticatedUser();
     await requirePermission('Orders', 'create');
     const body = await req.json();
-    body.companyId = user.companyId;
-    body.founderId = user.hierarchyLevel === 2 ? user.id : user.founderId;
+    if (user) {
+      body.companyId = user.companyId;
+      body.founderId = user.hierarchyLevel === 2 ? user.id : user.founderId;
+      body.createdBy = user._id;
+    }
     const item = await Order.create(body);
     return NextResponse.json({ message: 'Created successfully', order: item }, { status: 201 });
   } catch (error: any) {

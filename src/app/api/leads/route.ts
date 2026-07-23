@@ -88,9 +88,9 @@ export async function POST(req: Request) {
 
     // Auto-assign hierarchical ownership based on creator
     if (user) {
-      body.createdBy = user.id;
-      body.companyId = companyId;
+      body.companyId = user.companyId;
       body.founderId = user.hierarchyLevel === 2 ? user.id : user.founderId;
+      body.createdBy = user._id;
       if (!body.assignedUserId) body.assignedUserId = user.id;
       if (user.departmentId) body.departmentId = user.departmentId;
       if (user.teamLeaderId) body.teamLeaderId = user.teamLeaderId;

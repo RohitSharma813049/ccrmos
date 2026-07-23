@@ -47,7 +47,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const avatarUrl = dbUser?.avatarUrl || null;
 
   return (
-    <div className="h-screen bg-gray-50 text-gray-900 flex flex-col md:flex-row overflow-hidden">
+    <div className="h-screen w-full bg-background text-foreground flex flex-col md:flex-row overflow-hidden">
       <SubscriptionAlert status={subscriptionStatus} />
       
       <SidebarWrapper logoUrl={logoUrl} platformName={platformName}>
@@ -56,7 +56,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
         <nav className="flex-1 px-4 space-y-1 overflow-y-auto pb-6 relative z-10 custom-scrollbar">
           <div className="pt-2 pb-2">
-            <p className="px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Main Menu</p>
+            <p className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Main Menu</p>
           </div>
 
           <NavItem href="/dashboard" label="Overview" icon="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -64,7 +64,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <NavItem href="/dashboard/workbench" label="Workbench" icon="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
 
           <div className="pt-6 pb-2">
-            <p className="px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Workspace</p>
+            <p className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Workspace</p>
           </div>
           {hasModulePermission(session.user as any, "Leads", "view") && (
             <NavItem href="/dashboard/leads" label="Lead Management" icon="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -88,7 +88,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           {customModules.length > 0 && (
             <>
               <div className="pt-6 pb-2">
-                <p className="px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Custom Modules</p>
+                <p className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Custom Modules</p>
               </div>
               {customModules.map((mod: any) => (
                 <NavItem key={mod._id.toString()} href={`/dashboard/modules/${mod._id}`} label={mod.name} icon="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -100,7 +100,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           {((session?.user?.hierarchyLevel === 2) || isPlatformOwner) && (
             <>
               <div className="pt-6 pb-2">
-                <p className="px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">System Settings</p>
+                <p className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">System Settings</p>
               </div>
 
               <NavItem href="/dashboard/forms" label="Forms" icon="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -118,24 +118,24 @@ export default async function DashboardLayout({ children }: { children: React.Re
         </nav>
 
         {/* User Profile Footer */}
-        <div className="p-4 border-t border-gray-200 bg-white/50">
+        <div className="p-4 border-t border-border bg-card/50">
           <div className="flex items-center gap-3">
-            <Link href="/dashboard/settings/profile" className="shrink-0 hover:ring-2 hover:ring-indigo-500 rounded-full transition-all">
+            <Link href="/dashboard/settings/profile" className="shrink-0 hover:ring-2 hover:ring-primary rounded-full transition-all focus-visible:outline-none">
               {avatarUrl ? (
-                <img src={avatarUrl} alt="Avatar" className="w-9 h-9 rounded-full object-cover shadow-inner border border-gray-500/30" />
+                <img src={avatarUrl} alt="Avatar" className="w-9 h-9 rounded-full object-cover shadow-inner border border-border" />
               ) : (
-                <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-gray-700 to-gray-600 flex items-center justify-center font-bold text-sm text-white shadow-inner border border-gray-500/30">
+                <div className="w-9 h-9 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-sm shadow-inner border border-primary/30">
                   {session?.user?.email?.[0].toUpperCase()}
                 </div>
               )}
             </Link>
-            <Link href="/dashboard/settings/profile" className="flex-1 min-w-0 group cursor-pointer">
-              <p className="text-sm font-medium text-gray-900 truncate group-hover:text-indigo-600 transition-colors">{session?.user?.email}</p>
-              <p className="text-xs text-gray-500 uppercase font-semibold">
+            <Link href="/dashboard/settings/profile" className="flex-1 min-w-0 group cursor-pointer focus-visible:outline-none">
+              <p className="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">{session?.user?.email}</p>
+              <p className="text-xs text-muted-foreground uppercase font-semibold">
                 {session?.user?.role}
               </p>
             </Link>
-            <Link href="/api/auth/signout" className="p-2 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors" title="Logout">
+            <Link href="/api/auth/signout" className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors focus-visible:outline-none" title="Logout">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
@@ -163,7 +163,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           {((session?.user?.hierarchyLevel === 2) || isPlatformOwner) && (
             <>
               <div className="pt-6 pb-2">
-                <p className="px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">System Settings</p>
+                <p className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">System Settings</p>
               </div>
 
               <NavItem href="/dashboard/forms" label="Forms" icon="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -181,24 +181,24 @@ export default async function DashboardLayout({ children }: { children: React.Re
           )}
 
           {/* Mobile User Profile Footer */}
-          <div className="mt-6 p-4 border-t border-gray-100 shrink-0">
+          <div className="mt-6 p-4 border-t border-border shrink-0">
             <div className="flex items-center gap-3">
-              <Link href="/dashboard/settings/profile" className="shrink-0 hover:ring-2 hover:ring-indigo-500 rounded-full transition-all">
+              <Link href="/dashboard/settings/profile" className="shrink-0 hover:ring-2 hover:ring-primary rounded-full transition-all focus-visible:outline-none">
                 {avatarUrl ? (
-                  <img src={avatarUrl} alt="Avatar" className="w-10 h-10 rounded-full object-cover shadow-inner border border-gray-500/30" />
+                  <img src={avatarUrl} alt="Avatar" className="w-10 h-10 rounded-full object-cover shadow-inner border border-border" />
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-gray-700 to-gray-600 flex items-center justify-center font-bold text-sm text-white shadow-inner border border-gray-500/30">
+                  <div className="w-10 h-10 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-sm shadow-inner border border-primary/30">
                     {session?.user?.email?.[0].toUpperCase()}
                   </div>
                 )}
               </Link>
-              <Link href="/dashboard/settings/profile" className="flex-1 min-w-0 group cursor-pointer">
-                <p className="text-sm font-medium text-gray-900 truncate group-hover:text-indigo-600 transition-colors">{session?.user?.email}</p>
-                <p className="text-xs text-gray-500 uppercase font-semibold">
+              <Link href="/dashboard/settings/profile" className="flex-1 min-w-0 group cursor-pointer focus-visible:outline-none">
+                <p className="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">{session?.user?.email}</p>
+                <p className="text-xs text-muted-foreground uppercase font-semibold">
                   {session?.user?.role}
                 </p>
               </Link>
-              <Link href="/api/auth/signout" className="p-2 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors" title="Logout">
+              <Link href="/api/auth/signout" className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors focus-visible:outline-none" title="Logout">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
@@ -209,26 +209,26 @@ export default async function DashboardLayout({ children }: { children: React.Re
       </BottomNav>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col h-[calc(100vh-64px)] md:h-screen overflow-hidden bg-white relative pb-16 md:pb-0">
+      <main className="flex-1 flex flex-col h-[calc(100vh-64px)] md:h-screen w-full min-w-0 overflow-hidden bg-background relative pb-16 md:pb-0">
         {(session?.user as any)?.impersonatedFounderId && <ImpersonationBanner />}
 
         {/* Top Navbar */}
-        <header className="h-16 border-b border-gray-200/60 bg-white/40 backdrop-blur-xl flex items-center justify-between px-4 md:px-8 shrink-0 z-10 gap-3">
+        <header className="h-16 border-b border-border bg-card/40 backdrop-blur-xl flex items-center justify-between px-4 md:px-8 shrink-0 z-10 gap-3">
           {/* Mobile Logo */}
           <div className="md:hidden flex shrink-0 items-center">
             {logoUrl ? (
               <img src={logoUrl} alt={platformName} className="max-h-8 w-auto object-contain" />
             ) : (
-              <h2 className="font-bold text-lg tracking-tight text-gray-900">{platformName}</h2>
+              <h2 className="font-bold text-lg tracking-tight text-foreground">{platformName}</h2>
             )}
           </div>
           
           <div className="flex items-center flex-1 min-w-0">
             <div className="relative w-full max-w-md">
-              <svg className="w-5 h-5 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
-              <input type="text" placeholder="Search..." className="w-full bg-gray-50/50 border border-gray-200 rounded-full pl-10 pr-4 py-1.5 text-sm text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder:text-gray-400" />
+              <input type="text" placeholder="Search..." className="w-full bg-muted/50 border border-border rounded-full pl-10 pr-4 py-1.5 text-sm text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all placeholder:text-muted-foreground" />
             </div>
           </div>
           <div className="flex items-center shrink-0">
@@ -237,7 +237,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         </header>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar z-0 w-full">
+        <div className="flex-1 overflow-y-auto min-w-0 p-6 md:p-8 custom-scrollbar z-0 w-full">
           {children}
         </div>
       </main>
@@ -251,9 +251,9 @@ function NavItem({ href, label, icon }: { href: string; label: string; icon: str
   return (
     <Link
       href={href}
-      className="group flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all"
+      className="group flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/80 rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
     >
-      <svg className="w-5 h-5 text-gray-500 group-hover:text-blue-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={icon} />
       </svg>
       {label}

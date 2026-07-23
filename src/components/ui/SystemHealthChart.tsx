@@ -31,27 +31,27 @@ export default function SystemHealthChart() {
               <stop offset="95%" stopColor="#60a5fa" stopOpacity={0}/>
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
           <XAxis 
             dataKey="time" 
             axisLine={false} 
             tickLine={false} 
-            tick={{ fill: '#9ca3af', fontSize: 12 }} 
+            tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} 
             dy={10}
           />
           <YAxis 
             axisLine={false} 
             tickLine={false} 
-            tick={{ fill: '#9ca3af', fontSize: 12 }} 
+            tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} 
           />
           <Tooltip 
             contentStyle={{ 
-              backgroundColor: 'rgba(255, 255, 255, 0.9)', 
+              backgroundColor: 'hsl(var(--card))', 
               borderRadius: '8px', 
-              border: '1px solid #e5e7eb',
+              border: '1px solid hsl(var(--border))',
               boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' 
             }} 
-            itemStyle={{ color: '#374151', fontSize: '14px' }}
+            itemStyle={{ color: 'hsl(var(--foreground))', fontSize: '14px' }}
           />
           <Area 
             type="monotone" 

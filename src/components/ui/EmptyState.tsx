@@ -14,7 +14,7 @@ export default function EmptyState({
   action
 }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center p-12 text-center animate-in fade-in zoom-in-95 duration-500">
+    <div className="flex flex-col items-center justify-center p-6 sm:p-12 text-center animate-in fade-in zoom-in-95 duration-500">
       <div className="w-16 h-16 bg-gray-50 text-gray-400 rounded-2xl flex items-center justify-center mb-4 shadow-sm border border-gray-100">
         {icon || (
           <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">

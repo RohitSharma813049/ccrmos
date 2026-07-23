@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { DataTable, ColumnDef } from "@/components/ui/DataTable";
+import PageHeader from "@/components/ui/PageHeader";
 
 export default function CustomModuleClient({ moduleSchema }: { moduleSchema: any }) {
   const [records, setRecords] = useState<any[]>([]);
@@ -106,18 +107,17 @@ export default function CustomModuleClient({ moduleSchema }: { moduleSchema: any
 
   return (
     <div className="space-y-8 fade-in pb-12">
-      <div className="flex justify-between items-end">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">{moduleSchema.name}</h1>
-          <p className="text-gray-600 mt-1">Manage data for your custom module.</p>
-        </div>
+      <PageHeader 
+        title={moduleSchema.name} 
+        description="Manage data for your custom module."
+      >
         <button 
           onClick={openCreateModal}
-          className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg transition-all"
+          className="px-6 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl shadow-sm transition-all w-full sm:w-auto flex items-center justify-center gap-2"
         >
           + Add New {moduleSchema.name}
         </button>
-      </div>
+      </PageHeader>
 
       <DataTable 
         data={records}
