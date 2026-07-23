@@ -208,30 +208,39 @@ export default function IntegrationsPage() {
   const [waLoading, setWaLoading] = useState(false);
 
   const [isJdModalOpen, setIsJdModalOpen] = useState(false);
-  const [jdApiKey, setJdApiKey] = useState("");
+  const [jdConfigs, setJdConfigs] = useState<any[]>([]);
   const [jdSaving, setJdSaving] = useState(false);
 
-  const fetchJdKey = async () => {
+  const fetchJdConfigs = async () => {
     try {
-      const res = await fetch("/api/settings/justdial_api_key");
+      const res = await fetch("/api/settings/justdial_configs");
       const data = await res.json();
-      if (data.value) setJdApiKey(data.value);
+      if (data.value && Array.isArray(data.value)) {
+        setJdConfigs(data.value);
+      } else {
+        // Fallback for legacy single key
+        const legacyRes = await fetch("/api/settings/justdial_api_key");
+        const legacyData = await legacyRes.json();
+        if (legacyData.value) {
+          setJdConfigs([{ id: Date.now().toString(), apiKey: legacyData.value, scheduleType: "interval", intervalHours: 24, fixedTime: "00:00" }]);
+        }
+      }
     } catch (e) {
       console.error(e);
     }
   };
 
   useEffect(() => {
-    if (isJdModalOpen) fetchJdKey();
+    if (isJdModalOpen) fetchJdConfigs();
   }, [isJdModalOpen]);
 
   const handleJdSave = async () => {
     setJdSaving(true);
     try {
-      await fetch("/api/settings/justdial_api_key", {
+      await fetch("/api/settings/justdial_configs", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ value: jdApiKey })
+        body: JSON.stringify({ value: jdConfigs })
       });
       setIsJdModalOpen(false);
     } catch (e) {
@@ -239,6 +248,18 @@ export default function IntegrationsPage() {
     } finally {
       setJdSaving(false);
     }
+  };
+
+  const addJdConfig = () => {
+    setJdConfigs([...jdConfigs, { id: Date.now().toString(), apiKey: "", scheduleType: "interval", intervalHours: 2, fixedTime: "09:00" }]);
+  };
+
+  const updateJdConfig = (id: string, field: string, value: any) => {
+    setJdConfigs(jdConfigs.map(c => c.id === id ? { ...c, [field]: value } : c));
+  };
+
+  const removeJdConfig = (id: string) => {
+    setJdConfigs(jdConfigs.filter(c => c.id !== id));
   };
 
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
@@ -522,21 +543,77 @@ export default function IntegrationsPage() {
               </div>
             </div>
             
-            <div className="p-6">
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Vendor API Key</label>
-                  <input 
-                    type="text" 
-                    value={jdApiKey}
-                    onChange={(e) => setJdApiKey(e.target.value)}
-                    placeholder="Enter your Justdial Vendor API Key"
-                    className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-orange-500 outline-none" 
-                  />
-                  <p className="text-xs text-gray-500 mt-2">
-                    This key allows the system to automatically fetch leads from your Justdial account. Contact Justdial support if you do not have your API key.
-                  </p>
-                </div>
+            <div className="p-6 max-h-[60vh] overflow-y-auto">
+              <div className="space-y-6">
+                {jdConfigs.map((config, index) => (
+                  <div key={config.id} className="p-4 border border-gray-200 rounded-xl bg-gray-50/50 space-y-4 relative">
+                    <div className="absolute top-4 right-4">
+                      <button onClick={() => removeJdConfig(config.id)} className="text-red-500 hover:text-red-700 p-1">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                      </button>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Vendor API Key {index + 1}</label>
+                      <input 
+                        type="text" 
+                        value={config.apiKey}
+                        onChange={(e) => updateJdConfig(config.id, 'apiKey', e.target.value)}
+                        placeholder="Enter your Justdial Vendor API Key"
+                        className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-orange-500 outline-none" 
+                      />
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Schedule Mode</label>
+                        <select 
+                          value={config.scheduleType}
+                          onChange={(e) => updateJdConfig(config.id, 'scheduleType', e.target.value)}
+                          className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-orange-500 outline-none"
+                        >
+                          <option value="interval">Time Gap (Interval)</option>
+                          <option value="fixed">Fixed Time (Daily)</option>
+                        </select>
+                      </div>
+                      
+                      {config.scheduleType === 'interval' ? (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Every (Hours)</label>
+                          <input 
+                            type="number" 
+                            min="1"
+                            max="24"
+                            value={config.intervalHours}
+                            onChange={(e) => updateJdConfig(config.id, 'intervalHours', parseInt(e.target.value) || 2)}
+                            className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-orange-500 outline-none" 
+                          />
+                        </div>
+                      ) : (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
+                          <input 
+                            type="time" 
+                            value={config.fixedTime}
+                            onChange={(e) => updateJdConfig(config.id, 'fixedTime', e.target.value)}
+                            className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-orange-500 outline-none" 
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+
+                <button 
+                  onClick={addJdConfig}
+                  className="w-full py-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-600 font-medium hover:border-orange-500 hover:text-orange-600 transition-colors flex items-center justify-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                  Add Another Account
+                </button>
+
+                <p className="text-xs text-gray-500 mt-2">
+                  Add multiple API keys if you have multiple vendor accounts. The system will automatically fetch leads for each account according to its schedule.
+                </p>
               </div>
             </div>
 

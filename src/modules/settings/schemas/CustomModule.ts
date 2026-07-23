@@ -15,6 +15,7 @@ export interface ICustomModule extends Document {
   tenantScope: string;
   industryId?: mongoose.Types.ObjectId | null;
   companyId?: mongoose.Types.ObjectId | null;
+  enabledBy?: mongoose.Types.ObjectId[];
 }
 
 const customFieldSchema = new Schema<ICustomField>({
@@ -32,6 +33,7 @@ const customModuleSchema = new Schema<ICustomModule>({
   tenantScope: { type: String, default: "Global" },
   industryId: { type: Schema.Types.ObjectId, ref: 'Industry', default: null },
   companyId: { type: Schema.Types.ObjectId, ref: 'Company', default: null }, // Null means global or industry template
+  enabledBy: [{ type: Schema.Types.ObjectId, ref: 'Company' }],
 }, { timestamps: true });
 
 const CustomModule: Model<ICustomModule> = mongoose.models.CustomModule || mongoose.model<ICustomModule>('CustomModule', customModuleSchema);

@@ -50,7 +50,12 @@ export default function NotificationBell() {
             if (!n.isRead && !seenNotifIds.current.has(n._id)) {
               // Trigger desktop notification
               if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
-                new Notification(n.title, { body: n.message, icon: "/favicon.ico" });
+                const notif = new Notification(n.title, { body: n.message, icon: "/favicon.ico" });
+                if (n.link) {
+                  notif.onclick = () => {
+                    window.open(n.link, '_blank');
+                  };
+                }
               }
             }
           });

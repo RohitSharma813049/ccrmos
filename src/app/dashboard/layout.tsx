@@ -49,7 +49,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   const customModules = await CustomModule.find({
     active: true,
-    $or: [{ companyId: userCompanyId }, { companyId: null }]
+    $or: [
+      { companyId: userCompanyId },
+      { enabledBy: userCompanyId }
+    ]
   }).select("_id name").lean();
 
   const isPlatformOwner = (session?.user as any)?.hierarchyLevel === 1;

@@ -83,6 +83,23 @@ export default function TenantCustomModulesClient() {
     setIsBuildModalOpen(true);
   };
 
+  async function toggleEnable(mod: any) {
+    try {
+      const res = await fetch(`/api/settings/modules/${mod._id}/toggle-enable`, {
+        method: "PUT"
+      });
+      if (res.ok) {
+        fetchModules();
+      } else {
+        const errorData = await res.json();
+        alert(errorData.error || "Failed to toggle module");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Failed to toggle module due to a network error.");
+    }
+  }
+
   async function toggleStatus(mod: any) {
     if (!isEditable(mod)) return alert("You cannot edit a global module.");
     try {
@@ -171,20 +188,30 @@ export default function TenantCustomModulesClient() {
     {
       header: "Actions",
       className: "text-right",
-      cell: (mod) => (
-        <div className="flex justify-end">
-          {isEditable(mod) ? (
-            <button 
-              onClick={() => openSchemaEditor(mod)} 
-              className="text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-            >
-              Edit Schema
-            </button>
-          ) : (
-            <span className="text-muted-foreground text-sm italic">Read-Only (Platform)</span>
-          )}
-        </div>
-      )
+      cell: (mod) => {
+        const userCompanyId = (session?.user as any)?.companyId || (session?.user as any)?.impersonatedFounderId;
+        const isEnabled = mod.enabledBy?.includes(userCompanyId);
+
+        return (
+          <div className="flex justify-end gap-2 items-center">
+            {isEditable(mod) ? (
+              <button 
+                onClick={() => openSchemaEditor(mod)} 
+                className="text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              >
+                Edit Schema
+              </button>
+            ) : (
+              <button 
+                onClick={() => toggleEnable(mod)} 
+                className={`px-3 py-1.5 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${isEnabled ? 'bg-destructive/10 text-destructive hover:bg-destructive/20' : 'bg-primary/10 text-primary hover:bg-primary/20'}`}
+              >
+                {isEnabled ? 'Disable' : 'Enable for my Workspace'}
+              </button>
+            )}
+          </div>
+        );
+      }
     }
   ];
 

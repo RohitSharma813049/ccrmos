@@ -18,19 +18,20 @@ export async function GET(req: Request) {
     
     // In a real application, you would iterate through active companies with configured integration credentials
     // For example:
-    // const companiesWithIntegrations = await Company.find({ 'integrations.justdial.active': true });
-    
-    console.log("Starting daily fetch for third-party leads...");
-    
-    let totalImported = 0;
-
-    // Simulate fetching leads for companies (Placeholder logic)
-    // for (const company of companiesWithIntegrations) {
-    //   const newLeads = await fetchJustDialLeads(company.integrations.justdial.apiKey);
-    //   for (const leadData of newLeads) {
-    //     // create lead, trigger workflows
+    // const companies = await Company.find({ status: "Active" });
+    // for (const company of companies) {
+    //   const jdSettings = await SystemSetting.findOne({ key: "justdial_configs", companyId: company._id });
+    //   if (jdSettings && Array.isArray(jdSettings.value)) {
+    //     for (const config of jdSettings.value) {
+    //        // check config.scheduleType (interval vs fixed), compare with current time, and fetch if due.
+    //        const newLeads = await fetchJustDialLeads(config.apiKey);
+    //        // create lead, trigger workflows
+    //     }
     //   }
     // }
+    
+    console.log("Starting daily fetch for third-party leads...");
+    let totalImported = 0;
 
     return NextResponse.json({ 
       success: true, 
