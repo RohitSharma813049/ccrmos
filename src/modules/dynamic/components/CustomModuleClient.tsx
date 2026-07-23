@@ -107,7 +107,7 @@ export default function CustomModuleClient({ moduleSchema }: { moduleSchema: any
   });
 
   function copyPublicLink() {
-    const url = `${window.location.origin}/f/${moduleSchema._id}`;
+    const url = `${window.location.origin}/m/${moduleSchema._id}`;
     navigator.clipboard.writeText(url);
     alert("Public Form Link copied to clipboard!\n\n" + url);
   }
