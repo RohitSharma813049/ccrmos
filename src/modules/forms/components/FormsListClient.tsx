@@ -27,23 +27,37 @@ export default function FormsListClient() {
     }
   }
 
-  const createForm = async () => {
-    const title = prompt("Enter a title for your new form:");
-    if (!title) return;
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newFormTitle, setNewFormTitle] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
 
+  const openCreateModal = () => {
+    setNewFormTitle("");
+    setIsModalOpen(true);
+  };
+
+  const submitCreateForm = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!newFormTitle.trim()) return;
+
+    setIsCreating(true);
     try {
       const res = await fetch("/api/forms", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title })
+        body: JSON.stringify({ title: newFormTitle.trim() })
       });
       if (res.ok) {
         const data = await res.json();
         router.push(`/dashboard/forms/${data.form._id}`);
+      } else {
+        alert("Failed to create form");
+        setIsCreating(false);
       }
     } catch (e) {
       console.error(e);
       alert("Failed to create form");
+      setIsCreating(false);
     }
   };
 
@@ -68,7 +82,7 @@ export default function FormsListClient() {
           <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Standalone Forms</h1>
           <p className="text-gray-500 mt-1">Create custom surveys, contact forms, and lead captures.</p>
         </div>
-        <button onClick={createForm} className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-semibold shadow-sm transition-colors flex items-center gap-2 w-full sm:w-auto justify-center sm:justify-start">
+        <button onClick={openCreateModal} className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-semibold shadow-sm transition-colors flex items-center gap-2 w-full sm:w-auto justify-center sm:justify-start">
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
           Create New Form
         </button>
@@ -81,7 +95,7 @@ export default function FormsListClient() {
           </div>
           <h3 className="text-xl font-bold text-gray-900 mb-2">No Forms Yet</h3>
           <p className="text-gray-500 max-w-sm mb-6">Create your first form to start collecting responses from your customers.</p>
-          <button onClick={createForm} className="text-indigo-600 font-semibold hover:text-indigo-800 transition-colors">Get Started &rarr;</button>
+          <button onClick={openCreateModal} className="text-indigo-600 font-semibold hover:text-indigo-800 transition-colors">Get Started &rarr;</button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -98,16 +112,62 @@ export default function FormsListClient() {
                 </div>
                 <h3 className="text-lg font-bold text-gray-900 group-hover:text-indigo-600 transition-colors truncate">{form.title}</h3>
                 <p className="text-sm text-gray-500 mt-1 line-clamp-2 min-h-[40px]">{form.description || "No description provided."}</p>
-                <div className="mt-6 flex items-center justify-between text-xs text-gray-500">
-                  <span className="flex items-center gap-1">
-                    <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
-                    {form.fields?.length || 0} Fields
-                  </span>
-                  <span>{new Date(form.createdAt).toLocaleDateString()}</span>
+                <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between text-sm text-gray-500">
+                  <span className="flex items-center gap-1.5"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg> {form.views}</span>
+                  <span className="flex items-center gap-1.5"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg> {form.submissions}</span>
                 </div>
               </div>
             </Link>
           ))}
+        </div>
+      )}
+
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => !isCreating && setIsModalOpen(false)}></div>
+          <div className="relative bg-white border border-gray-300 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900">Create New Form</h2>
+              <p className="text-sm text-gray-600 mt-1">Give your new standalone form a title to get started.</p>
+            </div>
+            <form onSubmit={submitCreateForm}>
+              <div className="p-6">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Form Title</label>
+                <input 
+                  type="text" 
+                  autoFocus
+                  required
+                  value={newFormTitle}
+                  onChange={(e) => setNewFormTitle(e.target.value)}
+                  placeholder="e.g. Customer Feedback Survey"
+                  className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none" 
+                  disabled={isCreating}
+                />
+              </div>
+              <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
+                <button 
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  disabled={isCreating}
+                  className="px-5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  disabled={!newFormTitle.trim() || isCreating}
+                  className="px-5 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+                >
+                  {isCreating ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      Creating...
+                    </>
+                  ) : "Create Form"}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>
