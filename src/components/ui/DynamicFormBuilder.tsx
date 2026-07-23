@@ -22,6 +22,7 @@ interface DynamicFormBuilderProps {
 
 export default function DynamicFormBuilder({ targetModule, initialData, onSubmit, onCancel }: DynamicFormBuilderProps) {
   const [fields, setFields] = useState<DynamicField[]>([]);
+  const [pipelineStages, setPipelineStages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
   const [formData, setFormData] = useState<Record<string, any>>(initialData || {});
@@ -33,6 +34,16 @@ export default function DynamicFormBuilder({ targetModule, initialData, onSubmit
         if (res.ok) {
           const data = await res.json();
           setFields(data.fields || []);
+        }
+
+        if (targetModule === "lead") {
+          const pipeRes = await fetch('/api/pipelines');
+          if (pipeRes.ok) {
+            const pipeData = await pipeRes.json();
+            if (pipeData.pipelines && pipeData.pipelines.length > 0) {
+              setPipelineStages(pipeData.pipelines[0].stages || []);
+            }
+          }
         }
       } catch (error) {
         console.error("Failed to fetch dynamic fields", error);
@@ -95,15 +106,54 @@ export default function DynamicFormBuilder({ targetModule, initialData, onSubmit
               className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none" 
             />
           </div>
-          <div className="col-span-2">
-            <label className="block text-sm font-medium text-foreground mb-1.5">Email</label>
-            <input 
-              type="email" 
-              name="email"
-              value={formData.email || ""}
-              onChange={(e) => handleFixedDataChange("email", e.target.value)}
-              className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none" 
-            />
+          <div className="col-span-2 grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">Email</label>
+              <input 
+                type="email" 
+                name="email"
+                value={formData.email || ""}
+                onChange={(e) => handleFixedDataChange("email", e.target.value)}
+                className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none" 
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">Phone Number</label>
+              <div className="phone-input-wrapper">
+                <PhoneInput
+                  international
+                  defaultCountry="US"
+                  value={formData.phone || ""}
+                  onChange={(val) => handleFixedDataChange("phone", val)}
+                  className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus-within:ring-2 focus-within:ring-primary outline-none"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="col-span-2 grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">Priority Score (1-10)</label>
+              <input 
+                type="number" 
+                min="1" max="10"
+                value={formData.leadScore || 5}
+                onChange={(e) => handleFixedDataChange("leadScore", parseInt(e.target.value))}
+                className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none" 
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">Status</label>
+              <select 
+                value={formData.status || ""}
+                onChange={(e) => handleFixedDataChange("status", e.target.value)}
+                className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none" 
+              >
+                <option value="">Select a Status</option>
+                {pipelineStages.map((stage: any, i: number) => (
+                  <option key={i} value={stage.name}>{stage.name}</option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
       )}

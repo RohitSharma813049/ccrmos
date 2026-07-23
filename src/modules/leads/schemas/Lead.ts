@@ -70,7 +70,13 @@ const leadSchema = new Schema<ILead>({
 // A contact may exist in different tenants, but a tenant must not receive the
 // same lead twice through a repeated form submission or retry.
 leadSchema.index({ founderId: 1, email: 1 }, { unique: true });
-leadSchema.index({ founderId: 1, phone: 1 }, { unique: true, sparse: true });
+leadSchema.index(
+  { founderId: 1, phone: 1 }, 
+  { 
+    unique: true, 
+    partialFilterExpression: { phone: { $type: "string", $ne: "" } } 
+  }
+);
 
 leadSchema.pre('save', async function (this: ILead) {
   if (this.isNew && !this.displayId) {

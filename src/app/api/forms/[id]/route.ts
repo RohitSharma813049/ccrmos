@@ -14,9 +14,40 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     
     // For now, let's allow it to be public to fetch the schema, but we don't expose sensitive info anyway.
     const { id } = await params;
-    const form = await Form.findById(id);
+    const form = await Form.findById(id).lean();
     
     if (!form) return NextResponse.json({ error: "Form not found" }, { status: 404 });
+
+    // Inject relation options for standalone forms too
+    if (form.fields) {
+      for (const field of form.fields) {
+        if (field.type === 'relation') {
+          if (field.relationTarget === 'Project') {
+            const { default: Project } = await import('@/modules/projects/schemas/Project');
+            const projects = await Project.find({ companyId: form.companyId }).select('_id name displayId').lean();
+            field.relationOptions = projects.map((p: any) => ({
+              label: `${p.displayId ? p.displayId + ' - ' : ''}${p.name}`,
+              value: p._id.toString()
+            }));
+          } else if (field.relationTarget === 'Lead') {
+            const { default: Lead } = await import('@/modules/leads/schemas/Lead');
+            const leads = await Lead.find({ companyId: form.companyId }).select('_id firstName lastName').lean();
+            field.relationOptions = leads.map((l: any) => ({
+              label: `${l.firstName} ${l.lastName || ''}`.trim(),
+              value: l._id.toString()
+            }));
+          } else if (field.relationTarget === 'Customer') {
+            const { default: Customer } = await import('@/modules/customers/schemas/Customer');
+            const customers = await Customer.find({ companyId: form.companyId }).select('_id name').lean();
+            field.relationOptions = customers.map((c: any) => ({
+              label: c.name,
+              value: c._id.toString()
+            }));
+          }
+        }
+      }
+    }
+
     return NextResponse.json({ form });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

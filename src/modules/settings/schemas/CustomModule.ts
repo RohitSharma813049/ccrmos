@@ -2,9 +2,10 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface ICustomField {
   name: string;
-  type: string; // 'text', 'number', 'date', 'select', etc.
+  type: string; // 'text', 'number', 'date', 'select', 'phone', 'whatsapp', 'checkbox', 'score', 'relation'
   required: boolean;
   options?: string[]; // for select types
+  relationTarget?: string; // e.g., 'Project', 'Lead', etc., used for 'relation' type
 }
 
 export interface ICustomModule extends Document {
@@ -20,7 +21,8 @@ const customFieldSchema = new Schema<ICustomField>({
   name: { type: String, required: true },
   type: { type: String, required: true },
   required: { type: Boolean, default: false },
-  options: { type: [String], default: [] }
+  options: { type: [String], default: [] },
+  relationTarget: { type: String, default: null }
 });
 
 const customModuleSchema = new Schema<ICustomModule>({

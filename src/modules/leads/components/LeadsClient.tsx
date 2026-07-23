@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { toast, Toaster } from "react-hot-toast";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import DynamicFormBuilder from "@/components/ui/DynamicFormBuilder";
 import EmptyState from "@/components/ui/EmptyState";
 import PageHeader from "@/components/ui/PageHeader";
@@ -27,6 +29,16 @@ export default function LeadsClient() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedLeadForDetails, setSelectedLeadForDetails] = useState<any | null>(null);
+
+  // Custom Modal States
+  const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
+  const [bulkStatusModalOpen, setBulkStatusModalOpen] = useState(false);
+  const [bulkStatusValue, setBulkStatusValue] = useState("");
+  const [convertModalOpen, setConvertModalOpen] = useState<string | null>(null);
+
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
   const { hasPermission, session } = usePermissions();
 
   const [advancedFilters, setAdvancedFilters] = useState<any[]>([]);
@@ -111,7 +123,7 @@ export default function LeadsClient() {
         fetchLeads();
       } else {
         const err = await res.json();
-        alert(err.error || "Failed to save lead");
+        toast.error(err.error || "Failed to save lead");
       }
     } catch (e) {
       console.error(e);
@@ -129,7 +141,7 @@ export default function LeadsClient() {
         fetchLeads();
       } else {
         const err = await res.json();
-        alert(err.error || "Failed to update lead status");
+        toast.error(err.error || "Failed to update lead status");
       }
     } catch (e) {
       console.error(e);
@@ -158,7 +170,7 @@ export default function LeadsClient() {
 
   const handleExport = () => {
     if (selectedIds.length === 0) {
-      alert("Please select at least one lead to export.");
+      toast.error("Please select at least one lead to export.");
       return;
     }
     const selectedLeads = leads.filter(l => selectedIds.includes(l._id));
@@ -187,34 +199,34 @@ export default function LeadsClient() {
     document.body.removeChild(link);
   };
 
-  const handleBulkDelete = async (ids: string[]) => {
-    const confirmation = window.prompt(`Are you sure you want to permanently delete ${ids.length} leads?\n\nType DELETE to confirm:`);
-    if (confirmation !== "DELETE") return;
-    
+  const handleBulkDelete = () => setBulkDeleteModalOpen(true);
+  
+  const executeBulkDelete = async () => {
     try {
       const res = await fetch("/api/leads/bulk", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids })
+        body: JSON.stringify({ ids: selectedIds })
       });
       if (res.ok) {
         setSelectedIds([]);
+        setBulkDeleteModalOpen(false);
         fetchLeads();
+        toast.success("Leads deleted successfully");
       } else {
         const err = await res.json();
-        alert(err.error || "Failed to bulk delete leads");
+        toast.error(err.error || "Failed to bulk delete leads");
       }
     } catch (e) {
       console.error(e);
     }
   };
 
-  const handleBulkStatusChange = async (ids: string[]) => {
-    const newStatus = window.prompt(`Enter new status for ${ids.length} leads:\n(Available statuses: ${pipelineStages.map(s => s.name).join(", ")})`);
-    if (!newStatus) return;
-    
-    if (!pipelineStages.some(s => s.name.toLowerCase() === newStatus.toLowerCase())) {
-      alert("Invalid status entered.");
+  const handleBulkStatusChange = () => setBulkStatusModalOpen(true);
+
+  const executeBulkStatusChange = async () => {
+    if (!bulkStatusValue) {
+      toast.error("Please select a status");
       return;
     }
     
@@ -222,17 +234,66 @@ export default function LeadsClient() {
       const res = await fetch("/api/leads/bulk", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids, data: { status: pipelineStages.find(s => s.name.toLowerCase() === newStatus.toLowerCase())?.name } })
+        body: JSON.stringify({ ids: selectedIds, data: { status: bulkStatusValue } })
       });
       if (res.ok) {
         setSelectedIds([]);
+        setBulkStatusModalOpen(false);
         fetchLeads();
+        toast.success("Status updated successfully");
       } else {
         const err = await res.json();
-        alert(err.error || "Failed to bulk update leads");
+        toast.error(err.error || "Failed to bulk update leads");
       }
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  const [newNote, setNewNote] = useState("");
+  const [submittingNote, setSubmittingNote] = useState(false);
+
+  const handleAddNote = async (leadId: string) => {
+    if (!newNote.trim()) return;
+    setSubmittingNote(true);
+    try {
+      const res = await fetch(`/api/leads/${leadId}/notes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: newNote })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setNewNote("");
+        setSelectedLeadForDetails({ ...selectedLeadForDetails, activities: data.activities, customData: data.customData });
+        fetchLeads(); // refresh the list to show new lastMessage
+        toast.success("Note added successfully");
+      } else {
+        const err = await res.json();
+        toast.error(err.error || "Failed to add note");
+      }
+    } catch (e) {
+      toast.error("An error occurred");
+    } finally {
+      setSubmittingNote(false);
+    }
+  };
+
+  const executeConvert = async (leadId: string) => {
+    try {
+      const res = await fetch(`/api/leads/${leadId}/convert`, {
+        method: "POST"
+      });
+      if (res.ok) {
+        setConvertModalOpen(null);
+        fetchLeads();
+        toast.success("Lead converted to Customer successfully!");
+      } else {
+        const err = await res.json();
+        toast.error(err.error || "Failed to convert lead");
+      }
+    } catch (e) {
+      toast.error("An error occurred during conversion");
     }
   };
 
@@ -280,13 +341,13 @@ export default function LeadsClient() {
       if (res.ok) {
         setIsImportModalOpen(false);
         fetchLeads();
-        alert(`Successfully imported ${importedLeads.length} leads.`);
+        toast.success(`Successfully imported ${importedLeads.length} leads.`);
       } else {
         const err = await res.json();
-        alert(err.error || "Failed to import leads");
+        toast.error(err.error || "Failed to import leads");
       }
     } catch (err: any) {
-      alert("Import error: " + err.message);
+      toast.error("Import error: " + err.message);
     } finally {
       setImporting(false);
     }
@@ -404,6 +465,40 @@ export default function LeadsClient() {
           </div>
         ) : (
           !item.customData?.lastMessage && <span className="text-muted-foreground/50">No additional data</span>
+        )}
+      </div>
+    )},
+    { header: "Actions", cell: (item) => (
+      <div className="relative" ref={dropdownRef}>
+        <button onClick={(e) => { e.stopPropagation(); setActiveDropdown(activeDropdown === item._id ? null : item._id); }} className="p-2 hover:bg-muted rounded-full">
+          <svg className="w-5 h-5 text-muted-foreground" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" /></svg>
+        </button>
+        {activeDropdown === item._id && (
+          <div className="absolute right-8 top-0 w-48 bg-card border border-border rounded-xl shadow-lg z-50 py-1 animate-in fade-in zoom-in-95">
+            <button 
+              onClick={(e) => { e.stopPropagation(); setActiveDropdown(null); setSelectedLeadForDetails(item); }}
+              className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors flex items-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+              Quick View
+            </button>
+            {item.status !== "Converted" && (
+              <button 
+                onClick={(e) => { e.stopPropagation(); setActiveDropdown(null); setConvertModalOpen(item._id); }}
+                className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                Convert
+              </button>
+            )}
+            <button 
+              onClick={(e) => { e.stopPropagation(); setActiveDropdown(null); setIsModalOpen(true); setSelectedLeadForDetails(item); }}
+              className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors flex items-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+              Edit Lead
+            </button>
+          </div>
         )}
       </div>
     )}
@@ -706,13 +801,87 @@ export default function LeadsClient() {
                 )}
               </div>
             </div>
-            <div className="p-6 border-t border-border bg-muted/30 shrink-0">
+            
+            {/* Quick Notes Input */}
+            <div className="p-4 bg-muted/20 border-t border-border flex flex-col gap-2 shrink-0">
+              <label className="text-xs font-semibold text-foreground uppercase tracking-wider">Add Note / Message</label>
+              <div className="flex gap-2">
+                <textarea 
+                  value={newNote}
+                  onChange={(e) => setNewNote(e.target.value)}
+                  placeholder="Type a message or note..."
+                  className="flex-1 px-3 py-2 text-sm bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary resize-none h-12"
+                />
+                <button 
+                  onClick={() => handleAddNote(selectedLeadForDetails._id)}
+                  disabled={submittingNote || !newNote.trim()}
+                  className="px-4 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
+                >
+                  {submittingNote ? '...' : 'Send'}
+                </button>
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-border bg-muted/30 shrink-0">
               <button 
                 onClick={() => setSelectedLeadForDetails(null)} 
                 className="w-full px-4 py-2 bg-card border border-border hover:bg-muted text-foreground font-medium rounded-xl shadow-sm transition-colors text-sm"
               >
                 Close Panel
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Convert Modal */}
+      {convertModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
+          <div className="bg-card p-6 rounded-2xl shadow-xl max-w-sm w-full border border-border animate-in zoom-in-95">
+            <h3 className="text-lg font-bold text-foreground">Convert to Customer</h3>
+            <p className="text-sm text-muted-foreground mt-2 mb-6">Are you sure you want to convert this lead into a customer? This will change their status to Converted and add them to the Customers directory.</p>
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setConvertModalOpen(null)} className="px-4 py-2 text-sm font-medium hover:bg-muted rounded-lg">Cancel</button>
+              <button onClick={() => executeConvert(convertModalOpen)} className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg">Convert Lead</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Status Modal */}
+      {bulkStatusModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
+          <div className="bg-card p-6 rounded-2xl shadow-xl max-w-sm w-full border border-border animate-in zoom-in-95">
+            <h3 className="text-lg font-bold text-foreground">Update Status ({selectedIds.length} leads)</h3>
+            <div className="mt-4 mb-6">
+              <select
+                value={bulkStatusValue}
+                onChange={(e) => setBulkStatusValue(e.target.value)}
+                className="w-full px-3 py-2 border border-border rounded-lg bg-card focus:ring-2 focus:ring-primary"
+              >
+                <option value="">Select new status</option>
+                {pipelineStages.sort((a,b) => a.order - b.order).map(stage => (
+                  <option key={stage.name} value={stage.name}>{stage.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setBulkStatusModalOpen(false)} className="px-4 py-2 text-sm font-medium hover:bg-muted rounded-lg">Cancel</button>
+              <button onClick={executeBulkStatusChange} className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg">Update Status</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Delete Modal */}
+      {bulkDeleteModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
+          <div className="bg-card p-6 rounded-2xl shadow-xl max-w-sm w-full border border-border animate-in zoom-in-95">
+            <h3 className="text-lg font-bold text-foreground">Delete {selectedIds.length} Leads?</h3>
+            <p className="text-sm text-muted-foreground mt-2 mb-6">Are you sure you want to delete the selected leads? This action cannot be undone.</p>
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setBulkDeleteModalOpen(false)} className="px-4 py-2 text-sm font-medium hover:bg-muted rounded-lg">Cancel</button>
+              <button onClick={executeBulkDelete} className="px-4 py-2 text-sm font-medium bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-lg">Yes, Delete</button>
             </div>
           </div>
         </div>

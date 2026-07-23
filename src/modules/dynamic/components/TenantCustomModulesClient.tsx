@@ -314,6 +314,11 @@ export default function TenantCustomModulesClient() {
                               <option value="number">Number</option>
                               <option value="date">Date</option>
                               <option value="select">Dropdown (Select)</option>
+                              <option value="phone">Phone Number</option>
+                              <option value="whatsapp">WhatsApp</option>
+                              <option value="checkbox">Checkbox (Boolean)</option>
+                              <option value="score">Score (1-10)</option>
+                              <option value="relation">Relation (Link to Module)</option>
                             </select>
                           </div>
                         </div>
@@ -333,6 +338,22 @@ export default function TenantCustomModulesClient() {
                             />
                           </div>
                         )}
+
+                        {field.type === 'relation' && (
+                          <div>
+                            <label className="block text-xs font-medium text-muted-foreground mb-1">Relation Target</label>
+                            <select 
+                              value={field.relationTarget || "Project"}
+                              onChange={(e) => updateField(idx, "relationTarget", e.target.value)}
+                              className="w-full bg-background border-border text-foreground rounded-lg shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-3 py-2 border transition-colors"
+                            >
+                              <option value="Project">Project</option>
+                              <option value="Lead">Lead</option>
+                              <option value="Customer">Customer</option>
+                            </select>
+                          </div>
+                        )}
+
 
                         <div className="flex items-center gap-2 mt-2">
                           <input 

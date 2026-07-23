@@ -9,6 +9,8 @@ export async function logActivity({
   recordId,
   action,
   changes = {},
+  ipAddress,
+  device,
   req
 }: {
   companyId: string | mongoose.Types.ObjectId;
@@ -17,23 +19,23 @@ export async function logActivity({
   recordId: string;
   action: string;
   changes?: Record<string, any>;
+  ipAddress?: string;
+  device?: string;
   req?: Request;
 }) {
   try {
-    // Silent Admin Entry: Do not log actions if the user is a Platform Owner
-    if (userId) {
-      const user = await User.findById(userId).select("hierarchyLevel").lean();
-      if (user && user.hierarchyLevel === 1) {
-        return; // Skip logging entirely
-      }
-    }
+    // We will log actions for all users, including Platform Owners, so they can see their own actions.
 
-    let ipAddress = "Unknown";
-    let device = "Unknown";
+    let finalIpAddress = ipAddress || "Unknown";
+    let finalDevice = device || "Unknown";
 
     if (req) {
-      ipAddress = req.headers.get("x-forwarded-for") || "Unknown";
-      device = req.headers.get("user-agent") || "Unknown";
+      try {
+        finalIpAddress = req.headers.get("x-forwarded-for") || finalIpAddress;
+        finalDevice = req.headers.get("user-agent") || finalDevice;
+      } catch (e) {
+        // req might be destroyed if accessed async after response
+      }
     }
 
     await AuditLog.create({
@@ -43,8 +45,8 @@ export async function logActivity({
       recordId,
       action,
       changes,
-      ipAddress,
-      device
+      ipAddress: finalIpAddress,
+      device: finalDevice
     });
   } catch (error) {
     console.error("[Audit Service] Failed to log activity:", error);

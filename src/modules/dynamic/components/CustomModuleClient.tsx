@@ -90,7 +90,17 @@ export default function CustomModuleClient({ moduleSchema }: { moduleSchema: any
   const columns: ColumnDef<any>[] = moduleSchema.fields.map((field: any) => ({
     header: field.name,
     cell: (record: any) => {
-      const val = record.data?.[field.name];
+      let val = record.data?.[field.name];
+      if (field.type === 'checkbox') {
+        return <span className="text-gray-700">{val ? '✅ Yes' : '❌ No'}</span>;
+      }
+      if (field.type === 'score') {
+        return <span className="text-gray-700 font-medium">{val ? `${val}/10` : '-'}</span>;
+      }
+      if (field.type === 'relation' && field.relationOptions) {
+        const match = field.relationOptions.find((opt: any) => opt.value === val);
+        val = match ? match.label : val;
+      }
       return <span className="text-gray-700">{val?.toString() || "-"}</span>;
     }
   }));
@@ -191,12 +201,43 @@ export default function CustomModuleClient({ moduleSchema }: { moduleSchema: any
                       onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
                       className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                     />
-                  ) : field.type === 'number' ? (
+                  ) : field.type === 'number' || field.type === 'score' ? (
                     <input 
-                      type="number"
-                      value={formData[field.name] || ''}
+                      type={field.type === 'score' ? 'range' : 'number'}
+                      min={field.type === 'score' ? 1 : undefined}
+                      max={field.type === 'score' ? 10 : undefined}
+                      value={formData[field.name] || (field.type === 'score' ? 5 : '')}
                       onChange={(e) => setFormData({ ...formData, [field.name]: parseFloat(e.target.value) })}
+                      className={`w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all ${field.type === 'score' ? 'accent-blue-500' : ''}`}
+                    />
+                  ) : field.type === 'checkbox' ? (
+                    <div className="flex items-center gap-2 mt-1">
+                      <input 
+                        type="checkbox"
+                        checked={!!formData[field.name]}
+                        onChange={(e) => setFormData({ ...formData, [field.name]: e.target.checked })}
+                        className="w-5 h-5 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
+                      />
+                      <span className="text-sm text-gray-700">Yes</span>
+                    </div>
+                  ) : field.type === 'relation' ? (
+                    <select
+                      value={formData[field.name] || ''}
+                      onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
                       className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                    >
+                      <option value="">Select {field.relationTarget || 'an option'}</option>
+                      {(field.relationOptions || []).map((opt: any) => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </select>
+                  ) : field.type === 'phone' || field.type === 'whatsapp' ? (
+                    <input 
+                      type="tel"
+                      value={formData[field.name] || ''}
+                      onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                      placeholder={field.type === 'whatsapp' ? 'WhatsApp Number' : 'Phone Number'}
                     />
                   ) : (
                     <input 

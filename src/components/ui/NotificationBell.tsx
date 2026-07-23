@@ -8,9 +8,22 @@ export default function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const seenNotifIds = useRef<Set<string>>(new Set());
 
   useEffect(() => {
+    // Request desktop notification permission on mount
+    if (typeof window !== "undefined" && "Notification" in window) {
+      if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+        Notification.requestPermission();
+      }
+    }
+
     fetchNotifications();
+
+    // Poll for new notifications every 15 seconds
+    const interval = setInterval(() => {
+      fetchNotifications(true);
+    }, 15000);
 
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -18,15 +31,34 @@ export default function NotificationBell() {
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      clearInterval(interval);
+    };
   }, []);
 
-  async function fetchNotifications() {
+  async function fetchNotifications(isPolling = false) {
     try {
       const res = await fetch("/api/notifications");
       if (res.ok) {
         const data = await res.json();
-        setNotifications(data.notifications || []);
+        const newNotifs = data.notifications || [];
+        
+        if (isPolling) {
+          // Check for brand new unread notifications we haven't seen yet
+          newNotifs.forEach((n: any) => {
+            if (!n.isRead && !seenNotifIds.current.has(n._id)) {
+              // Trigger desktop notification
+              if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+                new Notification(n.title, { body: n.message, icon: "/favicon.ico" });
+              }
+            }
+          });
+        }
+        
+        // Update seen set
+        newNotifs.forEach((n: any) => seenNotifIds.current.add(n._id));
+        setNotifications(newNotifs);
       }
     } catch (e) {
       console.error(e);

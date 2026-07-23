@@ -142,23 +142,33 @@ export default function AuditClient({
         <div className="bg-card p-4 rounded-xl border border-border shadow-sm flex gap-4 animate-in fade-in slide-in-from-top-2">
           <div className="flex-1">
             <label className="block text-xs font-medium text-muted-foreground mb-1">Module Filter</label>
-            <input 
-              type="text" 
-              placeholder="e.g., LEADS, SETTINGS" 
+            <select 
               value={moduleFilter}
               onChange={(e) => { setModuleFilter(e.target.value); setPage(1); }}
               className="w-full bg-background border-border text-foreground rounded-lg shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-3 py-2 border outline-none transition-colors"
-            />
+            >
+              <option value="">All Modules</option>
+              <option value="Leads">LEADS</option>
+              <option value="Projects">PROJECTS</option>
+              <option value="Settings">SETTINGS</option>
+              <option value="Forms">FORMS</option>
+              <option value="Users">USERS</option>
+              <option value="Auth">AUTH</option>
+            </select>
           </div>
           <div className="flex-1">
             <label className="block text-xs font-medium text-muted-foreground mb-1">Action Filter</label>
-            <input 
-              type="text" 
-              placeholder="e.g., UPDATE, DELETE" 
+            <select 
               value={actionFilter}
               onChange={(e) => { setActionFilter(e.target.value); setPage(1); }}
               className="w-full bg-background border-border text-foreground rounded-lg shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-3 py-2 border outline-none transition-colors"
-            />
+            >
+              <option value="">All Actions</option>
+              <option value="Create">CREATE</option>
+              <option value="Update">UPDATE</option>
+              <option value="Delete">DELETE</option>
+              <option value="Login">LOGIN</option>
+            </select>
           </div>
           <div className="flex items-end">
             <button 

@@ -3,6 +3,7 @@ import dbConnect from '@/lib/db';
 import Form from '@/modules/forms/schemas/Form';
 import FormSubmission from '@/modules/forms/schemas/FormSubmission';
 import Lead from '@/modules/leads/schemas/Lead';
+import { sendPushNotification } from '@/modules/notifications/services/notifications.service';
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   await dbConnect();
@@ -61,6 +62,20 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     if (!leadData.email) leadData.email = `no-email-${Date.now()}@example.com`; // Fallback to avoid strict validation error
 
     await Lead.create(leadData);
+
+    // Notify founder if enabled
+    if (form.notifyOnSubmit !== false && form.founderId) {
+      try {
+        await sendPushNotification(
+          form.founderId.toString(),
+          "New Form Submission",
+          `A new response was submitted to your form: ${form.title}`,
+          { link: `/f/leads` } // Directing to leads since it creates a lead
+        );
+      } catch (err) {
+        console.error("Failed to send notification for form submission", err);
+      }
+    }
 
     return NextResponse.json({ success: true, submissionId: submission._id });
   } catch (error: any) {

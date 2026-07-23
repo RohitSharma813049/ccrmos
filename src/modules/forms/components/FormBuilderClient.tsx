@@ -297,6 +297,21 @@ export default function FormBuilderClient({ formId }: { formId: string }) {
               </div>
 
               <div>
+                <label className="flex items-center gap-2 cursor-pointer mt-4">
+                  <input 
+                    type="checkbox" 
+                    checked={form.notifyOnSubmit !== false} 
+                    onChange={(e) => {
+                      setForm({...form, notifyOnSubmit: e.target.checked});
+                      saveForm();
+                    }}
+                    className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                  />
+                  <span className="text-sm font-medium text-gray-700">Notify me on new submissions</span>
+                </label>
+              </div>
+
+              <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Linked Project</label>
                 <select 
                   value={form.projectId || ""}
@@ -365,6 +380,11 @@ export default function FormBuilderClient({ formId }: { formId: string }) {
                     <option value="number">Number</option>
                     <option value="select">Dropdown</option>
                     <option value="radio">Multiple Choice (Single Answer)</option>
+                    <option value="phone">Phone Number</option>
+                    <option value="whatsapp">WhatsApp</option>
+                    <option value="checkbox">Checkbox (Boolean)</option>
+                    <option value="score">Score (1-10)</option>
+                    <option value="relation">Relation (Link to Module)</option>
                   </select>
                 </div>
 
@@ -376,6 +396,21 @@ export default function FormBuilderClient({ formId }: { formId: string }) {
                   </div>
                 )}
                 
+                {fieldData.type === "relation" && (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Relation Target</label>
+                    <select 
+                      value={(fieldData as any).relationTarget || "Project"} 
+                      onChange={e => setFieldData({...fieldData, relationTarget: e.target.value} as any)} 
+                      className="w-full border-gray-200 bg-gray-50 rounded-xl px-4 py-2.5 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                    >
+                      <option value="Project">Project</option>
+                      <option value="Lead">Lead</option>
+                      <option value="Customer">Customer</option>
+                    </select>
+                  </div>
+                )}
+
                 {["text", "textarea", "email", "number"].includes(fieldData.type) && (
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-1">Placeholder Text (Optional)</label>

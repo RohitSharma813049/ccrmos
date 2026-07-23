@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import ApiKey from '@/modules/settings/schemas/ApiKey';
 import Lead from '@/modules/leads/schemas/Lead';
+import { sendPushNotification } from '@/modules/notifications/services/notifications.service';
 
 // CORS Headers for public access
 const corsHeaders = {
@@ -44,6 +45,14 @@ export async function POST(req: Request) {
     };
 
     const newLead = await Lead.create(leadData);
+    
+    // Notify the founder
+    sendPushNotification(
+      apiKey.founderId.toString(),
+      "New Lead via Public API",
+      `A new lead (${leadData.firstName} ${leadData.lastName || ''}) has just submitted the public form!`,
+      { link: '/f/leads' }
+    ).catch(console.error);
     
     return NextResponse.json({ 
       success: true, 

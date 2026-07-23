@@ -25,8 +25,8 @@ export async function GET(req: Request) {
       query.companyId = user.companyId;
     }
     
-    if (moduleFilter) query.module = moduleFilter;
-    if (actionFilter) query.action = actionFilter;
+    if (moduleFilter) query.module = { $regex: moduleFilter, $options: "i" };
+    if (actionFilter) query.action = { $regex: actionFilter, $options: "i" };
 
     if (search) {
       const searchRegex = { $regex: search, $options: "i" };

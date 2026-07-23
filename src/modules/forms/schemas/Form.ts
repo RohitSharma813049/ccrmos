@@ -17,6 +17,7 @@ const FormSchema = new mongoose.Schema({
   description: { type: String, default: "" },
   fields: [FormFieldSchema],
   isActive: { type: Boolean, default: true },
+  notifyOnSubmit: { type: Boolean, default: true },
   submitButtonText: { type: String, default: "Submit" },
   successMessage: { type: String, default: "Thank you for your submission!" }
 }, { timestamps: true });
