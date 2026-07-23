@@ -62,7 +62,10 @@ export async function requirePermission(permissionOrModule: string, action?: str
   
   // Ensure Founders always get their default permissions if the DB is missing them
   if (hierarchyLevel === 2 && (!userPermissions || (Array.isArray(userPermissions) ? userPermissions.length === 0 : Object.keys(userPermissions).length === 0))) {
-    userPermissions = FOUNDER_PERMISSIONS;
+    userPermissions = { all: true };
+  } else if (hierarchyLevel === 2) {
+    // If they have array permissions, let's just forcefully give them "all" or let's say a Founder has access to all things in their company anyway.
+    userPermissions = { ...userPermissions, all: true };
   }
 
   let hasAccess = false;
@@ -106,7 +109,9 @@ export async function hasPermission(permissionOrModule: string, action?: string)
   let userPermissions = (session.user as any).permissions || {};
   
   if (hierarchyLevel === 2 && (!userPermissions || (Array.isArray(userPermissions) ? userPermissions.length === 0 : Object.keys(userPermissions).length === 0))) {
-    userPermissions = FOUNDER_PERMISSIONS;
+    userPermissions = { all: true };
+  } else if (hierarchyLevel === 2) {
+    userPermissions = { ...userPermissions, all: true };
   }
   
   const hasAll = userPermissions["all"] === true || Object.values(userPermissions).includes("all");

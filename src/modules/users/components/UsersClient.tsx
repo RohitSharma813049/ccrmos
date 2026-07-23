@@ -90,10 +90,12 @@ export default function UsersClient() {
         setIsModalOpen(false);
         fetchUsers();
       } else {
-        alert("Failed to save user");
+        const errData = await res.json().catch(() => ({}));
+        alert(`Failed to save user: ${errData.error || res.statusText}`);
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
+      alert(`Error: ${e.message}`);
     }
   };
 
