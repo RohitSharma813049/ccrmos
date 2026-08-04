@@ -2,8 +2,11 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface ILeadStatus extends Document {
   name: string;
-  stageId: mongoose.Types.ObjectId;
+  stageId?: mongoose.Types.ObjectId;
   active: boolean;
+  color?: string;
+  iconColor?: string;
+  category?: string;
   companyId: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
@@ -11,8 +14,11 @@ export interface ILeadStatus extends Document {
 
 const LeadStatusSchema: Schema<ILeadStatus> = new Schema({
   name: { type: String, required: true },
-  stageId: { type: Schema.Types.ObjectId, ref: "LeadStage", required: true },
+  stageId: { type: Schema.Types.ObjectId, ref: "LeadStage" },
   active: { type: Boolean, default: true },
+  color: { type: String, default: "#6b7280" },
+  iconColor: { type: String, default: "bg-blue-500" },
+  category: { type: String, default: "Interested" },
   companyId: { type: Schema.Types.ObjectId, ref: "Company", required: true }
 }, { timestamps: true });
 

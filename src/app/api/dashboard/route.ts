@@ -21,7 +21,7 @@ export async function GET(req: Request) {
     const getQuery = async (moduleName: string) => {
       const query = { ...tenantQuery };
       if (user.hierarchyLevel > 2) {
-        const scopeFilter = await getRecordScopeFilter(user, moduleName, 'view');
+        const scopeFilter = await getRecordScopeFilter(user, moduleName);
         Object.assign(query, scopeFilter);
       }
       return query;

@@ -135,12 +135,39 @@ export default function FormBuilderClient() {
     }
   };
 
-  const handleDelete = async (id: string, scope: string) => {
-    if (confirm("Delete this custom field?")) {
+  async function handleDelete(id: string) {
+    if (!confirm("Are you sure you want to delete this field?")) return;
+    try {
       const res = await fetch(`/api/dynamic-fields/${id}`, { method: "DELETE" });
-      if (res.ok) fetchFields();
+      if (res.ok) {
+        fetchFields();
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to delete field");
+      }
+    } catch (e) {
+      console.error(e);
     }
-  };
+  }
+
+  async function handleRenameSection(oldSection: string) {
+    const newName = prompt(`Rename section "${oldSection}" to:`, oldSection);
+    if (!newName || newName === oldSection) return;
+    
+    const fieldsToUpdate = fields.filter(f => f.section === oldSection);
+    
+    try {
+      await Promise.all(fieldsToUpdate.map(f => fetch(`/api/dynamic-fields/${f._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ section: newName })
+      })));
+      fetchFields();
+    } catch (e) {
+      console.error(e);
+      alert("Failed to rename section");
+    }
+  }
 
   const sections = Array.from(new Set(fields.map(f => f.section || "General")));
   
@@ -286,7 +313,7 @@ export default function FormBuilderClient() {
                                   </div>
                                 </div>
                                 <button 
-                                  onClick={() => handleDelete(field._id, field.tenantScope)}
+                                  onClick={() => handleDelete(field._id)}
                                   className="text-sm text-destructive hover:text-destructive/80 font-medium focus-visible:outline-none focus-visible:underline"
                                 >
                                   Remove
@@ -337,7 +364,19 @@ export default function FormBuilderClient() {
 
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">Section (Used for Wizard Steps)</label>
-                <input type="text" placeholder="e.g. General, Medical Info" value={formData.section} onChange={e => setFormData({...formData, section: e.target.value})} className="w-full bg-background border-border rounded-lg px-3 py-2 border outline-none focus:ring-2 focus:ring-primary text-foreground shadow-sm" />
+                <input 
+                  type="text" 
+                  list="sections-list"
+                  placeholder="e.g. General, Medical Info" 
+                  value={formData.section} 
+                  onChange={e => setFormData({...formData, section: e.target.value})} 
+                  className="w-full bg-background border-border rounded-lg px-3 py-2 border outline-none focus:ring-2 focus:ring-primary text-foreground shadow-sm" 
+                />
+                <datalist id="sections-list">
+                  {sections.map(sec => (
+                    <option key={sec} value={sec} />
+                  ))}
+                </datalist>
               </div>
 
               <div>
@@ -398,7 +437,12 @@ export default function FormBuilderClient() {
                 <div className="space-y-6">
                   {formStyle === "steps" ? (
                     <div>
-                      <h3 className="text-xl font-bold text-foreground mb-6 border-b border-border pb-2">{sections[currentStep]}</h3>
+                      <div className="flex items-center gap-2 mb-6 border-b border-border pb-2">
+                        <h3 className="text-xl font-bold text-foreground">{sections[currentStep]}</h3>
+                        <button onClick={() => handleRenameSection(sections[currentStep])} className="text-muted-foreground hover:text-primary transition-colors p-1" title="Rename Section">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                        </button>
+                      </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {fields.filter(f => f.section === sections[currentStep]).map(field => (
                           <div key={field._id} className={field.customCss || "col-span-1 md:col-span-2"}>
@@ -424,7 +468,12 @@ export default function FormBuilderClient() {
                   ) : (
                     sections.map(section => (
                       <div key={section} className="mb-10">
-                        <h3 className="text-lg font-bold text-foreground mb-6 border-b border-border pb-2">{section}</h3>
+                        <div className="flex items-center gap-2 mb-6 border-b border-border pb-2">
+                          <h3 className="text-lg font-bold text-foreground">{section}</h3>
+                          <button onClick={() => handleRenameSection(section)} className="text-muted-foreground hover:text-primary transition-colors p-1" title="Rename Section">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                          </button>
+                        </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           {fields.filter(f => f.section === section).map(field => (
                             <div key={field._id} className={field.customCss || "col-span-1 md:col-span-2"}>

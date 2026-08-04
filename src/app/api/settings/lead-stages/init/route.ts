@@ -30,8 +30,7 @@ export async function POST(req: Request) {
       if (!existing) {
         existing = await LeadStage.create({
           ...stage,
-          companyId: user.companyId,
-          createdBy: user.id
+          companyId: user.companyId
         });
       }
       stagesMap.set(stage.name, existing._id);

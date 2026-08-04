@@ -38,7 +38,7 @@ BookingSchema.pre("validate", function (next) {
     // Generate a random 6 character alphanumeric string
     this.bookingId = Math.random().toString(36).substring(2, 8).toUpperCase();
   }
-  next();
+  if (typeof next === 'function') (next as any)();
 });
 
 const Booking: Model<IBooking> = mongoose.models.Booking || mongoose.model<IBooking>("Booking", BookingSchema);

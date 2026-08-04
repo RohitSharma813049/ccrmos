@@ -31,6 +31,7 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedLeadForDetails, setSelectedLeadForDetails] = useState<any | null>(null);
+  const [selectedLeadForEdit, setSelectedLeadForEdit] = useState<any | null>(null);
 
   // Custom Modal States
   const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
@@ -141,20 +142,25 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
 
   const handleSave = async (formData: any) => {
     try {
-      const res = await fetch("/api/leads", {
-        method: "POST",
+      const url = selectedLeadForEdit ? `/api/leads/${selectedLeadForEdit._id}` : "/api/leads";
+      const method = selectedLeadForEdit ? "PUT" : "POST";
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)
       });
       if (res.ok) {
         setIsModalOpen(false);
+        setSelectedLeadForEdit(null);
         fetchLeads();
+        toast.success(selectedLeadForEdit ? "Lead updated successfully" : "Lead created successfully");
       } else {
         const err = await res.json();
         toast.error(err.error || "Failed to save lead");
       }
     } catch (e) {
       console.error(e);
+      toast.error("An error occurred while saving the lead.");
     }
   };
 
@@ -177,7 +183,7 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
   };
 
   const isStageDisabled = (currentStatus: string, targetStage: any) => {
-    const currentIndex = pipelineStages.findIndex(s => s.name === currentStatus);
+    const currentIndex = leadStages.findIndex((s: any) => s.name === currentStatus);
     if (currentIndex === -1) return false;
     // Allow moving to next stages, or backwards. For now, allow all.
     return false;
@@ -451,7 +457,18 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
             </>
           )}
           {item.email && (
-            <a href={`mailto:${item.email}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} title="Email" className="text-muted-foreground hover:text-rose-500 transition-colors">
+            <a 
+              href={`mailto:${item.email}`} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              onClick={(e) => {
+                e.stopPropagation();
+                navigator.clipboard.writeText(item.email);
+                toast.success("Email copied to clipboard!");
+              }} 
+              title="Email (Copied on click)" 
+              className="text-muted-foreground hover:text-rose-500 transition-colors"
+            >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
             </a>
           )}
@@ -475,8 +492,8 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
             <select
               value={currentStageId || ""}
               onChange={(e) => updateLeadStatusAndStage(item._id, e.target.value, "")}
-              style={stageStyle}
-              className="w-full text-xs font-semibold rounded-lg shadow-sm py-1.5 pl-3 pr-8 focus:ring-2 focus:ring-primary focus:border-primary border cursor-pointer"
+              style={typeof stageStyle === 'object' ? stageStyle : undefined}
+              className={`w-full text-xs font-semibold rounded-lg shadow-sm py-1.5 pl-3 pr-8 focus:ring-2 focus:ring-primary focus:border-primary border cursor-pointer ${typeof stageStyle === 'string' ? stageStyle : ''}`}
             >
               <option value="" disabled>Select Stage</option>
               {leadStages.sort((a,b) => a.order - b.order).map(stage => (
@@ -486,23 +503,28 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
               ))}
             </select>
           ) : (
-            <span style={stageStyle} className="px-2.5 py-1 rounded-md text-xs font-semibold border inline-block text-center">
+            <span style={typeof stageStyle === 'object' ? stageStyle : undefined} className={`px-2.5 py-1 rounded-md text-xs font-semibold border inline-block text-center ${typeof stageStyle === 'string' ? stageStyle : ''}`}>
               {stageObj.name || "No Stage"}
             </span>
           )}
 
-          {currentStageId && availableStatuses.length > 0 && (
-            <select
-              value={item.status || ""}
-              onChange={(e) => updateLeadStatusAndStage(item._id, currentStageId, e.target.value)}
-              className="w-full text-xs font-medium rounded-lg shadow-sm py-1.5 pl-3 pr-8 focus:ring-2 focus:ring-primary focus:border-primary border cursor-pointer bg-background text-foreground"
-            >
-              <option value="" disabled>Select Status</option>
-              {availableStatuses.map((status: any) => (
-                <option key={status._id} value={status.name}>{status.name}</option>
-              ))}
-            </select>
-          )}
+          {currentStageId && availableStatuses.length > 0 && (() => {
+            const selectedStatusObj = availableStatuses.find((s: any) => s.name === item.status);
+            const statusClass = selectedStatusObj?.iconColor ? `${selectedStatusObj.iconColor} text-white` : "bg-background text-foreground";
+            
+            return (
+              <select
+                value={item.status || ""}
+                onChange={(e) => updateLeadStatusAndStage(item._id, currentStageId, e.target.value)}
+                className={`w-full text-xs font-medium rounded-lg shadow-sm py-1.5 pl-3 pr-8 focus:ring-2 focus:ring-primary focus:border-primary border cursor-pointer ${statusClass}`}
+              >
+                <option value="" disabled className="bg-background text-foreground">Select Status</option>
+                {availableStatuses.map((status: any) => (
+                  <option key={status._id} value={status.name} className="bg-background text-foreground">{status.name}</option>
+                ))}
+              </select>
+            );
+          })()}
         </div>
       );
     }},
@@ -567,7 +589,7 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
               </button>
             )}
             <button 
-              onClick={(e) => { e.stopPropagation(); setActiveDropdown(null); setIsModalOpen(true); setSelectedLeadForDetails(item); }}
+              onClick={(e) => { e.stopPropagation(); setActiveDropdown(null); setSelectedLeadForEdit(item); setIsModalOpen(true); }}
               className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors flex items-center gap-2"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
@@ -756,11 +778,11 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
 
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => { setIsModalOpen(false); setSelectedLeadForEdit(null); }} />
           <div className="relative bg-card border border-border rounded-2xl shadow-xl w-full max-w-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="p-6 border-b border-border flex justify-between items-center bg-muted/30">
-              <h2 className="text-xl font-bold text-foreground">Create New Lead</h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-muted-foreground hover:text-foreground">
+              <h2 className="text-xl font-bold text-foreground">{selectedLeadForEdit ? "Edit Lead" : "Create New Lead"}</h2>
+              <button onClick={() => { setIsModalOpen(false); setSelectedLeadForEdit(null); }} className="text-muted-foreground hover:text-foreground">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -769,8 +791,9 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
             <div className="p-6 max-h-[80vh] overflow-y-auto custom-scrollbar">
               <DynamicFormBuilder 
                 targetModule="lead" 
+                initialData={selectedLeadForEdit}
                 onSubmit={handleSave} 
-                onCancel={() => setIsModalOpen(false)} 
+                onCancel={() => { setIsModalOpen(false); setSelectedLeadForEdit(null); }} 
               />
             </div>
           </div>
@@ -791,11 +814,11 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
             </div>
             <div className="p-6">
               <form onSubmit={handleImportSubmit} className="space-y-4">
-                <div className="p-4 bg-primary/10 text-foreground text-sm rounded-lg border border-primary/20">
+                <div className="p-4 bg-primary/10 text-primary text-sm rounded-lg border border-primary/20">
                   <p>Upload a CSV file with your leads.</p>
                   <p className="mt-1 font-medium">Standard columns:</p>
                   <p className="text-xs">First Name, Last Name, Email, Phone, Status</p>
-                  <p className="mt-1 text-xs text-primary">Any other columns will be stored automatically in custom data!</p>
+                  <p className="mt-1 text-xs font-semibold">Any other columns will be stored automatically in custom data!</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1">Assign to Project (Optional)</label>
@@ -845,7 +868,11 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
           <div className="relative w-full max-w-md bg-card h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
             <div className="p-6 border-b border-border flex justify-between items-center bg-muted/30">
               <div>
-                <h2 className="text-xl font-bold text-foreground">{selectedLeadForDetails.firstName} {selectedLeadForDetails.lastName}</h2>
+                <h2 className="text-xl font-bold text-foreground">
+                  {selectedLeadForDetails.firstName || selectedLeadForDetails.lastName 
+                    ? `${selectedLeadForDetails.firstName || ''} ${selectedLeadForDetails.lastName || ''}`.trim() 
+                    : (selectedLeadForDetails.email?.split('@')[0] || selectedLeadForDetails.phone || 'Unknown Lead')}
+                </h2>
                 <p className="text-sm text-muted-foreground mt-1">{selectedLeadForDetails.email}</p>
               </div>
               <button onClick={() => setSelectedLeadForDetails(null)} className="text-muted-foreground hover:text-foreground p-2 hover:bg-muted rounded-full transition-colors">
@@ -959,7 +986,7 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
                 className="w-full px-3 py-2 border border-border rounded-lg bg-card focus:ring-2 focus:ring-primary"
               >
                 <option value="">Select new status</option>
-                {pipelineStages.sort((a,b) => a.order - b.order).map(stage => (
+                {leadStages.sort((a: any, b: any) => a.order - b.order).map((stage: any) => (
                   <option key={stage.name} value={stage.name}>{stage.name}</option>
                 ))}
               </select>

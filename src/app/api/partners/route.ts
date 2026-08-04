@@ -51,16 +51,12 @@ export async function POST(req: Request) {
     if (body.email) {
       const existingUser = await User.findOne({ email: body.email.toLowerCase() });
       if (!existingUser) {
-        tempPassword = Math.random().toString(36).slice(-8);
-        const hashedPassword = await bcrypt.hash(tempPassword, 10);
-        const newUser = await User.create({
+        // Removed password as we use OTP
+        const newUser: any = await User.create({
           name: body.name,
           email: body.email.toLowerCase(),
-          password: hashedPassword,
-          role: 'Manager',
-          userType: 'Partner',
           companyId: body.companyId,
-          active: true
+          isActive: true
         });
         newUserId = newUser._id;
         body.userId = newUserId;

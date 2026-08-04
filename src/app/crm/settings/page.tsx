@@ -9,7 +9,9 @@ import {
   Link as LinkIcon, 
   ShieldCheck,
   Camera,
-  Save
+  Save,
+  Mail,
+  Phone
 } from 'lucide-react'
 
 export default function SettingsPage() {

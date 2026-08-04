@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 
-const SYSTEM_MODULES = ["Leads", "Customers", "Projects", "Orders", "Invoices", "Tasks", "Settings"];
+const SYSTEM_MODULES = ["Leads", "Customers", "Projects", "Invoices", "Tasks", "Settings"];
 const ACTIONS = ["view", "create", "edit", "delete", "assign", "export", "import", "approve"];
 const SCOPES = ["Own", "Team", "Department", "Director", "Company", "Platform"];
 
