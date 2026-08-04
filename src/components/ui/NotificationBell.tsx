@@ -65,8 +65,11 @@ export default function NotificationBell() {
         newNotifs.forEach((n: any) => seenNotifIds.current.add(n._id));
         setNotifications(newNotifs);
       }
-    } catch (e) {
-      console.error(e);
+    } catch (e: any) {
+      // Ignore network errors which often happen during dev server restarts or Turbopack recompiles
+      if (e?.name !== "TypeError" || e?.message !== "Failed to fetch") {
+        console.error("Failed to fetch notifications:", e);
+      }
     } finally {
       setLoading(false);
     }
@@ -80,8 +83,10 @@ export default function NotificationBell() {
         body: JSON.stringify(id ? { notificationId: id } : {})
       });
       fetchNotifications();
-    } catch (e) {
-      console.error(e);
+    } catch (e: any) {
+      if (e?.name !== "TypeError" || e?.message !== "Failed to fetch") {
+        console.error("Failed to mark notification as read:", e);
+      }
     }
   }
 
