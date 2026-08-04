@@ -4,7 +4,7 @@ import { NextRequest } from "next/server";
 import CredentialsProvider from "next-auth/providers/credentials";
 import dbConnect from "@/lib/db";
 import User from "@/modules/users/schemas/User";
-import "@/modules/roles/schemas/Role"; // Side-effect import to prevent tree-shaking
+import "@/modules/owner/schemas/GlobalRole"; // Side-effect import to prevent tree-shaking
 import VerificationToken from "@/modules/auth/schemas/VerificationToken";
 
 export const authOptions: NextAuthOptions = {
@@ -75,6 +75,7 @@ export const authOptions: NextAuthOptions = {
           permissions: user.role ? (user.role as any).permissions : {},
           companyId: user.companyId ? user.companyId.toString() : null,
           founderId: user.founderId ? user.founderId.toString() : null,
+          teamId: user.teamId ? user.teamId.toString() : null,
           hierarchyLevel: user.hierarchyLevel,
         };
       },
@@ -92,6 +93,7 @@ export const authOptions: NextAuthOptions = {
         token.companyId = (user as any).companyId;
         token.founderId = (user as any).founderId;
         token.hierarchyLevel = (user as any).hierarchyLevel;
+        token.teamId = (user as any).teamId;
       }
       return token;
     },
@@ -104,6 +106,7 @@ export const authOptions: NextAuthOptions = {
           (session.user as any).companyId = token.companyId;
           (session.user as any).founderId = token.founderId;
           (session.user as any).hierarchyLevel = token.hierarchyLevel;
+          (session.user as any).teamId = token.teamId;
 
           if (token.hierarchyLevel === 1) {
             // We pass the parsed cookies from the request wrapper

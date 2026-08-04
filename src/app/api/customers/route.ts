@@ -5,6 +5,7 @@ import Pipeline from '@/modules/settings/schemas/Pipeline';
 import LoyaltyProfile from '@/modules/rewards/schemas/LoyaltyProfile';
 import { requireAuthenticatedUser, requirePermission } from '@/lib/auth-utils';
 import { buildTenantQuery } from "@/lib/access-control";
+import { getRecordScopeFilter, filterFields } from "@/lib/permissions";
 import { parseFiltersToMongo } from "@/utils/parseFilters";
 
 export async function GET(req: Request) {
@@ -24,7 +25,8 @@ export async function GET(req: Request) {
     const dateFrom = searchParams.get("dateFrom") || "";
     const dateTo = searchParams.get("dateTo") || "";
     
-    const queryObj: any = { ...buildTenantQuery(user), ...dynamicQuery };
+    const queryScope = getRecordScopeFilter(user, "Customers");
+    const queryObj: any = { ...queryScope, ...dynamicQuery };
 
     if (statusFilter) {
       queryObj.status = statusFilter;

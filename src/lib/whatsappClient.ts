@@ -56,24 +56,25 @@ export const initializeWhatsAppClient = async (companyId: string, scopeId: strin
   
   try {
     const isProd = process.env.NODE_ENV === 'production';
+    const isServerless = process.env.NODE_ENV === 'production' && process.platform !== 'win32';
     let puppeteerConfig: any = { headless: true };
     
     // Add Browserless WebSocket support for Vercel
     if (process.env.BROWSERLESS_TOKEN) {
       puppeteerConfig.browserWSEndpoint = `wss://chrome.browserless.io?token=${process.env.BROWSERLESS_TOKEN}`;
     } else {
-      const executablePath = isProd
+      const executablePath = isServerless
         ? await chromium.executablePath('https://github.com/Sparticuz/chromium/releases/download/v131.0.1/chromium-v131.0.1-pack.tar')
         : 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
       
       puppeteerConfig.executablePath = executablePath;
-      puppeteerConfig.args = isProd ? chromium.args : ['--no-sandbox', '--disable-setuid-sandbox'];
+      puppeteerConfig.args = isServerless ? chromium.args : ['--no-sandbox', '--disable-setuid-sandbox'];
     }
 
     const client = new Client({
       authStrategy: new LocalAuth({ 
         clientId: scopeId,
-        dataPath: isProd ? '/tmp/.wwebjs_auth' : './.wwebjs_auth'
+        dataPath: isServerless ? '/tmp/.wwebjs_auth' : './.wwebjs_auth'
       }),
       puppeteer: puppeteerConfig
     });

@@ -56,9 +56,9 @@ export default function UsersClient() {
 
   async function fetchRoles() {
     try {
-      const res = await fetch("/api/roles");
+      const res = await fetch("/api/owner/roles");
       const data = await res.json();
-      setRoles(data.roles || []);
+      setRoles(data.data || []);
     } catch (e) {
       console.error(e);
     }

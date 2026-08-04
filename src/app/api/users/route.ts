@@ -23,7 +23,7 @@ export async function GET(req: Request) {
     const query: any = {};
     
     // Find roles that should be hidden from general management
-    const hiddenRoles = await mongoose.models.Role.find({
+    const hiddenRoles = await mongoose.models.GlobalRole.find({
       name: { $regex: /^(owner|founder|platform owner)$/i }
     }).select('_id');
     const hiddenRoleIds = hiddenRoles.map(r => r._id);

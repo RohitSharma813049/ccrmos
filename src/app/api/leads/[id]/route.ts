@@ -9,7 +9,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   try {
     const user = await requireAuthenticatedUser();
     await requirePermission('Leads', 'view');
-    const lead = await Lead.findOne({ _id: (await params).id, ...buildTenantQuery(user) });
+    const lead = await Lead.findOne({ _id: (await params).id, ...buildTenantQuery(user) }).populate('stageId');
     if (!lead) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     return NextResponse.json({ lead });
   } catch (error: any) {
@@ -26,6 +26,18 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     const body = await req.json();
     body.updatedBy = user._id;
     const { id } = await params;
+
+    const existingLead = await Lead.findOne({ _id: id, ...buildTenantQuery(user) });
+    if (!existingLead) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
+    const terminalStatuses = ['closed', 'complete', 'closed won', 'closed lost'];
+    const isTerminal = terminalStatuses.includes(existingLead.status?.toLowerCase() || "");
+    
+    // Allow founders (level 1 or 2) to override lock
+    if (isTerminal && user.hierarchyLevel > 2) {
+      return NextResponse.json({ error: 'Cannot modify a closed or completed lead.' }, { status: 403 });
+    }
+
     const updatedLead = await Lead.findOneAndUpdate({ _id: id, ...buildTenantQuery(user) }, body, { new: true, runValidators: true });
     if (!updatedLead) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     

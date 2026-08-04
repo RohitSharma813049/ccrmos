@@ -12,6 +12,7 @@ export interface SessionUser {
   founderId?: string;
   hierarchyLevel?: number;
   departmentId?: string;
+  teamId?: string;
   directorId?: string;
   managerId?: string;
   teamLeaderId?: string;
@@ -62,9 +63,17 @@ export function getRecordScopeFilter(user: SessionUser, module: string): Record<
       if (user.departmentId) return { ...baseFilter, departmentId: user.departmentId };
       break;
     case "Team":
-      if (user.hierarchyLevel === 4) return { ...baseFilter, managerId: user.id };
-      if (user.hierarchyLevel === 5) return { ...baseFilter, teamLeaderId: user.id };
-      break;
+      // Allow user to see records if they are part of a team (via teamId),
+      // OR they are specifically the manager/team leader of the record.
+      const teamQueries = [];
+      if (user.teamId) teamQueries.push({ teamId: user.teamId });
+      if (user.hierarchyLevel === 4) teamQueries.push({ managerId: user.id });
+      if (user.hierarchyLevel === 5) teamQueries.push({ teamLeaderId: user.id });
+      
+      if (teamQueries.length > 0) {
+        return { ...baseFilter, $or: teamQueries };
+      }
+      return { ...baseFilter, assignedUserId: user.id }; // Fallback to Own
     case "Own":
     default:
       return { ...baseFilter, assignedUserId: user.id };

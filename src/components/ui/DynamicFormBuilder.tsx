@@ -22,7 +22,8 @@ interface DynamicFormBuilderProps {
 
 export default function DynamicFormBuilder({ targetModule, initialData, onSubmit, onCancel }: DynamicFormBuilderProps) {
   const [fields, setFields] = useState<DynamicField[]>([]);
-  const [pipelineStages, setPipelineStages] = useState<any[]>([]);
+  const [leadStages, setLeadStages] = useState<any[]>([]);
+  const [leadStatuses, setLeadStatuses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
   const [formData, setFormData] = useState<Record<string, any>>(initialData || {});
@@ -37,12 +38,15 @@ export default function DynamicFormBuilder({ targetModule, initialData, onSubmit
         }
 
         if (targetModule === "lead") {
-          const pipeRes = await fetch('/api/pipelines');
-          if (pipeRes.ok) {
-            const pipeData = await pipeRes.json();
-            if (pipeData.pipelines && pipeData.pipelines.length > 0) {
-              setPipelineStages(pipeData.pipelines[0].stages || []);
-            }
+          const [stageRes, statusRes] = await Promise.all([
+            fetch('/api/settings/lead-stages'),
+            fetch('/api/lead-status')
+          ]);
+          if (stageRes.ok && statusRes.ok) {
+            const stages = await stageRes.json();
+            const { statuses } = await statusRes.json();
+            setLeadStages(stages);
+            setLeadStatuses(statuses || []);
           }
         }
       } catch (error) {
@@ -142,15 +146,35 @@ export default function DynamicFormBuilder({ targetModule, initialData, onSubmit
               />
             </div>
             <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">Stage *</label>
+              <select 
+                value={formData.stageId || ""}
+                onChange={(e) => handleFixedDataChange("stageId", e.target.value)}
+                required
+                className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none" 
+              >
+                <option value="">Select a Stage</option>
+                {leadStages.map((stage: any) => (
+                  <option key={stage._id} value={stage._id}>{stage.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
               <label className="block text-sm font-medium text-foreground mb-1.5">Status</label>
               <select 
                 value={formData.status || ""}
                 onChange={(e) => handleFixedDataChange("status", e.target.value)}
-                className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none" 
+                disabled={!formData.stageId}
+                className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none disabled:opacity-50" 
               >
                 <option value="">Select a Status</option>
-                {pipelineStages.map((stage: any, i: number) => (
-                  <option key={i} value={stage.name}>{stage.name}</option>
+                {leadStatuses
+                  .filter(s => {
+                    const sStageId = typeof s.stageId === 'object' ? s.stageId._id : s.stageId;
+                    return sStageId === formData.stageId && s.active;
+                  })
+                  .map((status: any) => (
+                  <option key={status._id} value={status.name}>{status.name}</option>
                 ))}
               </select>
             </div>

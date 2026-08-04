@@ -11,6 +11,7 @@ export interface ILead extends Document {
   phone?: string;
   company?: string;
   status: string;
+  stageId?: mongoose.Types.ObjectId;
   source?: string;
   notes?: string;
   createdBy?: mongoose.Types.ObjectId;
@@ -18,13 +19,14 @@ export interface ILead extends Document {
   
   // Ownership Chain
   departmentId?: mongoose.Types.ObjectId;
+  teamId?: mongoose.Types.ObjectId;
   directorId?: mongoose.Types.ObjectId;
   managerId?: mongoose.Types.ObjectId;
   teamLeaderId?: mongoose.Types.ObjectId;
   assignedUserId?: mongoose.Types.ObjectId;
   
   leadScore?: number;
-  activities?: { type: string; description: string; timestamp: Date }[];
+  activities?: { type: string; description: string; timestamp: Date; attachmentUrl?: string }[];
   customData?: any;
   
   // Real Estate Fields
@@ -44,6 +46,7 @@ const leadSchema = new Schema<ILead>({
   phone: { type: String },
   company: { type: String },
   status: { type: String, default: 'new' },
+  stageId: { type: Schema.Types.ObjectId, ref: 'LeadStage' },
   leadScore: { type: Number, min: 1, max: 10, default: 5 },
   customData: { type: Schema.Types.Mixed, default: {} },
   createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
@@ -51,10 +54,12 @@ const leadSchema = new Schema<ILead>({
   activities: [{
     type: { type: String },
     description: String,
+    attachmentUrl: String,
     timestamp: { type: Date, default: Date.now }
   }],
   
   departmentId: { type: Schema.Types.ObjectId, ref: "Department" },
+  teamId: { type: Schema.Types.ObjectId, ref: "Team" },
   directorId: { type: Schema.Types.ObjectId, ref: "User" },
   managerId: { type: Schema.Types.ObjectId, ref: "User" },
   teamLeaderId: { type: Schema.Types.ObjectId, ref: "User" },

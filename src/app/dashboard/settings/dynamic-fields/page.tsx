@@ -11,6 +11,8 @@ interface DynamicField {
   required: boolean;
   tenantScope: string;
   industryId?: { _id: string; name: string };
+  options?: string[];
+  optionColors?: Record<string, string>;
 }
 
 export default function TenantDynamicFieldsPage() {
@@ -30,12 +32,35 @@ export default function TenantDynamicFieldsPage() {
   const [currentFieldId, setCurrentFieldId] = useState<string | null>(null);
   
   // Form State
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string;
+    target: string;
+    type: string;
+    required: boolean;
+    options: string[];
+    optionColors: Record<string, string>;
+  }>({
     name: "",
     target: "lead",
     type: "Text String",
-    required: false
+    required: false,
+    options: [],
+    optionColors: {}
   });
+
+  const [newOption, setNewOption] = useState("");
+  const [newOptionColor, setNewOptionColor] = useState("bg-blue-500");
+  
+  const colors = [
+    { label: 'Blue', value: 'bg-blue-500' },
+    { label: 'Green', value: 'bg-green-500' },
+    { label: 'Red', value: 'bg-red-500' },
+    { label: 'Purple', value: 'bg-purple-500' },
+    { label: 'Pink', value: 'bg-pink-500' },
+    { label: 'Teal', value: 'bg-teal-600' },
+    { label: 'Orange', value: 'bg-orange-500' },
+    { label: 'Slate', value: 'bg-slate-500' },
+  ];
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -79,7 +104,7 @@ export default function TenantDynamicFieldsPage() {
 
   const openCreateModal = () => {
     setIsEditMode(false);
-    setFormData({ name: "", target: activeTab === "all" ? "lead" : activeTab, type: "Text String", required: false });
+    setFormData({ name: "", target: activeTab === "all" ? "lead" : activeTab, type: "Text String", required: false, options: [], optionColors: {} });
     setIsModalOpen(true);
   };
 
@@ -90,7 +115,9 @@ export default function TenantDynamicFieldsPage() {
       name: field.name,
       target: field.target,
       type: field.type,
-      required: field.required
+      required: field.required,
+      options: field.options || [],
+      optionColors: field.optionColors || {}
     });
     setIsModalOpen(true);
   };
@@ -347,6 +374,79 @@ export default function TenantDynamicFieldsPage() {
                 />
                 <label htmlFor="req" className="text-sm text-gray-700 font-medium cursor-pointer">Make this field mandatory</label>
               </div>
+
+              {formData.type === "Dropdown (Select)" && (
+                <div className="border border-gray-200 rounded-xl p-4 space-y-4">
+                  <h3 className="text-sm font-semibold text-gray-900">Dropdown Options</h3>
+                  
+                  {/* List existing options */}
+                  {formData.options.length > 0 && (
+                    <div className="space-y-2 mb-4">
+                      {formData.options.map(opt => (
+                        <div key={opt} className="flex items-center justify-between bg-gray-50 p-2 rounded-lg border border-gray-100">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-4 h-4 rounded-full ${formData.optionColors[opt] || 'bg-gray-400'}`}></div>
+                            <span className="text-sm font-medium text-gray-700">{opt}</span>
+                          </div>
+                          <button 
+                            type="button" 
+                            onClick={() => {
+                              const newOptions = formData.options.filter(o => o !== opt);
+                              const newColors = { ...formData.optionColors };
+                              delete newColors[opt];
+                              setFormData({ ...formData, options: newOptions, optionColors: newColors });
+                            }}
+                            className="text-red-500 hover:text-red-700 p-1"
+                          >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Add new option */}
+                  <div className="flex flex-col gap-3 pt-2 border-t border-gray-100">
+                    <div className="flex gap-2">
+                      <input 
+                        type="text" 
+                        value={newOption}
+                        onChange={e => setNewOption(e.target.value)}
+                        placeholder="Option label (e.g. In Progress)"
+                        className="flex-1 bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                      />
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          if (newOption.trim() && !formData.options.includes(newOption.trim())) {
+                            setFormData({
+                              ...formData,
+                              options: [...formData.options, newOption.trim()],
+                              optionColors: { ...formData.optionColors, [newOption.trim()]: newOptionColor }
+                            });
+                            setNewOption("");
+                          }
+                        }}
+                        className="px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-medium hover:bg-slate-800"
+                      >
+                        Add
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs text-gray-500 font-medium mr-2">Color:</span>
+                      {colors.map(c => (
+                        <button
+                          key={c.value}
+                          type="button"
+                          onClick={() => setNewOptionColor(c.value)}
+                          className={`w-6 h-6 rounded-full ${c.value} transition-all ${newOptionColor === c.value ? 'ring-2 ring-offset-2 ring-indigo-500 scale-110' : 'hover:scale-105'}`}
+                          title={c.label}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div className="pt-4 flex items-center justify-end gap-3">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 text-sm font-medium text-gray-700 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">

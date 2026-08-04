@@ -1,9 +1,5 @@
-import RolesManager from "@/modules/settings/components/RolesManager";
-
-export const metadata = {
-  title: "Roles & Permissions | Enterprise CRM",
-};
+import RolesClient from '@/modules/owner/components/RolesClient';
 
 export default function RolesPage() {
-  return <RolesManager />;
+  return <RolesClient />;
 }

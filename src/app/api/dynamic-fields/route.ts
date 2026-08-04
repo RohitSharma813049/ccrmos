@@ -103,7 +103,7 @@ export async function POST(req: Request) {
       await mongoose.connect(process.env.MONGODB_URI!);
     }
     
-    const { name, target, type, required, section, order, options, tenantScope, customCss } = await req.json();
+    const { name, target, type, required, section, order, options, optionColors, tenantScope, customCss } = await req.json();
     
     if (!name || !target || !type) {
       return NextResponse.json({ error: "Name, target, and type are required." }, { status: 400 });
@@ -124,6 +124,7 @@ export async function POST(req: Request) {
       section: section || "General",
       order: order || 0,
       options: options || [],
+      optionColors: optionColors || {},
       customCss: customCss || ""
     });
     

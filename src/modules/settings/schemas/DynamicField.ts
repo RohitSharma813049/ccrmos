@@ -2,7 +2,7 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface IDynamicField extends Document {
   name: string;
-  target: "lead" | "customer" | "project" | "invoice" | "task" | "order" | "all";
+  target: string;
   type: string;
   required: boolean;
   tenantScope: string;
@@ -11,6 +11,7 @@ export interface IDynamicField extends Document {
   section?: string;
   order?: number;
   options?: string[]; // For dropdown types
+  optionColors?: Record<string, string>; // Maps option label to color
   customCss?: string; // For field-level CSS overrides
   createdAt: Date;
   updatedAt: Date;
@@ -21,7 +22,6 @@ const dynamicFieldSchema = new Schema<IDynamicField>(
     name: { type: String, required: true, trim: true },
     target: { 
       type: String, 
-      enum: ["lead", "customer", "project", "invoice", "task", "order", "all"], 
       required: true 
     },
     type: { type: String, required: true },
@@ -32,6 +32,7 @@ const dynamicFieldSchema = new Schema<IDynamicField>(
     section: { type: String, default: "General" },
     order: { type: Number, default: 0 },
     options: [{ type: String }],
+    optionColors: { type: Map, of: String },
     customCss: { type: String, default: "" },
   },
   { timestamps: true }

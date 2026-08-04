@@ -23,6 +23,14 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       if (!existing) {
         return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
       }
+
+      const terminalStatuses = ['closed', 'complete', 'closed won', 'closed lost'];
+      const isTerminal = terminalStatuses.includes(existing.status?.toLowerCase() || "");
+      
+      // Allow founders (level 1 or 2) to override lock
+      if (isTerminal && user.hierarchyLevel > 2) {
+        return NextResponse.json({ error: 'Cannot modify a closed or completed record.' }, { status: 403 });
+      }
       
       const currentStatus = existing.status;
       const newStatus = body.status;

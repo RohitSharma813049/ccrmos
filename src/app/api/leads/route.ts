@@ -40,14 +40,18 @@ export async function GET(req: Request) {
     const dynamicQuery = parseFiltersToMongo(filtersJson);
     
     // We still support standard specific search params if passed directly
-    const statusFilter = searchParams.get("status") || "";
+    const stageIdFilter = searchParams.get("stageId") || "";
     const dateFrom = searchParams.get("dateFrom") || "";
     const dateTo = searchParams.get("dateTo") || "";
     
     const queryObj: any = { ...queryScope, status: { $ne: 'Archived' }, ...dynamicQuery };
 
-    if (statusFilter) {
-      queryObj.status = statusFilter;
+    if (stageIdFilter) {
+      if (stageIdFilter === 'Archived') {
+        queryObj.status = 'Archived';
+      } else {
+        queryObj.stageId = stageIdFilter;
+      }
     }
 
     if (dateFrom || dateTo) {
@@ -68,7 +72,7 @@ export async function GET(req: Request) {
 
     const skip = (page - 1) * limit;
     const total = await Lead.countDocuments(queryObj);
-    const leads = await Lead.find(queryObj).sort({ createdAt: -1 }).skip(skip).limit(limit).lean();
+    const leads = await Lead.find(queryObj).populate('stageId').sort({ createdAt: -1 }).skip(skip).limit(limit).lean();
     
     // Apply Field-Level Permissions
     const filteredLeads = leads.map(lead => filterFields(lead, user, "Leads"));
@@ -145,50 +149,38 @@ export async function PUT(req: Request) {
     await dbConnect();
 
     const body = await req.json();
-    const { _id, status, ...updateData } = body;
+    const { _id, status, stageId, ...updateData } = body;
 
     if (!_id) return NextResponse.json({ error: "Missing Lead ID" }, { status: 400 });
 
     const lead = await Lead.findOne({ _id, ...buildTenantQuery(user) });
     if (!lead) return NextResponse.json({ error: "Lead not found" }, { status: 404 });
 
-    // Enforce "forward-only" logic if status is changing
+    // Handle Stage and Status Change
+    let activityDesc = [];
+    if (stageId && lead.stageId?.toString() !== stageId) {
+      activityDesc.push(`Stage changed`);
+      lead.stageId = stageId;
+    }
+    
     if (status && lead.status !== status) {
-      const pipeline = await Pipeline.findOne({ companyId: user.companyId, module: "lead" });
-      
-      // Fallback for default pipeline stages
-      const stages = pipeline?.stages || [
-        { name: "New", order: 0 },
-        { name: "Contacted", order: 1 },
-        { name: "Qualified", order: 2 },
-        { name: "Converted", order: 3 },
-      ];
+      activityDesc.push(`Status changed from ${lead.status} to ${status}`);
+      lead.status = status;
+    }
 
-      const currentStage = stages.find(s => s.name === lead.status);
-      const newStage = stages.find(s => s.name === status);
-
-      // If both stages are in the pipeline, enforce ordering
-      if (currentStage && newStage) {
-        if (newStage.order < currentStage.order) {
-          return NextResponse.json({ 
-            error: "Status can only move forward in the pipeline." 
-          }, { status: 400 });
-        }
-      }
-      
+    if (activityDesc.length > 0) {
       lead.activities = lead.activities || [];
       lead.activities.push({
         type: "Status Change",
-        description: `Status changed from ${lead.status} to ${status}`,
+        description: activityDesc.join(' and '),
         timestamp: new Date()
       });
-
-      lead.status = status;
 
       // Workflow Hook
       evaluateWorkflows(user.companyId, "Lead Updated", lead._id.toString(), {
         ...lead.toObject(),
-        status
+        status,
+        stageId
       }).catch(console.error);
     }
 

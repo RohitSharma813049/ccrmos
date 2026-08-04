@@ -1,13 +1,17 @@
 import crypto from "crypto";
 import Company from "@/modules/companies/schemas/Company";
 import User from "@/modules/users/schemas/User";
-import Role from "@/modules/roles/schemas/Role";
+import GlobalRole from "@/modules/owner/schemas/GlobalRole";
+import LeadStatus from "@/modules/leads/schemas/LeadStatus";
 import SubscriptionPlan from "@/modules/settings/schemas/SubscriptionPlan";
 import IndustryTemplate from "@/modules/settings/schemas/IndustryTemplate";
 import CustomModule from "@/modules/settings/schemas/CustomModule";
 import DynamicField from "@/modules/settings/schemas/DynamicField";
 import ApiKey from "@/modules/settings/schemas/ApiKey";
 import nodemailer from "nodemailer";
+
+import TemplateModule from "@/modules/settings/schemas/TemplateModule";
+import CompanyModule from "@/modules/companies/schemas/CompanyModule";
 
 export class CompanyService {
   static async getCompaniesWithUserCounts(page: number = 1, limit: number = 10, search: string = "") {
@@ -43,7 +47,7 @@ export class CompanyService {
     };
   }
 
-  static async registerTenant({ name, adminEmail, subscriptionPlanId, usersQuota, industryId, enabledModules }: { name: string, adminEmail: string, subscriptionPlanId?: string, usersQuota?: number, industryId?: string, enabledModules?: string[] }) {
+  static async registerTenant({ name, adminEmail, subscriptionPlanId, usersQuota, templateId }: { name: string, adminEmail: string, subscriptionPlanId?: string, usersQuota?: number, templateId?: string }) {
     if (!name || !adminEmail) {
       throw new Error("Name and Admin Email are required.");
     }
@@ -67,19 +71,22 @@ export class CompanyService {
       adminEmail: normalizedEmail,
       subscriptionPlanId: subscriptionPlanId || undefined,
       usersQuota: usersQuota || 5,
-      industryId: industryId || undefined,
+      selected_template_id: templateId || undefined,
       status: "Suspended",
       subscriptionStatus: "pending_payment",
-      checkoutToken,
-      enabledModules: enabledModules || []
+      checkoutToken
     });
 
-    // Automatically create the founder role and user account for this new tenant
-    const founderRole = await Role.create({
-      name: "Founder",
-      companyId: newCompany._id,
-      permissions: {} // Founders typically bypass permission checks, but you can add full permissions if needed
-    });
+    // Find or create the Global Founder role
+    let founderRole = await GlobalRole.findOne({ name: "Founder" });
+    if (!founderRole) {
+      founderRole = await GlobalRole.create({
+        name: "Founder",
+        description: "System default Founder role",
+        permissions: { all: true },
+        isActive: true
+      });
+    }
 
     const founder = await User.create({
       email: normalizedEmail,
@@ -90,18 +97,52 @@ export class CompanyService {
     founder.founderId = founder._id;
     await founder.save();
     
-    // Provision Industry-Specific Dynamic Fields
-    if (industryId) {
-      // Find all global dynamic fields tied to this industry
-      const industryFields = await DynamicField.find({ industryId, tenantScope: "Global" }).lean();
+    // Provision Default Lead Statuses
+    const defaultStatuses = [
+      { name: 'New', color: '#3b82f6', isTerminal: false },
+      { name: 'Contacted', color: '#f59e0b', isTerminal: false },
+      { name: 'In Progress', color: '#8b5cf6', isTerminal: false },
+      { name: 'Qualified', color: '#10b981', isTerminal: false },
+      { name: 'Closed Won', color: '#059669', isTerminal: true },
+      { name: 'Closed Lost', color: '#ef4444', isTerminal: true }
+    ];
+    
+    const statusesToInsert = defaultStatuses.map((st, i) => ({
+      ...st,
+      sortOrder: i,
+      tenantId: newCompany._id,
+      active: true,
+      createdBy: founder._id,
+      updatedBy: founder._id
+    }));
+    await LeadStatus.insertMany(statusesToInsert);
+    
+    // Provision Modules & Fields from Template
+    if (templateId) {
+      // 1. Provision Company Modules
+      const templateModules = await TemplateModule.find({ template_id: templateId }).lean();
+      if (templateModules && templateModules.length > 0) {
+        const companyModulesData = templateModules.map((tm: any) => ({
+          company_id: newCompany._id,
+          module_id: tm.module_id,
+          visible: true,
+          display_name: tm.default_display_name,
+          sort_order: tm.sort_order,
+          is_customized: false,
+        }));
+        await CompanyModule.insertMany(companyModulesData);
+      }
       
-      if (industryFields && industryFields.length > 0) {
-        const newFields = industryFields.map((field: any) => ({
+      // 2. Provision Dynamic Fields from the template's legacy definition or if they were global
+      // Note: We need to pull from the IndustryTemplate if it has inline fields, OR adapt if fields were defined globally
+      const template = await IndustryTemplate.findById(templateId).lean();
+      if (template && template.fields && template.fields.length > 0) {
+        const newFields = template.fields.map((field: any) => ({
           ...field,
           _id: undefined, // Let mongoose generate a new ID
           companyId: newCompany._id,
-          tenantScope: "Local", // Convert to local so company can edit
-          industryId: undefined, // No longer globally tied
+          tenantScope: "Local",
+          industryId: undefined, 
           createdAt: undefined,
           updatedAt: undefined
         }));

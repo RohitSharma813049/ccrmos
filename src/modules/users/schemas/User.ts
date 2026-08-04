@@ -1,14 +1,15 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
-import Role, { IRole } from "@/modules/roles/schemas/Role";
+import GlobalRole, { IGlobalRole } from "@/modules/owner/schemas/GlobalRole";
 
 export interface IUser extends Document {
   email: string;
   name?: string;
-  role?: mongoose.Types.ObjectId | IRole;
+  role?: mongoose.Types.ObjectId | IGlobalRole;
   companyId?: mongoose.Types.ObjectId;
   founderId?: mongoose.Types.ObjectId;
   hierarchyLevel?: number; // 1: Platform Owner, 2: Founder, 3: Director, 4: Manager, 5: Team Leader, 6: Team Member
   departmentId?: mongoose.Types.ObjectId;
+  teamId?: mongoose.Types.ObjectId;
   directorId?: mongoose.Types.ObjectId;
   managerId?: mongoose.Types.ObjectId;
   teamLeaderId?: mongoose.Types.ObjectId;
@@ -34,7 +35,7 @@ const UserSchema: Schema<IUser> = new Schema({
   },
   role: {
     type: Schema.Types.ObjectId,
-    ref: "Role",
+    ref: "GlobalRole",
   },
   companyId: {
     type: Schema.Types.ObjectId,
@@ -43,6 +44,7 @@ const UserSchema: Schema<IUser> = new Schema({
   founderId: { type: Schema.Types.ObjectId, ref: "User" },
   hierarchyLevel: { type: Number, min: 1, max: 6, default: 6 },
   departmentId: { type: Schema.Types.ObjectId, ref: "Department" },
+  teamId: { type: Schema.Types.ObjectId, ref: "Team" },
   directorId: { type: Schema.Types.ObjectId, ref: "User" },
   managerId: { type: Schema.Types.ObjectId, ref: "User" },
   teamLeaderId: { type: Schema.Types.ObjectId, ref: "User" },

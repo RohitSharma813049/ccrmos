@@ -1,8 +1,5 @@
-import { requirePermission } from "@/lib/auth-utils";
-import { PERMISSIONS } from "@/config/permissions";
-import IndustriesClient from "@/modules/settings/components/IndustriesClient";
+import IndustriesClient from '@/modules/owner/components/IndustriesClient';
 
-export default async function IndustriesPage() {
-  await requirePermission(PERMISSIONS.CREATE_INDUSTRY_TEMPLATES);
+export default function IndustriesPage() {
   return <IndustriesClient />;
 }

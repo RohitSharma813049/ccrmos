@@ -10,7 +10,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const user = await requireAuthenticatedUser();
     await requirePermission('Leads', 'edit');
     const { id } = await params;
-    const { message } = await req.json();
+    const { message, attachmentUrl } = await req.json();
 
     if (!message || message.trim() === '') {
       return NextResponse.json({ error: 'Message cannot be empty' }, { status: 400 });
@@ -21,8 +21,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     
     if (!lead.activities) lead.activities = [];
     lead.activities.push({
-      type: 'Note',
+      type: attachmentUrl ? 'Note with Attachment' : 'Note',
       description: message,
+      attachmentUrl: attachmentUrl || undefined,
       timestamp: new Date()
     });
 

@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
+
 import Order from '@/modules/orders/schemas/Order';
 import dbConnect from '@/lib/db';
 import { requireAuthenticatedUser, requirePermission } from '@/lib/auth-utils';
 import { buildTenantQuery } from '@/lib/access-control';
+import { getRecordScopeFilter } from "@/lib/permissions";
 import { parseFiltersToMongo } from "@/utils/parseFilters";
 
 export async function GET(req: Request) {
@@ -22,7 +24,8 @@ export async function GET(req: Request) {
     const dateFrom = searchParams.get("dateFrom") || "";
     const dateTo = searchParams.get("dateTo") || "";
     
-    const queryObj: any = { ...buildTenantQuery(user), ...dynamicQuery };
+    const queryScope = getRecordScopeFilter(user, "Orders");
+    const queryObj: any = { ...buildTenantQuery(user), ...dynamicQuery, ...queryScope };
 
     if (statusFilter) {
       queryObj.status = statusFilter;

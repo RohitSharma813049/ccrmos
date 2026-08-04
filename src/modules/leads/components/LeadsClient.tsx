@@ -11,21 +11,23 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { DataTable, ColumnDef } from "@/components/ui/DataTable";
 import KanbanBoard, { KanbanCard } from "@/components/ui/KanbanBoard";
 
-export default function LeadsClient() {
+export default function LeadsClient({ initialShowRecycleBin = false }: { initialShowRecycleBin?: boolean }) {
   const [leads, setLeads] = useState<any[]>([]);
-  const [pipelineStages, setPipelineStages] = useState<any[]>([]);
+  const [leadStages, setLeadStages] = useState<any[]>([]);
+  const [leadStatuses, setLeadStatuses] = useState<any[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState<"list" | "board">("list");
+  const [dynamicFields, setDynamicFields] = useState<any[]>([]);
   
   // New Filters
   const [statusFilter, setStatusFilter] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
-  const [showRecycleBin, setShowRecycleBin] = useState(false);
+  const [showRecycleBin, setShowRecycleBin] = useState(initialShowRecycleBin);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedLeadForDetails, setSelectedLeadForDetails] = useState<any | null>(null);
@@ -63,10 +65,24 @@ export default function LeadsClient() {
   ];
 
   useEffect(() => {
-    fetchPipeline();
+    fetchLeadStages();
+    fetchLeadStatuses();
     fetchProjects();
     fetchLeads();
+    fetchDynamicFields();
   }, [page, search, statusFilter, dateFrom, dateTo, viewMode]);
+
+  async function fetchDynamicFields() {
+    try {
+      const res = await fetch(`/api/dynamic-fields?target=lead&limit=100`);
+      if (res.ok) {
+        const data = await res.json();
+        setDynamicFields(data.fields || []);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
 
   async function fetchProjects() {
     try {
@@ -80,15 +96,27 @@ export default function LeadsClient() {
     }
   }
 
-  async function fetchPipeline() {
+  async function fetchLeadStages() {
     try {
-      const res = await fetch("/api/pipelines?module=lead");
+      const res = await fetch("/api/settings/lead-stages");
       if (res.ok) {
         const data = await res.json();
-        setPipelineStages(data.pipeline?.stages || []);
+        setLeadStages(data || []);
       }
     } catch (e) {
-      console.error("Failed to fetch pipeline", e);
+      console.error("Failed to fetch lead stages", e);
+    }
+  }
+
+  async function fetchLeadStatuses() {
+    try {
+      const res = await fetch("/api/lead-status");
+      if (res.ok) {
+        const data = await res.json();
+        setLeadStatuses(data.statuses || []);
+      }
+    } catch (e) {
+      console.error("Failed to fetch lead statuses", e);
     }
   }
 
@@ -97,8 +125,8 @@ export default function LeadsClient() {
       setLoading(true);
       const filterStr = encodeURIComponent(JSON.stringify(advancedFilters));
       const limit = viewMode === "board" ? 200 : 10;
-      const appliedStatus = showRecycleBin ? "Archived" : statusFilter;
-      const res = await fetch(`/api/leads?page=${page}&limit=${limit}&search=${search}&status=${appliedStatus}&dateFrom=${dateFrom}&dateTo=${dateTo}&filters=${filterStr}`);
+      const appliedStage = showRecycleBin ? "Archived" : statusFilter;
+      const res = await fetch(`/api/leads?page=${page}&limit=${limit}&search=${search}&stageId=${appliedStage}&dateFrom=${dateFrom}&dateTo=${dateTo}&filters=${filterStr}`);
       if (res.ok) {
         const data = await res.json();
         setLeads(data.leads || []);
@@ -130,18 +158,18 @@ export default function LeadsClient() {
     }
   };
 
-  const updateLeadStatus = async (leadId: string, newStatus: string) => {
+  const updateLeadStatusAndStage = async (leadId: string, newStageId: string, newStatus: string) => {
     try {
       const res = await fetch("/api/leads", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ _id: leadId, status: newStatus })
+        body: JSON.stringify({ _id: leadId, stageId: newStageId, status: newStatus })
       });
       if (res.ok) {
         fetchLeads();
       } else {
         const err = await res.json();
-        toast.error(err.error || "Failed to update lead status");
+        toast.error(err.error || "Failed to update lead");
       }
     } catch (e) {
       console.error(e);
@@ -155,17 +183,12 @@ export default function LeadsClient() {
     return false;
   };
 
-  const getStageColorClass = (stageName: string, allStages: any[]) => {
-    if (stageName === 'Archived') return 'bg-gray-500/10 text-gray-600 border-gray-500/20';
-    if (!allStages || allStages.length === 0) return 'bg-primary/10 text-primary border-primary/20';
-    const sorted = [...allStages].sort((a,b) => a.order - b.order);
-    const index = sorted.findIndex(s => s.name === stageName);
-    if (index === -1) return 'bg-primary/10 text-primary border-primary/20';
-    
-    const progress = index / (sorted.length - 1);
-    if (progress <= 0.33) return 'bg-blue-500/10 text-blue-600 border-blue-500/20';
-    if (progress <= 0.66) return 'bg-amber-500/10 text-amber-600 border-amber-500/20';
-    return 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20';
+  const getStageColorClass = (stageId: any, allStages: any[]) => {
+    if (!stageId) return 'bg-gray-500/10 text-gray-600 border-gray-500/20';
+    const id = typeof stageId === 'object' ? stageId._id : stageId;
+    const stage = allStages.find(s => s._id === id);
+    if (!stage || !stage.color) return 'bg-primary/10 text-primary border-primary/20';
+    return { backgroundColor: `${stage.color}1A`, color: stage.color, borderColor: `${stage.color}33` };
   };
 
   const handleExport = () => {
@@ -251,20 +274,40 @@ export default function LeadsClient() {
   };
 
   const [newNote, setNewNote] = useState("");
+  const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
   const [submittingNote, setSubmittingNote] = useState(false);
 
   const handleAddNote = async (leadId: string) => {
-    if (!newNote.trim()) return;
+    if (!newNote.trim() && !attachmentFile) return;
     setSubmittingNote(true);
     try {
+      let attachmentUrl = "";
+      if (attachmentFile) {
+        const formData = new FormData();
+        formData.append("file", attachmentFile);
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+        if (uploadRes.ok) {
+          const uploadData = await uploadRes.json();
+          attachmentUrl = uploadData.url;
+        } else {
+          toast.error("Failed to upload attachment");
+          setSubmittingNote(false);
+          return;
+        }
+      }
+
       const res = await fetch(`/api/leads/${leadId}/notes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: newNote })
+        body: JSON.stringify({ message: newNote, attachmentUrl })
       });
       if (res.ok) {
         const data = await res.json();
         setNewNote("");
+        setAttachmentFile(null);
         setSelectedLeadForDetails({ ...selectedLeadForDetails, activities: data.activities, customData: data.customData });
         fetchLeads(); // refresh the list to show new lastMessage
         toast.success("Note added successfully");
@@ -408,7 +451,7 @@ export default function LeadsClient() {
             </>
           )}
           {item.email && (
-            <a href={`mailto:${item.email}`} title="Email" className="text-muted-foreground hover:text-rose-500 transition-colors">
+            <a href={`mailto:${item.email}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} title="Email" className="text-muted-foreground hover:text-rose-500 transition-colors">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
             </a>
           )}
@@ -416,32 +459,53 @@ export default function LeadsClient() {
       </div>
     )},
     { header: "Date Added", cell: (item) => <span className="text-muted-foreground text-xs">{new Date(item.createdAt).toLocaleDateString()}</span> },
-    { header: "Status (Pipeline)", className: "min-w-[200px]", cell: (item) => (
-      pipelineStages.length > 0 ? (
-        <select
-          value={item.status}
-          onChange={(e) => updateLeadStatus(item._id, e.target.value)}
-          className={`w-full text-xs font-semibold rounded-lg shadow-sm py-1.5 pl-3 pr-8 focus:ring-2 focus:ring-primary focus:border-primary border cursor-pointer ${getStageColorClass(item.status, pipelineStages)}`}
-        >
-          {!pipelineStages.find(s => s.name === item.status) && (
-            <option value={item.status} disabled>{item.status}</option>
-          )}
-          {pipelineStages.sort((a,b) => a.order - b.order).map(stage => (
-            <option 
-              key={stage.name} 
-              value={stage.name}
-              disabled={isStageDisabled(item.status, stage)}
+    { header: "Stage & Status", className: "min-w-[200px]", cell: (item) => {
+      const stageObj = item.stageId || {};
+      const currentStageId = stageObj._id || item.stageId;
+      const stageStyle = getStageColorClass(currentStageId, leadStages);
+      
+      const availableStatuses = leadStatuses.filter(s => {
+        const sStageId = typeof s.stageId === 'object' ? s.stageId._id : s.stageId;
+        return sStageId === currentStageId && s.active;
+      });
+
+      return (
+        <div className="flex flex-col gap-2">
+          {leadStages.length > 0 ? (
+            <select
+              value={currentStageId || ""}
+              onChange={(e) => updateLeadStatusAndStage(item._id, e.target.value, "")}
+              style={stageStyle}
+              className="w-full text-xs font-semibold rounded-lg shadow-sm py-1.5 pl-3 pr-8 focus:ring-2 focus:ring-primary focus:border-primary border cursor-pointer"
             >
-              {stage.name} {isStageDisabled(item.status, stage) ? '(Locked)' : ''}
-            </option>
-          ))}
-        </select>
-      ) : (
-        <span className={`px-2.5 py-1 rounded-md text-xs font-semibold border ${getStageColorClass(item.status, [])}`}>
-          {item.status}
-        </span>
-      )
-    )},
+              <option value="" disabled>Select Stage</option>
+              {leadStages.sort((a,b) => a.order - b.order).map(stage => (
+                <option key={stage._id} value={stage._id}>
+                  {stage.name}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <span style={stageStyle} className="px-2.5 py-1 rounded-md text-xs font-semibold border inline-block text-center">
+              {stageObj.name || "No Stage"}
+            </span>
+          )}
+
+          {currentStageId && availableStatuses.length > 0 && (
+            <select
+              value={item.status || ""}
+              onChange={(e) => updateLeadStatusAndStage(item._id, currentStageId, e.target.value)}
+              className="w-full text-xs font-medium rounded-lg shadow-sm py-1.5 pl-3 pr-8 focus:ring-2 focus:ring-primary focus:border-primary border cursor-pointer bg-background text-foreground"
+            >
+              <option value="" disabled>Select Status</option>
+              {availableStatuses.map((status: any) => (
+                <option key={status._id} value={status.name}>{status.name}</option>
+              ))}
+            </select>
+          )}
+        </div>
+      );
+    }},
     { header: "Incoming / Custom Data", cell: (item) => (
       <div className="text-xs text-muted-foreground max-w-sm">
         {item.customData?.lastMessage && (
@@ -457,11 +521,22 @@ export default function LeadsClient() {
           <div className="flex flex-wrap gap-1.5">
             {Object.entries(item.customData)
               .filter(([k]) => k !== 'lastMessage' && k !== 'whatsappOptIn' && !k.startsWith('_'))
-              .map(([k, v]) => (
-              <span key={k} className="bg-muted border border-border px-2 py-1 rounded-md text-foreground">
-                <strong className="text-foreground capitalize">{k.replace(/([A-Z])/g, ' $1').trim()}:</strong> {String(v)}
-              </span>
-            ))}
+              .map(([k, v]) => {
+                const df = dynamicFields.find(f => f.name === k);
+                if (df && df.type === "Dropdown (Select)") {
+                  const color = df.optionColors?.[String(v)] || "#6b7280";
+                  return (
+                    <span key={k} className="border px-2 py-1 rounded-md text-foreground shadow-sm" style={{ backgroundColor: `${color}1A`, borderColor: `${color}33` }}>
+                      <strong className="capitalize" style={{ color: color }}>{k.replace(/([A-Z])/g, ' $1').trim()}:</strong> <span style={{ color: color }}>{String(v)}</span>
+                    </span>
+                  );
+                }
+                return (
+                  <span key={k} className="bg-muted border border-border px-2 py-1 rounded-md text-foreground">
+                    <strong className="text-foreground capitalize">{k.replace(/([A-Z])/g, ' $1').trim()}:</strong> {String(v)}
+                  </span>
+                );
+              })}
           </div>
         ) : (
           !item.customData?.lastMessage && <span className="text-muted-foreground/50">No additional data</span>
@@ -506,24 +581,19 @@ export default function LeadsClient() {
 
   const filterControls = (
     <>
-      <select
-        value={statusFilter}
-        onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-        className="py-2 pl-3 pr-8 border border-border rounded-xl text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none text-foreground bg-card"
-      >
-        <option value="">All Statuses</option>
-        {pipelineStages.sort((a,b) => a.order - b.order).map(stage => (
-          <option key={stage.name} value={stage.name}>{stage.name}</option>
-        ))}
-      </select>
+      {!initialShowRecycleBin && (
+        <select
+          value={statusFilter}
+          onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+          className="py-2 pl-3 pr-8 border border-border rounded-xl text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none text-foreground bg-card"
+        >
+          <option value="">All Stages</option>
+          {leadStages.sort((a,b) => a.order - b.order).map(stage => (
+            <option key={stage._id} value={stage._id}>{stage.name}</option>
+          ))}
+        </select>
+      )}
       
-      <button 
-        onClick={() => setShowRecycleBin(!showRecycleBin)}
-        className={`px-3 py-1.5 rounded-xl text-sm font-medium transition-colors border ${showRecycleBin ? 'bg-destructive text-destructive-foreground border-destructive' : 'bg-card text-muted-foreground border-border hover:bg-muted'}`}
-      >
-        {showRecycleBin ? "Exit Recycle Bin" : "Recycle Bin"}
-      </button>
-
       <div className="flex items-center gap-2 text-sm text-muted-foreground bg-card border border-border rounded-xl px-3 py-1.5 focus-within:ring-2 focus-within:ring-primary">
         <label>From:</label>
         <input 
@@ -652,20 +722,29 @@ export default function LeadsClient() {
             <div className="p-12 text-center text-muted-foreground">Loading board...</div>
           ) : (
             <KanbanBoard 
-              columns={pipelineStages.sort((a,b) => a.order - b.order).map(s => s.name)}
+              columns={leadStages.sort((a,b) => a.order - b.order).map(s => s.name)}
               cards={leads.map(l => {
                 const phone = l.phone || l.customData?.phoneNumber || l.phoneNumber;
                 const displayName = l.firstName === "WhatsApp Lead" || l.firstName === "Imported" 
                   ? phone || l.firstName 
                   : `${l.firstName} ${l.lastName !== "WhatsApp" && l.lastName !== "Lead" ? l.lastName : ""}`.trim();
+                
+                const stageObj = l.stageId || {};
+                const stageName = stageObj.name || "No Stage";
+
                 return {
                   id: l._id,
                   title: displayName,
                   subtitle: l.email && !l.email.includes('@whatsapp') ? l.email : phone,
-                  status: l.status || "New Lead",
+                  status: stageName,
                 };
               })}
-              onCardMoved={updateLeadStatus}
+              onCardMoved={(id, newStageName) => {
+                const targetStage = leadStages.find(s => s.name === newStageName);
+                if (targetStage) {
+                  updateLeadStatusAndStage(id, targetStage._id, "");
+                }
+              }}
               onCardClick={(id) => {
                 const lead = leads.find(l => l._id === id);
                 if (lead) setSelectedLeadForDetails(lead);
@@ -712,7 +791,7 @@ export default function LeadsClient() {
             </div>
             <div className="p-6">
               <form onSubmit={handleImportSubmit} className="space-y-4">
-                <div className="p-4 bg-primary/10 text-primary-foreground text-sm rounded-lg border border-primary/20">
+                <div className="p-4 bg-primary/10 text-foreground text-sm rounded-lg border border-primary/20">
                   <p>Upload a CSV file with your leads.</p>
                   <p className="mt-1 font-medium">Standard columns:</p>
                   <p className="text-xs">First Name, Last Name, Email, Phone, Status</p>
@@ -790,7 +869,19 @@ export default function LeadsClient() {
                       <span className="absolute -left-[35px] top-1 flex h-4 w-4 items-center justify-center rounded-full ring-4 ring-card bg-primary"></span>
                       <div className="flex flex-col gap-1">
                         <span className="text-sm font-semibold text-foreground">{activity.type}</span>
-                        <span className="text-sm text-muted-foreground">{activity.description}</span>
+                        {activity.description && <span className="text-sm text-muted-foreground">{activity.description}</span>}
+                        {activity.attachmentUrl && (
+                          <div className="mt-1">
+                            <a href={activity.attachmentUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 hover:underline flex items-center gap-1">
+                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
+                              View Attachment
+                            </a>
+                            {/* If it's an image, optionally render a small preview: */}
+                            {activity.attachmentUrl.match(/\.(jpeg|jpg|gif|png|webp)$/i) && (
+                              <img src={activity.attachmentUrl} alt="Attachment preview" className="mt-2 max-h-32 rounded border border-border object-cover" />
+                            )}
+                          </div>
+                        )}
                         <span className="text-xs font-medium text-muted-foreground/70 mt-1 flex items-center gap-1.5">
                           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                           {new Date(activity.timestamp).toLocaleString()}
@@ -814,11 +905,19 @@ export default function LeadsClient() {
                 />
                 <button 
                   onClick={() => handleAddNote(selectedLeadForDetails._id)}
-                  disabled={submittingNote || !newNote.trim()}
+                  disabled={submittingNote || (!newNote.trim() && !attachmentFile)}
                   className="px-4 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
                 >
                   {submittingNote ? '...' : 'Send'}
                 </button>
+              </div>
+              <div className="flex items-center gap-2 mt-1">
+                <label className="cursor-pointer text-xs flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
+                  Attach File
+                  <input type="file" className="hidden" onChange={(e) => setAttachmentFile(e.target.files?.[0] || null)} />
+                </label>
+                {attachmentFile && <span className="text-xs text-primary truncate max-w-[200px]">{attachmentFile.name}</span>}
               </div>
             </div>
 

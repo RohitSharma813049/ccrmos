@@ -20,7 +20,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     }
     
     const { id } = await params;
-    const { name, target, type, required } = await req.json();
+    const { name, target, type, required, section, order, options, optionColors, customCss } = await req.json();
     
     const field = await DynamicField.findById(id);
     if (!field) return NextResponse.json({ error: "Field not found" }, { status: 404 });
@@ -29,9 +29,16 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       return NextResponse.json({ error: "Forbidden: Cannot edit Global fields." }, { status: 403 });
     }
     
+    const updateData: any = { name, target, type, required };
+    if (section !== undefined) updateData.section = section;
+    if (order !== undefined) updateData.order = order;
+    if (options !== undefined) updateData.options = options;
+    if (optionColors !== undefined) updateData.optionColors = optionColors;
+    if (customCss !== undefined) updateData.customCss = customCss;
+    
     const updatedField = await DynamicField.findByIdAndUpdate(
       id,
-      { name, target, type, required },
+      updateData,
       { new: true, runValidators: true }
     );
     

@@ -29,6 +29,18 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     const body = await req.json();
     body.updatedBy = user._id;
 
+    const { id } = await params;
+    const existingRecord = await Customer.findOne({ _id: id, ...buildTenantQuery(user) });
+    if (!existingRecord) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
+    const terminalStatuses = ['closed', 'complete', 'closed won', 'closed lost'];
+    const isTerminal = terminalStatuses.includes(existingRecord.status?.toLowerCase() || "");
+    
+    // Allow founders (level 1 or 2) to override lock
+    if (isTerminal && user.hierarchyLevel > 2) {
+      return NextResponse.json({ error: 'Cannot modify a closed or completed record.' }, { status: 403 });
+    }
+
     // Cascade restore if status changes to something other than Archived
     if (body.status && body.status !== 'Archived') {
       const existingCustomer = await Customer.findOne({ _id: (await params).id, ...buildTenantQuery(user) });

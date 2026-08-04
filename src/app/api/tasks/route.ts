@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
+
 import mongoose from 'mongoose';
 import Task from '@/modules/tasks/schemas/Task';
 import { requireAuthenticatedUser, requirePermission } from '@/lib/auth-utils';
 import { buildTenantQuery } from '@/lib/access-control';
-
+import { getRecordScopeFilter } from "@/lib/permissions";
 import { parseFiltersToMongo } from "@/utils/parseFilters";
 
 export async function GET(req: Request) {
@@ -23,7 +24,8 @@ export async function GET(req: Request) {
     const dateFrom = searchParams.get("dateFrom") || "";
     const dateTo = searchParams.get("dateTo") || "";
     
-    const queryObj: any = { ...buildTenantQuery(user), ...dynamicQuery };
+    const queryScope = getRecordScopeFilter(user, "Tasks");
+    const queryObj: any = { ...buildTenantQuery(user), ...dynamicQuery, ...queryScope };
 
     if (statusFilter) {
       queryObj.status = statusFilter;

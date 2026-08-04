@@ -14,7 +14,7 @@ export interface ICompany extends Document {
   stripeCustomerId?: string;
   stripeSubscriptionId?: string;
   checkoutToken?: string;
-  enabledModules?: string[];
+  selected_template_id?: mongoose.Types.ObjectId | string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -34,7 +34,7 @@ const companySchema = new Schema<ICompany>(
     stripeCustomerId: { type: String },
     stripeSubscriptionId: { type: String },
     checkoutToken: { type: String },
-    enabledModules: [{ type: String }],
+    selected_template_id: { type: Schema.Types.ObjectId, ref: 'IndustryTemplate' },
   },
   { timestamps: true }
 );
