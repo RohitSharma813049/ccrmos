@@ -205,10 +205,15 @@ function CampaignSettingFormModal({ onClose, onSuccess, users }: { onClose: () =
     e.preventDefault()
     setSaving(true)
     try {
+      const payload: any = { ...formData };
+      if (!payload.assignedTo) {
+        delete payload.assignedTo;
+      }
+      
       const res = await fetch('/api/campaign-settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(payload)
       })
       if (res.ok) {
         toast.success('Configuration saved!')
