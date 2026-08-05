@@ -5,7 +5,8 @@ import { requireAuthenticatedUser } from '@/lib/auth-utils';
 import { buildTenantQuery } from "@/lib/access-control";
 import User from '@/modules/users/schemas/User';
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   await dbConnect();
   try {
     const user = await requireAuthenticatedUser();
@@ -27,7 +28,8 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   await dbConnect();
   try {
     const user = await requireAuthenticatedUser();

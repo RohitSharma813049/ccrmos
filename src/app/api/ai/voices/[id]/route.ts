@@ -4,16 +4,17 @@ import Voice from '@/modules/ai/schemas/Voice';
 import { requireAuthenticatedUser } from '@/lib/auth-utils';
 import { buildTenantQuery } from "@/lib/access-control";
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   await dbConnect();
   try {
+    const { id } = await params;
     const user = await requireAuthenticatedUser();
     
     const body = await req.json();
     const { _id, ...updateData } = body;
 
     const voice = await Voice.findOneAndUpdate(
-      { _id: params.id, ...buildTenantQuery(user) },
+      { _id: id, ...buildTenantQuery(user) },
       updateData,
       { new: true }
     );
@@ -26,13 +27,14 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   await dbConnect();
   try {
+    const { id } = await params;
     const user = await requireAuthenticatedUser();
     
     const voice = await Voice.findOneAndDelete({ 
-      _id: params.id, 
+      _id: id, 
       ...buildTenantQuery(user) 
     });
 
