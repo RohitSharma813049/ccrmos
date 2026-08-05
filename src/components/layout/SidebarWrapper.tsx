@@ -26,11 +26,12 @@ export default function SidebarWrapper({
       <aside className="hidden md:flex relative z-0 w-64 bg-card border-r border-border h-full flex-col shrink-0 overflow-hidden">
         {/* Desktop Header */}
         <div className="p-6 relative z-10 flex items-center gap-3">
-          {logoUrl ? (
-            <img src={logoUrl} alt={platformName} className="max-h-12 w-auto object-contain" />
-          ) : (
-            <h2 className="font-bold text-xl tracking-tight text-foreground">{platformName}</h2>
+          {logoUrl && (
+            <img src={logoUrl} alt={platformName} className="max-h-10 w-auto object-contain shrink-0" />
           )}
+          <h2 className="font-bold text-xl tracking-tight text-foreground truncate" title={platformName}>
+            {platformName}
+          </h2>
         </div>
         
         {children}
