@@ -203,8 +203,15 @@ export default function WhitelabelClient() {
               
               <div className="flex flex-col gap-4">
                 {logoUrl && (
-                  <div className="p-4 bg-background rounded-xl border border-border flex justify-center">
+                  <div className="p-4 bg-background rounded-xl border border-border flex flex-col items-center gap-3">
                     <img src={logoUrl} alt="Logo Preview" className="max-h-24 object-contain" />
+                    <button 
+                      type="button" 
+                      onClick={() => setLogoUrl("")}
+                      className="text-xs text-red-500 hover:text-red-700 font-medium px-3 py-1 bg-red-50 hover:bg-red-100 rounded-full transition-colors"
+                    >
+                      Remove Logo
+                    </button>
                   </div>
                 )}
                 
@@ -223,7 +230,7 @@ export default function WhitelabelClient() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                   </svg>
                   <p className="text-sm text-muted-foreground">
-                    {uploading ? 'Uploading...' : 'Click to upload or drag and drop SVG/PNG'}
+                    {uploading ? 'Uploading...' : logoUrl ? 'Click to replace logo or drag and drop' : 'Click to upload or drag and drop SVG/PNG'}
                   </p>
                 </div>
               </div>

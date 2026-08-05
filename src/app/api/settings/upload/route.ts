@@ -1,8 +1,17 @@
 import { NextResponse } from 'next/server';
 import { requireAuthenticatedUser, requirePermission } from "@/lib/auth-utils";
 import { PERMISSIONS } from "@/config/permissions";
-import fs from 'fs';
-import path from 'path';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import crypto from 'crypto';
+
+const s3Client = new S3Client({
+  region: 'auto',
+  endpoint: process.env.R2_ENDPOINT!,
+  credentials: {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
+  },
+});
 
 export async function POST(req: Request) {
   try {
@@ -24,22 +33,22 @@ export async function POST(req: Request) {
 
     const buffer = Buffer.from(await file.arrayBuffer());
     
-    // Ensure the public/uploads directory exists
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-
     // Generate unique filename
     const ext = file.name.split('.').pop() || 'png';
-    const filename = `logo_${Date.now()}.${ext}`;
-    const filePath = path.join(uploadDir, filename);
+    const randomHash = crypto.randomBytes(16).toString('hex');
+    const filename = `branding/${user.companyId || 'global'}/logo_${randomHash}.${ext}`;
 
-    // Save to public/uploads
-    fs.writeFileSync(filePath, buffer);
+    const command = new PutObjectCommand({
+      Bucket: process.env.R2_BUCKET_NAME!,
+      Key: filename,
+      Body: buffer,
+      ContentType: file.type,
+    });
+
+    await s3Client.send(command);
 
     // Return the public URL
-    const fileUrl = `/uploads/${filename}`;
+    const fileUrl = `${process.env.R2_PUBLIC_URL}/${filename}`;
     return NextResponse.json({ url: fileUrl });
   } catch (error: any) {
     console.error("Upload error:", error);
