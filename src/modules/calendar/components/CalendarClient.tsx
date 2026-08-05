@@ -30,8 +30,9 @@ export default function CalendarClient() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [systemUsers, setSystemUsers] = useState<{name: string, email: string}[]>([]);
-  
+  const [systemUsers, setSystemUsers] = useState<{name: string, email: string, role: string}[]>([]);
+  const [teams, setTeams] = useState<string[]>([]);
+
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
 
@@ -92,7 +93,14 @@ export default function CalendarClient() {
   useEffect(() => {
     fetch('/api/users?limit=100').then(r => r.json()).then(data => {
       if (data.users) {
-        setSystemUsers(data.users.map((u: any) => ({ name: `${u.firstName} ${u.lastName}`, email: u.email })));
+        const users = data.users.map((u: any) => ({ 
+          name: `${u.firstName} ${u.lastName}`, 
+          email: u.email,
+          role: u.role?.name || 'User'
+        }));
+        setSystemUsers(users);
+        const uniqueRoles = Array.from(new Set(users.map((u: any) => u.role))) as string[];
+        setTeams(uniqueRoles.filter(r => r !== 'User'));
       }
     }).catch(e => console.error("Failed to load users", e));
   }, []);
@@ -405,9 +413,23 @@ export default function CalendarClient() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Location (Optional)</label>
-                <div className="relative">
-                  <MapPin className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-                  <input type="text" value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} className="w-full pl-9 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Office, Zoom link, Address..." />
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <MapPin className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                    <input type="text" value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} className="w-full pl-9 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Office, Zoom link, Address..." />
+                  </div>
+                  {formData.type === 'Meeting' && (
+                    <button 
+                      type="button" 
+                      onClick={() => {
+                        const randomId = Math.random().toString(36).substring(2, 12).match(/.{1,3}/g)?.join('-') || 'meet-link';
+                        setFormData({...formData, location: `https://meet.google.com/${randomId}`})
+                      }}
+                      className="px-3 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 rounded-lg text-sm font-medium transition-colors whitespace-nowrap"
+                    >
+                      Google Meet
+                    </button>
+                  )}
                 </div>
               </div>
               <div>
@@ -416,23 +438,52 @@ export default function CalendarClient() {
                   <Users className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                   <input type="text" value={formData.attendees} onChange={e => setFormData({...formData, attendees: e.target.value})} className="w-full pl-9 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="john@example.com, sarah@..." />
                 </div>
+                
+                {/* Team Selection */}
+                {teams.length > 0 && (
+                  <div className="mt-3">
+                    <span className="text-xs font-semibold text-slate-500 mb-1 block">Add Entire Team:</span>
+                    <div className="flex flex-wrap gap-2">
+                      {teams.map((team, i) => (
+                        <button 
+                          key={i} 
+                          type="button"
+                          onClick={() => {
+                            const teamEmails = systemUsers.filter(u => u.role === team).map(u => u.email);
+                            const current = formData.attendees.split(',').map(a=>a.trim()).filter(Boolean);
+                            const newEmails = Array.from(new Set([...current, ...teamEmails]));
+                            setFormData({...formData, attendees: newEmails.join(', ')});
+                          }}
+                          className="text-xs px-2.5 py-1 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-full text-slate-700 font-medium transition-colors"
+                        >
+                          + {team}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Individual User Selection */}
                 {systemUsers.length > 0 && (
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {systemUsers.map((u, i) => (
-                      <button 
-                        key={i} 
-                        type="button"
-                        onClick={() => {
-                          const current = formData.attendees.split(',').map(a=>a.trim()).filter(Boolean);
-                          if (!current.includes(u.email)) {
-                            setFormData({...formData, attendees: [...current, u.email].join(', ')});
-                          }
-                        }}
-                        className="text-xs px-2.5 py-1 bg-purple-50 hover:bg-purple-100 border border-purple-100 rounded-full text-purple-700 font-medium transition-colors"
-                      >
-                        + {u.name}
-                      </button>
-                    ))}
+                  <div className="mt-3">
+                    <span className="text-xs font-semibold text-slate-500 mb-1 block">Quick Add Users:</span>
+                    <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto custom-scrollbar">
+                      {systemUsers.map((u, i) => (
+                        <button 
+                          key={i} 
+                          type="button"
+                          onClick={() => {
+                            const current = formData.attendees.split(',').map(a=>a.trim()).filter(Boolean);
+                            if (!current.includes(u.email)) {
+                              setFormData({...formData, attendees: [...current, u.email].join(', ')});
+                            }
+                          }}
+                          className="text-xs px-2.5 py-1 bg-purple-50 hover:bg-purple-100 border border-purple-100 rounded-full text-purple-700 font-medium transition-colors"
+                        >
+                          + {u.name}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
