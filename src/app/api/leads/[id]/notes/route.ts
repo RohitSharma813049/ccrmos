@@ -10,7 +10,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const user = await requireAuthenticatedUser();
     await requirePermission('Leads', 'edit');
     const { id } = await params;
-    const { message, attachmentUrl } = await req.json();
+    const { message, attachmentUrl, channel = "Note", subject = "" } = await req.json();
 
     if (!message || message.trim() === '') {
       return NextResponse.json({ error: 'Message cannot be empty' }, { status: 400 });
@@ -20,9 +20,22 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     if (!lead) return NextResponse.json({ error: 'Lead not found' }, { status: 404 });
     
     if (!lead.activities) lead.activities = [];
+    
+    let activityType = attachmentUrl ? 'Note with Attachment' : 'Note';
+    let activityDescription = message;
+
+    if (channel === "Email") {
+      activityType = 'Email Sent';
+      activityDescription = subject ? `Subject: ${subject}\n\n${message}` : message;
+      // TODO: In a real environment, trigger SES/Nodemailer here
+    } else if (channel === "WhatsApp") {
+      activityType = 'WhatsApp Sent';
+      // TODO: In a real environment, trigger Twilio API here
+    }
+
     lead.activities.push({
-      type: attachmentUrl ? 'Note with Attachment' : 'Note',
-      description: message,
+      type: activityType,
+      description: activityDescription,
       attachmentUrl: attachmentUrl || undefined,
       timestamp: new Date()
     });

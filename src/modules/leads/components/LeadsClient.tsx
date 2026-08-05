@@ -282,6 +282,8 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
   const [newNote, setNewNote] = useState("");
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
   const [submittingNote, setSubmittingNote] = useState(false);
+  const [communicationChannel, setCommunicationChannel] = useState<"Note" | "Email" | "WhatsApp">("Note");
+  const [emailSubject, setEmailSubject] = useState("");
 
   const handleAddNote = async (leadId: string) => {
     if (!newNote.trim() && !attachmentFile) return;
@@ -305,18 +307,26 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
         }
       }
 
+      const payload = {
+        message: newNote,
+        attachmentUrl,
+        channel: communicationChannel,
+        subject: emailSubject
+      };
+
       const res = await fetch(`/api/leads/${leadId}/notes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: newNote, attachmentUrl })
+        body: JSON.stringify(payload)
       });
       if (res.ok) {
         const data = await res.json();
         setNewNote("");
+        setEmailSubject("");
         setAttachmentFile(null);
         setSelectedLeadForDetails({ ...selectedLeadForDetails, activities: data.activities, customData: data.customData });
         fetchLeads(); // refresh the list to show new lastMessage
-        toast.success("Note added successfully");
+        toast.success(`${communicationChannel} sent successfully`);
       } else {
         const err = await res.json();
         toast.error(err.error || "Failed to add note");
@@ -921,19 +931,56 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
             </div>
             
             {/* Quick Notes Input */}
-            <div className="p-4 bg-muted/20 border-t border-border flex flex-col gap-2 shrink-0">
-              <label className="text-xs font-semibold text-foreground uppercase tracking-wider">Add Note / Message</label>
+            <div className="p-4 bg-muted/20 border-t border-border flex flex-col gap-3 shrink-0">
+              <div className="flex items-center gap-2 mb-1 border-b border-border pb-2">
+                {(["Note", "Email", "WhatsApp"] as const).map(channel => (
+                  <button
+                    key={channel}
+                    onClick={() => setCommunicationChannel(channel)}
+                    className={`px-3 py-1 text-xs font-semibold rounded-full transition-colors ${
+                      communicationChannel === channel
+                        ? channel === "WhatsApp" ? "bg-green-100 text-green-700 border border-green-200" 
+                        : channel === "Email" ? "bg-blue-100 text-blue-700 border border-blue-200"
+                        : "bg-primary text-primary-foreground border border-primary"
+                        : "bg-transparent text-muted-foreground hover:bg-muted"
+                    }`}
+                  >
+                    {channel === "Note" && "Internal Note"}
+                    {channel === "Email" && "Send Email"}
+                    {channel === "WhatsApp" && "Send WhatsApp"}
+                  </button>
+                ))}
+              </div>
+
+              {communicationChannel === "Email" && (
+                <input
+                  type="text"
+                  value={emailSubject}
+                  onChange={(e) => setEmailSubject(e.target.value)}
+                  placeholder="Email Subject..."
+                  className="w-full px-3 py-2 text-sm bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+                />
+              )}
+
               <div className="flex gap-2">
                 <textarea 
                   value={newNote}
                   onChange={(e) => setNewNote(e.target.value)}
-                  placeholder="Type a message or note..."
-                  className="flex-1 px-3 py-2 text-sm bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary resize-none h-12"
+                  placeholder={
+                    communicationChannel === "Note" ? "Type an internal note..." :
+                    communicationChannel === "Email" ? "Type your email message..." :
+                    "Type your WhatsApp message..."
+                  }
+                  className="flex-1 px-3 py-2 text-sm bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary resize-none min-h-[60px]"
                 />
                 <button 
                   onClick={() => handleAddNote(selectedLeadForDetails._id)}
                   disabled={submittingNote || (!newNote.trim() && !attachmentFile)}
-                  className="px-4 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
+                  className={`px-4 font-medium rounded-lg disabled:opacity-50 transition-colors flex flex-col items-center justify-center gap-1 ${
+                    communicationChannel === "WhatsApp" ? "bg-[#25D366] hover:bg-[#128C7E] text-white" :
+                    communicationChannel === "Email" ? "bg-blue-600 hover:bg-blue-700 text-white" :
+                    "bg-primary text-primary-foreground hover:bg-primary/90"
+                  }`}
                 >
                   {submittingNote ? '...' : 'Send'}
                 </button>
