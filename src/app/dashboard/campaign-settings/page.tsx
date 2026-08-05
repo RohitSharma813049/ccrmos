@@ -194,7 +194,7 @@ export default function CampaignSettingsPage() {
 
 function CampaignSettingFormModal({ onClose, onSuccess, users }: { onClose: () => void, onSuccess: () => void, users: User[] }) {
   const [formData, setFormData] = useState({
-    name: '',
+    name: 'Dummy_Form_' + Math.floor(Math.random() * 10000),
     assignedTo: '',
     type: 'Buyer',
     category: 'Hot'

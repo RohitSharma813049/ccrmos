@@ -222,13 +222,7 @@ export default function TenantCustomModulesClient() {
           <h1 className="text-3xl font-bold text-foreground tracking-tight">Custom Modules</h1>
           <p className="text-muted-foreground mt-1">Build and manage custom databases tailored specifically to your business needs.</p>
         </div>
-        <button 
-          onClick={openBuildModal}
-          className="px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary w-full sm:w-auto flex items-center justify-center gap-2"
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-          Build Custom Module
-        </button>
+        {/* Removed Build Custom Module button per request */}
       </div>
 
       <div className="flex flex-col md:flex-row gap-4 items-center bg-card p-4 rounded-xl border border-border shadow-sm">
