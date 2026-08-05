@@ -10,6 +10,11 @@ export interface ITask extends Document {
   title: string;
   description: string;
   status: string;
+  type: string;
+  startTime?: Date;
+  endTime?: Date;
+  location?: string;
+  attendees?: string[];
   customData?: Record<string, any>;
 }
 
@@ -21,6 +26,11 @@ const TaskSchema = new Schema<ITask>({
   updatedBy: { type: Schema.Types.ObjectId, ref: 'User' },
   title: { type: String, required: true },
   status: { type: String, default: 'Pending' },
+  type: { type: String, enum: ['Task', 'Meeting', 'Site Visit'], default: 'Task' },
+  startTime: { type: Date },
+  endTime: { type: Date },
+  location: { type: String },
+  attendees: [{ type: String }],
   customData: { type: Schema.Types.Mixed, default: {} }
 }, { timestamps: true });
 

@@ -40,6 +40,18 @@ export async function GET(req: Request) {
         queryObj.createdAt.$lte = toDate;
       }
     }
+
+    const startDate = searchParams.get("startDate") || "";
+    const endDate = searchParams.get("endDate") || "";
+    if (startDate || endDate) {
+      queryObj.startTime = {};
+      if (startDate) queryObj.startTime.$gte = new Date(startDate);
+      if (endDate) {
+        const tDate = new Date(endDate);
+        tDate.setHours(23, 59, 59, 999);
+        queryObj.startTime.$lte = tDate;
+      }
+    }
     
     if (search) {
       const searchRegex = { $regex: search, $options: "i" };

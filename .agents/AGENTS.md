@@ -58,3 +58,7 @@ If any business rule is unclear, explicitly identify the assumption instead of g
 
 ## 12. OUTPUT EXPECTATION
 When building new screens, output a checklist or matrix covering UI Layout, Field Visibility, Validation Rules, Permissions, Responsive Behavior, Accessibility, UX Improvements before generating code.
+
+## 13. TRACKER FILES RULE
+Whenever features are planned, completed, found broken, or tested, YOU MUST update the corresponding tracker files in the project root (pending.md, close.md, roken.md, 	esting.md). You can use the 
+ode scripts/update-trackers.js <file> <message> script to add entries. This is a STRICT RULE.
