@@ -14,6 +14,7 @@ export interface IProperty extends Document {
   status: "Available" | "Sold" | "Pending" | "Off-Market";
   type: "House" | "Apartment" | "Condo" | "Land" | "Commercial" | "Farm Land";
   companyId?: mongoose.Types.ObjectId;
+  founderId?: mongoose.Types.ObjectId;
   assignedAgentId?: mongoose.Types.ObjectId;
   projectId?: mongoose.Types.ObjectId;
   images?: string[];
@@ -43,6 +44,7 @@ const PropertySchema: Schema<IProperty> = new Schema({
     default: "House"
   },
   companyId: { type: Schema.Types.ObjectId, ref: "Company" },
+  founderId: { type: Schema.Types.ObjectId, ref: "User" },
   assignedAgentId: { type: Schema.Types.ObjectId, ref: "User" },
   projectId: { type: Schema.Types.ObjectId, ref: "Project" },
   images: [{ type: String }]

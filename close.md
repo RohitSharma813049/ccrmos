@@ -7,3 +7,4 @@
 - [x] Identified RBAC rules for Departments and Teams
 - [x] Built Calendar and Scheduling module
 - [x] Add Email/WhatsApp Integration to Lead Profiles
+- [x] Implement Property & Inventory Management
