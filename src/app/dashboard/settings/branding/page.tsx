@@ -46,7 +46,7 @@ export default function BrandingSettingsPage() {
     setSaving(true);
     try {
       const res = await fetch("/api/settings/whitelabel", {
-        method: "POST", // The [key] route usually handles POST/PUT for updating settings
+        method: "PUT", // The [key] route usually handles POST/PUT for updating settings
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ value: formData })
       });
