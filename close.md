@@ -12,3 +12,4 @@
 - [x] Connect AI Voice Cloning backend
 - [x] Build Calendar and Scheduling module
 - [x] Integrate Cloudflare R2 and Logo Edit/Delete options
+- [x] Fix AI Sound Effects module and Voice categories

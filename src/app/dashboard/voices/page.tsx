@@ -23,6 +23,7 @@ interface Voice {
   category: string;
   description: string;
   createdAt: string;
+  isElevenLabs?: boolean;
 }
 
 export default function VoicesPage() {
@@ -128,87 +129,84 @@ export default function VoicesPage() {
 
         {/* Tab Content */}
         <div className="p-6 space-y-6">
-          {activeTab === 'All Voices' ? (
-            <>
-              {/* Search Bar */}
-              <div className="flex items-center gap-4">
-                <div className="flex-1 relative">
-                  <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input 
-                    type="text" 
-                    placeholder="Search voices by name or category..." 
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all text-sm"
-                  />
-                </div>
-                <div className="px-4 py-2 bg-slate-50 text-slate-600 font-semibold text-sm rounded-xl border border-slate-200">
-                  {voices.length} voices
-                </div>
-              </div>
+          
+          {/* Search Bar */}
+          <div className="flex items-center gap-4">
+            <div className="flex-1 relative">
+              <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input 
+                type="text" 
+                placeholder="Search voices by name or category..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all text-sm"
+              />
+            </div>
+            <div className="px-4 py-2 bg-slate-50 text-slate-600 font-semibold text-sm rounded-xl border border-slate-200">
+              {voices.length} voices
+            </div>
+          </div>
 
-              {/* Preview Text Box */}
-              <div className="bg-fuchsia-50/50 rounded-xl p-4 border border-fuchsia-100/50">
-                <label className="block text-xs font-semibold text-slate-700 mb-2">
-                  Preview Text (for voice testing)
-                </label>
-                <textarea 
-                  rows={2}
-                  className="w-full border border-fuchsia-100 rounded-lg p-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/20 focus:border-fuchsia-300 resize-none"
-                  defaultValue="Hello, this is a voice preview."
-                ></textarea>
-              </div>
+          {/* Preview Text Box */}
+          <div className="bg-fuchsia-50/50 rounded-xl p-4 border border-fuchsia-100/50">
+            <label className="block text-xs font-semibold text-slate-700 mb-2">
+              Preview Text (for voice testing)
+            </label>
+            <textarea 
+              rows={2}
+              className="w-full border border-fuchsia-100 rounded-lg p-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/20 focus:border-fuchsia-300 resize-none"
+              defaultValue="Hello, this is a voice preview."
+            ></textarea>
+          </div>
 
-              {/* Voice List */}
-              {loading ? (
-                <div className="py-20 flex justify-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-fuchsia-500"></div>
-                </div>
-              ) : voices.length === 0 ? (
-                <div className="py-20 flex flex-col items-center justify-center text-center">
-                  <VolumeX className="w-16 h-16 text-slate-200 mb-4" />
-                  <p className="text-slate-500 font-medium">
-                    No voices found. Click "Add Voice" to create one.
-                  </p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {voices.map(voice => (
-                    <div key={voice._id} className="border border-slate-100 rounded-xl p-4 flex items-center justify-between hover:border-purple-200 transition-colors">
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center">
-                          <Volume2 className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-slate-800">{voice.name}</h4>
-                          <p className="text-xs text-slate-500">{voice.category} • ID: {voice.voiceId}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <button className="p-2 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
-                          <Edit3 className="w-4 h-4" />
-                        </button>
-                        <button 
-                          onClick={() => handleDelete(voice._id)}
-                          className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </>
-          ) : (
+          {/* Voice List */}
+          {loading ? (
+            <div className="py-20 flex justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-fuchsia-500"></div>
+            </div>
+          ) : voices.length === 0 ? (
             <div className="py-20 flex flex-col items-center justify-center text-center">
-              <Settings className="w-16 h-16 text-slate-200 mb-4" />
-              <h3 className="text-xl font-bold text-slate-800 mb-2">{activeTab}</h3>
-              <p className="text-slate-500 font-medium max-w-sm">
-                The {activeTab} section is currently under construction. Please check back later!
+              <VolumeX className="w-16 h-16 text-slate-200 mb-4" />
+              <p className="text-slate-500 font-medium">
+                No voices found. Click "Add Voice" to create one.
               </p>
             </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {voices.map(voice => (
+                <div key={voice._id} className="border border-slate-100 rounded-xl p-4 flex items-center justify-between hover:border-purple-200 transition-colors">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center">
+                      <Volume2 className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-slate-800">{voice.name}</h4>
+                      <p className="text-xs text-slate-500">{voice.category} • ID: {voice.voiceId}</p>
+                    </div>
+                  </div>
+                  {!voice.isElevenLabs && (
+                    <div className="flex items-center gap-2">
+                      <button className="p-2 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
+                        <Edit3 className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => handleDelete(voice._id)}
+                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                  {voice.isElevenLabs && (
+                    <div className="px-2 py-1 bg-slate-100 text-slate-500 text-xs rounded font-medium">
+                      ElevenLabs
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           )}
+
         </div>
       </div>
 
@@ -230,35 +228,24 @@ function VoiceFormModal({ onClose, onSuccess }: { onClose: () => void, onSuccess
   const [formData, setFormData] = useState({
     name: '',
     category: 'Custom',
-    description: '',
+    description: ''
   })
-  const [audioFile, setAudioFile] = useState<File | null>(null)
   const [saving, setSaving] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setSaving(true)
     try {
-      const data = new FormData()
-      data.append('name', formData.name)
-      data.append('category', formData.category)
-      data.append('description', formData.description)
-      
-      if (audioFile) {
-        data.append('file', audioFile)
-      }
-
       const res = await fetch('/api/ai/voices', {
         method: 'POST',
-        // Do NOT set Content-Type header when sending FormData
-        body: data
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
       })
       if (res.ok) {
         toast.success('Voice created successfully!')
         onSuccess()
       } else {
-        const err = await res.json()
-        toast.error(err.error || 'Failed to create voice')
+        toast.error('Failed to create voice')
       }
     } catch (error) {
       console.error(error)
@@ -296,22 +283,6 @@ function VoiceFormModal({ onClose, onSuccess }: { onClose: () => void, onSuccess
             <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" rows={3} placeholder="A brief description of this voice..."></textarea>
           </div>
           
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Audio Sample / Recording</label>
-            <input 
-              type="file" 
-              accept="audio/*" 
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  setAudioFile(file);
-                }
-              }}
-              className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100" 
-            />
-            {audioFile && <p className="text-xs text-green-600 mt-2">File selected: {audioFile.name}</p>}
-          </div>
-
           <div className="flex justify-end gap-3 pt-4 border-t mt-6">
             <button type="button" onClick={onClose} className="px-5 py-2 border rounded-lg text-slate-700 font-medium hover:bg-slate-50">Cancel</button>
             <button type="submit" disabled={saving} className="px-5 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 disabled:opacity-50">

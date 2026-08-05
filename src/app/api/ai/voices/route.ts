@@ -26,9 +26,55 @@ export async function GET(req: Request) {
       ];
     }
 
-    const voices = await Voice.find(queryObj).sort({ createdAt: -1 });
+    const dbVoices = await Voice.find(queryObj).sort({ createdAt: -1 });
+    let elevenLabsVoices: any[] = [];
     
-    return NextResponse.json({ voices });
+    const apiKey = process.env.ELEVENLABS_API_KEY;
+    if (apiKey) {
+      try {
+        const res = await fetch('https://api.elevenlabs.io/v1/voices', {
+          headers: { 'xi-api-key': apiKey }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          elevenLabsVoices = (data.voices || []).map((v: any) => ({
+            _id: v.voice_id,
+            name: v.name,
+            voiceId: v.voice_id,
+            category: v.category ? v.category.charAt(0).toUpperCase() + v.category.slice(1) : 'Premade',
+            description: v.description || (v.labels ? Object.values(v.labels).join(', ') : ''),
+            createdAt: new Date().toISOString(),
+            isElevenLabs: true
+          }));
+        }
+      } catch (err) {
+        console.error("Failed to fetch ElevenLabs voices:", err);
+      }
+    }
+
+    // Merge and deduplicate by voiceId
+    const mergedVoicesMap = new Map();
+    // Prioritize DB voices so we keep custom DB fields like _id if needed
+    for (const v of dbVoices) {
+      mergedVoicesMap.set(v.voiceId, v);
+    }
+    for (const v of elevenLabsVoices) {
+      if (!mergedVoicesMap.has(v.voiceId)) {
+        mergedVoicesMap.set(v.voiceId, v);
+      }
+    }
+
+    // Apply search filter to the merged list if search exists
+    let finalVoices = Array.from(mergedVoicesMap.values());
+    if (search) {
+      const lowerSearch = search.toLowerCase();
+      finalVoices = finalVoices.filter(v => 
+        v.name?.toLowerCase().includes(lowerSearch) || 
+        v.category?.toLowerCase().includes(lowerSearch)
+      );
+    }
+
+    return NextResponse.json({ voices: finalVoices });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

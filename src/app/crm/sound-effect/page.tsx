@@ -20,6 +20,47 @@ const examplePrompts = [
 
 export default function SoundEffectPage() {
   const [duration, setDuration] = useState(5)
+  const [prompt, setPrompt] = useState("")
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [audioUrl, setAudioUrl] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleGenerate = async () => {
+    if (!prompt.trim()) return;
+    setIsGenerating(true);
+    setError(null);
+    setAudioUrl(null);
+
+    try {
+      const res = await fetch('/api/ai/sound-effect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: prompt, duration_seconds: duration })
+      });
+
+      if (res.status === 503) {
+        // Mock fallback if API key is missing
+        await new Promise(r => setTimeout(r, 2000));
+        setError("ElevenLabs API Key is missing. This is a mock response.");
+        setAudioUrl("https://actions.google.com/sounds/v1/weather/rain_on_roof.ogg");
+        setIsGenerating(false);
+        return;
+      }
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Generation failed');
+      }
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      setAudioUrl(url);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsGenerating(false);
+    }
+  }
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -52,6 +93,8 @@ export default function SoundEffectPage() {
                 </label>
                 <textarea 
                   rows={4}
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
                   className="w-full border border-slate-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/50 focus:border-fuchsia-500 resize-none"
                   placeholder="e.g., Thunder and lightning storm with heavy rain"
                 ></textarea>
@@ -80,6 +123,12 @@ export default function SoundEffectPage() {
                 </div>
               </div>
 
+              {error && (
+                <div className="bg-red-50 border border-red-100 text-red-600 rounded-xl p-3 text-sm">
+                  {error}
+                </div>
+              )}
+
               {/* Warning Alert */}
               <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 flex gap-3">
                 <AlertCircle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
@@ -92,9 +141,19 @@ export default function SoundEffectPage() {
               </div>
 
               {/* Submit Button */}
-              <button className="w-full py-3.5 bg-gradient-to-r from-fuchsia-400 to-pink-500 hover:from-fuchsia-500 hover:to-pink-600 text-white rounded-xl font-semibold shadow-lg shadow-pink-500/20 transition-all flex items-center justify-center gap-2">
-                <Sparkles className="w-5 h-5" />
-                Generate Sound Effect
+              <button 
+                onClick={handleGenerate}
+                disabled={!prompt.trim() || isGenerating}
+                className="w-full py-3.5 bg-gradient-to-r from-fuchsia-400 to-pink-500 hover:from-fuchsia-500 hover:to-pink-600 text-white rounded-xl font-semibold shadow-lg shadow-pink-500/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isGenerating ? (
+                   <span className="animate-pulse">Generating Audio...</span>
+                ) : (
+                  <>
+                    <Sparkles className="w-5 h-5" />
+                    Generate Sound Effect
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -103,9 +162,13 @@ export default function SoundEffectPage() {
           <div className="bg-fuchsia-50/50 rounded-2xl p-6 border border-fuchsia-100">
             <h3 className="font-semibold text-slate-800 mb-4">Example Prompts</h3>
             <div className="space-y-2">
-              {examplePrompts.map((prompt, idx) => (
-                <div key={idx} className="bg-white px-4 py-3 rounded-lg border border-fuchsia-100/50 text-sm text-slate-600 shadow-sm cursor-pointer hover:border-fuchsia-300 transition-colors">
-                  {prompt}
+              {examplePrompts.map((p, idx) => (
+                <div 
+                  key={idx} 
+                  onClick={() => setPrompt(p)}
+                  className="bg-white px-4 py-3 rounded-lg border border-fuchsia-100/50 text-sm text-slate-600 shadow-sm cursor-pointer hover:border-fuchsia-300 transition-colors"
+                >
+                  {p}
                 </div>
               ))}
             </div>
@@ -123,13 +186,33 @@ export default function SoundEffectPage() {
             </div>
             
             <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4">
-              <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center">
-                <Sparkles className="w-8 h-8 text-slate-300" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-slate-700">No sound effect yet</h3>
-                <p className="text-sm text-slate-400 mt-1">Enter a description and generate</p>
-              </div>
+              {audioUrl ? (
+                <div className="w-full flex flex-col items-center gap-4">
+                  <div className="w-16 h-16 bg-fuchsia-100 rounded-full flex items-center justify-center text-fuchsia-500 mb-2">
+                    <PlayCircle className="w-8 h-8" />
+                  </div>
+                  <h3 className="font-semibold text-slate-700">Sound Ready!</h3>
+                  <audio controls src={audioUrl} className="w-full max-w-[250px]" autoPlay></audio>
+                  <a href={audioUrl} download="sound-effect.mp3" className="mt-2 text-sm text-fuchsia-600 hover:underline">Download MP3</a>
+                </div>
+              ) : isGenerating ? (
+                <div className="animate-pulse flex flex-col items-center gap-4">
+                  <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center">
+                    <div className="w-8 h-8 border-4 border-fuchsia-500 border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                  <h3 className="font-semibold text-slate-500">Creating magic...</h3>
+                </div>
+              ) : (
+                <>
+                  <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center">
+                    <Sparkles className="w-8 h-8 text-slate-300" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-slate-700">No sound effect yet</h3>
+                    <p className="text-sm text-slate-400 mt-1">Enter a description and generate</p>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 

@@ -23,6 +23,7 @@ interface Voice {
   category: string;
   description: string;
   createdAt: string;
+  isElevenLabs?: boolean;
 }
 
 export default function VoicesPage() {
@@ -183,17 +184,24 @@ export default function VoicesPage() {
                       <p className="text-xs text-slate-500">{voice.category} • ID: {voice.voiceId}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button className="p-2 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
-                      <Edit3 className="w-4 h-4" />
-                    </button>
-                    <button 
-                      onClick={() => handleDelete(voice._id)}
-                      className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
+                  {!voice.isElevenLabs && (
+                    <div className="flex items-center gap-2">
+                      <button className="p-2 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
+                        <Edit3 className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => handleDelete(voice._id)}
+                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                  {voice.isElevenLabs && (
+                    <div className="px-2 py-1 bg-slate-100 text-slate-500 text-xs rounded font-medium">
+                      ElevenLabs
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
