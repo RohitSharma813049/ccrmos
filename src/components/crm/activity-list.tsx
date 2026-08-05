@@ -1,5 +1,5 @@
 import React from 'react'
-import { CheckCircle2, Clock, XCircle, ImageIcon, Edit3, Check, AlertTriangle } from 'lucide-react'
+import { CheckCircle2, Clock, XCircle, ImageIcon, Edit3, Check, AlertTriangle, Video } from 'lucide-react'
 
 export interface ActivityItemProps {
   id: string
@@ -19,9 +19,10 @@ interface ActivityListProps {
   totalCount?: number
   items: ActivityItemProps[]
   emptyMessage?: string
+  showMeetButton?: boolean
 }
 
-export function ActivityList({ title, count, totalCount, items, emptyMessage = 'No data found' }: ActivityListProps) {
+export function ActivityList({ title, count, totalCount, items, emptyMessage = 'No data found', showMeetButton = false }: ActivityListProps) {
   return (
     <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden flex flex-col h-full">
       <div className="p-4 border-b border-slate-50 flex justify-between items-center bg-white sticky top-0 z-10">
@@ -81,6 +82,17 @@ export function ActivityList({ title, count, totalCount, items, emptyMessage = '
                     )}
                     {(item.status === 'pending' || item.status === 'overdue') && (
                       <div className="flex items-center gap-1.5">
+                        {showMeetButton && (
+                          <a 
+                            href="https://meet.google.com/new"
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="p-1 rounded bg-purple-50 border border-purple-200 text-purple-600 hover:bg-purple-100 transition-colors"
+                            title="Start Google Meet"
+                          >
+                            <Video className="w-3 h-3" />
+                          </a>
+                        )}
                         <button className="p-1 rounded bg-blue-50 border border-blue-200 text-blue-500 hover:bg-blue-100 transition-colors">
                           <Edit3 className="w-3 h-3" />
                         </button>

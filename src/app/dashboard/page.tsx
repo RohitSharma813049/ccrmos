@@ -86,6 +86,7 @@ export default function DashboardPage() {
           count={next7DaysMeetingsList.length} 
           items={next7DaysMeetingsList} 
           emptyMessage="No meetings found"
+          showMeetButton={true}
         />
         <ActivityList 
           title="Follow - Ups (Next 7 Days)" 
