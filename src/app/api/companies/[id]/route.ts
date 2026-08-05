@@ -19,7 +19,15 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     
     const updatedCompany = await Company.findByIdAndUpdate(
       id,
-      { name, adminEmail, plan, usersQuota, status, industryId, enabledModules },
+      { 
+        name, 
+        adminEmail, 
+        plan, 
+        usersQuota, 
+        status, 
+        industryId: industryId === "" ? null : industryId, 
+        enabledModules 
+      },
       { new: true, runValidators: true }
     );
     
