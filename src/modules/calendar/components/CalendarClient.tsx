@@ -30,6 +30,7 @@ export default function CalendarClient() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [systemUsers, setSystemUsers] = useState<{name: string, email: string}[]>([]);
   
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
@@ -87,6 +88,14 @@ export default function CalendarClient() {
   useEffect(() => {
     fetchEvents();
   }, [year, month]);
+
+  useEffect(() => {
+    fetch('/api/users?limit=100').then(r => r.json()).then(data => {
+      if (data.users) {
+        setSystemUsers(data.users.map((u: any) => ({ name: `${u.firstName} ${u.lastName}`, email: u.email })));
+      }
+    }).catch(e => console.error("Failed to load users", e));
+  }, []);
 
   const handleSaveEvent = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -407,6 +416,25 @@ export default function CalendarClient() {
                   <Users className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                   <input type="text" value={formData.attendees} onChange={e => setFormData({...formData, attendees: e.target.value})} className="w-full pl-9 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="john@example.com, sarah@..." />
                 </div>
+                {systemUsers.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {systemUsers.map((u, i) => (
+                      <button 
+                        key={i} 
+                        type="button"
+                        onClick={() => {
+                          const current = formData.attendees.split(',').map(a=>a.trim()).filter(Boolean);
+                          if (!current.includes(u.email)) {
+                            setFormData({...formData, attendees: [...current, u.email].join(', ')});
+                          }
+                        }}
+                        className="text-xs px-2.5 py-1 bg-purple-50 hover:bg-purple-100 border border-purple-100 rounded-full text-purple-700 font-medium transition-colors"
+                      >
+                        + {u.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="flex justify-end gap-3 pt-4 border-t mt-6">
