@@ -169,12 +169,12 @@ export default function TenantCustomModulesClient() {
           <button 
             onClick={() => isEditable(mod) ? toggleStatus(mod) : undefined}
             disabled={!isEditable(mod)}
-            className={`px-2.5 py-1 rounded-md text-xs font-semibold border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${mod.active ? 'bg-primary/10 text-primary border-primary/20 hover:bg-primary/20' : 'bg-muted text-muted-foreground border-border hover:bg-muted/80'} ${!isEditable(mod) && 'opacity-50 cursor-not-allowed'}`}
+            className={`px-2.5 py-1 rounded-md text-xs font-semibold border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${mod.active ? 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800' : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'} ${!isEditable(mod) && 'opacity-50 cursor-not-allowed'}`}
           >
             {mod.active ? 'Published' : 'Draft'}
           </button>
           <div className="flex gap-1 mt-1">
-            <span className={`px-2 py-0.5 rounded text-[10px] font-medium border ${mod.tenantScope === 'Global' || mod.tenantScope === 'Industry' ? 'bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800' : 'bg-muted text-muted-foreground border-border'}`}>
+            <span className={`px-2 py-0.5 rounded text-[10px] font-medium border ${mod.tenantScope === 'Global' || mod.tenantScope === 'Industry' ? 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800' : 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'}`}>
               {mod.tenantScope || "Global"}
             </span>
           </div>
@@ -204,7 +204,7 @@ export default function TenantCustomModulesClient() {
             ) : (
               <button 
                 onClick={() => toggleEnable(mod)} 
-                className={`px-3 py-1.5 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${isEnabled ? 'bg-destructive/10 text-destructive hover:bg-destructive/20' : 'bg-primary/10 text-primary hover:bg-primary/20'}`}
+                className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isEnabled ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800' : 'bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800'}`}
               >
                 {isEnabled ? 'Disable' : 'Enable for my Workspace'}
               </button>

@@ -12,6 +12,8 @@ import Invoice from "./src/modules/invoices/schemas/Invoice";
 import Order from "./src/modules/orders/schemas/Order";
 import LeadStatus from "./src/modules/leads/schemas/LeadStatus";
 import LeadStage from "./src/modules/leads/schemas/LeadStage";
+import CustomModule from "./src/modules/settings/schemas/CustomModule";
+import DynamicRecord from "./src/modules/dynamic/schemas/DynamicRecord";
 
 dotenv.config({ path: ".env.local" });
 
@@ -125,6 +127,40 @@ async function seed() {
     { name: "Newsletter Signup (Form ID 2)", type: "Lead", category: "Warm", processed: 120, companyId: finalCompanyId, assignedTo: user._id }
   ]);
   console.log("Seeded Campaign Settings");
+
+  // Seeding Custom Modules and Dynamic Records
+  await CustomModule.deleteMany({ companyId: finalCompanyId });
+  const customModules = await CustomModule.insertMany([
+    {
+      name: "Properties",
+      active: true,
+      tenantScope: "Tenant",
+      companyId: finalCompanyId,
+      fields: [
+        { name: "Property Name", type: "text", required: true },
+        { name: "Location", type: "text", required: false },
+        { name: "Price", type: "number", required: true }
+      ]
+    }
+  ]);
+  console.log("Seeded Custom Modules");
+
+  await DynamicRecord.deleteMany({ companyId: finalCompanyId });
+  await DynamicRecord.insertMany([
+    {
+      moduleId: customModules[0]._id,
+      companyId: finalCompanyId,
+      createdBy: user._id,
+      data: { "Property Name": "Sunset Villa", "Location": "Malibu", "Price": 2500000 }
+    },
+    {
+      moduleId: customModules[0]._id,
+      companyId: finalCompanyId,
+      createdBy: user._id,
+      data: { "Property Name": "Downtown Apartment", "Location": "New York", "Price": 950000 }
+    }
+  ]);
+  console.log("Seeded Dynamic Records");
 
   console.log("Database seeded successfully!");
   process.exit(0);
