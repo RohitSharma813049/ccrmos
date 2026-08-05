@@ -96,9 +96,13 @@ export default function BrandingSettingsPage() {
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) {
-                  // Create a local object URL to show preview
-                  const url = URL.createObjectURL(file);
-                  setFormData({...formData, logoUrl: url});
+                  // Read the file as a base64 Data URL so it can be saved in the database
+                  const reader = new FileReader();
+                  reader.onloadend = () => {
+                    const base64String = reader.result as string;
+                    setFormData({...formData, logoUrl: base64String});
+                  };
+                  reader.readAsDataURL(file);
                 }
               }}
               className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none transition-all file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" 

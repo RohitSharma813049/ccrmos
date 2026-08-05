@@ -8,6 +8,10 @@ import Task from "./src/modules/tasks/schemas/Task";
 import Voice from "./src/modules/ai/schemas/Voice";
 import Agent from "./src/modules/ai/schemas/Agent";
 import CampaignSetting from "./src/modules/marketing/schemas/CampaignSetting";
+import Invoice from "./src/modules/invoices/schemas/Invoice";
+import Order from "./src/modules/orders/schemas/Order";
+import LeadStatus from "./src/modules/leads/schemas/LeadStatus";
+import LeadStage from "./src/modules/leads/schemas/LeadStage";
 
 dotenv.config({ path: ".env.local" });
 
@@ -62,7 +66,41 @@ async function seed() {
   ]);
   console.log("Seeded Tasks");
 
+  // Seeding Invoices
+  await Invoice.deleteMany({ founderId });
+  await Invoice.insertMany([
+    { displayId: "INV-1001", invoiceNumber: "INV-2026-001", amount: 1500, status: "Paid", approvalStatus: "Approved", founderId, companyId, createdBy: user._id },
+    { displayId: "INV-1002", invoiceNumber: "INV-2026-002", amount: 3200, status: "Unpaid", approvalStatus: "Pending", founderId, companyId, createdBy: user._id }
+  ]);
+  console.log("Seeded Invoices");
+
+  // Seeding Orders
+  await Order.deleteMany({ founderId });
+  await Order.insertMany([
+    { displayId: "ORD-1001", orderNumber: "ORD-12345", amount: 500, status: "Completed", founderId, companyId, createdBy: user._id },
+    { displayId: "ORD-1002", orderNumber: "ORD-12346", amount: 850, status: "Processing", founderId, companyId, createdBy: user._id }
+  ]);
+  console.log("Seeded Orders");
+
   const finalCompanyId = companyId || founderId;
+
+  // Seeding Lead Stages
+  await LeadStage.deleteMany({ companyId: finalCompanyId });
+  const stages = await LeadStage.insertMany([
+    { name: "New", color: "#3B82F6", order: 1, active: true, companyId: finalCompanyId },
+    { name: "Contacted", color: "#F59E0B", order: 2, active: true, companyId: finalCompanyId },
+    { name: "Qualified", color: "#10B981", order: 3, active: true, companyId: finalCompanyId }
+  ]);
+  console.log("Seeded Lead Stages");
+
+  // Seeding Lead Statuses
+  await LeadStatus.deleteMany({ companyId: finalCompanyId });
+  await LeadStatus.insertMany([
+    { name: "Hot", stageId: stages[0]._id, active: true, color: "#EF4444", iconColor: "bg-red-500", category: "Interested", companyId: finalCompanyId },
+    { name: "Warm", stageId: stages[1]._id, active: true, color: "#F59E0B", iconColor: "bg-yellow-500", category: "Interested", companyId: finalCompanyId },
+    { name: "Cold", stageId: stages[2]._id, active: true, color: "#9CA3AF", iconColor: "bg-gray-500", category: "Not Interested", companyId: finalCompanyId }
+  ]);
+  console.log("Seeded Lead Statuses");
 
   // Seeding Voices
   await Voice.deleteMany({ companyId: finalCompanyId }); // Voice doesn't use founderId
