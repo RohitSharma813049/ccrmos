@@ -9,6 +9,12 @@ export async function GET(req: Request) {
   try {
     const user = await requireAuthenticatedUser();
     const queryObj = { ...buildTenantQuery(user) };
+    
+    // Voice schema doesn't have founderId, only companyId. 
+    // Remove founderId to prevent strictQuery errors in Mongoose 9.
+    if (queryObj.founderId) {
+      delete queryObj.founderId;
+    }
 
     const { searchParams } = new URL(req.url);
     const search = searchParams.get("search") || "";
