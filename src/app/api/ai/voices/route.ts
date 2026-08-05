@@ -38,20 +38,63 @@ export async function POST(req: Request) {
   await dbConnect();
   try {
     const user = await requireAuthenticatedUser();
-    const body = await req.json();
+    
+    // Parse FormData
+    const formData = await req.formData();
+    const name = formData.get('name') as string || '';
+    const category = formData.get('category') as string || 'Custom';
+    const description = formData.get('description') as string || '';
+    const file = formData.get('file') as File | null;
+
+    let voiceId = '';
+
+    const elevenLabsKey = process.env.ELEVENLABS_API_KEY;
+
+    if (elevenLabsKey && file) {
+      // Create a FormData to send to ElevenLabs
+      const elevenLabsData = new FormData();
+      elevenLabsData.append('name', name);
+      elevenLabsData.append('description', description);
+      
+      // Need to convert the File object to a Blob and append with a filename
+      // The Next.js File object works seamlessly with fetch's FormData
+      elevenLabsData.append('files', file);
+      
+      const response = await fetch('https://api.elevenlabs.io/v1/voices/add', {
+        method: 'POST',
+        headers: {
+          'xi-api-key': elevenLabsKey
+        },
+        body: elevenLabsData
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`ElevenLabs Error: ${errorData.detail?.status || response.statusText}`);
+      }
+
+      const data = await response.json();
+      voiceId = data.voice_id;
+    } else {
+      // Fallback to mock voiceId
+      voiceId = 'voice_' + Math.random().toString(36).substring(2, 10);
+    }
+
+    const body: any = {
+      name,
+      category,
+      description,
+      voiceId
+    };
 
     if (user) {
       body.companyId = user.companyId;
     }
 
-    // Auto-generate voiceId for mock
-    if (!body.voiceId) {
-      body.voiceId = 'voice_' + Math.random().toString(36).substring(2, 10);
-    }
-
     const newVoice = await Voice.create(body);
     return NextResponse.json({ voice: newVoice }, { status: 201 });
   } catch (error: any) {
+    console.error('Error adding voice:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

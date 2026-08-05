@@ -9,3 +9,4 @@
 - [x] Add Email/WhatsApp Integration to Lead Profiles
 - [x] Implement Property & Inventory Management
 - [x] Complete Global Automations UI
+- [x] Connect AI Voice Cloning backend
