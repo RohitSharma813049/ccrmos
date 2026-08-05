@@ -230,7 +230,8 @@ function VoiceFormModal({ onClose, onSuccess }: { onClose: () => void, onSuccess
   const [formData, setFormData] = useState({
     name: '',
     category: 'Custom',
-    description: ''
+    description: '',
+    previewUrl: ''
   })
   const [saving, setSaving] = useState(false)
 
@@ -285,6 +286,24 @@ function VoiceFormModal({ onClose, onSuccess }: { onClose: () => void, onSuccess
             <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" rows={3} placeholder="A brief description of this voice..."></textarea>
           </div>
           
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Audio Sample / Recording</label>
+            <input 
+              type="file" 
+              accept="audio/*" 
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onloadend = () => setFormData({...formData, previewUrl: reader.result as string});
+                  reader.readAsDataURL(file);
+                }
+              }} 
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm" 
+            />
+            {formData.previewUrl && <p className="text-xs text-green-600 mt-2 font-medium">✓ Audio ready to save</p>}
+          </div>
+
           <div className="flex justify-end gap-3 pt-4 border-t mt-6">
             <button type="button" onClick={onClose} className="px-5 py-2 border rounded-lg text-slate-700 font-medium hover:bg-slate-50">Cancel</button>
             <button type="submit" disabled={saving} className="px-5 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 disabled:opacity-50">
