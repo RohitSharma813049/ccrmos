@@ -7,7 +7,8 @@ export interface ILeadStatus extends Document {
   color?: string;
   iconColor?: string;
   category?: string;
-  companyId: mongoose.Types.ObjectId;
+  companyId?: mongoose.Types.ObjectId;
+  founderId?: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -19,7 +20,8 @@ const LeadStatusSchema: Schema<ILeadStatus> = new Schema({
   color: { type: String, default: "#6b7280" },
   iconColor: { type: String, default: "bg-blue-500" },
   category: { type: String, default: "Interested" },
-  companyId: { type: Schema.Types.ObjectId, ref: "Company", required: true }
+  companyId: { type: Schema.Types.ObjectId, ref: "Company" },
+  founderId: { type: Schema.Types.ObjectId, ref: "User" }
 }, { timestamps: true });
 
 const LeadStatus: Model<ILeadStatus> = mongoose.models.LeadStatus || mongoose.model<ILeadStatus>("LeadStatus", LeadStatusSchema);

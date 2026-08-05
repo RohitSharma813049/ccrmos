@@ -39,7 +39,8 @@ export async function POST(req: Request) {
     const body = await req.json();
 
     if (user) {
-      body.companyId = user.companyId;
+      if (user.companyId) body.companyId = user.companyId;
+      body.founderId = user.founderId || user.id;
     }
 
     const newStatus = await LeadStatus.create(body);
