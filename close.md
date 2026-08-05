@@ -8,3 +8,4 @@
 - [x] Built Calendar and Scheduling module
 - [x] Add Email/WhatsApp Integration to Lead Profiles
 - [x] Implement Property & Inventory Management
+- [x] Complete Global Automations UI

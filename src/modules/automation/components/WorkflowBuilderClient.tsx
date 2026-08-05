@@ -26,7 +26,7 @@ const nodeTypes = {
   action: ActionNode,
 };
 
-export default function WorkflowBuilderClient({ workflow }: { workflow: any }) {
+export default function WorkflowBuilderClient({ workflow, isGlobal = false }: { workflow: any, isGlobal?: boolean }) {
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
   const [isSaving, setIsSaving] = useState(false);
@@ -160,8 +160,15 @@ export default function WorkflowBuilderClient({ workflow }: { workflow: any }) {
     <div className="flex flex-col h-[calc(100vh-6rem)] fade-in">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{workflow.title} Builder</h1>
-          <p className="text-gray-500 text-sm">{workflow.description}</p>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold text-gray-900">{workflow.title} Builder</h1>
+            {isGlobal && (
+              <span className="px-2.5 py-0.5 text-xs font-bold bg-fuchsia-100 text-fuchsia-700 rounded-full border border-fuchsia-200">
+                Global Workflow
+              </span>
+            )}
+          </div>
+          <p className="text-gray-500 text-sm mt-1">{workflow.description}</p>
         </div>
         <div className="flex gap-3">
           <button onClick={() => window.history.back()} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">

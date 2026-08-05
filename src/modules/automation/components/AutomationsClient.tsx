@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import PageHeader from "@/components/ui/PageHeader";
 
-export default function AutomationsClient() {
+export default function AutomationsClient({ isGlobal = false }: { isGlobal?: boolean }) {
   const [workflows, setWorkflows] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -14,11 +14,11 @@ export default function AutomationsClient() {
 
   useEffect(() => {
     fetchWorkflows();
-  }, []);
+  }, [isGlobal]);
 
   async function fetchWorkflows() {
     try {
-      const res = await fetch("/api/automation/workflows");
+      const res = await fetch(`/api/automation/workflows${isGlobal ? '?global=true' : ''}`);
       if (res.ok) {
         const data = await res.json();
         setWorkflows(data.workflows || []);
@@ -40,7 +40,8 @@ export default function AutomationsClient() {
           title: newTitle, 
           description: newDesc, 
           trigger: newTrigger, 
-          active: false 
+          active: false,
+          isGlobal 
         })
       });
       if (res.ok) {
@@ -85,8 +86,8 @@ export default function AutomationsClient() {
   return (
     <div className="space-y-8 fade-in pb-12">
       <PageHeader
-        title="Company Automations"
-        description="Design event triggers, execution queues, and background jobs for your company."
+        title={isGlobal ? "Global Automations" : "Company Automations"}
+        description={isGlobal ? "Design platform-wide event triggers and execution pipelines." : "Design event triggers, execution queues, and background jobs for your company."}
       />
 
       <div className="bg-white/50 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-xl">
