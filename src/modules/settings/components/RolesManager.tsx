@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 
 const SYSTEM_MODULES = ["Leads", "Customers", "Projects", "Invoices", "Tasks", "Settings"];
 const ACTIONS = ["view", "create", "edit", "delete", "assign", "export", "import", "approve"];
@@ -98,13 +99,16 @@ export default function RolesManager() {
       });
 
       if (res.ok) {
+        toast.success(currentRole ? "Role updated successfully!" : "Role created successfully!");
         setIsModalOpen(false);
         fetchRoles();
       } else {
-        alert("Failed to save role");
+        const errData = await res.json().catch(() => ({}));
+        toast.error(`Failed to save role: ${errData.error || res.statusText}`);
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
+      toast.error(`Error: ${e.message}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -112,16 +116,22 @@ export default function RolesManager() {
 
   const handleDelete = async (id: string, isSystem: boolean) => {
     if (isSystem) {
-      alert("Cannot delete system roles.");
+      toast.error("System roles cannot be deleted.");
       return;
     }
-    if (!confirm("Delete this role?")) return;
+    if (!confirm("Are you sure you want to delete this role?")) return;
     
     try {
-      const res = await fetch(`/api/roles?id=${id}`, { method: "DELETE" });
-      if (res.ok) fetchRoles();
+      const res = await fetch(`/api/owner/roles?id=${id}`, { method: "DELETE" });
+      if (res.ok) {
+        toast.success("Role deleted successfully!");
+        fetchRoles();
+      } else {
+        toast.error("Failed to delete role.");
+      }
     } catch (e) {
       console.error(e);
+      toast.error("An error occurred while deleting.");
     }
   };
 
