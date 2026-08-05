@@ -4,6 +4,7 @@ import Lead from '@/modules/leads/schemas/Lead';
 import User from '@/modules/users/schemas/User';
 import Booking from '@/modules/bookings/schemas/Booking';
 import Property from '@/modules/properties/schemas/Property';
+import Task from '@/modules/tasks/schemas/Task';
 import { requireAuthenticatedUser } from '@/lib/auth-utils';
 import { buildTenantQuery } from "@/lib/access-control";
 
@@ -22,7 +23,8 @@ export async function GET(req: Request) {
       totalProperties,
       totalBookings,
       pendingBookings,
-      leads
+      leads,
+      tasks
     ] = await Promise.all([
       Lead.countDocuments({ ...tenantQuery, status: { $ne: 'Closed' } }),
       Lead.countDocuments({ ...tenantQuery, status: 'Closed' }),
@@ -30,7 +32,8 @@ export async function GET(req: Request) {
       Property.countDocuments({ ...tenantQuery }),
       Booking ? Booking.countDocuments({ ...tenantQuery, status: 'confirmed' }) : 0,
       Booking ? Booking.countDocuments({ ...tenantQuery, status: { $ne: 'confirmed' } }) : 0,
-      Lead.find({ ...tenantQuery }).select('activities firstName lastName')
+      Lead.find({ ...tenantQuery }).select('activities firstName lastName'),
+      Task.find({ ...tenantQuery })
     ]);
 
     let pendingMeetings = 0;
@@ -94,6 +97,49 @@ export async function GET(req: Request) {
           }
         }
       });
+    });
+
+    tasks.forEach((task) => {
+      if (!task.startTime) return;
+      const actDate = new Date(task.startTime);
+      const isPast = actDate < now;
+      const isNext7Days = actDate >= now && actDate <= next7Days;
+      const typeLower = task.type?.toLowerCase() || '';
+
+      const itemProps = {
+        id: task._id?.toString(),
+        name: task.title || 'Task',
+        comment: task.description || '',
+        date: actDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }),
+        time: actDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+        status: (task.status === 'Completed' || isPast) ? 'done' : 'pending'
+      };
+
+      if (typeLower.includes('meeting')) {
+        if (isPast) {
+          doneMeetings++;
+          completedMeetingsList.push({ ...itemProps, status: 'done' });
+        } else {
+          pendingMeetings++;
+          if (isNext7Days) next7DaysMeetingsList.push({ ...itemProps, status: 'pending' });
+        }
+      } else if (typeLower.includes('site visit') || typeLower.includes('visit')) {
+        if (isPast) {
+          doneSiteVisits++;
+          completedSiteVisitsList.push({ ...itemProps, status: 'done', imagesCount: 0, images: [] });
+        } else {
+          pendingSiteVisits++;
+        }
+      } else {
+        // Treat as Follow-up / Task
+        if (isPast) {
+          doneFollowUps++;
+          pendingFollowUpsList.push({ ...itemProps, status: 'overdue' });
+        } else {
+          pendingFollowUps++;
+          if (isNext7Days) next7DaysFollowUpsList.push({ ...itemProps, status: 'pending' });
+        }
+      }
     });
 
     const summaryData = [
