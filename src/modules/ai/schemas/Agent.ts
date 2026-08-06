@@ -10,6 +10,7 @@ export interface IAgent extends Document {
   companyId: mongoose.Types.ObjectId;
   founderId?: mongoose.Types.ObjectId;
   greetingAudioUrl?: string;
+  avatarUrl?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -27,7 +28,8 @@ const AgentSchema: Schema<IAgent> = new Schema({
   },
   companyId: { type: Schema.Types.ObjectId, ref: "Company", required: true },
   founderId: { type: Schema.Types.ObjectId, ref: "User" },
-  greetingAudioUrl: { type: String }
+  greetingAudioUrl: { type: String },
+  avatarUrl: { type: String }
 }, { timestamps: true });
 
 const Agent: Model<IAgent> = mongoose.models.Agent || mongoose.model<IAgent>("Agent", AgentSchema);

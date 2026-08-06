@@ -32,6 +32,7 @@ export default function VoicesPage() {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingVoice, setEditingVoice] = useState<Voice | null>(null)
 
   const tabs = [
     { name: 'All Voices', icon: Volume2 },
@@ -99,7 +100,7 @@ export default function VoicesPage() {
             <RefreshCcw className="w-4 h-4" />
             Refresh
           </button>
-          <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors shadow-sm text-sm">
+          <button onClick={() => { setEditingVoice(null); setIsModalOpen(true); }} className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors shadow-sm text-sm">
             <Plus className="w-4 h-4" />
             Add Voice
           </button>
@@ -186,7 +187,7 @@ export default function VoicesPage() {
                   </div>
                   {!voice.isElevenLabs && (
                     <div className="flex items-center gap-2">
-                      <button className="p-2 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
+                      <button onClick={() => { setEditingVoice(voice); setIsModalOpen(true); }} className="p-2 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
                         <Edit3 className="w-4 h-4" />
                       </button>
                       <button 
@@ -210,12 +211,17 @@ export default function VoicesPage() {
         </div>
       </div>
 
-      {/* Add Voice Modal */}
+      {/* Add/Edit Voice Modal */}
       {isModalOpen && (
         <VoiceFormModal 
-          onClose={() => setIsModalOpen(false)}
+          voiceToEdit={editingVoice}
+          onClose={() => {
+            setIsModalOpen(false)
+            setEditingVoice(null)
+          }}
           onSuccess={() => {
             setIsModalOpen(false)
+            setEditingVoice(null)
             fetchVoices()
           }}
         />
@@ -224,11 +230,11 @@ export default function VoicesPage() {
   )
 }
 
-function VoiceFormModal({ onClose, onSuccess }: { onClose: () => void, onSuccess: () => void }) {
+function VoiceFormModal({ onClose, onSuccess, voiceToEdit }: { onClose: () => void, onSuccess: () => void, voiceToEdit?: Voice | null }) {
   const [formData, setFormData] = useState({
-    name: '',
-    category: 'Custom',
-    description: ''
+    name: voiceToEdit?.name || '',
+    category: voiceToEdit?.category || 'Custom',
+    description: voiceToEdit?.description || ''
   })
   const [saving, setSaving] = useState(false)
 
@@ -236,16 +242,20 @@ function VoiceFormModal({ onClose, onSuccess }: { onClose: () => void, onSuccess
     e.preventDefault()
     setSaving(true)
     try {
-      const res = await fetch('/api/ai/voices', {
-        method: 'POST',
+      const isEdit = !!voiceToEdit;
+      const url = isEdit ? `/api/ai/voices/${voiceToEdit._id}` : '/api/ai/voices';
+      const method = isEdit ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       })
       if (res.ok) {
-        toast.success('Voice created successfully!')
+        toast.success(`Voice ${isEdit ? 'updated' : 'created'} successfully!`)
         onSuccess()
       } else {
-        toast.error('Failed to create voice')
+        toast.error(`Failed to ${isEdit ? 'update' : 'create'} voice`)
       }
     } catch (error) {
       console.error(error)
@@ -259,7 +269,7 @@ function VoiceFormModal({ onClose, onSuccess }: { onClose: () => void, onSuccess
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b border-slate-100">
-          <h2 className="text-xl font-bold text-slate-900">Add New Voice</h2>
+          <h2 className="text-xl font-bold text-slate-900">{voiceToEdit ? 'Edit Voice' : 'Add New Voice'}</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-2">
             <X className="w-5 h-5" />
           </button>
@@ -286,7 +296,7 @@ function VoiceFormModal({ onClose, onSuccess }: { onClose: () => void, onSuccess
           <div className="flex justify-end gap-3 pt-4 border-t mt-6">
             <button type="button" onClick={onClose} className="px-5 py-2 border rounded-lg text-slate-700 font-medium hover:bg-slate-50">Cancel</button>
             <button type="submit" disabled={saving} className="px-5 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 disabled:opacity-50">
-              {saving ? 'Saving...' : 'Save Voice'}
+              {saving ? (voiceToEdit ? 'Updating...' : 'Saving...') : (voiceToEdit ? 'Update Voice' : 'Save Voice')}
             </button>
           </div>
         </form>

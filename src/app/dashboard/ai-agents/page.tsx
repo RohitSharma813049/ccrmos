@@ -13,6 +13,7 @@ interface Agent {
   phone: string;
   maxDuration: string;
   greetingAudioUrl?: string;
+  avatarUrl?: string;
 }
 
 export default function AiAgentsPage() {
@@ -136,15 +137,22 @@ export default function AiAgentsPage() {
                   {agent.status}
                 </span>
               </div>
-
-              {/* Agent Info */}
-              <div className="flex gap-4 mb-6">
-                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center border border-primary/20 shrink-0 group-hover:bg-[var(--primary)] group-hover:text-white transition-colors">
-                  <Bot className="w-6 h-6 text-[var(--primary)] group-hover:text-white transition-colors" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-[var(--foreground)] leading-tight">{agent.name}</h3>
-                  <p className="text-xs text-[var(--muted-foreground)] mt-1">{agent.role}</p>
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-inner overflow-hidden shrink-0" style={{ 
+                    background: agent.avatarUrl ? 'transparent' : 'linear-gradient(135deg, var(--primary) 0%, #a855f7 100%)',
+                    color: 'white'
+                  }}>
+                    {agent.avatarUrl ? (
+                      <img src={agent.avatarUrl} alt={agent.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <Bot className="w-6 h-6" />
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg text-[var(--foreground)] leading-tight">{agent.name}</h3>
+                    <p className="text-sm text-[var(--muted-foreground)] mt-0.5">{agent.role}</p>
+                  </div>
                 </div>
               </div>
 
@@ -256,9 +264,33 @@ function AgentFormModal({ onClose, onSuccess, agentToEdit }: { onClose: () => vo
     phone: agentToEdit?.phone || '',
     maxDuration: agentToEdit?.maxDuration || '5:00',
     status: agentToEdit?.status || 'ACTIVE',
-    greetingAudioUrl: agentToEdit?.greetingAudioUrl || ''
+    greetingAudioUrl: agentToEdit?.greetingAudioUrl || '',
+    avatarUrl: agentToEdit?.avatarUrl || ''
   })
   const [saving, setSaving] = useState(false)
+  const [uploadingImage, setUploadingImage] = useState(false)
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadingImage(true)
+    try {
+      const data = new FormData()
+      data.append('file', file)
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: data
+      })
+      if (!res.ok) throw new Error('Upload failed')
+      const json = await res.json()
+      setFormData({ ...formData, avatarUrl: json.url })
+      toast.success('Avatar uploaded!')
+    } catch (err: any) {
+      toast.error('Failed to upload image')
+    } finally {
+      setUploadingImage(false)
+    }
+  }
 
   const selectedRole = AI_ROLES.find(r => r.value === formData.role);
   const hasPermission = selectedRole ? selectedRole.hasPermission : false;
@@ -301,7 +333,21 @@ function AgentFormModal({ onClose, onSuccess, agentToEdit }: { onClose: () => vo
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto custom-scrollbar">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-full bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0">
+              {formData.avatarUrl ? (
+                <img src={formData.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+              ) : (
+                <Bot className="w-8 h-8 text-slate-400" />
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-[var(--foreground)] mb-1">Avatar Image (Optional)</label>
+              <input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploadingImage} className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[var(--primary)] file:text-white hover:file:opacity-90 transition-opacity" />
+              {uploadingImage && <p className="text-xs text-[var(--primary)] mt-1 animate-pulse">Uploading...</p>}
+            </div>
+          </div>
           <div>
             <label className="block text-sm font-medium text-[var(--foreground)] mb-1">Agent Name *</label>
             <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] text-slate-900 bg-white" placeholder="e.g. Sales Agent" />
