@@ -29,6 +29,7 @@ export default function CalendarClient() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [systemUsers, setSystemUsers] = useState<{name: string, email: string, role: string}[]>([]);
   const [teams, setTeams] = useState<string[]>([]);
@@ -107,9 +108,13 @@ export default function CalendarClient() {
 
   const handleSaveEvent = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (saving) return;
+    
     if (!formData.title || !formData.date || !formData.startTime || !formData.endTime) {
       return toast.error("Please fill all required fields");
     }
+
+    setSaving(true);
 
     const startDateTime = new Date(`${formData.date}T${formData.startTime}:00`);
     const endDateTime = new Date(`${formData.date}T${formData.endTime}:00`);
@@ -145,6 +150,8 @@ export default function CalendarClient() {
       }
     } catch (err) {
       toast.error("Failed to save event");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -490,7 +497,9 @@ export default function CalendarClient() {
 
               <div className="flex justify-end gap-3 pt-4 border-t mt-6">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2 border rounded-lg text-slate-700 font-medium hover:bg-slate-50">Cancel</button>
-                <button type="submit" className="px-5 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700">{selectedEvent ? 'Save Changes' : 'Schedule'}</button>
+                <button type="submit" disabled={saving} className="px-5 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 disabled:opacity-50">
+                  {saving ? (selectedEvent ? 'Saving...' : 'Scheduling...') : (selectedEvent ? 'Save Changes' : 'Schedule')}
+                </button>
               </div>
             </form>
           </div>

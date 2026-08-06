@@ -11,6 +11,8 @@ export interface ActivityItemProps {
   imagesCount?: number
   images?: string[]
   notAssigned?: boolean
+  location?: string
+  timestamp?: string
 }
 
 interface ActivityListProps {
@@ -20,9 +22,11 @@ interface ActivityListProps {
   items: ActivityItemProps[]
   emptyMessage?: string
   showMeetButton?: boolean
+  onEdit?: (id: string) => void
+  onComplete?: (id: string) => void
 }
 
-export function ActivityList({ title, count, totalCount, items, emptyMessage = 'No data found', showMeetButton = false }: ActivityListProps) {
+export function ActivityList({ title, count, totalCount, items, emptyMessage = 'No data found', showMeetButton = false, onEdit, onComplete }: ActivityListProps) {
   return (
     <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden flex flex-col h-full">
       <div className="p-4 border-b border-slate-50 flex justify-between items-center bg-white sticky top-0 z-10">
@@ -84,19 +88,19 @@ export function ActivityList({ title, count, totalCount, items, emptyMessage = '
                       <div className="flex items-center gap-1.5">
                         {showMeetButton && (
                           <a 
-                            href="https://meet.google.com/new"
+                            href={item.location && item.location.includes('http') ? item.location : "https://meet.google.com/new"}
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="p-1 rounded bg-purple-50 border border-purple-200 text-purple-600 hover:bg-purple-100 transition-colors"
-                            title="Start Google Meet"
+                            title={item.location && item.location.includes('http') ? "Join Meeting" : "Start Google Meet"}
                           >
                             <Video className="w-3 h-3" />
                           </a>
                         )}
-                        <button className="p-1 rounded bg-blue-50 border border-blue-200 text-blue-500 hover:bg-blue-100 transition-colors">
+                        <button onClick={() => onEdit?.(item.id)} className="p-1 rounded bg-blue-50 border border-blue-200 text-blue-500 hover:bg-blue-100 transition-colors">
                           <Edit3 className="w-3 h-3" />
                         </button>
-                        <button className="p-1 rounded bg-green-50 border border-green-200 text-green-500 hover:bg-green-100 transition-colors">
+                        <button onClick={() => onComplete?.(item.id)} className="p-1 rounded bg-green-50 border border-green-200 text-green-500 hover:bg-green-100 transition-colors">
                           <Check className="w-3 h-3 stroke-[3]" />
                         </button>
                       </div>

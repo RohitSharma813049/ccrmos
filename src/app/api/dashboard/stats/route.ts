@@ -69,7 +69,8 @@ export async function GET(req: Request) {
           comment: act.description || '',
           date: actDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }),
           time: actDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-          status: isPast ? 'done' : 'overdue'
+          status: isPast ? 'done' : 'overdue',
+          timestamp: actDate.toISOString()
         };
 
         if (typeLower.includes('meeting')) {
@@ -112,7 +113,9 @@ export async function GET(req: Request) {
         comment: task.description || '',
         date: actDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }),
         time: actDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-        status: (task.status === 'Completed' || isPast) ? 'done' : 'pending'
+        status: (task.status === 'Completed' || isPast) ? 'done' : 'pending',
+        location: task.location,
+        timestamp: actDate.toISOString()
       };
 
       if (typeLower.includes('meeting')) {

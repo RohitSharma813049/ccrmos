@@ -7,6 +7,7 @@ import DashboardQuickActions from "@/components/ui/DashboardQuickActions";
 import { SummaryCard } from '@/components/crm/summary-card'
 import { ActivityList, ActivityItemProps } from '@/components/crm/activity-list'
 import { Users, Building, Calendar, Phone, MapPin, CheckCircle } from 'lucide-react'
+import { toast } from 'react-hot-toast'
 
 // Maps string iconNames from API back to Lucide components
 const iconMap: Record<string, any> = {
@@ -17,20 +18,80 @@ export default function DashboardPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const res = await fetch('/api/dashboard/stats');
-        const json = await res.json();
-        setData(json);
+  const fetchData = async () => {
+    try {
+      const res = await fetch('/api/dashboard/stats');
+      const json = await res.json();
+      setData(json);
+
+        // Check for upcoming meetings (within 15 minutes)
+        if (json.next7DaysMeetingsList && json.next7DaysMeetingsList.length > 0) {
+          const now = new Date().getTime();
+          json.next7DaysMeetingsList.forEach((meeting: any) => {
+            if (meeting.timestamp) {
+              const meetingTime = new Date(meeting.timestamp).getTime();
+              const timeDiff = meetingTime - now;
+              // If meeting is within the next 15 minutes (or currently happening up to 15 mins late)
+              if (timeDiff <= 15 * 60 * 1000 && timeDiff >= -15 * 60 * 1000) {
+                const isLate = timeDiff < 0;
+                toast(
+                  (t) => (
+                    <div>
+                      <div className="font-semibold text-slate-800">{isLate ? 'Meeting in progress' : 'Upcoming Meeting'}</div>
+                      <div className="text-sm text-slate-600 mb-3">{meeting.name} is scheduled for {meeting.time}.</div>
+                      <div className="flex gap-2">
+                        <a 
+                          href={meeting.location && meeting.location.includes('http') ? meeting.location : "https://meet.google.com/new"}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() => toast.dismiss(t.id)}
+                          className="px-3 py-1.5 bg-purple-600 text-white rounded-md text-xs font-semibold"
+                        >
+                          Join Now
+                        </a>
+                        <button onClick={() => toast.dismiss(t.id)} className="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-md text-xs font-semibold">
+                          Dismiss
+                        </button>
+                      </div>
+                    </div>
+                  ),
+                  { duration: 10000, icon: '📅' }
+                );
+              }
+            }
+          });
+        }
       } catch (err) {
         console.error("Failed to load dashboard data", err);
-      } finally {
-        setLoading(false);
-      }
     }
+  };
+
+  useEffect(() => {
     fetchData();
   }, []);
+
+  const handleComplete = async (id: string) => {
+    try {
+      const res = await fetch(`/api/tasks/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'Completed' })
+      });
+      if (res.ok) {
+        toast.success("Marked as done!");
+        fetchData();
+      } else {
+        toast.error("Failed to update status");
+      }
+    } catch (e) {
+      toast.error("Error updating status");
+    }
+  };
+
+  const handleEdit = (id: string) => {
+    // For now, redirect to calendar where they can edit events, or just show a message.
+    toast("To edit, please navigate to the Tasks or Calendar page.", { icon: "ℹ️" });
+  };
 
   if (loading) {
     return (
@@ -87,12 +148,16 @@ export default function DashboardPage() {
           items={next7DaysMeetingsList} 
           emptyMessage="No meetings found"
           showMeetButton={true}
+          onComplete={handleComplete}
+          onEdit={handleEdit}
         />
         <ActivityList 
           title="Follow - Ups (Next 7 Days)" 
           count={next7DaysFollowUpsList.length} 
           items={next7DaysFollowUpsList} 
           emptyMessage="No follow-ups today"
+          onComplete={handleComplete}
+          onEdit={handleEdit}
         />
       </div>
 
