@@ -63,6 +63,8 @@ export default function DashboardPage() {
         }
       } catch (err) {
         console.error("Failed to load dashboard data", err);
+    } finally {
+      setLoading(false);
     }
   };
 
