@@ -180,6 +180,16 @@ export default function AiAgentsPage() {
   )
 }
 
+const AI_ROLES = [
+  { value: '', label: 'Select a role...', hasPermission: true },
+  { value: 'Sales Agent', label: 'Sales Agent', hasPermission: true },
+  { value: 'Support Agent', label: 'Support Agent', hasPermission: true },
+  { value: 'Lead Qualifier', label: 'Lead Qualifier (No Permission)', hasPermission: false },
+  { value: 'Admin Agent', label: 'Admin Agent (No Permission)', hasPermission: false },
+];
+
+const LANGUAGES = ['English', 'Spanish', 'French', 'German', 'Mandarin'];
+
 function AgentFormModal({ onClose, onSuccess }: { onClose: () => void, onSuccess: () => void }) {
   const [formData, setFormData] = useState({
     name: '',
@@ -190,6 +200,9 @@ function AgentFormModal({ onClose, onSuccess }: { onClose: () => void, onSuccess
     status: 'ACTIVE'
   })
   const [saving, setSaving] = useState(false)
+
+  const selectedRole = AI_ROLES.find(r => r.value === formData.role);
+  const hasPermission = selectedRole ? selectedRole.hasPermission : false;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -231,11 +244,22 @@ function AgentFormModal({ onClose, onSuccess }: { onClose: () => void, onSuccess
           </div>
           <div>
             <label className="block text-sm font-medium text-[var(--foreground)] mb-1">Role *</label>
-            <input required type="text" value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] text-slate-900 bg-white" placeholder="e.g. Senior Support Specialist" />
+            <select required value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] text-slate-900 bg-white appearance-none">
+              {AI_ROLES.map(role => (
+                <option key={role.value} value={role.value}>{role.label}</option>
+              ))}
+            </select>
+            {formData.role && !hasPermission && (
+              <p className="text-sm text-red-500 mt-1">This role does not have permission to be an AI agent.</p>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-[var(--foreground)] mb-1">Languages</label>
-            <input type="text" value={formData.languages} onChange={e => setFormData({...formData, languages: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] text-slate-900 bg-white" placeholder="e.g. English, Spanish" />
+            <select value={formData.languages} onChange={e => setFormData({...formData, languages: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] text-slate-900 bg-white appearance-none">
+              {LANGUAGES.map(lang => (
+                <option key={lang} value={lang}>{lang}</option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-[var(--foreground)] mb-1">Phone Number (Optional)</label>
@@ -244,9 +268,11 @@ function AgentFormModal({ onClose, onSuccess }: { onClose: () => void, onSuccess
           
           <div className="flex justify-end gap-3 pt-4 border-t mt-6">
             <button type="button" onClick={onClose} className="px-5 py-2 border rounded-lg text-[var(--foreground)] font-medium hover:bg-slate-50">Cancel</button>
-            <button type="submit" disabled={saving} className="px-5 py-2 bg-[var(--primary)] text-white rounded-lg font-medium hover:bg-[var(--primary)] disabled:opacity-50">
-              {saving ? 'Creating...' : 'Create Agent'}
-            </button>
+            {hasPermission && (
+              <button type="submit" disabled={saving || !formData.role} className="px-5 py-2 bg-[var(--primary)] text-white rounded-lg font-medium hover:bg-[var(--primary)] disabled:opacity-50">
+                {saving ? 'Creating...' : 'Create Agent'}
+              </button>
+            )}
           </div>
         </form>
       </div>
