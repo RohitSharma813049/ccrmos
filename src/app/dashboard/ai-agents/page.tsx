@@ -188,7 +188,7 @@ const AI_ROLES = [
   { value: 'Admin Agent', label: 'Admin Agent (No Permission)', hasPermission: false },
 ];
 
-const LANGUAGES = ['English', 'Spanish', 'French', 'German', 'Mandarin'];
+const LANGUAGES = ['English', 'Hindi', 'Hinglish','Spanish', 'French', 'German', 'Mandarin'];
 
 function AgentFormModal({ onClose, onSuccess }: { onClose: () => void, onSuccess: () => void }) {
   const [formData, setFormData] = useState({
