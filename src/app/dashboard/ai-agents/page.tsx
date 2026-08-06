@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Bot, Phone, Clock, Globe, Edit2, Trash2, Link as LinkIcon, Plus, Users, X } from 'lucide-react'
+import { Bot, Phone, Clock, Globe, Edit2, Trash2, Link as LinkIcon, Plus, Users, X, AudioLines } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 
 interface Agent {
