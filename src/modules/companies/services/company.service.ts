@@ -47,7 +47,7 @@ export class CompanyService {
     };
   }
 
-  static async registerTenant({ name, adminEmail, subscriptionPlanId, usersQuota, templateId }: { name: string, adminEmail: string, subscriptionPlanId?: string, usersQuota?: number, templateId?: string }) {
+  static async registerTenant({ name, adminEmail, subscriptionPlanId, usersQuota, templateId, industryId }: { name: string, adminEmail: string, subscriptionPlanId?: string, usersQuota?: number, templateId?: string, industryId?: string }) {
     if (!name || !adminEmail) {
       throw new Error("Name and Admin Email are required.");
     }
@@ -71,7 +71,7 @@ export class CompanyService {
       adminEmail: normalizedEmail,
       subscriptionPlanId: subscriptionPlanId || undefined,
       usersQuota: usersQuota || 5,
-      industryId: (payload as any).industryId || undefined,
+      industryId: industryId || undefined,
       selected_template_id: templateId || undefined,
       status: "Suspended",
       subscriptionStatus: "pending_payment",
@@ -149,10 +149,10 @@ export class CompanyService {
         }));
         await DynamicField.insertMany(newFields);
       }
-    } else if ((payload as any).industryId) {
+    } else if (industryId) {
       // Provision Default Modules from Industry if no Template is selected
       const Industry = require("@/modules/owner/schemas/Industry").default;
-      const industry = await Industry.findById((payload as any).industryId).lean();
+      const industry = await Industry.findById(industryId).lean();
       if (industry && industry.defaultModules && industry.defaultModules.length > 0) {
         const companyModulesData = industry.defaultModules.map((mod: string, index: number) => ({
           company_id: newCompany._id,

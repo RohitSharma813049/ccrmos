@@ -37,6 +37,8 @@ export default function TenantDynamicFieldsPage() {
     target: string;
     type: string;
     required: boolean;
+    section: string;
+    order: number;
     options: string[];
     optionColors: Record<string, string>;
   }>({
@@ -44,6 +46,8 @@ export default function TenantDynamicFieldsPage() {
     target: "lead",
     type: "Text String",
     required: false,
+    section: "General",
+    order: 0,
     options: [],
     optionColors: {}
   });
@@ -104,7 +108,7 @@ export default function TenantDynamicFieldsPage() {
 
   const openCreateModal = () => {
     setIsEditMode(false);
-    setFormData({ name: "", target: activeTab === "all" ? "lead" : activeTab, type: "Text String", required: false, options: [], optionColors: {} });
+    setFormData({ name: "", target: activeTab === "all" ? "lead" : activeTab, type: "Text String", required: false, section: "General", order: 0, options: [], optionColors: {} });
     setIsModalOpen(true);
   };
 
@@ -116,6 +120,8 @@ export default function TenantDynamicFieldsPage() {
       target: field.target,
       type: field.type,
       required: field.required,
+      section: (field as any).section || "General",
+      order: (field as any).order || 0,
       options: field.options || [],
       optionColors: field.optionColors || {}
     });
@@ -337,6 +343,28 @@ export default function TenantDynamicFieldsPage() {
                 />
               </div>
               
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Section Name</label>
+                  <input 
+                    type="text" 
+                    value={formData.section}
+                    onChange={(e) => setFormData({...formData, section: e.target.value})}
+                    placeholder="e.g. Financials, General"
+                    className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Order/Sequence</label>
+                  <input 
+                    type="number" 
+                    value={formData.order}
+                    onChange={(e) => setFormData({...formData, order: parseInt(e.target.value) || 0})}
+                    className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                  />
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">Target Entity</label>
