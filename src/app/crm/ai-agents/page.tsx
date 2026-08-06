@@ -226,8 +226,9 @@ export default function AiAgentsPage() {
                 <input type="text" className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] text-slate-900 bg-white" placeholder="sk_test_..." />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[var(--foreground)] mb-1">Webhook URL</label>
+                <label className="block text-sm font-medium text-[var(--foreground)] mb-1">Webhook URL <span className="text-slate-400 font-normal">(Optional)</span></label>
                 <input type="text" className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] text-slate-900 bg-white" placeholder="https://yourdomain.com/webhook" />
+                <p className="text-xs text-slate-500 mt-1">Leave blank if you don't have a custom webhook URL yet.</p>
               </div>
               <div className="flex justify-end gap-3 pt-4 border-t mt-6">
                 <button type="button" onClick={() => setIsConfigApiOpen(false)} className="px-5 py-2 border rounded-lg text-[var(--foreground)] font-medium hover:bg-slate-50">Close</button>

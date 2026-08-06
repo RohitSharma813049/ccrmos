@@ -141,6 +141,9 @@ export default function ManageCompaniesPage() {
           suspended: (data.companies || []).filter((c: any) => c.status === "Suspended").length,
           avgUsers: data.companies?.length > 0 ? Math.round(data.companies.reduce((acc: number, c: any) => acc + (c.users || 0), 0) / data.companies.length) : 0
         });
+      } else {
+        const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+        console.error("Failed to fetch companies:", err);
       }
     } catch (error) {
       console.error("Failed to fetch companies", error);
