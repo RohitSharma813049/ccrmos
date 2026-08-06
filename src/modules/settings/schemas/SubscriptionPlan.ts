@@ -7,6 +7,9 @@ export interface ISubscriptionPlan extends Document {
   users: string;
   features: string[];
   maxCustomForms: number;
+  planType: "FIXED" | "CUSTOM";
+  allowedModules: string[];
+  permissions: Record<string, boolean>;
   isActive: boolean; // Soft delete flag
   createdAt: Date;
   updatedAt: Date;
@@ -20,6 +23,9 @@ const subscriptionPlanSchema = new Schema<ISubscriptionPlan>(
     users: { type: String, required: true },
     features: [{ type: String }],
     maxCustomForms: { type: Number, default: 2 },
+    planType: { type: String, enum: ["FIXED", "CUSTOM"], default: "FIXED" },
+    allowedModules: [{ type: String }],
+    permissions: { type: Schema.Types.Mixed, default: {} },
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }

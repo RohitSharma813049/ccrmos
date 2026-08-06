@@ -9,6 +9,8 @@ interface SubscriptionPlan {
   billing: "Monthly" | "Yearly";
   users: string;
   features: string[];
+  planType?: "FIXED" | "CUSTOM";
+  allowedModules?: string[];
   isActive?: boolean;
 }
 
@@ -28,9 +30,22 @@ export default function SubscriptionsClient() {
     price: 0,
     billing: "Monthly" as "Monthly" | "Yearly",
     users: "Up to 5",
-    features: [""] // Start with one empty feature input
+    features: [""],
+    planType: "FIXED" as "FIXED" | "CUSTOM",
+    allowedModules: [] as string[]
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const availableModules = [
+    { id: 'lead', label: 'Leads' },
+    { id: 'customer', label: 'Customers' },
+    { id: 'project', label: 'Projects' },
+    { id: 'task', label: 'Tasks' },
+    { id: 'order', label: 'Orders' },
+    { id: 'invoice', label: 'Invoices' },
+    { id: 'partner', label: 'Partners' },
+    { id: 'property', label: 'Properties' },
+  ];
 
   // Escape key to close modal
   useEffect(() => {
@@ -70,7 +85,9 @@ export default function SubscriptionsClient() {
       price: 0,
       billing: "Monthly",
       users: "Up to 5",
-      features: [""]
+      features: [""],
+      planType: "FIXED",
+      allowedModules: []
     });
     setIsModalOpen(true);
   };
@@ -83,9 +100,23 @@ export default function SubscriptionsClient() {
       price: plan.price,
       billing: plan.billing,
       users: plan.users,
-      features: plan.features.length > 0 ? plan.features : [""]
+      features: plan.features.length > 0 ? plan.features : [""],
+      planType: plan.planType || "FIXED",
+      allowedModules: plan.allowedModules || []
     });
     setIsModalOpen(true);
+  };
+
+  const handleModuleToggle = (moduleId: string) => {
+    setFormData(prev => {
+      const isSelected = prev.allowedModules.includes(moduleId);
+      return {
+        ...prev,
+        allowedModules: isSelected 
+          ? prev.allowedModules.filter(m => m !== moduleId)
+          : [...prev.allowedModules, moduleId]
+      };
+    });
   };
 
   const handleFeatureChange = (index: number, value: string) => {
@@ -221,7 +252,10 @@ export default function SubscriptionsClient() {
                 ${plan.price}
                 <span className="ml-1 text-xl font-medium text-muted-foreground">/{plan.billing === "Monthly" ? "mo" : "yr"}</span>
               </div>
-              <p className="mt-4 text-sm text-primary font-bold bg-primary/10 inline-block px-3 py-1 rounded-full">{plan.users} Users</p>
+              <div className="flex gap-2 mt-4">
+                <p className="text-sm text-primary font-bold bg-primary/10 inline-block px-3 py-1 rounded-full">{plan.users} Users</p>
+                <p className="text-sm text-blue-600 font-bold bg-blue-50 inline-block px-3 py-1 rounded-full">{plan.planType || 'FIXED'} PLAN</p>
+              </div>
               
               <div className="mt-8 pt-6 border-t border-border flex-1">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">Included Features</p>
@@ -316,6 +350,39 @@ export default function SubscriptionsClient() {
                     placeholder="e.g. Up to 20, Unlimited" 
                   />
                 </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-foreground mb-2">Plan Type</label>
+                    <select 
+                      value={formData.planType}
+                      onChange={(e) => setFormData({...formData, planType: e.target.value as "FIXED" | "CUSTOM"})}
+                      className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none transition-all shadow-sm"
+                    >
+                      <option value="FIXED">Fixed (Pre-selected Modules)</option>
+                      <option value="CUSTOM">Custom (Customer Choice)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {formData.planType === 'FIXED' && (
+                  <div>
+                    <label className="block text-sm font-semibold text-foreground mb-2">Allowed Modules</label>
+                    <div className="grid grid-cols-2 gap-3 bg-card/50 p-4 border border-border rounded-xl max-h-48 overflow-y-auto">
+                      {availableModules.map(mod => (
+                        <label key={mod.id} className="flex items-center space-x-2 cursor-pointer p-1">
+                          <input 
+                            type="checkbox" 
+                            checked={formData.allowedModules.includes(mod.id)}
+                            onChange={() => handleModuleToggle(mod.id)}
+                            className="w-4 h-4 text-primary rounded border-border focus:ring-primary"
+                          />
+                          <span className="text-sm text-foreground font-medium">{mod.label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <div className="pt-4 border-t border-border">
                   <div className="flex items-center justify-between mb-4">

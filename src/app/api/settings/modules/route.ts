@@ -46,11 +46,21 @@ export async function GET(req: Request) {
       }
     } else if (companyId) {
       const mongoose = require("mongoose");
-      query.$or = [
+      const company = await Company.findById(companyId).select('industryId');
+      
+      const orConditions: any[] = [
         { tenantScope: "Global" },
-        { tenantScope: "Industry" }, // Note: in a real scenario, this matches company's industry
         { companyId: new mongoose.Types.ObjectId(companyId) }
       ];
+
+      if (company && company.industryId) {
+        orConditions.push({ 
+          tenantScope: "Industry",
+          industryId: company.industryId 
+        });
+      }
+
+      query.$or = orConditions;
     } else {
       query.tenantScope = { $in: ["Global", "Industry"] };
     }

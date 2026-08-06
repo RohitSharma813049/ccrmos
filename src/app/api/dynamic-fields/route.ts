@@ -54,11 +54,22 @@ export async function GET(req: Request) {
     } else if (companyId) {
       // Normal tenant
       const mongoose = require("mongoose");
-      query.$or = [
+      const Company = (await import("@/modules/companies/schemas/Company")).default;
+      const company = await Company.findById(companyId).select('industryId');
+      
+      const orConditions: any[] = [
         { tenantScope: "Global" },
-        { tenantScope: "Industry" }, // In a real app, this should filter by the specific company's industryId
         { companyId: new mongoose.Types.ObjectId(companyId) }
       ];
+
+      if (company && company.industryId) {
+        orConditions.push({ 
+          tenantScope: "Industry",
+          industryId: company.industryId 
+        });
+      }
+
+      query.$or = orConditions;
     } else {
       query.tenantScope = { $in: ["Global", "Industry"] };
     }
