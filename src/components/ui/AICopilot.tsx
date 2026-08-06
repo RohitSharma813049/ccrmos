@@ -32,15 +32,16 @@ export default function AICopilot() {
     setIsLoading(true);
 
     try {
+      const currentMessages = [...messages, { role: "user", content: userMessage }];
       const res = await fetch("/api/ai/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: userMessage })
+        body: JSON.stringify({ messages: currentMessages })
       });
 
       if (res.ok) {
         const data = await res.json();
-        setMessages(prev => [...prev, { role: "assistant", content: data.reply }]);
+        setMessages(prev => [...prev, { role: "assistant", content: data.content }]);
       } else {
         setMessages(prev => [...prev, { role: "assistant", content: "Sorry, I'm having trouble connecting right now." }]);
       }

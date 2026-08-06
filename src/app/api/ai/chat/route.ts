@@ -1,77 +1,65 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
-import mongoose from "mongoose";
-export async function POST(req: NextRequest) {
+import Agent from "@/modules/ai/schemas/Agent";
+import { requireAuthenticatedUser } from "@/lib/auth-utils";
+import { buildTenantQuery } from "@/lib/access-control";
+
+export async function POST(req: Request) {
+  await dbConnect();
+  
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const { prompt } = await req.json();
-
-    if (!prompt) {
-      return NextResponse.json({ error: "Prompt is required" }, { status: 400 });
-    }
-
-    await dbConnect();
+    const user = await requireAuthenticatedUser();
+    const tenantQuery = buildTenantQuery(user);
     
-    // We fetch SystemSettings from the mongoose connection
-    const db = mongoose.connection.db;
-    const settingsColl = db?.collection("systemsettings");
-    let aiConfig: any = null;
-    if (settingsColl) {
-      const companyId = (session.user as any).companyId ? new mongoose.Types.ObjectId((session.user as any).companyId) : null;
-      aiConfig = await settingsColl.findOne({ key: "ai_config", companyId });
-      if (!aiConfig) {
-        aiConfig = await settingsColl.findOne({ key: "ai_config", companyId: null });
-      }
-    }
-
-    const groqKey = aiConfig?.value?.groqKey;
-    const groqModel = aiConfig?.value?.groqModel || "llama-3.3-70b-versatile";
-
-    if (groqKey) {
-      // Call Groq API
-      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${groqKey}`
-        },
-        body: JSON.stringify({
-          model: groqModel,
-          messages: [{ role: "system", content: "You are a helpful CRM assistant." }, { role: "user", content: prompt }]
-        })
+    // Find the active AI Agent for this tenant
+    const agent = await Agent.findOne({ ...tenantQuery, active: true }).sort({ createdAt: -1 });
+    
+    if (!agent) {
+      return NextResponse.json({ 
+        role: "assistant", 
+        content: "Hello! I am the default AI Assistant. It looks like you haven't configured a custom AI Agent for your company yet. Please go to Settings > AI Agents to set one up!" 
       });
-
-      if (response.ok) {
-        const data = await response.json();
-        const reply = data.choices[0]?.message?.content || "I couldn't generate a response.";
-        return NextResponse.json({ reply });
-      }
     }
 
-    // Fallback if no keys
-    await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 500));
-    let reply = "I'm a prototype AI Co-Pilot! Please configure an AI API key (like Groq) in the Control Center to enable real responses.";
-
-    const p = prompt.toLowerCase();
-    if (p.includes("draft") && p.includes("email")) {
-      reply = `Here's a draft email for your lead:\n\nSubject: Following up on your inquiry\n\nHi there,\n\nI noticed you recently showed interest in our platform. I'd love to jump on a quick 10-minute call to see how we can help your business grow.\n\nAre you available sometime this Tuesday or Wednesday?\n\nBest,\n${session.user.name || 'Your Sales Rep'}`;
-    } else if (p.includes("summarize") && p.includes("lead")) {
-      reply = "Based on the recent activity, this lead has been quite engaged. They opened our last 3 emails and visited the pricing page twice yesterday. I recommend reaching out via WhatsApp to schedule a demo.";
-    } else if (p.includes("hi") || p.includes("hello")) {
-      reply = "Hello there! I'm ready to help you manage your CRM. What would you like to do?";
-    } else if (p.includes("discount") || p.includes("coupon")) {
-      reply = "You can manage your coupons in the Control Center under 'Coupons & Discounts'. Would you like me to draft a promotional email for you?";
+    const { messages } = await req.json();
+    if (!messages || !Array.isArray(messages)) {
+      return NextResponse.json({ error: "Messages array is required" }, { status: 400 });
     }
 
-    return NextResponse.json({ reply });
+    const lastMessage = messages[messages.length - 1];
+
+    // NOTE: This is a mocked LLM response for demonstration.
+    // In production, you would pass `agent.prompt` as the system message
+    // and `messages` as the conversation history to OpenAI or Anthropic.
+
+    const userFirstName = user.firstName || "User";
+    const agentName = agent.name || "AI Agent";
+    
+    // Generate a contextual mock response
+    let mockResponse = `Hi ${userFirstName}, I am ${agentName}. `;
+    
+    const userMessage = lastMessage?.content?.toLowerCase() || "";
+    
+    if (userMessage.includes("help") || userMessage.includes("what can you do")) {
+      mockResponse += `Based on my instructions, my primary role is: ${agent.role}. I am here to help you manage your CRM data effectively.`;
+    } else if (userMessage.includes("lead") || userMessage.includes("customer")) {
+      mockResponse += `I'd be happy to help you with your leads and customers. Could you provide more specific details?`;
+    } else if (userMessage.includes("hello") || userMessage.includes("hi")) {
+      mockResponse += `How can I assist you with your CRM today?`;
+    } else {
+      mockResponse += `I've received your message: "${lastMessage?.content}". (This is a simulated AI response. To generate real responses, integrate an OpenAI API key in this route).`;
+    }
+
+    // Simulate network delay for realism
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    return NextResponse.json({
+      role: "assistant",
+      content: mockResponse
+    });
+
   } catch (error: any) {
-    console.error("AI Chat Error:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    console.error("AI Chat API Error:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
