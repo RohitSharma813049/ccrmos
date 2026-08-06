@@ -18,6 +18,8 @@ export default function AiAgentsPage() {
   const [agents, setAgents] = useState<Agent[]>([])
   const [loading, setLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState<'agents' | 'call-list' | 'call-history'>('agents')
+  const [isConfigApiOpen, setIsConfigApiOpen] = useState(false)
 
   useEffect(() => {
     fetchAgents()
@@ -59,15 +61,24 @@ export default function AiAgentsPage() {
     <div className="min-h-full rounded-2xl bg-[var(--card)] p-8 text-[var(--foreground)] shadow-sm border border-[var(--border)] font-sans">
       {/* Top Navigation Pills */}
       <div className="flex gap-2 mb-8 p-1 bg-[var(--border)]/50 rounded-xl max-w-fit">
-        <button className="flex items-center gap-2 px-8 py-2.5 bg-white rounded-lg text-sm font-semibold shadow-sm text-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] transition-shadow">
+        <button 
+          onClick={() => setActiveTab('agents')}
+          className={`flex items-center gap-2 px-8 py-2.5 rounded-lg text-sm font-semibold transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] ${activeTab === 'agents' ? 'bg-white shadow-sm text-[var(--primary)]' : 'text-[var(--muted-foreground)] hover:text-[var(--foreground)]'}`}
+        >
           <Users className="w-4 h-4" />
           Agents
         </button>
-        <button className="flex items-center gap-2 px-8 py-2.5 text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] rounded-lg">
+        <button 
+          onClick={() => setActiveTab('call-list')}
+          className={`flex items-center gap-2 px-8 py-2.5 rounded-lg text-sm font-semibold transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] ${activeTab === 'call-list' ? 'bg-white shadow-sm text-[var(--primary)]' : 'text-[var(--muted-foreground)] hover:text-[var(--foreground)]'}`}
+        >
           <Phone className="w-4 h-4" />
           Call List
         </button>
-        <button className="flex items-center gap-2 px-8 py-2.5 text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] rounded-lg">
+        <button 
+          onClick={() => setActiveTab('call-history')}
+          className={`flex items-center gap-2 px-8 py-2.5 rounded-lg text-sm font-semibold transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] ${activeTab === 'call-history' ? 'bg-white shadow-sm text-[var(--primary)]' : 'text-[var(--muted-foreground)] hover:text-[var(--foreground)]'}`}
+        >
           <Clock className="w-4 h-4" />
           Call History
         </button>
@@ -80,7 +91,10 @@ export default function AiAgentsPage() {
           <p className="text-[var(--muted-foreground)] text-sm">Manage your AI voice agents</p>
         </div>
         <div className="flex gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-[var(--border)] hover:border-[var(--primary)] hover:text-[var(--primary)] rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] shadow-sm">
+          <button 
+            onClick={() => setIsConfigApiOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-[var(--border)] hover:border-[var(--primary)] hover:text-[var(--primary)] rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] shadow-sm"
+          >
             <LinkIcon className="w-4 h-4" />
             Connect API
           </button>
@@ -94,8 +108,10 @@ export default function AiAgentsPage() {
         </div>
       </div>
 
-      {/* Agents Grid */}
-      {loading ? (
+      {/* Tab Content */}
+      {activeTab === 'agents' && (
+        <>
+          {loading ? (
         <div className="py-12 flex justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--primary)]"></div>
         </div>
@@ -165,6 +181,24 @@ export default function AiAgentsPage() {
           ))}
         </div>
       )}
+        </>
+      )}
+
+      {activeTab === 'call-list' && (
+        <div className="py-12 flex flex-col items-center justify-center text-center bg-white rounded-[12px] border border-[var(--border)] shadow-sm p-6">
+          <Phone className="w-12 h-12 text-[var(--muted-foreground)] mb-4" />
+          <h3 className="text-lg font-bold text-[var(--foreground)] mb-2">Call List</h3>
+          <p className="text-[var(--muted-foreground)]">Your active calls and queues will appear here.</p>
+        </div>
+      )}
+
+      {activeTab === 'call-history' && (
+        <div className="py-12 flex flex-col items-center justify-center text-center bg-white rounded-[12px] border border-[var(--border)] shadow-sm p-6">
+          <Clock className="w-12 h-12 text-[var(--muted-foreground)] mb-4" />
+          <h3 className="text-lg font-bold text-[var(--foreground)] mb-2">Call History</h3>
+          <p className="text-[var(--muted-foreground)]">Past call logs and recordings will appear here.</p>
+        </div>
+      )}
 
       {/* Add Agent Modal */}
       {isModalOpen && (
@@ -175,6 +209,33 @@ export default function AiAgentsPage() {
             fetchAgents()
           }}
         />
+      )}
+      {/* Config API Modal */}
+      {isConfigApiOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+            <div className="flex items-center justify-between p-6 border-b border-slate-100">
+              <h2 className="text-xl font-bold text-[var(--foreground)]">API Configuration</h2>
+              <button onClick={() => setIsConfigApiOpen(false)} className="text-slate-400 hover:text-slate-600 p-2">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-[var(--foreground)] mb-1">API Key</label>
+                <input type="text" className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] text-slate-900 bg-white" placeholder="sk_test_..." />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[var(--foreground)] mb-1">Webhook URL</label>
+                <input type="text" className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] text-slate-900 bg-white" placeholder="https://yourdomain.com/webhook" />
+              </div>
+              <div className="flex justify-end gap-3 pt-4 border-t mt-6">
+                <button type="button" onClick={() => setIsConfigApiOpen(false)} className="px-5 py-2 border rounded-lg text-[var(--foreground)] font-medium hover:bg-slate-50">Close</button>
+                <button type="button" onClick={() => { toast.success('API configuration saved!'); setIsConfigApiOpen(false); }} className="px-5 py-2 bg-[var(--primary)] text-white rounded-lg font-medium hover:bg-[var(--primary)]">Save Settings</button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

@@ -26,6 +26,7 @@ export async function POST(req: Request) {
 
     if (user) {
       body.companyId = user.companyId || (user.hierarchyLevel === 2 ? user.id : user.founderId) || user.id;
+      body.founderId = user.hierarchyLevel === 2 ? user.id : user.founderId || user.id;
     }
 
     const newAgent = await Agent.create(body);
