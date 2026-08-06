@@ -12,12 +12,14 @@ interface Agent {
   languages: string;
   phone: string;
   maxDuration: string;
+  greetingAudioUrl?: string;
 }
 
 export default function AiAgentsPage() {
   const [agents, setAgents] = useState<Agent[]>([])
   const [loading, setLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingAgent, setEditingAgent] = useState<Agent | null>(null)
   const [activeTab, setActiveTab] = useState<'agents' | 'call-list' | 'call-history'>('agents')
 
   useEffect(() => {
@@ -98,7 +100,7 @@ export default function AiAgentsPage() {
             Connect API
           </a>
           <button 
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => { setEditingAgent(null); setIsModalOpen(true); }}
             className="flex items-center gap-2 px-4 py-2 bg-[var(--primary)] text-white hover:bg-[var(--primary)] rounded-lg text-sm font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
           >
             <Plus className="w-4 h-4" />
@@ -156,6 +158,12 @@ export default function AiAgentsPage() {
                   <Phone className="w-4 h-4 text-[var(--muted-foreground)]" />
                   {agent.phone || 'No phone assigned'}
                 </div>
+                {agent.greetingAudioUrl && (
+                  <div className="flex items-center gap-3 text-sm text-[var(--foreground)]">
+                    <AudioLines className="w-4 h-4 text-[var(--primary)]" />
+                    Custom Greeting Set
+                  </div>
+                )}
                 <div className="flex items-center gap-3 text-sm text-[var(--foreground)]">
                   <Clock className="w-4 h-4 text-[var(--muted-foreground)]" />
                   Max {agent.maxDuration}
@@ -164,7 +172,10 @@ export default function AiAgentsPage() {
 
               {/* Actions */}
               <div className="flex gap-3">
-                <button className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white border border-[var(--border)] hover:border-[var(--primary)] hover:text-[var(--primary)] rounded-lg text-sm font-medium transition-colors text-[var(--foreground)] shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]">
+                <button 
+                  onClick={() => { setEditingAgent(agent); setIsModalOpen(true); }}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white border border-[var(--border)] hover:border-[var(--primary)] hover:text-[var(--primary)] rounded-lg text-sm font-medium transition-colors text-[var(--foreground)] shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
+                >
                   <Edit2 className="w-3.5 h-3.5" />
                   Edit
                 </button>
@@ -199,12 +210,17 @@ export default function AiAgentsPage() {
         </div>
       )}
 
-      {/* Add Agent Modal */}
+      {/* Add/Edit Agent Modal */}
       {isModalOpen && (
         <AgentFormModal 
-          onClose={() => setIsModalOpen(false)}
+          agentToEdit={editingAgent}
+          onClose={() => {
+            setIsModalOpen(false)
+            setEditingAgent(null)
+          }}
           onSuccess={() => {
             setIsModalOpen(false)
+            setEditingAgent(null)
             fetchAgents()
           }}
         />
@@ -224,14 +240,23 @@ const AI_ROLES = [
 
 const LANGUAGES = ['English', 'Hindi', 'Hinglish','Spanish', 'French', 'German', 'Mandarin'];
 
-function AgentFormModal({ onClose, onSuccess }: { onClose: () => void, onSuccess: () => void }) {
+function AgentFormModal({ onClose, onSuccess, agentToEdit }: { onClose: () => void, onSuccess: () => void, agentToEdit?: Agent | null }) {
+  const [mediaOptions, setMediaOptions] = useState<{url: string, name: string}[]>([])
+
+  useEffect(() => {
+    fetch('/api/ai/media').then(r => r.json()).then(d => {
+      if (d.media) setMediaOptions(d.media);
+    }).catch(console.error)
+  }, [])
+
   const [formData, setFormData] = useState({
-    name: '',
-    role: '',
-    languages: 'English',
-    phone: '',
-    maxDuration: '5:00',
-    status: 'ACTIVE'
+    name: agentToEdit?.name || '',
+    role: agentToEdit?.role || '',
+    languages: agentToEdit?.languages || 'English',
+    phone: agentToEdit?.phone || '',
+    maxDuration: agentToEdit?.maxDuration || '5:00',
+    status: agentToEdit?.status || 'ACTIVE',
+    greetingAudioUrl: agentToEdit?.greetingAudioUrl || ''
   })
   const [saving, setSaving] = useState(false)
 
@@ -240,15 +265,20 @@ function AgentFormModal({ onClose, onSuccess }: { onClose: () => void, onSuccess
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (saving) return; // Prevent double submission
     setSaving(true)
     try {
-      const res = await fetch('/api/ai/agents', {
-        method: 'POST',
+      const isEdit = !!agentToEdit;
+      const url = isEdit ? `/api/ai/agents/${agentToEdit._id}` : '/api/ai/agents';
+      const method = isEdit ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       })
       if (res.ok) {
-        toast.success('Agent created successfully!')
+        toast.success(`Agent ${isEdit ? 'updated' : 'created'} successfully!`)
         onSuccess()
       } else {
         toast.error('Failed to create agent')
@@ -265,7 +295,7 @@ function AgentFormModal({ onClose, onSuccess }: { onClose: () => void, onSuccess
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b border-slate-100">
-          <h2 className="text-xl font-bold text-[var(--foreground)]">Create AI Agent</h2>
+          <h2 className="text-xl font-bold text-[var(--foreground)]">{agentToEdit ? 'Edit AI Agent' : 'Create AI Agent'}</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-2">
             <X className="w-5 h-5" />
           </button>
@@ -299,12 +329,21 @@ function AgentFormModal({ onClose, onSuccess }: { onClose: () => void, onSuccess
             <label className="block text-sm font-medium text-[var(--foreground)] mb-1">Phone Number (Optional)</label>
             <input type="text" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] text-slate-900 bg-white" placeholder="+1234567890" />
           </div>
+          <div>
+            <label className="block text-sm font-medium text-[var(--foreground)] mb-1">Greeting Audio</label>
+            <select value={formData.greetingAudioUrl} onChange={e => setFormData({...formData, greetingAudioUrl: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] text-slate-900 bg-white appearance-none">
+              <option value="">Default AI Greeting</option>
+              {mediaOptions.map(m => (
+                <option key={m.url} value={m.url}>{m.name}</option>
+              ))}
+            </select>
+          </div>
           
           <div className="flex justify-end gap-3 pt-4 border-t mt-6">
             <button type="button" onClick={onClose} className="px-5 py-2 border rounded-lg text-[var(--foreground)] font-medium hover:bg-slate-50">Cancel</button>
             {hasPermission && (
               <button type="submit" disabled={saving || !formData.role} className="px-5 py-2 bg-[var(--primary)] text-white rounded-lg font-medium hover:bg-[var(--primary)] disabled:opacity-50">
-                {saving ? 'Creating...' : 'Create Agent'}
+                {saving ? (agentToEdit ? 'Updating...' : 'Creating...') : (agentToEdit ? 'Update Agent' : 'Create Agent')}
               </button>
             )}
           </div>

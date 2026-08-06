@@ -9,6 +9,7 @@ export interface IAgent extends Document {
   status: "ACTIVE" | "INACTIVE";
   companyId: mongoose.Types.ObjectId;
   founderId?: mongoose.Types.ObjectId;
+  greetingAudioUrl?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -25,7 +26,8 @@ const AgentSchema: Schema<IAgent> = new Schema({
     default: "ACTIVE"
   },
   companyId: { type: Schema.Types.ObjectId, ref: "Company", required: true },
-  founderId: { type: Schema.Types.ObjectId, ref: "User" }
+  founderId: { type: Schema.Types.ObjectId, ref: "User" },
+  greetingAudioUrl: { type: String }
 }, { timestamps: true });
 
 const Agent: Model<IAgent> = mongoose.models.Agent || mongoose.model<IAgent>("Agent", AgentSchema);

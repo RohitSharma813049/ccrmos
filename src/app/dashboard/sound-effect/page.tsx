@@ -1,7 +1,8 @@
 'use client'
 
 import React, { useState } from 'react'
-import { AudioLines, Sparkles, AlertCircle, PlayCircle, Lightbulb } from 'lucide-react'
+import { AudioLines, Sparkles, AlertCircle, PlayCircle, Lightbulb, Save } from 'lucide-react'
+import { toast } from 'react-hot-toast'
 
 const examplePrompts = [
   "Thunder and lightning storm with heavy rain",
@@ -24,6 +25,44 @@ export default function SoundEffectPage() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [audioUrl, setAudioUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
+
+  const handleSaveToLibrary = async () => {
+    if (!audioUrl) return;
+    setIsSaving(true);
+    try {
+      const response = await fetch(audioUrl);
+      const blob = await response.blob();
+      
+      const formData = new FormData();
+      formData.append('file', blob, 'sound-effect.mp3');
+
+      const uploadRes = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (!uploadRes.ok) throw new Error("Cloud storage upload failed. Make sure your R2 keys are configured in .env.");
+      const uploadData = await uploadRes.json();
+
+      const mediaRes = await fetch('/api/ai/media', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: prompt.substring(0, 50) || 'Generated Sound Effect',
+          type: 'audio',
+          url: uploadData.url
+        })
+      });
+
+      if (!mediaRes.ok) throw new Error("Failed to save to database");
+      toast.success("Saved to Media Library!");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to save");
+    } finally {
+      setIsSaving(false);
+    }
+  }
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
@@ -193,7 +232,17 @@ export default function SoundEffectPage() {
                   </div>
                   <h3 className="font-semibold text-slate-700">Sound Ready!</h3>
                   <audio controls src={audioUrl} className="w-full max-w-[250px]" autoPlay></audio>
-                  <a href={audioUrl} download="sound-effect.mp3" className="mt-2 text-sm text-fuchsia-600 hover:underline">Download MP3</a>
+                  <div className="flex gap-4 mt-2">
+                    <a href={audioUrl} download="sound-effect.mp3" className="text-sm text-fuchsia-600 hover:underline">Download MP3</a>
+                    <button 
+                      onClick={handleSaveToLibrary}
+                      disabled={isSaving}
+                      className="text-sm text-blue-600 hover:underline flex items-center gap-1 disabled:opacity-50"
+                    >
+                      <Save className="w-4 h-4" />
+                      {isSaving ? 'Saving...' : 'Save to Library'}
+                    </button>
+                  </div>
                 </div>
               ) : isGenerating ? (
                 <div className="animate-pulse flex flex-col items-center gap-4">
