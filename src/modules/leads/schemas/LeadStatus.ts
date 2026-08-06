@@ -19,7 +19,11 @@ const LeadStatusSchema: Schema<ILeadStatus> = new Schema({
   active: { type: Boolean, default: true },
   color: { type: String, default: "#6b7280" },
   iconColor: { type: String, default: "bg-blue-500" },
-  category: { type: String, default: "Interested" },
+  category: { 
+    type: String, 
+    enum: ["Fresh Lead", "Interested", "Not Interested", "Neutral", "Deal Closed", "Deal Cancelled"],
+    default: "Fresh Lead" 
+  },
   companyId: { type: Schema.Types.ObjectId, ref: "Company" },
   founderId: { type: Schema.Types.ObjectId, ref: "User" }
 }, { timestamps: true });

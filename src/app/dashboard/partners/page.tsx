@@ -10,6 +10,7 @@ import {
   X
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
+import DocumentUpload, { DocumentInfo } from '@/components/ui/DocumentUpload'
 
 interface Partner {
   _id: string;
@@ -281,7 +282,8 @@ function PartnerFormModal({ onClose, onSuccess }: { onClose: () => void, onSucce
     type: 'Individual',
     experience: '',
     expDesc: '',
-    teamSize: '0'
+    teamSize: '0',
+    documents: [] as DocumentInfo[]
   })
   const [saving, setSaving] = useState(false)
 
@@ -380,6 +382,15 @@ function PartnerFormModal({ onClose, onSuccess }: { onClose: () => void, onSucce
               <label className="block text-sm font-medium text-slate-700 mb-1">Exp. Description</label>
               <input type="text" placeholder="e.g. Residential" value={formData.expDesc} onChange={e => setFormData({...formData, expDesc: e.target.value})} className="w-full px-4 py-2 border rounded-lg" />
             </div>
+          </div>
+
+          <div className="pt-4 mt-2">
+            <label className="block text-sm font-medium text-slate-700 mb-2">Documents (Agreements, KYC, etc.)</label>
+            <DocumentUpload 
+              documents={formData.documents}
+              onChange={(docs) => setFormData({ ...formData, documents: docs })}
+              maxFiles={5}
+            />
           </div>
 
           <div className="flex justify-end gap-3 pt-6 border-t mt-6">

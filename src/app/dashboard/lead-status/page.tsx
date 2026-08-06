@@ -246,7 +246,7 @@ export default function LeadStatusPage() {
 function LeadStatusFormModal({ onClose, onSuccess }: { onClose: () => void, onSuccess: () => void }) {
   const [formData, setFormData] = useState({
     name: '',
-    category: 'Interested',
+    category: 'Fresh Lead',
     iconColor: 'bg-blue-500'
   })
   const [saving, setSaving] = useState(false)
@@ -303,9 +303,12 @@ function LeadStatusFormModal({ onClose, onSuccess }: { onClose: () => void, onSu
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Category</label>
             <select value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} className="w-full px-4 py-2 border rounded-lg">
+              <option value="Fresh Lead">Fresh Lead</option>
               <option value="Interested">Interested</option>
               <option value="Not Interested">Not Interested</option>
               <option value="Neutral">Neutral</option>
+              <option value="Deal Closed">Deal Closed</option>
+              <option value="Deal Cancelled">Deal Cancelled</option>
             </select>
           </div>
 

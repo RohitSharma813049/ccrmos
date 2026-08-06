@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import PageHeader from '@/components/ui/PageHeader';
 import { toast } from 'react-hot-toast';
+import DocumentUpload, { DocumentInfo } from '@/components/ui/DocumentUpload';
 
 export default function PropertiesClient() {
   const [properties, setProperties] = useState<any[]>([]);
@@ -25,6 +26,7 @@ export default function PropertiesClient() {
     squareFeet: "",
     status: "Available",
     type: "House",
+    documents: [] as DocumentInfo[]
   };
   const [formData, setFormData] = useState<any>(initialForm);
   const [saving, setSaving] = useState(false);
@@ -97,6 +99,7 @@ export default function PropertiesClient() {
       squareFeet: prop.squareFeet || "",
       status: prop.status || "Available",
       type: prop.type || "House",
+      documents: prop.documents || []
     });
     setIsModalOpen(true);
   };
@@ -317,6 +320,15 @@ export default function PropertiesClient() {
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">Description</label>
                 <textarea rows={4} value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full px-4 py-2 border border-border rounded-lg bg-card resize-none" placeholder="Describe the property..." />
+              </div>
+
+              <div className="pt-2">
+                <label className="block text-sm font-medium text-foreground mb-2">Documents & Brochures</label>
+                <DocumentUpload 
+                  documents={formData.documents}
+                  onChange={(docs) => setFormData({ ...formData, documents: docs })}
+                  maxFiles={10}
+                />
               </div>
             </form>
 

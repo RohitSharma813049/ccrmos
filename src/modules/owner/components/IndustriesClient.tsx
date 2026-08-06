@@ -14,7 +14,31 @@ export default function IndustriesClient() {
     name: '',
     description: '',
     icon: '',
+    defaultModules: [] as string[],
   });
+
+  const availableModules = [
+    { id: 'lead', label: 'Leads' },
+    { id: 'customer', label: 'Customers' },
+    { id: 'project', label: 'Projects' },
+    { id: 'task', label: 'Tasks' },
+    { id: 'order', label: 'Orders' },
+    { id: 'invoice', label: 'Invoices' },
+    { id: 'partner', label: 'Partners' },
+    { id: 'property', label: 'Properties' },
+  ];
+
+  const handleModuleToggle = (moduleId: string) => {
+    setFormData(prev => {
+      const isSelected = prev.defaultModules.includes(moduleId);
+      return {
+        ...prev,
+        defaultModules: isSelected 
+          ? prev.defaultModules.filter(m => m !== moduleId)
+          : [...prev.defaultModules, moduleId]
+      };
+    });
+  };
 
   const fetchIndustries = async () => {
     try {
@@ -78,9 +102,10 @@ export default function IndustriesClient() {
         name: industry.name || '',
         description: industry.description || '',
         icon: industry.icon || '',
+        defaultModules: industry.defaultModules || [],
       });
     } else {
-      setFormData({ name: '', description: '', icon: '' });
+      setFormData({ name: '', description: '', icon: '', defaultModules: [] });
     }
     setIsModalOpen(true);
   };
@@ -164,6 +189,24 @@ export default function IndustriesClient() {
                   className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all"
                 />
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Default Modules</label>
+                <div className="grid grid-cols-2 gap-3 bg-gray-50 p-4 border border-gray-200 rounded-xl max-h-48 overflow-y-auto">
+                  {availableModules.map(mod => (
+                    <label key={mod.id} className="flex items-center space-x-2 cursor-pointer p-1">
+                      <input 
+                        type="checkbox" 
+                        checked={formData.defaultModules.includes(mod.id)}
+                        onChange={() => handleModuleToggle(mod.id)}
+                        className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                      />
+                      <span className="text-sm text-gray-700 font-medium">{mod.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
               <button 
                 type="submit" 
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-xl transition-all"

@@ -71,6 +71,7 @@ export class CompanyService {
       adminEmail: normalizedEmail,
       subscriptionPlanId: subscriptionPlanId || undefined,
       usersQuota: usersQuota || 5,
+      industryId: (payload as any).industryId || undefined,
       selected_template_id: templateId || undefined,
       status: "Suspended",
       subscriptionStatus: "pending_payment",
@@ -99,12 +100,12 @@ export class CompanyService {
     
     // Provision Default Lead Statuses
     const defaultStatuses = [
-      { name: 'New', color: '#3b82f6', isTerminal: false },
-      { name: 'Contacted', color: '#f59e0b', isTerminal: false },
-      { name: 'In Progress', color: '#8b5cf6', isTerminal: false },
-      { name: 'Qualified', color: '#10b981', isTerminal: false },
-      { name: 'Closed Won', color: '#059669', isTerminal: true },
-      { name: 'Closed Lost', color: '#ef4444', isTerminal: true }
+      { name: 'New', category: 'Fresh Lead', color: '#3b82f6' },
+      { name: 'Contacted', category: 'Interested', color: '#f59e0b' },
+      { name: 'In Progress', category: 'Neutral', color: '#8b5cf6' },
+      { name: 'Qualified', category: 'Interested', color: '#10b981' },
+      { name: 'Closed Won', category: 'Deal Closed', color: '#059669' },
+      { name: 'Closed Lost', category: 'Deal Cancelled', color: '#ef4444' }
     ];
     
     const statusesToInsert = defaultStatuses.map((st, i) => ({
@@ -147,6 +148,21 @@ export class CompanyService {
           updatedAt: undefined
         }));
         await DynamicField.insertMany(newFields);
+      }
+    } else if ((payload as any).industryId) {
+      // Provision Default Modules from Industry if no Template is selected
+      const Industry = require("@/modules/owner/schemas/Industry").default;
+      const industry = await Industry.findById((payload as any).industryId).lean();
+      if (industry && industry.defaultModules && industry.defaultModules.length > 0) {
+        const companyModulesData = industry.defaultModules.map((mod: string, index: number) => ({
+          company_id: newCompany._id,
+          module_id: mod,
+          visible: true,
+          display_name: mod.charAt(0).toUpperCase() + mod.slice(1),
+          sort_order: index,
+          is_customized: false,
+        }));
+        await CompanyModule.insertMany(companyModulesData);
       }
     }
     
