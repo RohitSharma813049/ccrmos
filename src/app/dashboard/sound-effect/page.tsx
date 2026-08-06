@@ -41,7 +41,7 @@ export default function SoundEffectPage() {
       if (res.status === 503) {
         // Mock fallback if API key is missing
         await new Promise(r => setTimeout(r, 2000));
-        setError("ElevenLabs API Key is missing. This is a mock response.");
+        setError("ElevenLabs API Key is missing. Please configure it in Settings > API & Integrations. Using mock audio for now.");
         setAudioUrl("https://actions.google.com/sounds/v1/weather/rain_on_roof.ogg");
         setIsGenerating(false);
         return;

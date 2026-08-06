@@ -19,7 +19,6 @@ export default function AiAgentsPage() {
   const [loading, setLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<'agents' | 'call-list' | 'call-history'>('agents')
-  const [isConfigApiOpen, setIsConfigApiOpen] = useState(false)
 
   useEffect(() => {
     fetchAgents()
@@ -91,13 +90,13 @@ export default function AiAgentsPage() {
           <p className="text-[var(--muted-foreground)] text-sm">Manage your AI voice agents</p>
         </div>
         <div className="flex gap-3">
-          <button 
-            onClick={() => setIsConfigApiOpen(true)}
+          <a 
+            href="/dashboard/settings/integrations"
             className="flex items-center gap-2 px-4 py-2 bg-white border border-[var(--border)] hover:border-[var(--primary)] hover:text-[var(--primary)] rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] shadow-sm"
           >
             <LinkIcon className="w-4 h-4" />
             Connect API
-          </button>
+          </a>
           <button 
             onClick={() => setIsModalOpen(true)}
             className="flex items-center gap-2 px-4 py-2 bg-[var(--primary)] text-white hover:bg-[var(--primary)] rounded-lg text-sm font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
@@ -210,34 +209,7 @@ export default function AiAgentsPage() {
           }}
         />
       )}
-      {/* Config API Modal */}
-      {isConfigApiOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
-            <div className="flex items-center justify-between p-6 border-b border-slate-100">
-              <h2 className="text-xl font-bold text-[var(--foreground)]">API Configuration</h2>
-              <button onClick={() => setIsConfigApiOpen(false)} className="text-slate-400 hover:text-slate-600 p-2">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-[var(--foreground)] mb-1">API Key</label>
-                <input type="text" className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] text-slate-900 bg-white" placeholder="sk_test_..." />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[var(--foreground)] mb-1">Webhook URL <span className="text-slate-400 font-normal">(Optional)</span></label>
-                <input type="text" className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] text-slate-900 bg-white" placeholder="https://yourdomain.com/webhook" />
-                <p className="text-xs text-slate-500 mt-1">Leave blank if you don't have a custom webhook URL yet.</p>
-              </div>
-              <div className="flex justify-end gap-3 pt-4 border-t mt-6">
-                <button type="button" onClick={() => setIsConfigApiOpen(false)} className="px-5 py-2 border rounded-lg text-[var(--foreground)] font-medium hover:bg-slate-50">Close</button>
-                <button type="button" onClick={() => { toast.success('API configuration saved!'); setIsConfigApiOpen(false); }} className="px-5 py-2 bg-[var(--primary)] text-white rounded-lg font-medium hover:bg-[var(--primary)]">Save Settings</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+
     </div>
   )
 }

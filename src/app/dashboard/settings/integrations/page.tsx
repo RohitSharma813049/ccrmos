@@ -143,6 +143,22 @@ export default function IntegrationsPage() {
         "Use the 'Test Connection' button to ensure emails are sending successfully.",
         "Save your configuration to enable outgoing emails across the platform."
       ]
+    },
+    {
+      id: "elevenlabs",
+      name: "ElevenLabs AI",
+      description: "Configure your ElevenLabs API key for AI sound effect and voice generation.",
+      actionLabel: "Configure API Key",
+      icon: "M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z",
+      color: "fuchsia"
+    },
+    {
+      id: "groq",
+      name: "Groq (Llama AI)",
+      description: "Configure your Groq API key to power conversational AI agents with Llama models.",
+      actionLabel: "Configure API Key",
+      icon: "M13 10V3L4 14h7v7l9-11h-7z",
+      color: "orange"
     }
   ];
 
@@ -150,7 +166,8 @@ export default function IntegrationsPage() {
     blue: "bg-blue-50 text-blue-600 border-blue-200",
     emerald: "bg-emerald-50 text-emerald-600 border-emerald-200",
     purple: "bg-purple-50 text-purple-600 border-purple-200",
-    orange: "bg-orange-50 text-orange-600 border-orange-200"
+    orange: "bg-orange-50 text-orange-600 border-orange-200",
+    fuchsia: "bg-fuchsia-50 text-fuchsia-600 border-fuchsia-200"
   };
 
   const [integrationLinks, setIntegrationLinks] = useState<any[]>([]);
@@ -267,6 +284,74 @@ export default function IntegrationsPage() {
   const [emailTestEmail, setEmailTestEmail] = useState("");
   const [emailSaving, setEmailSaving] = useState(false);
   const [emailTesting, setEmailTesting] = useState(false);
+
+  // ElevenLabs
+  const [isElevenLabsModalOpen, setIsElevenLabsModalOpen] = useState(false);
+  const [elevenLabsConfig, setElevenLabsConfig] = useState("");
+  const [elevenLabsSaving, setElevenLabsSaving] = useState(false);
+
+  const fetchElevenLabsConfig = async () => {
+    try {
+      const res = await fetch("/api/settings/elevenlabs_api_key");
+      const data = await res.json();
+      if (data.value) setElevenLabsConfig(data.value);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+  useEffect(() => {
+    if (isElevenLabsModalOpen) fetchElevenLabsConfig();
+  }, [isElevenLabsModalOpen]);
+
+  const handleElevenLabsSave = async () => {
+    setElevenLabsSaving(true);
+    try {
+      await fetch("/api/settings/elevenlabs_api_key", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ value: elevenLabsConfig })
+      });
+      setIsElevenLabsModalOpen(false);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setElevenLabsSaving(false);
+    }
+  };
+
+  // Groq
+  const [isGroqModalOpen, setIsGroqModalOpen] = useState(false);
+  const [groqConfig, setGroqConfig] = useState("");
+  const [groqSaving, setGroqSaving] = useState(false);
+
+  const fetchGroqConfig = async () => {
+    try {
+      const res = await fetch("/api/settings/groq_api_key");
+      const data = await res.json();
+      if (data.value) setGroqConfig(data.value);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+  useEffect(() => {
+    if (isGroqModalOpen) fetchGroqConfig();
+  }, [isGroqModalOpen]);
+
+  const handleGroqSave = async () => {
+    setGroqSaving(true);
+    try {
+      await fetch("/api/settings/groq_api_key", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ value: groqConfig })
+      });
+      setIsGroqModalOpen(false);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setGroqSaving(false);
+    }
+  };
 
   const fetchEmailConfig = async () => {
     try {
@@ -461,6 +546,8 @@ export default function IntegrationsPage() {
                     if (int.id === 'whatsapp-web') setIsWaModalOpen(true);
                     else if (int.id === 'justdial') setIsJdModalOpen(true);
                     else if (int.id === 'email') setIsEmailModalOpen(true);
+                    else if (int.id === 'elevenlabs') setIsElevenLabsModalOpen(true);
+                    else if (int.id === 'groq') setIsGroqModalOpen(true);
                   }}
                   className="px-5 py-2.5 bg-gray-100 text-gray-900 border border-gray-300 font-medium rounded-lg hover:bg-gray-200 transition-colors"
                 >
@@ -684,6 +771,108 @@ export default function IntegrationsPage() {
                 className="px-5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isElevenLabsModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsElevenLabsModalOpen(false)} />
+          <div className="relative bg-white border border-gray-300 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-gray-200 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg border flex items-center justify-center bg-fuchsia-50 text-fuchsia-600 border-fuchsia-200">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">ElevenLabs Configuration</h2>
+                <p className="text-sm text-gray-600 mt-0.5">Enter your API key below</p>
+              </div>
+            </div>
+            <div className="p-6">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">API Key</label>
+                  <input 
+                    type="text" 
+                    value={elevenLabsConfig}
+                    onChange={(e) => setElevenLabsConfig(e.target.value)}
+                    placeholder="Enter your ElevenLabs API Key"
+                    className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-fuchsia-500 outline-none" 
+                  />
+                </div>
+                <p className="text-xs text-gray-500">
+                  This key will be used to generate AI sound effects and voices.
+                </p>
+              </div>
+            </div>
+            <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
+              <button 
+                onClick={() => setIsElevenLabsModalOpen(false)}
+                className="px-5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleElevenLabsSave}
+                disabled={elevenLabsSaving}
+                className="px-5 py-2 text-sm font-medium text-white bg-fuchsia-600 rounded-lg hover:bg-fuchsia-700 transition-colors disabled:opacity-50"
+              >
+                {elevenLabsSaving ? "Saving..." : "Save Configuration"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isGroqModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsGroqModalOpen(false)} />
+          <div className="relative bg-white border border-gray-300 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-gray-200 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg border flex items-center justify-center bg-orange-50 text-orange-600 border-orange-200">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Groq (Llama) Configuration</h2>
+                <p className="text-sm text-gray-600 mt-0.5">Enter your API key below</p>
+              </div>
+            </div>
+            <div className="p-6">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">API Key</label>
+                  <input 
+                    type="text" 
+                    value={groqConfig}
+                    onChange={(e) => setGroqConfig(e.target.value)}
+                    placeholder="Enter your Groq API Key"
+                    className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-orange-500 outline-none" 
+                  />
+                </div>
+                <p className="text-xs text-gray-500">
+                  This key will be used to power your conversational AI agents with Llama models.
+                </p>
+              </div>
+            </div>
+            <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
+              <button 
+                onClick={() => setIsGroqModalOpen(false)}
+                className="px-5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleGroqSave}
+                disabled={groqSaving}
+                className="px-5 py-2 text-sm font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50"
+              >
+                {groqSaving ? "Saving..." : "Save Configuration"}
               </button>
             </div>
           </div>
