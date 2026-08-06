@@ -144,6 +144,9 @@ export default function ManageCompaniesPage() {
       } else {
         const err = await res.json().catch(() => ({ error: 'Unknown error' }));
         console.error("Failed to fetch companies:", err);
+        // Show the error on UI
+        setStats(s => ({ ...s, total: 0, active: 0, suspended: 0, avgUsers: 0 }));
+        alert("Failed to load data: " + (err.error || 'Unknown Error'));
       }
     } catch (error) {
       console.error("Failed to fetch companies", error);
