@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 import { requirePermission } from "@/lib/auth-utils";
 import { PERMISSIONS } from "@/config/permissions";
 import { CompanyService } from "@/modules/companies/services/company.service";
+import dbConnect from "@/lib/db";
+import "@/modules/settings/schemas/SubscriptionPlan"; // Ensure schema is registered
 
 // GET /api/companies
 // Fetch all companies (Tenant accounts)
@@ -10,9 +12,7 @@ export async function GET(req: Request) {
   try {
     await requirePermission(PERMISSIONS.MANAGE_COMPANIES);
     
-    if (!mongoose.connection.readyState) {
-      await mongoose.connect(process.env.MONGODB_URI!);
-    }
+    await dbConnect();
     
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get('page') || '1', 10);
@@ -33,9 +33,7 @@ export async function POST(req: Request) {
   try {
     await requirePermission(PERMISSIONS.MANAGE_COMPANIES);
     
-    if (!mongoose.connection.readyState) {
-      await mongoose.connect(process.env.MONGODB_URI!);
-    }
+    await dbConnect();
     
     const payload = await req.json();
     const newCompany = await CompanyService.registerTenant(payload);
