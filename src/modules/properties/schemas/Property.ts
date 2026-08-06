@@ -18,6 +18,7 @@ export interface IProperty extends Document {
   assignedAgentId?: mongoose.Types.ObjectId;
   projectId?: mongoose.Types.ObjectId;
   images?: string[];
+  documents?: { url: string; name: string; format: string }[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -47,7 +48,12 @@ const PropertySchema: Schema<IProperty> = new Schema({
   founderId: { type: Schema.Types.ObjectId, ref: "User" },
   assignedAgentId: { type: Schema.Types.ObjectId, ref: "User" },
   projectId: { type: Schema.Types.ObjectId, ref: "Project" },
-  images: [{ type: String }]
+  images: [{ type: String }],
+  documents: [{
+    url: String,
+    name: String,
+    format: String
+  }]
 }, { timestamps: true });
 
 const Property: Model<IProperty> = mongoose.models.Property || mongoose.model<IProperty>("Property", PropertySchema);

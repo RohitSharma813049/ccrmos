@@ -18,6 +18,7 @@ export interface IPartner extends Document {
   userId?: mongoose.Types.ObjectId;
   companyId: mongoose.Types.ObjectId;
   createdBy?: mongoose.Types.ObjectId;
+  documents?: { url: string; name: string; format: string }[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -43,7 +44,12 @@ const PartnerSchema: Schema<IPartner> = new Schema({
   teamSize: { type: String, default: "0" },
   userId: { type: Schema.Types.ObjectId, ref: "User" },
   companyId: { type: Schema.Types.ObjectId, ref: "Company", required: true },
-  createdBy: { type: Schema.Types.ObjectId, ref: "User" }
+  createdBy: { type: Schema.Types.ObjectId, ref: "User" },
+  documents: [{
+    url: String,
+    name: String,
+    format: String
+  }]
 }, { timestamps: true });
 
 const Partner: Model<IPartner> = mongoose.models.Partner || mongoose.model<IPartner>("Partner", PartnerSchema);
