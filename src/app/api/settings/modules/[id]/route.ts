@@ -32,6 +32,8 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   }
 }
 
+import RecycleBin from '@/modules/settings/schemas/RecycleBin';
+
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   await dbConnect();
   try {
@@ -46,10 +48,23 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
       query.companyId = user.companyId;
     }
 
-    const deleted = await CustomModule.findOneAndDelete(query);
-    if (!deleted) {
+    const moduleToDel = await CustomModule.findOne(query).lean();
+    if (!moduleToDel) {
       return NextResponse.json({ error: "Module not found or unauthorized" }, { status: 404 });
     }
+
+    // Save to recycle bin
+    if (user.companyId) {
+      await RecycleBin.create({
+        companyId: user.companyId,
+        originalId: moduleToDel._id,
+        collectionName: 'custommodules',
+        documentData: moduleToDel,
+        deletedBy: user.id
+      });
+    }
+
+    await CustomModule.deleteOne({ _id: id });
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

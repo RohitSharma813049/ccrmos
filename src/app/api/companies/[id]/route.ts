@@ -4,6 +4,9 @@ import Company from "@/modules/companies/schemas/Company";
 import User from "@/modules/users/schemas/User";
 import { requirePermission } from "@/lib/auth-utils";
 import { PERMISSIONS } from "@/config/permissions";
+import { S3Client, ListObjectsV2Command, DeleteObjectsCommand } from "@aws-sdk/client-s3";
+import fs from "fs/promises";
+import path from "path";
 
 // PUT /api/companies/[id]
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -85,6 +88,55 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     } else {
       // Fallback if db is not immediately accessible, at least delete users
       await User.deleteMany({ companyId: id });
+    }
+    
+    // Delete files from Cloudflare R2 if configured
+    if (process.env.R2_ENDPOINT && process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY && process.env.R2_BUCKET_NAME) {
+      try {
+        const s3Client = new S3Client({
+          region: 'auto',
+          endpoint: process.env.R2_ENDPOINT,
+          credentials: {
+            accessKeyId: process.env.R2_ACCESS_KEY_ID,
+            secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+          },
+        });
+        
+        const prefix = `uploads/${id}/`;
+        let isTruncated = true;
+        let continuationToken: string | undefined = undefined;
+
+        while (isTruncated) {
+          const listCommand = new ListObjectsV2Command({
+            Bucket: process.env.R2_BUCKET_NAME,
+            Prefix: prefix,
+            ContinuationToken: continuationToken
+          });
+          const listRes = await s3Client.send(listCommand);
+          
+          if (listRes.Contents && listRes.Contents.length > 0) {
+            const deleteCommand = new DeleteObjectsCommand({
+              Bucket: process.env.R2_BUCKET_NAME,
+              Delete: {
+                Objects: listRes.Contents.map(c => ({ Key: c.Key }))
+              }
+            });
+            await s3Client.send(deleteCommand);
+          }
+          isTruncated = !!listRes.IsTruncated;
+          continuationToken = listRes.NextContinuationToken;
+        }
+      } catch (e) {
+        console.error(`Failed to delete Cloudflare R2 files for tenant ${id}`, e);
+      }
+    }
+    
+    // Delete files from local storage (fallback)
+    try {
+      const uploadDir = path.join(process.cwd(), 'public', 'uploads', id.toString());
+      await fs.rm(uploadDir, { recursive: true, force: true });
+    } catch (e) {
+      // Ignore if directory doesn't exist
     }
     
     return NextResponse.json({ message: "Tenant and all associated data deleted successfully." }, { status: 200 });

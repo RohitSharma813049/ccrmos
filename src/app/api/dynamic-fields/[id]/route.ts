@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import DynamicField from "@/modules/settings/schemas/DynamicField";
 import { requirePermission, getSession } from "@/lib/auth-utils";
 import { PERMISSIONS } from "@/config/permissions";
+import RecycleBin from "@/modules/settings/schemas/RecycleBin";
 
 // PUT /api/dynamic-fields/[id]
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -71,6 +72,17 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
       return NextResponse.json({ error: "Forbidden: Cannot delete Global fields." }, { status: 403 });
     }
     
+    // Save to recycle bin
+    if (user.companyId) {
+      await RecycleBin.create({
+        companyId: user.companyId,
+        originalId: field._id,
+        collectionName: 'dynamicfields',
+        documentData: field.toObject(),
+        deletedBy: user.id
+      });
+    }
+
     await DynamicField.findByIdAndDelete(id);
     
     return NextResponse.json({ message: "Field definition deleted successfully." }, { status: 200 });

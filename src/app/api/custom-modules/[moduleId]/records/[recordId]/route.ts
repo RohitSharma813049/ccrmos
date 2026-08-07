@@ -3,6 +3,7 @@ import dbConnect from '@/lib/db';
 import CustomRecord from '@/modules/settings/schemas/CustomRecord';
 import CustomModule from '@/modules/settings/schemas/CustomModule';
 import { getSession } from "@/lib/auth-utils";
+import RecycleBin from "@/modules/settings/schemas/RecycleBin";
 
 export async function PUT(req: Request, { params }: { params: Promise<{ moduleId: string, recordId: string }> }) {
   await dbConnect();
@@ -54,10 +55,23 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ modul
 
     const { moduleId, recordId } = await params;
 
-    const deleted = await CustomRecord.findOneAndDelete({ _id: recordId, moduleId, companyId: user.companyId });
-    if (!deleted) {
+    const recordToDel = await CustomRecord.findOne({ _id: recordId, moduleId, companyId: user.companyId }).lean();
+    if (!recordToDel) {
       return NextResponse.json({ error: "Record not found or unauthorized" }, { status: 404 });
     }
+
+    // Save to recycle bin
+    if (user.companyId) {
+      await RecycleBin.create({
+        companyId: user.companyId,
+        originalId: recordToDel._id,
+        collectionName: 'customrecords',
+        documentData: recordToDel,
+        deletedBy: user.id
+      });
+    }
+
+    await CustomRecord.deleteOne({ _id: recordId });
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
