@@ -19,11 +19,6 @@ const industrySchema = new Schema<IIndustry>(
   { timestamps: true }
 );
 
-// Delete the cached model if it exists to allow Next.js Fast Refresh to update schema
-if (mongoose.models.Industry) {
-  delete mongoose.models.Industry;
-}
-
-const Industry: Model<IIndustry> = mongoose.model<IIndustry>("Industry", industrySchema);
+const Industry: Model<IIndustry> = mongoose.models.Industry || mongoose.model<IIndustry>("Industry", industrySchema);
 
 export default Industry;

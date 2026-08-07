@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import dbConnect from '@/lib/db';
 import Process from '@/modules/companies/schemas/Process';
+import Department from '@/modules/companies/schemas/Department';
 import { getSession } from "@/lib/auth-utils";
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {

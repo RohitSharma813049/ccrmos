@@ -23,10 +23,6 @@ const integrationLinkSchema = new Schema<IIntegrationLink>(
   { timestamps: true }
 );
 
-if (mongoose.models.IntegrationLink) {
-  delete mongoose.models.IntegrationLink;
-}
-
-const IntegrationLink: Model<IIntegrationLink> = mongoose.model<IIntegrationLink>("IntegrationLink", integrationLinkSchema);
+const IntegrationLink: Model<IIntegrationLink> = mongoose.models.IntegrationLink || mongoose.model<IIntegrationLink>("IntegrationLink", integrationLinkSchema);
 
 export default IntegrationLink;

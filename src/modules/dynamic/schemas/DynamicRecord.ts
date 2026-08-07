@@ -20,10 +20,6 @@ const dynamicRecordSchema = new Schema<IDynamicRecord>(
 );
 
 // Delete the cached model if it exists to allow Next.js Fast Refresh to update schema
-if (mongoose.models.DynamicRecord) {
-  delete mongoose.models.DynamicRecord;
-}
-
-const DynamicRecord: Model<IDynamicRecord> = mongoose.model<IDynamicRecord>("DynamicRecord", dynamicRecordSchema);
+const DynamicRecord: Model<IDynamicRecord> = mongoose.models.DynamicRecord || mongoose.model<IDynamicRecord>("DynamicRecord", dynamicRecordSchema);
 
 export default DynamicRecord;

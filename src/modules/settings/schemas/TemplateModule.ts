@@ -19,10 +19,6 @@ const templateModuleSchema = new Schema<ITemplateModule>(
   { timestamps: true }
 );
 
-if (mongoose.models.TemplateModule) {
-  delete mongoose.models.TemplateModule;
-}
-
-const TemplateModule: Model<ITemplateModule> = mongoose.model<ITemplateModule>("TemplateModule", templateModuleSchema);
+const TemplateModule: Model<ITemplateModule> = mongoose.models.TemplateModule || mongoose.model<ITemplateModule>("TemplateModule", templateModuleSchema);
 
 export default TemplateModule;

@@ -26,10 +26,6 @@ const companyModuleSchema = new Schema<ICompanyModule>(
 // Ensure a company can only have one configuration per module
 companyModuleSchema.index({ company_id: 1, module_id: 1 }, { unique: true });
 
-if (mongoose.models.CompanyModule) {
-  delete mongoose.models.CompanyModule;
-}
-
-const CompanyModule: Model<ICompanyModule> = mongoose.model<ICompanyModule>("CompanyModule", companyModuleSchema);
+const CompanyModule: Model<ICompanyModule> = mongoose.models.CompanyModule || mongoose.model<ICompanyModule>("CompanyModule", companyModuleSchema);
 
 export default CompanyModule;

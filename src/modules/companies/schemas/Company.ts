@@ -39,11 +39,6 @@ const companySchema = new Schema<ICompany>(
   { timestamps: true }
 );
 
-// Delete the cached model if it exists to allow Next.js Fast Refresh to update schema
-if (mongoose.models.Company) {
-  delete mongoose.models.Company;
-}
-
-const Company: Model<ICompany> = mongoose.model<ICompany>("Company", companySchema);
+const Company: Model<ICompany> = mongoose.models.Company || mongoose.model<ICompany>("Company", companySchema);
 
 export default Company;
