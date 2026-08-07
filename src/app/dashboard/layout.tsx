@@ -45,12 +45,17 @@ export default async function DashboardLayout({ children }: { children: React.Re
   let subscriptionStatus = "active";
   let enabledModules: string[] = [];
   let companyModules: any[] = [];
+  let industryName = "CRM";
   
   if (userCompanyId) {
-    const company = await Company.findById(userCompanyId).select("subscriptionStatus enabledModules");
+    const company = await Company.findById(userCompanyId)
+      .select("subscriptionStatus enabledModules industryId")
+      .populate("industryId", "name");
+      
     if (company) {
       if ((company as any).subscriptionStatus) subscriptionStatus = (company as any).subscriptionStatus;
       if ((company as any).enabledModules) enabledModules = (company as any).enabledModules;
+      if ((company as any).industryId?.name) industryName = (company as any).industryId.name;
     }
     companyModules = await CompanyModule.find({ company_id: userCompanyId, visible: true }).sort({ sort_order: 1 }).lean();
   }
@@ -114,7 +119,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           {companyModules.length > 0 ? (
             <>
               <div className="pt-6 pb-2">
-                <p className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">CRM Modules</p>
+                <p className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{industryName} Modules</p>
               </div>
               {companyModules.map((mod: any) => {
                 const stdRouteMap: Record<string, string> = {
@@ -131,7 +136,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
                 const normalized = (mod.module_id || "").toLowerCase().trim();
                 const stdRoute = stdRouteMap[normalized];
                 
-                const href = stdRoute ? `/dashboard/${stdRoute}` : `/dashboard/modules/${mod._id}`;
+                const href = stdRoute ? `/dashboard/${stdRoute}` : `/dashboard/${mod.module_id}`;
                 // Fallback icon
                 const icon = "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6";
                 return (
@@ -251,7 +256,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           {companyModules.length > 0 ? (
             <>
               <div className="pt-6 pb-2">
-                <p className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">CRM Modules</p>
+                <p className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{industryName} Modules</p>
               </div>
               {companyModules.map((mod: any) => {
                 const stdRouteMap: Record<string, string> = {
@@ -268,7 +273,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
                 const normalized = (mod.module_id || "").toLowerCase().trim();
                 const stdRoute = stdRouteMap[normalized];
                 
-                const href = stdRoute ? `/dashboard/${stdRoute}` : `/dashboard/modules/${mod._id}`;
+                const href = stdRoute ? `/dashboard/${stdRoute}` : `/dashboard/${mod.module_id}`;
                 const icon = "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6";
                 return (
                   <NavItem key={mod._id.toString()} href={href} label={mod.display_name} icon={icon} />

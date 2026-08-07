@@ -9,6 +9,7 @@ export interface IUser extends Document {
   founderId?: mongoose.Types.ObjectId;
   hierarchyLevel?: number; // 1: Platform Owner, 2: Founder, 3: Director, 4: Manager, 5: Team Leader, 6: Team Member
   departmentId?: mongoose.Types.ObjectId;
+  processId?: mongoose.Types.ObjectId;
   teamId?: mongoose.Types.ObjectId;
   directorId?: mongoose.Types.ObjectId;
   managerId?: mongoose.Types.ObjectId;
@@ -44,6 +45,7 @@ const UserSchema: Schema<IUser> = new Schema({
   founderId: { type: Schema.Types.ObjectId, ref: "User" },
   hierarchyLevel: { type: Number, min: 1, max: 6, default: 6 },
   departmentId: { type: Schema.Types.ObjectId, ref: "Department" },
+  processId: { type: Schema.Types.ObjectId, ref: "Process" },
   teamId: { type: Schema.Types.ObjectId, ref: "Team" },
   directorId: { type: Schema.Types.ObjectId, ref: "User" },
   managerId: { type: Schema.Types.ObjectId, ref: "User" },
