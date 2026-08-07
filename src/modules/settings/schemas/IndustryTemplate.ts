@@ -6,7 +6,6 @@ export interface IIndustryTemplate extends Document {
   is_default: boolean;
   created_by?: mongoose.Types.ObjectId;
   description?: string;
-  tenantScope?: string;
   modules: any[]; // Configured custom modules (legacy)
   fields: any[]; // Configured dynamic fields
   createdAt: Date;
@@ -20,7 +19,6 @@ const industryTemplateSchema = new Schema<IIndustryTemplate>(
     is_default: { type: Boolean, default: false },
     created_by: { type: Schema.Types.ObjectId, ref: "User" },
     description: { type: String },
-    tenantScope: { type: String, enum: ['Global', 'Industry', 'Company'], default: 'Global' },
     modules: [{ type: Schema.Types.Mixed }],
     fields: [{ type: Schema.Types.Mixed }],
   },

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 
 const NAV_ITEMS = [
@@ -24,28 +24,7 @@ const NAV_ITEMS = [
 
 export default function OwnerSidebar() {
   const pathname = usePathname();
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [activeScope, setActiveScope] = useState("Global");
-
-  useEffect(() => {
-    const savedScope = localStorage.getItem("crmos_owner_scope");
-    if (savedScope) {
-      setActiveScope(savedScope);
-    }
-  }, []);
-
-  const handleScopeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newScope = e.target.value;
-    setActiveScope(newScope);
-    localStorage.setItem("crmos_owner_scope", newScope);
-    
-    // Refresh current route with new scope parameter
-    const currentParams = new URLSearchParams(Array.from(searchParams.entries()));
-    currentParams.set("scope", newScope);
-    router.push(`${pathname}?${currentParams.toString()}`);
-  };
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -53,27 +32,18 @@ export default function OwnerSidebar() {
   }, [pathname]);
 
   const renderNavGroup = (category: string) => {
-    // If we are not in Global scope, filter out Global Management items
-    const filteredItems = NAV_ITEMS.filter(item => {
-      if (item.category !== category) return false;
-      if (activeScope !== "Global" && category === "Global Management") return false;
-      return true;
-    });
-
-    if (filteredItems.length === 0) return null;
-
     return (
       <div key={category} className="mb-6">
         <p className="px-2 mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
           {category}
         </p>
         <div className="space-y-1">
-          {filteredItems.map((item) => {
+          {NAV_ITEMS.filter(item => item.category === category).map((item) => {
             const isActive = pathname === item.href || pathname?.startsWith(`${item.href}/`);
             return (
               <Link
                 key={item.href}
-                href={`${item.href}?scope=${activeScope}`}
+                href={item.href}
                 className={`group flex items-center gap-3 px-3 py-3 text-sm font-medium rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                   isActive 
                     ? "bg-primary text-primary-foreground" 
@@ -129,64 +99,23 @@ export default function OwnerSidebar() {
         ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <div className="p-6 relative z-10 hidden md:block">
-          <Link href="/owner" className="flex items-center gap-3 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg mb-4">
+          <Link href="/owner" className="flex items-center gap-3 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg">
             <h2 className="font-bold text-lg tracking-tight text-foreground">Platform Owner</h2>
           </Link>
-          
-          <div className="flex flex-col space-y-1.5">
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Active Scope</label>
-            <div className="relative">
-              <select
-                value={activeScope}
-                onChange={handleScopeChange}
-                className="w-full bg-muted/50 border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary outline-none appearance-none cursor-pointer"
-              >
-                <option value="Global">Global Scope</option>
-                <option value="Industry">Industry Scope</option>
-                <option value="Company">Company Scope</option>
-              </select>
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Mobile Sidebar Close Button */}
-        <div className="p-4 flex flex-col md:hidden relative z-10 border-b border-border mb-4">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-lg tracking-tight text-foreground">Navigation</h2>
-            <button
-              className="p-2 -mr-2 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg"
-              onClick={() => setIsMobileMenuOpen(false)}
-              aria-label="Close navigation menu"
-            >
-               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-               </svg>
-            </button>
-          </div>
-          <div className="flex flex-col space-y-1.5">
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Active Scope</label>
-            <div className="relative">
-              <select
-                value={activeScope}
-                onChange={handleScopeChange}
-                className="w-full bg-muted/50 border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary outline-none appearance-none cursor-pointer"
-              >
-                <option value="Global">Global Scope</option>
-                <option value="Industry">Industry Scope</option>
-                <option value="Company">Company Scope</option>
-              </select>
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
-          </div>
+        <div className="p-4 flex items-center justify-between md:hidden relative z-10 border-b border-border mb-4">
+          <h2 className="font-bold text-lg tracking-tight text-foreground">Navigation</h2>
+          <button
+            className="p-2 -mr-2 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg"
+            onClick={() => setIsMobileMenuOpen(false)}
+            aria-label="Close navigation menu"
+          >
+             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+             </svg>
+          </button>
         </div>
 
         <nav className="flex-1 px-4 overflow-y-auto relative z-10 custom-scrollbar">

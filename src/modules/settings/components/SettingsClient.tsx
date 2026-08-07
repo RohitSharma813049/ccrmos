@@ -15,7 +15,7 @@ export default function SettingsClient() {
   const [modalMode, setModalMode] = useState<"create" | "edit" | "delete">("create");
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
   const [activeTemplate, setActiveTemplate] = useState<any>(null);
-  const [formData, setFormData] = useState({ name: "", description: "", tenantScope: "Global" });
+  const [formData, setFormData] = useState({ name: "", description: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function fetchSettings() {
@@ -73,14 +73,14 @@ export default function SettingsClient() {
 
   const openCreateModal = () => {
     setModalMode("create");
-    setFormData({ name: "", description: "", tenantScope: "Global" });
+    setFormData({ name: "", description: "" });
     setModalOpen(true);
   };
 
   const openEditModal = (t: any) => {
     setModalMode("edit");
     setActiveTemplate(t);
-    setFormData({ name: t.name, description: t.description || "", tenantScope: t.tenantScope || "Global" });
+    setFormData({ name: t.name, description: t.description || "" });
     setModalOpen(true);
   };
 
@@ -190,7 +190,6 @@ export default function SettingsClient() {
                 <div>
                   <p className="font-semibold text-foreground">{t.name}</p>
                   <p className="text-xs text-muted-foreground mt-1">{t.description || "No description provided"}</p>
-                  <span className="inline-block mt-2 text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 bg-muted text-muted-foreground rounded">{t.tenantScope || 'Global'} Scope</span>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4 sm:items-center mt-4 pt-4 border-t border-primary/10">
                   <span className="text-xs text-primary font-medium bg-primary/10 px-3 py-1 rounded-full w-fit">{t.modules?.length || 0} Modules</span>
@@ -277,18 +276,6 @@ export default function SettingsClient() {
                       className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:ring-2 focus:ring-primary outline-none h-24 resize-none shadow-sm transition-colors"
                       placeholder="Briefly describe what this template is for..."
                     />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">Target Scope</label>
-                    <select
-                      value={formData.tenantScope}
-                      onChange={(e) => setFormData({...formData, tenantScope: e.target.value})}
-                      className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:ring-2 focus:ring-primary outline-none shadow-sm transition-colors appearance-none"
-                    >
-                      <option value="Global">Global Scope</option>
-                      <option value="Industry">Industry Scope</option>
-                      <option value="Company">Company Scope</option>
-                    </select>
                   </div>
                   <div className="pt-2 flex justify-end gap-3">
                     <button type="button" onClick={() => setModalOpen(false)} className="px-4 py-2 text-sm font-medium text-muted-foreground bg-muted hover:bg-muted/80 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Cancel</button>
