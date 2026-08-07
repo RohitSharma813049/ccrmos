@@ -4,15 +4,22 @@ import React, { useState, useEffect } from 'react';
 import { Loader2, Plus, Edit, Trash2, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
-const INDUSTRY_CORE_MODULES = [
+const CORE_MODULES = [
   'Leads',
+  'FB Leads',
   'Customers',
   'Projects',
   'Tasks',
   'Invoices',
   'Orders',
   'Departments',
-  'Teams'
+  'Teams',
+  'User Management',
+  'Roles & Permissions',
+  'API Configuration',
+  'WhatsApp',
+  'Manual-Whatsapp',
+  'Whatsapp Message Templates'
 ];
 
 export default function IndustriesClient() {
@@ -235,7 +242,7 @@ export default function IndustriesClient() {
                   <div>
                     <h4 className="text-xs font-bold text-gray-500 uppercase mb-2 tracking-wider">Base CRM Modules</h4>
                     <div className="grid grid-cols-2 gap-3">
-                      {INDUSTRY_CORE_MODULES.map(modName => {
+                      {CORE_MODULES.map(modName => {
                         const isSelected = formData.defaultModules.includes(modName);
                         if (isSelected) return null;
                         return (
