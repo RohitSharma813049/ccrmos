@@ -72,6 +72,7 @@ export default function ManageCompaniesPage() {
     setFormData(prev => ({
       ...prev,
       industryId: selectedId,
+      subscriptionPlanId: "", // Reset plan when industry changes
       // Auto-fill modules if an industry is selected, otherwise keep existing
       enabledModules: selectedIndustry && selectedIndustry.defaultModules 
         ? selectedIndustry.defaultModules 
@@ -372,156 +373,161 @@ export default function ManageCompaniesPage() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="modal-title">
           <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
-          <div className="relative bg-card border border-border rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-border">
+          <div className="relative flex flex-col bg-card border border-border rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-border shrink-0">
               <h2 id="modal-title" className="text-xl font-bold text-foreground">{isEditMode ? "Edit Tenant" : "Register New Tenant"}</h2>
               <p className="text-sm text-muted-foreground mt-1">{isEditMode ? "Modify existing tenant details." : "Provision a new CRM instance for a client."}</p>
             </div>
             
-            <form className="p-6 space-y-5" onSubmit={handleFormSubmit}>
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1.5">
-                  Company Name <span className="text-destructive">*</span>
-                </label>
-                <input 
-                  type="text" 
-                  required 
-                  value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" 
-                  placeholder="e.g. Acme Corp" 
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1.5">
-                  Primary Admin Email <span className="text-destructive">*</span>
-                </label>
-                <input 
-                  type="email" 
-                  required 
-                  value={formData.adminEmail}
-                  onChange={(e) => setFormData({...formData, adminEmail: e.target.value})}
-                  className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" 
-                  placeholder="admin@company.com" 
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
+            <form className="flex flex-col flex-1 overflow-hidden" onSubmit={handleFormSubmit}>
+              <div className="p-6 space-y-5 overflow-y-auto flex-1">
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">Subscription Plan</label>
-                  <select 
-                    value={formData.subscriptionPlanId}
-                    onChange={handlePlanChange}
-                    className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none transition-all"
-                  >
-                    {plans.map(p => (
-                      <option key={p._id} value={p._id}>{p.name} (₹{p.price})</option>
-                    ))}
-                  </select>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">
+                    Company Name <span className="text-destructive">*</span>
+                  </label>
+                  <input 
+                    type="text" 
+                    required 
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" 
+                    placeholder="e.g. Acme Corp" 
+                  />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">Target Industry <span className="text-destructive">*</span></label>
-                  <select 
-                    required
-                    value={formData.industryId}
-                    onChange={handleIndustryChange}
-                    className={`w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none transition-all`}
-                  >
-                    <option value="" disabled>Select an Industry</option>
-                    {industries.map(i => (
-                      <option key={i._id} value={i._id}>{i.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="col-span-2">
-                  <label className="block text-sm font-medium text-foreground mb-1.5">Users Quota</label>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">
+                    Primary Admin Email <span className="text-destructive">*</span>
+                  </label>
                   <input 
-                    type="number" 
-                    min={1} 
-                    value={formData.usersQuota}
-                    onChange={(e) => setFormData({...formData, usersQuota: parseInt(e.target.value) || 1})}
+                    type="email" 
+                    required 
+                    value={formData.adminEmail}
+                    onChange={(e) => setFormData({...formData, adminEmail: e.target.value})}
                     className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" 
+                    placeholder="admin@company.com" 
                   />
                 </div>
-              </div>
 
-              <div className="pt-2">
-                <label className="block text-sm font-medium text-foreground mb-2">Selected Modules</label>
-                <div className="flex flex-wrap gap-2 mb-4 p-3 bg-muted/30 border border-border rounded-xl min-h-[50px]">
-                  {formData.enabledModules.length === 0 ? (
-                    <span className="text-sm text-muted-foreground italic">No modules selected</span>
-                  ) : (
-                    formData.enabledModules.map(modName => (
-                      <span key={modName} className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary text-primary-foreground text-sm font-medium rounded-full">
-                        {modName}
-                        <button 
-                          type="button" 
-                          onClick={() => toggleModule(modName)}
-                          className="hover:bg-primary-foreground/20 rounded-full p-0.5 transition-colors"
-                        >
-                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                        </button>
-                      </span>
-                    ))
-                  )}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1.5">Target Industry <span className="text-destructive">*</span></label>
+                    <select 
+                      required
+                      value={formData.industryId}
+                      onChange={handleIndustryChange}
+                      className={`w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none transition-all`}
+                    >
+                      <option value="" disabled>Select an Industry</option>
+                      {industries.map(i => (
+                        <option key={i._id} value={i._id}>{i.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1.5">Subscription Plan</label>
+                    <select 
+                      value={formData.subscriptionPlanId}
+                      onChange={handlePlanChange}
+                      className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none transition-all"
+                    >
+                      <option value="" disabled>Select a Plan</option>
+                      {plans
+                        .filter(p => !p.industryId || p.industryId === formData.industryId)
+                        .map(p => (
+                        <option key={p._id} value={p._id}>{p.name} (₹{p.price})</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-foreground mb-1.5">Users Quota</label>
+                    <input 
+                      type="number" 
+                      min={1} 
+                      value={formData.usersQuota}
+                      onChange={(e) => setFormData({...formData, usersQuota: parseInt(e.target.value) || 1})}
+                      className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" 
+                    />
+                  </div>
                 </div>
 
-                <label className="block text-sm font-medium text-foreground mb-2">Available Modules (Grouped by Scope)</label>
-                <div className="bg-muted/10 p-4 border border-border rounded-xl max-h-60 overflow-y-auto space-y-4">
-                  {['Global', 'Industry', 'Company'].map(scope => {
-                    const scopedModules = availableModules.filter(m => {
-                      if (m.tenantScope !== scope) return false;
-                      if (scope === 'Industry') {
-                        const indId = m.industryId?._id || m.industryId;
-                        return indId === formData.industryId;
-                      }
-                      return true;
-                    });
-                    if (scopedModules.length === 0) return null;
-                    return (
-                      <div key={scope}>
-                        <h4 className="text-xs font-bold text-muted-foreground uppercase mb-2 tracking-wider">{scope} Scope</h4>
-                        <div className="grid grid-cols-2 gap-3">
-                          {scopedModules.map(mod => {
-                            const isSelected = formData.enabledModules.includes(mod.name);
-                            if (isSelected) return null;
-                            return (
-                              <label key={mod._id} className="flex items-center space-x-2 cursor-pointer p-1 hover:bg-muted/50 rounded transition-colors">
-                                <input 
-                                  type="checkbox" 
-                                  checked={false}
-                                  onChange={() => toggleModule(mod.name)}
-                                  className="w-4 h-4 text-primary rounded border-border focus:ring-primary"
-                                />
-                                <span className="text-sm text-foreground font-medium truncate" title={mod.name}>{mod.name}</span>
-                              </label>
-                            );
-                          })}
+                <div className="pt-2">
+                  <label className="block text-sm font-medium text-foreground mb-2">Selected Modules</label>
+                  <div className="flex flex-wrap gap-2 mb-4 p-3 bg-muted/30 border border-border rounded-xl min-h-[50px]">
+                    {formData.enabledModules.length === 0 ? (
+                      <span className="text-sm text-muted-foreground italic">No modules selected</span>
+                    ) : (
+                      formData.enabledModules.map(modName => (
+                        <span key={modName} className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary text-primary-foreground text-sm font-medium rounded-full">
+                          {modName}
+                          <button 
+                            type="button" 
+                            onClick={() => toggleModule(modName)}
+                            className="hover:bg-primary-foreground/20 rounded-full p-0.5 transition-colors"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                          </button>
+                        </span>
+                      ))
+                    )}
+                  </div>
+
+                  <label className="block text-sm font-medium text-foreground mb-2">Available Modules (Grouped by Scope)</label>
+                  <div className="bg-muted/10 p-4 border border-border rounded-xl max-h-60 overflow-y-auto space-y-4">
+                    {['Global', 'Industry', 'Company'].map(scope => {
+                      const scopedModules = availableModules.filter(m => {
+                        if (m.tenantScope !== scope) return false;
+                        if (scope === 'Industry') {
+                          const indId = m.industryId?._id || m.industryId;
+                          return indId === formData.industryId;
+                        }
+                        return true;
+                      });
+                      if (scopedModules.length === 0) return null;
+                      return (
+                        <div key={scope}>
+                          <h4 className="text-xs font-bold text-muted-foreground uppercase mb-2 tracking-wider">{scope} Scope</h4>
+                          <div className="grid grid-cols-2 gap-3">
+                            {scopedModules.map(mod => {
+                              const isSelected = formData.enabledModules.includes(mod.name);
+                              if (isSelected) return null;
+                              return (
+                                <label key={mod._id} className="flex items-center space-x-2 cursor-pointer p-1 hover:bg-muted/50 rounded transition-colors">
+                                  <input 
+                                    type="checkbox" 
+                                    checked={false}
+                                    onChange={() => toggleModule(mod.name)}
+                                    className="w-4 h-4 text-primary rounded border-border focus:ring-primary"
+                                  />
+                                  <span className="text-sm text-foreground font-medium truncate" title={mod.name}>{mod.name}</span>
+                                </label>
+                              );
+                            })}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
+
+                {isEditMode && (
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1.5">Account Status</label>
+                    <select 
+                      value={formData.status}
+                      onChange={(e) => setFormData({...formData, status: e.target.value})}
+                      className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none transition-all"
+                    >
+                      <option value="Active">Active</option>
+                      <option value="Suspended">Suspended</option>
+                    </select>
+                  </div>
+                )}
               </div>
 
-              {isEditMode && (
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">Account Status</label>
-                  <select 
-                    value={formData.status}
-                    onChange={(e) => setFormData({...formData, status: e.target.value})}
-                    className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none transition-all"
-                  >
-                    <option value="Active">Active</option>
-                    <option value="Suspended">Suspended</option>
-                  </select>
-                </div>
-              )}
-
-              <div className="pt-4 flex items-center justify-end gap-3">
+              <div className="p-6 border-t border-border shrink-0 bg-muted/20 flex items-center justify-end gap-3">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 text-sm font-medium text-foreground hover:bg-muted bg-background border border-border rounded-xl transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
                   Cancel
                 </button>
