@@ -13,6 +13,7 @@ export interface ISubscriptionPlan extends Document {
   maxCampaigns: number;
   aiFeatures: boolean;
   apiIntegration: boolean;
+  allowWhiteLabeling: boolean;
   planType: "FIXED" | "CUSTOM";
   allowedModules: string[];
   industryId?: mongoose.Types.ObjectId;
@@ -36,6 +37,7 @@ const subscriptionPlanSchema = new Schema<ISubscriptionPlan>(
     maxCampaigns: { type: Number, default: 0 },
     aiFeatures: { type: Boolean, default: false },
     apiIntegration: { type: Boolean, default: false },
+    allowWhiteLabeling: { type: Boolean, default: false },
     planType: { type: String, enum: ["FIXED", "CUSTOM"], default: "FIXED" },
     allowedModules: [{ type: String }],
     industryId: { type: Schema.Types.ObjectId, ref: 'Industry' },

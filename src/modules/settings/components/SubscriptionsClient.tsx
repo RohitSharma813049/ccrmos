@@ -15,6 +15,7 @@ interface SubscriptionPlan {
   maxCampaigns?: number;
   aiFeatures?: boolean;
   apiIntegration?: boolean;
+  allowWhiteLabeling?: boolean;
   planType?: "FIXED" | "CUSTOM";
   allowedModules?: string[];
   industryId?: string;
@@ -61,6 +62,7 @@ export default function SubscriptionsClient() {
     maxCampaigns: 0,
     aiFeatures: false,
     apiIntegration: false,
+    allowWhiteLabeling: false,
     features: [""],
     planType: "FIXED" as "FIXED" | "CUSTOM",
     allowedModules: [] as string[],
@@ -141,6 +143,7 @@ export default function SubscriptionsClient() {
       maxCampaigns: 0,
       aiFeatures: false,
       apiIntegration: false,
+      allowWhiteLabeling: false,
       features: [""],
       planType: "FIXED",
       allowedModules: [],
@@ -163,6 +166,7 @@ export default function SubscriptionsClient() {
       maxCampaigns: plan.maxCampaigns ?? 0,
       aiFeatures: plan.aiFeatures ?? false,
       apiIntegration: plan.apiIntegration ?? false,
+      allowWhiteLabeling: plan.allowWhiteLabeling ?? false,
       features: plan.features.length > 0 ? plan.features : [""],
       planType: plan.planType || "FIXED",
       allowedModules: plan.allowedModules || [],
@@ -454,7 +458,7 @@ export default function SubscriptionsClient() {
                   </div>
                 </div>
 
-                <div className="flex gap-6">
+                <div className="flex flex-wrap gap-6">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input 
                       type="checkbox" 
@@ -472,6 +476,15 @@ export default function SubscriptionsClient() {
                       className="w-4 h-4 text-primary rounded border-border focus:ring-primary"
                     />
                     <span className="text-sm font-medium text-foreground">Enable API Integrations</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={formData.allowWhiteLabeling}
+                      onChange={(e) => setFormData({...formData, allowWhiteLabeling: e.target.checked})}
+                      className="w-4 h-4 text-primary rounded border-border focus:ring-primary"
+                    />
+                    <span className="text-sm font-medium text-foreground">Enable White-Labeling (Branding & Domains)</span>
                   </label>
                 </div>
 

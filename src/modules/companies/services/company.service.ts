@@ -30,11 +30,15 @@ export class CompanyService {
     const companiesWithCounts = await Promise.all(
       companies.map(async (company) => {
         const usersCount = await User.countDocuments({ companyId: company._id });
+        const companyModules = await CompanyModule.find({ company_id: company._id }).select('module_id').lean();
+        const enabledModules = companyModules.map((m: any) => m.module_id);
+        
         const companyObj = company.toObject();
         return {
           ...companyObj,
           plan: company.subscriptionPlanId ? (company.subscriptionPlanId as any).name : companyObj.plan,
-          users: usersCount
+          users: usersCount,
+          enabledModules
         };
       })
     );
@@ -47,7 +51,7 @@ export class CompanyService {
     };
   }
 
-  static async registerTenant({ name, adminEmail, subscriptionPlanId, usersQuota, templateId, industryId }: { name: string, adminEmail: string, subscriptionPlanId?: string, usersQuota?: number, templateId?: string, industryId?: string }) {
+  static async registerTenant({ name, adminEmail, subscriptionPlanId, usersQuota, templateId, industryId, enabledModules }: { name: string, adminEmail: string, subscriptionPlanId?: string, usersQuota?: number, templateId?: string, industryId?: string, enabledModules?: string[] }) {
     if (!name || !adminEmail) {
       throw new Error("Name and Admin Email are required.");
     }
@@ -149,6 +153,17 @@ export class CompanyService {
         }));
         await DynamicField.insertMany(newFields);
       }
+    } else if (enabledModules && enabledModules.length > 0) {
+      // Provision the modules selected by the admin during creation
+      const companyModulesData = enabledModules.map((mod: string, index: number) => ({
+        company_id: newCompany._id,
+        module_id: mod,
+        visible: true,
+        display_name: mod.charAt(0).toUpperCase() + mod.slice(1),
+        sort_order: index,
+        is_customized: false,
+      }));
+      await CompanyModule.insertMany(companyModulesData);
     } else if (industryId) {
       // Provision Default Modules from Industry if no Template is selected
       const Industry = require("@/modules/settings/schemas/Industry").default;

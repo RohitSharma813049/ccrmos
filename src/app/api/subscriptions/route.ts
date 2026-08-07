@@ -39,7 +39,7 @@ export async function POST(req: Request) {
     const { 
       name, price, billing, users, features,
       maxUsers, maxRoles, maxTeams, maxCampaigns, 
-      aiFeatures, apiIntegration, planType, allowedModules, industryId 
+      aiFeatures, apiIntegration, allowWhiteLabeling, planType, allowedModules, industryId 
     } = await req.json();
     
     if (!name || price === undefined || !users) {
@@ -58,6 +58,7 @@ export async function POST(req: Request) {
       maxCampaigns,
       aiFeatures,
       apiIntegration,
+      allowWhiteLabeling: allowWhiteLabeling || false,
       planType: planType || "FIXED",
       allowedModules: allowedModules || [],
       industryId: industryId || null,

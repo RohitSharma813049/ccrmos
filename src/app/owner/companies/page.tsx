@@ -472,7 +472,14 @@ export default function ManageCompaniesPage() {
                 <label className="block text-sm font-medium text-foreground mb-2">Available Modules (Grouped by Scope)</label>
                 <div className="bg-muted/10 p-4 border border-border rounded-xl max-h-60 overflow-y-auto space-y-4">
                   {['Global', 'Industry', 'Company'].map(scope => {
-                    const scopedModules = availableModules.filter(m => m.tenantScope === scope);
+                    const scopedModules = availableModules.filter(m => {
+                      if (m.tenantScope !== scope) return false;
+                      if (scope === 'Industry') {
+                        const indId = m.industryId?._id || m.industryId;
+                        return indId === formData.industryId;
+                      }
+                      return true;
+                    });
                     if (scopedModules.length === 0) return null;
                     return (
                       <div key={scope}>

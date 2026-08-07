@@ -18,6 +18,21 @@ export async function GET(req: Request, { params }: { params: Promise<{ key: str
     // For other tenants, we look up settings specific to their companyId, falling back to global if not found
     const companyId = user.hierarchyLevel === 1 ? null : user.companyId;
 
+    if (key === 'whitelabel' && user.hierarchyLevel !== 1 && companyId) {
+      const Company = (await import('@/modules/companies/schemas/Company')).default;
+      const SubscriptionPlan = (await import('@/modules/settings/schemas/SubscriptionPlan')).default;
+      
+      const company = await Company.findById(companyId);
+      if (company && company.subscriptionPlanId) {
+        const plan = await SubscriptionPlan.findById(company.subscriptionPlanId);
+        if (!plan?.allowWhiteLabeling) {
+          return NextResponse.json({ error: "Feature not available on your current plan.", requiresUpgrade: true }, { status: 403 });
+        }
+      } else {
+        return NextResponse.json({ error: "Feature not available on your current plan.", requiresUpgrade: true }, { status: 403 });
+      }
+    }
+
     let setting = await SystemSetting.findOne({ key, companyId });
     if (!setting && companyId !== null) {
        // fallback to global if not found for tenant
@@ -44,6 +59,21 @@ export async function PUT(req: Request, { params }: { params: Promise<{ key: str
     // Determine scope based on user level or request body (if they explicitly pass global=true)
     const isGlobalReq = body.global === true && user.hierarchyLevel === 1;
     const companyId = isGlobalReq ? null : user.companyId;
+
+    if (key === 'whitelabel' && user.hierarchyLevel !== 1 && companyId) {
+      const Company = (await import('@/modules/companies/schemas/Company')).default;
+      const SubscriptionPlan = (await import('@/modules/settings/schemas/SubscriptionPlan')).default;
+      
+      const company = await Company.findById(companyId);
+      if (company && company.subscriptionPlanId) {
+        const plan = await SubscriptionPlan.findById(company.subscriptionPlanId);
+        if (!plan?.allowWhiteLabeling) {
+          return NextResponse.json({ error: "Feature not available on your current plan.", requiresUpgrade: true }, { status: 403 });
+        }
+      } else {
+        return NextResponse.json({ error: "Feature not available on your current plan.", requiresUpgrade: true }, { status: 403 });
+      }
+    }
 
     let setting = await SystemSetting.findOne({ key, companyId });
 

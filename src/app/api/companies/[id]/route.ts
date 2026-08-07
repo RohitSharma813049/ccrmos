@@ -28,14 +28,44 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         plan, 
         usersQuota, 
         status, 
-        industryId: industryId === "" ? null : industryId, 
-        enabledModules 
+        industryId: industryId === "" ? null : industryId
       },
       { new: true, runValidators: true }
     );
     
     if (!updatedCompany) {
       return NextResponse.json({ error: "Company not found" }, { status: 404 });
+    }
+    
+    // Sync modules if provided
+    if (enabledModules && Array.isArray(enabledModules)) {
+      const CompanyModule = (await import("@/modules/companies/schemas/CompanyModule")).default;
+      
+      // Delete modules that are not in the enabledModules list
+      await CompanyModule.deleteMany({
+        company_id: id,
+        module_id: { $nin: enabledModules }
+      });
+
+      // Find existing modules to avoid duplicates
+      const existingModules = await CompanyModule.find({ company_id: id }).lean();
+      const existingModuleIds = existingModules.map((m: any) => m.module_id);
+
+      // Insert new modules
+      const newModulesToInsert = enabledModules
+        .filter(mod => !existingModuleIds.includes(mod))
+        .map((mod, index) => ({
+          company_id: id,
+          module_id: mod,
+          visible: true,
+          display_name: mod.charAt(0).toUpperCase() + mod.slice(1),
+          sort_order: index,
+          is_customized: false
+        }));
+        
+      if (newModulesToInsert.length > 0) {
+        await CompanyModule.insertMany(newModulesToInsert);
+      }
     }
     
     return NextResponse.json({ message: "Tenant updated successfully.", company: updatedCompany }, { status: 200 });
