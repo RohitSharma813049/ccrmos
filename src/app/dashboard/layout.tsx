@@ -137,7 +137,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
                 const normalized = (mod.module_id || "").toLowerCase().trim();
                 const stdRoute = stdRouteMap[normalized];
                 
-                const href = stdRoute ? `/dashboard/${stdRoute}` : `/dashboard/${mod.module_id}`;
+                const href = stdRoute ? `/dashboard/${stdRoute}` : `/dashboard/${mod.module_id.toLowerCase()}`;
                 // Fallback icon
                 const icon = "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6";
                 return (
@@ -275,7 +275,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
                 const normalized = (mod.module_id || "").toLowerCase().trim();
                 const stdRoute = stdRouteMap[normalized];
                 
-                const href = stdRoute ? `/dashboard/${stdRoute}` : `/dashboard/${mod.module_id}`;
+                const href = stdRoute ? `/dashboard/${stdRoute}` : `/dashboard/${mod.module_id.toLowerCase()}`;
                 const icon = "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6";
                 return (
                   <NavItem key={mod._id.toString()} href={href} label={mod.display_name} icon={icon} />
