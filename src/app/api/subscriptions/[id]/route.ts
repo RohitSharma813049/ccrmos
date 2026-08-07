@@ -14,7 +14,11 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     }
     
     const { id } = await params;
-    const { name, price, billing, users, features, isActive } = await req.json();
+    const { 
+      name, price, billing, users, features, isActive,
+      maxUsers, maxRoles, maxTeams, maxCampaigns, 
+      aiFeatures, apiIntegration, planType, allowedModules, industryId
+    } = await req.json();
     
     const updatedPlan = await SubscriptionPlan.findByIdAndUpdate(
       id,
@@ -24,6 +28,15 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         billing, 
         users, 
         features,
+        maxUsers,
+        maxRoles,
+        maxTeams,
+        maxCampaigns,
+        aiFeatures,
+        apiIntegration,
+        planType,
+        allowedModules,
+        industryId: industryId || null,
         ...(isActive !== undefined && { isActive })
       },
       { new: true, runValidators: true }

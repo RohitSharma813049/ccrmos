@@ -151,7 +151,7 @@ export class CompanyService {
       }
     } else if (industryId) {
       // Provision Default Modules from Industry if no Template is selected
-      const Industry = require("@/modules/owner/schemas/Industry").default;
+      const Industry = require("@/modules/settings/schemas/Industry").default;
       const industry = await Industry.findById(industryId).lean();
       if (industry && industry.defaultModules && industry.defaultModules.length > 0) {
         const companyModulesData = industry.defaultModules.map((mod: string, index: number) => ({

@@ -36,7 +36,11 @@ export async function POST(req: Request) {
       await mongoose.connect(process.env.MONGODB_URI!);
     }
     
-    const { name, price, billing, users, features } = await req.json();
+    const { 
+      name, price, billing, users, features,
+      maxUsers, maxRoles, maxTeams, maxCampaigns, 
+      aiFeatures, apiIntegration, planType, allowedModules, industryId 
+    } = await req.json();
     
     if (!name || price === undefined || !users) {
       return NextResponse.json({ error: "Name, price, and users are required." }, { status: 400 });
@@ -48,6 +52,15 @@ export async function POST(req: Request) {
       billing: billing || "Monthly",
       users,
       features: features || [],
+      maxUsers,
+      maxRoles,
+      maxTeams,
+      maxCampaigns,
+      aiFeatures,
+      apiIntegration,
+      planType: planType || "FIXED",
+      allowedModules: allowedModules || [],
+      industryId: industryId || null,
       isActive: true
     });
     
