@@ -107,18 +107,18 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
         let continuationToken: string | undefined = undefined;
 
         while (isTruncated) {
-          const listCommand = new ListObjectsV2Command({
+          const listCommand: any = new ListObjectsV2Command({
             Bucket: process.env.R2_BUCKET_NAME,
             Prefix: prefix,
             ContinuationToken: continuationToken
           });
-          const listRes = await s3Client.send(listCommand);
+          const listRes: any = await s3Client.send(listCommand);
           
           if (listRes.Contents && listRes.Contents.length > 0) {
-            const deleteCommand = new DeleteObjectsCommand({
+            const deleteCommand: any = new DeleteObjectsCommand({
               Bucket: process.env.R2_BUCKET_NAME,
               Delete: {
-                Objects: listRes.Contents.map(c => ({ Key: c.Key }))
+                Objects: listRes.Contents.map((c: any) => ({ Key: c.Key }))
               }
             });
             await s3Client.send(deleteCommand);
