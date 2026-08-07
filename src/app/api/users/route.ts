@@ -54,7 +54,8 @@ export async function GET(req: Request) {
       query.hierarchyLevel = { $gt: 2 }; // Hide founders when impersonating
     } else {
       // Platform Owner managing their own internal platform employees
-      query.companyId = user.companyId;
+      query.companyId = user.companyId || null;
+      query.founderId = null; // Ensure we only get platform-level users, not tenant users
       // Hide other platform owners if they exist, or just hide founders
       query.hierarchyLevel = { $gt: 2 }; 
     }
@@ -109,6 +110,9 @@ export async function POST(req: Request) {
       if (newHierarchyLevel <= authUser.hierarchyLevel) {
         return NextResponse.json({ error: "Forbidden: Cannot create users at or above your own hierarchy level." }, { status: 403 });
       }
+    } else {
+      body.companyId = authUser.companyId || null;
+      body.founderId = null;
     }
 
     // In a real system, you would send an invite email and they would set their password.

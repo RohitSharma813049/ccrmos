@@ -4,24 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { Loader2, Plus, Edit, Trash2, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
-const CORE_MODULES = [
-  'Leads',
-  'FB Leads',
-  'Customers',
-  'Projects',
-  'Tasks',
-  'Invoices',
-  'Orders',
-  'Departments',
-  'Teams',
-  'User Management',
-  'Roles & Permissions',
-  'API Configuration',
-  'WhatsApp',
-  'Manual-Whatsapp',
-  'Whatsapp Message Templates'
-];
-
 export default function IndustriesClient() {
   const [industries, setIndustries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -238,26 +220,6 @@ export default function IndustriesClient() {
 
                 <label className="block text-sm font-medium text-gray-700 mb-2">Available Modules (Grouped by Scope)</label>
                 <div className="bg-gray-50 p-4 border border-gray-200 rounded-xl max-h-60 overflow-y-auto space-y-4">
-                  <div>
-                    <h4 className="text-xs font-bold text-gray-500 uppercase mb-2 tracking-wider">Core / Base Scope</h4>
-                    <div className="grid grid-cols-2 gap-3">
-                      {CORE_MODULES.map(modName => {
-                        const isSelected = formData.defaultModules.includes(modName);
-                        if (isSelected) return null;
-                        return (
-                          <label key={modName} className="flex items-center space-x-2 cursor-pointer p-1 hover:bg-gray-100 rounded">
-                            <input 
-                              type="checkbox" 
-                              checked={false}
-                              onChange={() => handleModuleToggle(modName)}
-                              className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                            />
-                            <span className="text-sm text-gray-700 font-medium truncate" title={modName}>{modName}</span>
-                          </label>
-                        );
-                      })}
-                    </div>
-                  </div>
                   {['Global', 'Industry', 'Company'].map(scope => {
                     const scopedModules = availableModules.filter(m => m.tenantScope === scope);
                     if (scopedModules.length === 0) return null;
