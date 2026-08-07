@@ -19,10 +19,7 @@ interface Company {
   createdAt: string;
 }
 
-const AVAILABLE_MODULES = [
-  "Leads", "Customers", "Projects", "Orders", "Invoices", 
-  "Tasks", "Support", "Rewards"
-];
+
 
 export default function ManageCompaniesPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -37,6 +34,7 @@ export default function ManageCompaniesPage() {
   const [currentCompanyId, setCurrentCompanyId] = useState<string | null>(null);
   const [plans, setPlans] = useState<any[]>([]);
   const [industries, setIndustries] = useState<any[]>([]);
+  const [availableModules, setAvailableModules] = useState<any[]>([]);
   
   const [formData, setFormData] = useState({
     name: "",
@@ -94,6 +92,7 @@ export default function ManageCompaniesPage() {
   useEffect(() => {
     fetchPlans();
     fetchIndustries();
+    fetchModules();
   }, []);
 
   useEffect(() => {
@@ -109,6 +108,18 @@ export default function ManageCompaniesPage() {
       }
     } catch (error) {
       console.error("Failed to fetch plans", error);
+    }
+  }
+
+  async function fetchModules() {
+    try {
+      const res = await fetch("/api/settings/modules?limit=1000");
+      if (res.ok) {
+        const data = await res.json();
+        setAvailableModules(data.modules || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch modules", error);
     }
   }
 
@@ -418,23 +429,52 @@ export default function ManageCompaniesPage() {
               </div>
 
               <div className="pt-2">
-                <label className="block text-sm font-medium text-foreground mb-2">Enabled Modules</label>
-                <div className="flex flex-wrap gap-2">
-                  {AVAILABLE_MODULES.map(mod => {
-                    const isSelected = formData.enabledModules.includes(mod);
+                <label className="block text-sm font-medium text-foreground mb-2">Selected Modules</label>
+                <div className="flex flex-wrap gap-2 mb-4 p-3 bg-muted/30 border border-border rounded-xl min-h-[50px]">
+                  {formData.enabledModules.length === 0 ? (
+                    <span className="text-sm text-muted-foreground italic">No modules selected</span>
+                  ) : (
+                    formData.enabledModules.map(modName => (
+                      <span key={modName} className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary text-primary-foreground text-sm font-medium rounded-full">
+                        {modName}
+                        <button 
+                          type="button" 
+                          onClick={() => toggleModule(modName)}
+                          className="hover:bg-primary-foreground/20 rounded-full p-0.5 transition-colors"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                      </span>
+                    ))
+                  )}
+                </div>
+
+                <label className="block text-sm font-medium text-foreground mb-2">Available Modules (Grouped by Scope)</label>
+                <div className="bg-muted/10 p-4 border border-border rounded-xl max-h-60 overflow-y-auto space-y-4">
+                  {['Global', 'Industry', 'Company'].map(scope => {
+                    const scopedModules = availableModules.filter(m => m.tenantScope === scope);
+                    if (scopedModules.length === 0) return null;
                     return (
-                      <button
-                        key={mod}
-                        type="button"
-                        onClick={() => toggleModule(mod)}
-                        className={`px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors ${
-                          isSelected 
-                            ? "bg-primary border-primary text-primary-foreground" 
-                            : "bg-background border-border text-muted-foreground hover:border-primary/50"
-                        }`}
-                      >
-                        {mod}
-                      </button>
+                      <div key={scope}>
+                        <h4 className="text-xs font-bold text-muted-foreground uppercase mb-2 tracking-wider">{scope} Scope</h4>
+                        <div className="grid grid-cols-2 gap-3">
+                          {scopedModules.map(mod => {
+                            const isSelected = formData.enabledModules.includes(mod.name);
+                            if (isSelected) return null;
+                            return (
+                              <label key={mod._id} className="flex items-center space-x-2 cursor-pointer p-1 hover:bg-muted/50 rounded transition-colors">
+                                <input 
+                                  type="checkbox" 
+                                  checked={false}
+                                  onChange={() => toggleModule(mod.name)}
+                                  className="w-4 h-4 text-primary rounded border-border focus:ring-primary"
+                                />
+                                <span className="text-sm text-foreground font-medium truncate" title={mod.name}>{mod.name}</span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </div>
                     );
                   })}
                 </div>

@@ -9,6 +9,12 @@ interface SubscriptionPlan {
   billing: "Monthly" | "Yearly";
   users: string;
   features: string[];
+  maxUsers?: number;
+  maxRoles?: number;
+  maxTeams?: number;
+  maxCampaigns?: number;
+  aiFeatures?: boolean;
+  apiIntegration?: boolean;
   planType?: "FIXED" | "CUSTOM";
   allowedModules?: string[];
   isActive?: boolean;
@@ -30,22 +36,19 @@ export default function SubscriptionsClient() {
     price: 0,
     billing: "Monthly" as "Monthly" | "Yearly",
     users: "Up to 5",
+    maxUsers: 5,
+    maxRoles: 3,
+    maxTeams: 2,
+    maxCampaigns: 0,
+    aiFeatures: false,
+    apiIntegration: false,
     features: [""],
     planType: "FIXED" as "FIXED" | "CUSTOM",
     allowedModules: [] as string[]
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const availableModules = [
-    { id: 'lead', label: 'Leads' },
-    { id: 'customer', label: 'Customers' },
-    { id: 'project', label: 'Projects' },
-    { id: 'task', label: 'Tasks' },
-    { id: 'order', label: 'Orders' },
-    { id: 'invoice', label: 'Invoices' },
-    { id: 'partner', label: 'Partners' },
-    { id: 'property', label: 'Properties' },
-  ];
+  const [availableModules, setAvailableModules] = useState<any[]>([]);
 
   // Escape key to close modal
   useEffect(() => {
@@ -60,6 +63,7 @@ export default function SubscriptionsClient() {
 
   useEffect(() => {
     fetchPlans();
+    fetchModules();
   }, [showInactive]);
 
   async function fetchPlans() {
@@ -77,6 +81,18 @@ export default function SubscriptionsClient() {
     }
   };
 
+  async function fetchModules() {
+    try {
+      const res = await fetch("/api/settings/modules?limit=1000");
+      if (res.ok) {
+        const data = await res.json();
+        setAvailableModules(data.modules || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch modules", error);
+    }
+  }
+
   const openCreateModal = () => {
     setIsEditMode(false);
     setCurrentPlanId(null);
@@ -85,6 +101,12 @@ export default function SubscriptionsClient() {
       price: 0,
       billing: "Monthly",
       users: "Up to 5",
+      maxUsers: 5,
+      maxRoles: 3,
+      maxTeams: 2,
+      maxCampaigns: 0,
+      aiFeatures: false,
+      apiIntegration: false,
       features: [""],
       planType: "FIXED",
       allowedModules: []
@@ -100,6 +122,12 @@ export default function SubscriptionsClient() {
       price: plan.price,
       billing: plan.billing,
       users: plan.users,
+      maxUsers: plan.maxUsers ?? 5,
+      maxRoles: plan.maxRoles ?? 3,
+      maxTeams: plan.maxTeams ?? 2,
+      maxCampaigns: plan.maxCampaigns ?? 0,
+      aiFeatures: plan.aiFeatures ?? false,
+      apiIntegration: plan.apiIntegration ?? false,
       features: plan.features.length > 0 ? plan.features : [""],
       planType: plan.planType || "FIXED",
       allowedModules: plan.allowedModules || []
@@ -337,18 +365,78 @@ export default function SubscriptionsClient() {
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-foreground mb-2">
-                    User Quota <span className="text-destructive">*</span>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-foreground mb-2">Max Users</label>
+                    <input 
+                      type="number" 
+                      min="1"
+                      required 
+                      value={formData.maxUsers}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value) || 1;
+                        setFormData({...formData, maxUsers: val, users: `Up to ${val}`});
+                      }}
+                      className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none transition-all shadow-sm" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-foreground mb-2">Max Roles</label>
+                    <input 
+                      type="number" 
+                      min="1"
+                      required 
+                      value={formData.maxRoles}
+                      onChange={(e) => setFormData({...formData, maxRoles: parseInt(e.target.value) || 1})}
+                      className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none transition-all shadow-sm" 
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-foreground mb-2">Max Teams</label>
+                    <input 
+                      type="number" 
+                      min="1"
+                      required 
+                      value={formData.maxTeams}
+                      onChange={(e) => setFormData({...formData, maxTeams: parseInt(e.target.value) || 1})}
+                      className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none transition-all shadow-sm" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-foreground mb-2">Max Campaigns (0 for unlimited)</label>
+                    <input 
+                      type="number" 
+                      min="0"
+                      required 
+                      value={formData.maxCampaigns}
+                      onChange={(e) => setFormData({...formData, maxCampaigns: parseInt(e.target.value) || 0})}
+                      className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none transition-all shadow-sm" 
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-6">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={formData.aiFeatures}
+                      onChange={(e) => setFormData({...formData, aiFeatures: e.target.checked})}
+                      className="w-4 h-4 text-primary rounded border-border focus:ring-primary"
+                    />
+                    <span className="text-sm font-medium text-foreground">Enable AI Features</span>
                   </label>
-                  <input 
-                    type="text" 
-                    required 
-                    value={formData.users}
-                    onChange={(e) => setFormData({...formData, users: e.target.value})}
-                    className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none transition-all shadow-sm" 
-                    placeholder="e.g. Up to 20, Unlimited" 
-                  />
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={formData.apiIntegration}
+                      onChange={(e) => setFormData({...formData, apiIntegration: e.target.checked})}
+                      className="w-4 h-4 text-primary rounded border-border focus:ring-primary"
+                    />
+                    <span className="text-sm font-medium text-foreground">Enable API Integrations</span>
+                  </label>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -367,19 +455,54 @@ export default function SubscriptionsClient() {
 
                 {formData.planType === 'FIXED' && (
                   <div>
-                    <label className="block text-sm font-semibold text-foreground mb-2">Allowed Modules</label>
-                    <div className="grid grid-cols-2 gap-3 bg-card/50 p-4 border border-border rounded-xl max-h-48 overflow-y-auto">
-                      {availableModules.map(mod => (
-                        <label key={mod.id} className="flex items-center space-x-2 cursor-pointer p-1">
-                          <input 
-                            type="checkbox" 
-                            checked={formData.allowedModules.includes(mod.id)}
-                            onChange={() => handleModuleToggle(mod.id)}
-                            className="w-4 h-4 text-primary rounded border-border focus:ring-primary"
-                          />
-                          <span className="text-sm text-foreground font-medium">{mod.label}</span>
-                        </label>
-                      ))}
+                    <label className="block text-sm font-semibold text-foreground mb-2">Selected Modules</label>
+                    <div className="flex flex-wrap gap-2 mb-4 p-3 bg-muted/30 border border-border rounded-xl min-h-[50px]">
+                      {formData.allowedModules.length === 0 ? (
+                        <span className="text-sm text-muted-foreground italic">No modules selected</span>
+                      ) : (
+                        formData.allowedModules.map(modName => (
+                          <span key={modName} className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary text-primary-foreground text-sm font-medium rounded-full">
+                            {modName}
+                            <button 
+                              type="button" 
+                              onClick={() => handleModuleToggle(modName)}
+                              className="hover:bg-primary-foreground/20 rounded-full p-0.5 transition-colors"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                          </span>
+                        ))
+                      )}
+                    </div>
+
+                    <label className="block text-sm font-semibold text-foreground mb-2">Available Modules (Grouped by Scope)</label>
+                    <div className="bg-muted/10 p-4 border border-border rounded-xl max-h-60 overflow-y-auto space-y-4">
+                      {['Global', 'Industry', 'Company'].map(scope => {
+                        const scopedModules = availableModules.filter(m => m.tenantScope === scope);
+                        if (scopedModules.length === 0) return null;
+                        return (
+                          <div key={scope}>
+                            <h4 className="text-xs font-bold text-muted-foreground uppercase mb-2 tracking-wider">{scope} Scope</h4>
+                            <div className="grid grid-cols-2 gap-3">
+                              {scopedModules.map(mod => {
+                                const isSelected = formData.allowedModules.includes(mod.name);
+                                if (isSelected) return null;
+                                return (
+                                  <label key={mod._id} className="flex items-center space-x-2 cursor-pointer p-1 hover:bg-muted/50 rounded transition-colors">
+                                    <input 
+                                      type="checkbox" 
+                                      checked={false}
+                                      onChange={() => handleModuleToggle(mod.name)}
+                                      className="w-4 h-4 text-primary rounded border-border focus:ring-primary"
+                                    />
+                                    <span className="text-sm text-foreground font-medium truncate" title={mod.name}>{mod.name}</span>
+                                  </label>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}

@@ -17,16 +17,10 @@ export default function IndustriesClient() {
     defaultModules: [] as string[],
   });
 
-  const availableModules = [
-    { id: 'lead', label: 'Leads' },
-    { id: 'customer', label: 'Customers' },
-    { id: 'project', label: 'Projects' },
-    { id: 'task', label: 'Tasks' },
-    { id: 'order', label: 'Orders' },
-    { id: 'invoice', label: 'Invoices' },
-    { id: 'partner', label: 'Partners' },
-    { id: 'property', label: 'Properties' },
-  ];
+  const [availableModules, setAvailableModules] = useState<any[]>([]);
+
+
+
 
   const handleModuleToggle = (moduleId: string) => {
     setFormData(prev => {
@@ -54,8 +48,21 @@ export default function IndustriesClient() {
     }
   };
 
+  const fetchModules = async () => {
+    try {
+      const res = await fetch('/api/settings/modules?limit=1000');
+      const json = await res.json();
+      if (res.ok) {
+        setAvailableModules(json.modules || []);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     fetchIndustries();
+    fetchModules();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -191,19 +198,54 @@ export default function IndustriesClient() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Default Modules</label>
-                <div className="grid grid-cols-2 gap-3 bg-gray-50 p-4 border border-gray-200 rounded-xl max-h-48 overflow-y-auto">
-                  {availableModules.map(mod => (
-                    <label key={mod.id} className="flex items-center space-x-2 cursor-pointer p-1">
-                      <input 
-                        type="checkbox" 
-                        checked={formData.defaultModules.includes(mod.id)}
-                        onChange={() => handleModuleToggle(mod.id)}
-                        className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                      />
-                      <span className="text-sm text-gray-700 font-medium">{mod.label}</span>
-                    </label>
-                  ))}
+                <label className="block text-sm font-medium text-gray-700 mb-2">Selected Default Modules</label>
+                <div className="flex flex-wrap gap-2 mb-4 p-3 bg-gray-50 border border-gray-200 rounded-xl min-h-[50px]">
+                  {formData.defaultModules.length === 0 ? (
+                    <span className="text-sm text-gray-500 italic">No modules selected</span>
+                  ) : (
+                    formData.defaultModules.map(modName => (
+                      <span key={modName} className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-100 text-blue-700 text-sm font-medium rounded-full">
+                        {modName}
+                        <button 
+                          type="button" 
+                          onClick={() => handleModuleToggle(modName)}
+                          className="hover:bg-blue-200 rounded-full p-0.5 transition-colors"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </span>
+                    ))
+                  )}
+                </div>
+
+                <label className="block text-sm font-medium text-gray-700 mb-2">Available Modules (Grouped by Scope)</label>
+                <div className="bg-gray-50 p-4 border border-gray-200 rounded-xl max-h-60 overflow-y-auto space-y-4">
+                  {['Global', 'Industry', 'Company'].map(scope => {
+                    const scopedModules = availableModules.filter(m => m.tenantScope === scope);
+                    if (scopedModules.length === 0) return null;
+                    return (
+                      <div key={scope}>
+                        <h4 className="text-xs font-bold text-gray-500 uppercase mb-2 tracking-wider">{scope} Scope</h4>
+                        <div className="grid grid-cols-2 gap-3">
+                          {scopedModules.map(mod => {
+                            const isSelected = formData.defaultModules.includes(mod.name);
+                            if (isSelected) return null;
+                            return (
+                              <label key={mod._id} className="flex items-center space-x-2 cursor-pointer p-1 hover:bg-gray-100 rounded">
+                                <input 
+                                  type="checkbox" 
+                                  checked={false}
+                                  onChange={() => handleModuleToggle(mod.name)}
+                                  className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                                />
+                                <span className="text-sm text-gray-700 font-medium truncate" title={mod.name}>{mod.name}</span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
