@@ -15,6 +15,7 @@ export interface ISubscriptionPlan extends Document {
   apiIntegration: boolean;
   planType: "FIXED" | "CUSTOM";
   allowedModules: string[];
+  industryId?: mongoose.Types.ObjectId;
   permissions: Record<string, boolean>;
   isActive: boolean; // Soft delete flag
   createdAt: Date;
@@ -37,6 +38,7 @@ const subscriptionPlanSchema = new Schema<ISubscriptionPlan>(
     apiIntegration: { type: Boolean, default: false },
     planType: { type: String, enum: ["FIXED", "CUSTOM"], default: "FIXED" },
     allowedModules: [{ type: String }],
+    industryId: { type: Schema.Types.ObjectId, ref: 'Industry' },
     permissions: { type: Schema.Types.Mixed, default: {} },
     isActive: { type: Boolean, default: true },
   },

@@ -17,6 +17,7 @@ interface SubscriptionPlan {
   apiIntegration?: boolean;
   planType?: "FIXED" | "CUSTOM";
   allowedModules?: string[];
+  industryId?: string;
   isActive?: boolean;
 }
 
@@ -44,11 +45,13 @@ export default function SubscriptionsClient() {
     apiIntegration: false,
     features: [""],
     planType: "FIXED" as "FIXED" | "CUSTOM",
-    allowedModules: [] as string[]
+    allowedModules: [] as string[],
+    industryId: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [availableModules, setAvailableModules] = useState<any[]>([]);
+  const [industries, setIndustries] = useState<any[]>([]);
 
   // Escape key to close modal
   useEffect(() => {
@@ -64,6 +67,7 @@ export default function SubscriptionsClient() {
   useEffect(() => {
     fetchPlans();
     fetchModules();
+    fetchIndustries();
   }, [showInactive]);
 
   async function fetchPlans() {
@@ -93,6 +97,18 @@ export default function SubscriptionsClient() {
     }
   }
 
+  async function fetchIndustries() {
+    try {
+      const res = await fetch("/api/industries");
+      if (res.ok) {
+        const data = await res.json();
+        setIndustries(data || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch industries", error);
+    }
+  }
+
   const openCreateModal = () => {
     setIsEditMode(false);
     setCurrentPlanId(null);
@@ -109,7 +125,8 @@ export default function SubscriptionsClient() {
       apiIntegration: false,
       features: [""],
       planType: "FIXED",
-      allowedModules: []
+      allowedModules: [],
+      industryId: ""
     });
     setIsModalOpen(true);
   };
@@ -130,7 +147,8 @@ export default function SubscriptionsClient() {
       apiIntegration: plan.apiIntegration ?? false,
       features: plan.features.length > 0 ? plan.features : [""],
       planType: plan.planType || "FIXED",
-      allowedModules: plan.allowedModules || []
+      allowedModules: plan.allowedModules || [],
+      industryId: plan.industryId || ""
     });
     setIsModalOpen(true);
   };
@@ -451,6 +469,19 @@ export default function SubscriptionsClient() {
                       <option value="CUSTOM">Custom (Customer Choice)</option>
                     </select>
                   </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-foreground mb-2">Target Industry <span className="text-muted-foreground font-normal">(Optional)</span></label>
+                    <select 
+                      value={formData.industryId}
+                      onChange={(e) => setFormData({...formData, industryId: e.target.value})}
+                      className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none transition-all shadow-sm"
+                    >
+                      <option value="">All Industries</option>
+                      {industries.map(i => (
+                        <option key={i._id} value={i._id}>{i.name}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
                 {formData.planType === 'FIXED' && (
@@ -478,7 +509,10 @@ export default function SubscriptionsClient() {
                     <label className="block text-sm font-semibold text-foreground mb-2">Available Modules (Grouped by Scope)</label>
                     <div className="bg-muted/10 p-4 border border-border rounded-xl max-h-60 overflow-y-auto space-y-4">
                       {['Global', 'Industry', 'Company'].map(scope => {
-                        const scopedModules = availableModules.filter(m => m.tenantScope === scope);
+                        let scopedModules = availableModules.filter(m => m.tenantScope === scope);
+                        if (scope === 'Industry' && formData.industryId) {
+                          scopedModules = scopedModules.filter(m => !m.industryId || m.industryId === formData.industryId || m.industryId._id === formData.industryId);
+                        }
                         if (scopedModules.length === 0) return null;
                         return (
                           <div key={scope}>
