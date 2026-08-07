@@ -32,8 +32,9 @@ export default function DynamicFieldsPage() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentFieldId, setCurrentFieldId] = useState<string | null>(null);
   
-  // Industries for target
+  // Industries and Modules for target
   const [industries, setIndustries] = useState<any[]>([]);
+  const [modules, setModules] = useState<any[]>([]);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -54,6 +55,7 @@ export default function DynamicFieldsPage() {
 
   useEffect(() => {
     fetchIndustries();
+    fetchModules();
   }, []);
 
   async function fetchFields() {
@@ -93,15 +95,33 @@ export default function DynamicFieldsPage() {
     }
   }
 
-  const tabs = [
+  async function fetchModules() {
+    try {
+      const res = await fetch("/api/settings/modules?limit=1000");
+      if (res.ok) {
+        const data = await res.json();
+        setModules(data.modules || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch modules", error);
+    }
+  }
+
+  const baseTabs = [
     { id: "lead", label: "Lead Fields" },
     { id: "customer", label: "Customer Fields" },
     { id: "project", label: "Project Fields" },
     { id: "invoice", label: "Invoice Fields" },
     { id: "task", label: "Task Fields" },
-    { id: "order", label: "Order Fields" },
-    { id: "all", label: "All Entities" },
-  ] as const;
+    { id: "order", label: "Order Fields" }
+  ];
+
+  const customTabs = modules.map(m => ({
+    id: m.name.toLowerCase().replace(/[^a-z0-9]/g, ""),
+    label: `${m.name} Fields`
+  }));
+
+  const tabs = [...baseTabs, ...customTabs, { id: "all", label: "All Entities" }];
 
   const openCreateModal = () => {
     setIsEditMode(false);
