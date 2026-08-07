@@ -22,9 +22,6 @@ export default function ModulesClient() {
   const [newModuleIndustryId, setNewModuleIndustryId] = useState("");
   const [newModuleCompanyId, setNewModuleCompanyId] = useState("");
 
-  const [isSchemaModalOpen, setIsSchemaModalOpen] = useState(false);
-  const [activeModule, setActiveModule] = useState<any>(null);
-
   useEffect(() => {
     fetchIndustries();
     fetchCompanies();
@@ -135,48 +132,6 @@ export default function ModulesClient() {
     }
   }
 
-  const openSchemaEditor = (mod: any) => {
-    setActiveModule(JSON.parse(JSON.stringify(mod))); // deep copy
-    setIsSchemaModalOpen(true);
-  };
-
-  const addField = () => {
-    setActiveModule({
-      ...activeModule,
-      fields: [...activeModule.fields, { name: "", type: "text", required: false, options: [] }]
-    });
-  };
-
-  const updateField = (index: number, key: string, value: any) => {
-    const updatedFields = [...activeModule.fields];
-    updatedFields[index][key] = value;
-    setActiveModule({ ...activeModule, fields: updatedFields });
-  };
-
-  const removeField = (index: number) => {
-    const updatedFields = [...activeModule.fields];
-    updatedFields.splice(index, 1);
-    setActiveModule({ ...activeModule, fields: updatedFields });
-  };
-
-  const saveSchema = async () => {
-    try {
-      const res = await fetch(`/api/settings/modules/${activeModule._id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fields: activeModule.fields })
-      });
-      if (res.ok) {
-        setIsSchemaModalOpen(false);
-        fetchModules();
-      } else {
-        alert("Failed to save schema");
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
   const columns: ColumnDef<any>[] = [
     {
       header: "Module Name",
@@ -206,19 +161,19 @@ export default function ModulesClient() {
       )
     },
     {
-      header: "Fields",
-      cell: (mod) => <span className="text-muted-foreground">{mod.fields?.length || 0} configured</span>
-    },
-    {
       header: "Actions",
       className: "text-right",
       cell: (mod) => (
         <div className="flex justify-end">
           <button 
-            onClick={() => openSchemaEditor(mod)} 
-            className="text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            onClick={() => {
+              if (confirm("Are you sure you want to delete this module?")) {
+                fetch(`/api/settings/modules/${mod._id}`, { method: "DELETE" }).then(() => fetchModules());
+              }
+            }} 
+            className="text-destructive hover:text-destructive/80 bg-destructive/10 hover:bg-destructive/20 px-3 py-1.5 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive"
           >
-            Edit Schema
+            Delete
           </button>
         </div>
       )
@@ -374,106 +329,6 @@ export default function ModulesClient() {
               >
                 Create
               </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Schema Editor Modal */}
-      {isSchemaModalOpen && activeModule && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
-          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setIsSchemaModalOpen(false)} />
-          <div className="relative bg-card border border-border rounded-2xl shadow-xl w-full max-w-3xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[85vh]">
-            <div className="p-6 border-b border-border flex justify-between items-center">
-              <div>
-                <h2 className="text-xl font-bold text-foreground">Schema Editor</h2>
-                <p className="text-sm text-muted-foreground">Configure fields for {activeModule.name}</p>
-              </div>
-              <button onClick={() => setIsSchemaModalOpen(false)} className="text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-              </button>
-            </div>
-            
-            <div className="p-6 overflow-y-auto flex-1 bg-muted/30">
-              {activeModule.fields.length === 0 ? (
-                <div className="text-center py-12 bg-card rounded-xl border border-dashed border-border">
-                  <p className="text-muted-foreground">No fields defined yet.</p>
-                  <button onClick={addField} className="mt-3 text-primary font-medium hover:text-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded">+ Add First Field</button>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {activeModule.fields.map((field: any, idx: number) => (
-                    <div key={idx} className="bg-card p-4 rounded-xl border border-border shadow-sm flex flex-col sm:flex-row items-start gap-4">
-                      <div className="flex-1 space-y-3 w-full">
-                        <div className="flex flex-col sm:flex-row gap-4">
-                          <div className="flex-1">
-                            <label className="block text-xs font-medium text-muted-foreground mb-1">Field Name</label>
-                            <input 
-                              type="text" 
-                              value={field.name}
-                              onChange={(e) => updateField(idx, "name", e.target.value)}
-                              placeholder="e.g., SKU Number"
-                              className="w-full bg-background border-border text-foreground rounded-lg shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-3 py-2 border transition-colors"
-                            />
-                          </div>
-                          <div className="w-full sm:w-1/3">
-                            <label className="block text-xs font-medium text-muted-foreground mb-1">Field Type</label>
-                            <select 
-                              value={field.type}
-                              onChange={(e) => updateField(idx, "type", e.target.value)}
-                              className="w-full bg-background border-border text-foreground rounded-lg shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-3 py-2 border transition-colors"
-                            >
-                              <option value="text">Short Text</option>
-                              <option value="textarea">Long Text</option>
-                              <option value="number">Number</option>
-                              <option value="date">Date</option>
-                              <option value="select">Dropdown (Select)</option>
-                            </select>
-                          </div>
-                        </div>
-
-                        {field.type === 'select' && (
-                          <div>
-                            <label className="block text-xs font-medium text-muted-foreground mb-1">Options (comma separated)</label>
-                            <input 
-                              type="text" 
-                              value={(field.options || []).join(", ")}
-                              onChange={(e) => {
-                                const arr = e.target.value.split(",").map((s: string) => s.trim()).filter(Boolean);
-                                updateField(idx, "options", arr);
-                              }}
-                              placeholder="e.g., High, Medium, Low"
-                              className="w-full bg-background border-border text-foreground rounded-lg shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-3 py-2 border transition-colors"
-                            />
-                          </div>
-                        )}
-
-                        <div className="flex items-center gap-2 mt-2">
-                          <input 
-                            type="checkbox" 
-                            checked={field.required}
-                            onChange={(e) => updateField(idx, "required", e.target.checked)}
-                            className="rounded border-border text-primary focus:ring-primary" 
-                          />
-                          <span className="text-sm text-foreground">Required field</span>
-                        </div>
-                      </div>
-                      
-                      <button onClick={() => removeField(idx)} className="text-destructive/70 hover:text-destructive p-2 hover:bg-destructive/10 rounded-lg transition-colors mt-0 sm:mt-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive self-end sm:self-auto">
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                      </button>
-                    </div>
-                  ))}
-                  <button onClick={addField} className="w-full py-3 border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/50 hover:bg-primary/5 font-medium rounded-xl transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
-                    + Add Field
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <div className="p-4 border-t border-border bg-card flex justify-end gap-3">
-              <button onClick={() => setIsSchemaModalOpen(false)} className="px-4 py-2 text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Cancel</button>
-              <button onClick={saveSchema} className="px-6 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">Save Schema</button>
             </div>
           </div>
         </div>
