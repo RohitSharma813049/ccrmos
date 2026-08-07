@@ -20,15 +20,28 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (!session?.user) redirect("/login");
 
   await dbConnect();
-  // Fetch global branding
-  const whitelabelSetting = await SystemSetting.findOne({ key: 'whitelabel', companyId: null });
-  const branding = whitelabelSetting?.value || {};
-  const platformName = branding.platformName || 'CRM OS';
-  const logoUrl = branding.logoUrl || null;
-  const primaryColor = branding.primaryColor || null;
+  // Determine user company for branding and subscription
+  const userCompanyId = (session.user as any).companyId || (session.user as any).impersonatedFounderId;
+
+  // Fetch branding (Tenant specific first, fallback to global)
+  let branding = {};
+  if (userCompanyId) {
+    const tenantWhitelabel = await SystemSetting.findOne({ key: 'whitelabel', companyId: userCompanyId });
+    if (tenantWhitelabel?.value) {
+      branding = tenantWhitelabel.value;
+    }
+  }
+  
+  if (Object.keys(branding).length === 0) {
+    const globalWhitelabel = await SystemSetting.findOne({ key: 'whitelabel', companyId: null });
+    branding = globalWhitelabel?.value || {};
+  }
+
+  const platformName = (branding as any).platformName || 'CRM OS';
+  const logoUrl = (branding as any).logoUrl || null;
+  const primaryColor = (branding as any).primaryColor || null;
 
   // Fetch company status for subscription enforcement
-  const userCompanyId = (session.user as any).companyId || (session.user as any).impersonatedFounderId;
   let subscriptionStatus = "active";
   let enabledModules: string[] = [];
   let companyModules: any[] = [];
