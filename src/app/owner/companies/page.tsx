@@ -46,6 +46,25 @@ export default function ManageCompaniesPage() {
     status: "Active"
   });
 
+  const handlePlanChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedPlanId = e.target.value;
+    const selectedPlan = plans.find(p => p._id === selectedPlanId);
+    
+    setFormData(prev => {
+      const newIndustryId = selectedPlan?.industryId || prev.industryId;
+      const selectedIndustry = industries.find(i => i._id === newIndustryId);
+      
+      return {
+        ...prev,
+        subscriptionPlanId: selectedPlanId,
+        industryId: newIndustryId,
+        enabledModules: selectedPlan?.allowedModules?.length 
+          ? selectedPlan.allowedModules 
+          : (selectedIndustry?.defaultModules || prev.enabledModules)
+      };
+    });
+  };
+
   const handleIndustryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedId = e.target.value;
     const selectedIndustry = industries.find(i => i._id === selectedId);
@@ -393,7 +412,7 @@ export default function ManageCompaniesPage() {
                   <label className="block text-sm font-medium text-foreground mb-1.5">Subscription Plan</label>
                   <select 
                     value={formData.subscriptionPlanId}
-                    onChange={(e) => setFormData({...formData, subscriptionPlanId: e.target.value})}
+                    onChange={handlePlanChange}
                     className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none transition-all"
                   >
                     {plans.map(p => (
@@ -403,13 +422,14 @@ export default function ManageCompaniesPage() {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">Target Industry</label>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">Target Industry <span className="text-destructive">*</span></label>
                   <select 
+                    required
                     value={formData.industryId}
                     onChange={handleIndustryChange}
                     className={`w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none transition-all`}
                   >
-                    <option value="">None (Blank CRM)</option>
+                    <option value="" disabled>Select an Industry</option>
                     {industries.map(i => (
                       <option key={i._id} value={i._id}>{i.name}</option>
                     ))}

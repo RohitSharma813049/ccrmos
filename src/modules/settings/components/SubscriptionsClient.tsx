@@ -530,7 +530,14 @@ export default function SubscriptionsClient() {
                       <div>
                         <h4 className="text-xs font-bold text-muted-foreground uppercase mb-2 tracking-wider">Core / Base Scope</h4>
                         <div className="grid grid-cols-2 gap-3">
-                          {CORE_MODULES.map(modName => {
+                          {CORE_MODULES.filter(modName => {
+                            if (!formData.industryId) return true;
+                            const industry = industries.find(i => i._id === formData.industryId);
+                            if (industry && industry.defaultModules) {
+                              return industry.defaultModules.includes(modName);
+                            }
+                            return true;
+                          }).map(modName => {
                             const isSelected = formData.allowedModules.includes(modName);
                             if (isSelected) return null;
                             return (
