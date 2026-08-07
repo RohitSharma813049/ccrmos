@@ -134,11 +134,7 @@ export default function DynamicFieldsPage() {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Ensure tenantScope is Industry if an industryId is selected (for convenience)
     const submitData = { ...formData };
-    if (submitData.industryId) {
-      submitData.tenantScope = "Industry";
-    }
 
     try {
       const url = isEditMode && currentFieldId ? `/api/dynamic-fields/${currentFieldId}` : "/api/dynamic-fields";
@@ -406,19 +402,34 @@ export default function DynamicFieldsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-1.5">Target Industry <span className="text-muted-foreground font-normal">(Optional)</span></label>
+                <label className="block text-sm font-medium text-foreground mb-1.5">Target Scope</label>
                 <select 
-                  value={formData.industryId}
-                  onChange={(e) => setFormData({...formData, industryId: e.target.value})}
-                  className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none transition-all shadow-sm"
+                  value={formData.tenantScope}
+                  onChange={(e) => setFormData({...formData, tenantScope: e.target.value, industryId: ''})}
+                  className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none transition-all shadow-sm appearance-none"
                 >
-                  <option value="">All Industries</option>
-                  {industries.map(i => (
-                    <option key={i._id} value={i._id}>{i.name}</option>
-                  ))}
+                  <option value="Global">Global Scope</option>
+                  <option value="Industry">Industry Scope</option>
+                  <option value="Company">Company Scope</option>
                 </select>
-                <p className="text-xs text-muted-foreground mt-1.5">If selected, this field will only be deployed to companies in this industry.</p>
               </div>
+
+              {formData.tenantScope === "Industry" && (
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">Target Industry</label>
+                  <select 
+                    value={formData.industryId}
+                    onChange={(e) => setFormData({...formData, industryId: e.target.value})}
+                    className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none transition-all shadow-sm"
+                  >
+                    <option value="">Select an Industry</option>
+                    {industries.map(i => (
+                      <option key={i._id} value={i._id}>{i.name}</option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-muted-foreground mt-1.5">This field will only be deployed to companies in this industry.</p>
+                </div>
+              )}
 
               <div className="flex items-center gap-3 p-4 bg-muted/50 border border-border rounded-xl">
                 <input 
