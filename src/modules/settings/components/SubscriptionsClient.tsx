@@ -21,6 +21,24 @@ interface SubscriptionPlan {
   isActive?: boolean;
 }
 
+const CORE_MODULES = [
+  'Leads',
+  'FB Leads',
+  'Customers',
+  'Projects',
+  'Tasks',
+  'Invoices',
+  'Orders',
+  'Departments',
+  'Teams',
+  'User Management',
+  'Roles & Permissions',
+  'API Configuration',
+  'WhatsApp',
+  'Manual-Whatsapp',
+  'Whatsapp Message Templates'
+];
+
 export default function SubscriptionsClient() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [loading, setLoading] = useState(true);
@@ -508,6 +526,29 @@ export default function SubscriptionsClient() {
 
                     <label className="block text-sm font-semibold text-foreground mb-2">Available Modules (Grouped by Scope)</label>
                     <div className="bg-muted/10 p-4 border border-border rounded-xl max-h-60 overflow-y-auto space-y-4">
+                      {/* CORE MODULES */}
+                      <div>
+                        <h4 className="text-xs font-bold text-muted-foreground uppercase mb-2 tracking-wider">Core / Base Scope</h4>
+                        <div className="grid grid-cols-2 gap-3">
+                          {CORE_MODULES.map(modName => {
+                            const isSelected = formData.allowedModules.includes(modName);
+                            if (isSelected) return null;
+                            return (
+                              <label key={modName} className="flex items-center space-x-2 cursor-pointer p-1 hover:bg-muted/50 rounded transition-colors">
+                                <input 
+                                  type="checkbox" 
+                                  checked={false}
+                                  onChange={() => handleModuleToggle(modName)}
+                                  className="w-4 h-4 text-primary rounded border-border focus:ring-primary"
+                                />
+                                <span className="text-sm text-foreground font-medium truncate" title={modName}>{modName}</span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* DYNAMIC MODULES */}
                       {['Global', 'Industry', 'Company'].map(scope => {
                         let scopedModules = availableModules.filter(m => m.tenantScope === scope);
                         if (scope === 'Industry' && formData.industryId) {
