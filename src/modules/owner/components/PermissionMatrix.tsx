@@ -17,6 +17,12 @@ const MODULES = [
   'Orders',
   'Departments',
   'Teams',
+  'User Management',
+  'Roles & Permissions',
+  'API Configuration',
+  'WhatsApp',
+  'Manual-Whatsapp',
+  'Whatsapp Message Templates'
 ];
 
 const ACTIONS = ['view', 'create', 'edit', 'delete'];

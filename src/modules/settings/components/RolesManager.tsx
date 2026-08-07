@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 
-const SYSTEM_MODULES = ["Leads", "Customers", "Projects", "Invoices", "Tasks", "Settings"];
+const SYSTEM_MODULES = ["Leads", "Customers", "Projects", "Invoices", "Tasks", "Settings", "User Management", "Roles & Permissions", "API Configuration", "WhatsApp", "Manual-Whatsapp", "Whatsapp Message Templates"];
 const ACTIONS = ["view", "create", "edit", "delete", "assign", "export", "import", "approve"];
 const SCOPES = ["Own", "Team", "Department", "Director", "Company", "Platform"];
 

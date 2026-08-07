@@ -11,7 +11,7 @@ const HIERARCHY_LEVELS = [
   { level: 6, label: "Team Member" }
 ];
 
-export default function UsersClient() {
+export default function UsersClient({ isOwner = false }: { isOwner?: boolean }) {
   const [users, setUsers] = useState<any[]>([]);
   const [roles, setRoles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,9 +56,10 @@ export default function UsersClient() {
 
   async function fetchRoles() {
     try {
-      const res = await fetch("/api/owner/roles");
+      const endpoint = isOwner ? "/api/owner/roles" : "/api/roles";
+      const res = await fetch(endpoint);
       const data = await res.json();
-      setRoles(data.data || []);
+      setRoles(isOwner ? (data.data || []) : (data.roles || []));
     } catch (e) {
       console.error(e);
     }
