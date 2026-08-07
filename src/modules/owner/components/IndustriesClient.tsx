@@ -98,7 +98,10 @@ export default function IndustriesClient() {
         body: JSON.stringify(formData),
       });
 
-      if (!res.ok) throw new Error('Failed to save industry');
+      if (!res.ok) {
+        const errData = await res.json().catch(() => null);
+        throw new Error((errData && errData.error) ? errData.error : 'Failed to save industry');
+      }
 
       toast.success('Industry saved successfully');
       setIsModalOpen(false);

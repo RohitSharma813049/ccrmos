@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
-import Industry from '@/modules/owner/schemas/Industry';
+import Industry from '@/modules/settings/schemas/Industry';
 import { requireAuthenticatedUser } from '@/lib/auth-utils';
 
 export async function PUT(req: Request, props: { params: Promise<{ id: string }> }) {
