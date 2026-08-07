@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { Loader2, X } from 'lucide-react';
 
@@ -23,6 +23,23 @@ const ACTIONS = ['view', 'create', 'edit', 'delete'];
 
 export default function PermissionMatrix({ role, isOpen, onClose }: PermissionMatrixProps) {
   const [loading, setLoading] = useState(false);
+  const [dynamicModules, setDynamicModules] = useState<string[]>(MODULES);
+  
+  useEffect(() => {
+    async function fetchModules() {
+      try {
+        const res = await fetch("/api/settings/modules?limit=1000");
+        if (res.ok) {
+          const data = await res.json();
+          const customModules = (data.modules || []).map((m: any) => m.name);
+          setDynamicModules(Array.from(new Set([...MODULES, ...customModules])));
+        }
+      } catch (e) {
+        console.error("Failed to fetch custom modules for matrix", e);
+      }
+    }
+    fetchModules();
+  }, []);
   
   // Initialize state with existing permissions or empty
   const [permissions, setPermissions] = useState<Record<string, Record<string, boolean>>>(
@@ -89,7 +106,7 @@ export default function PermissionMatrix({ role, isOpen, onClose }: PermissionMa
                 </tr>
               </thead>
               <tbody>
-                {MODULES.map((module) => (
+                {dynamicModules.map((module) => (
                   <tr key={module} className="border-b border-gray-100 hover:bg-blue-50/30 transition-colors">
                     <td className="py-4 px-6 font-medium text-gray-900 text-sm">{module}</td>
                     {ACTIONS.map((action) => (

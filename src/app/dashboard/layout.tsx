@@ -137,9 +137,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
                   <div className="pt-6 pb-2">
                     <p className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Custom Modules</p>
                   </div>
-                  {customModules.map((mod: any) => (
-                    <NavItem key={mod._id.toString()} href={`/dashboard/modules/${mod._id}`} label={mod.name} icon="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                  ))}
+                  {customModules.map((mod: any) => {
+                    if (!isPlatformOwner && !hasModulePermission(session.user as any, mod.name, "view")) return null;
+                    return (
+                      <NavItem key={mod._id.toString()} href={`/dashboard/modules/${mod._id}`} label={mod.name} icon="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    );
+                  })}
                 </>
               )}
             </>
@@ -245,9 +248,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
                   <div className="pt-6 pb-2">
                     <p className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Custom Modules</p>
                   </div>
-                  {customModules.map((mod: any) => (
-                    <NavItem key={mod._id.toString()} href={`/dashboard/modules/${mod._id}`} label={mod.name} icon="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                  ))}
+                  {customModules.map((mod: any) => {
+                    if (!isPlatformOwner && !hasModulePermission(session.user as any, mod.name, "view")) return null;
+                    return (
+                      <NavItem key={mod._id.toString()} href={`/dashboard/modules/${mod._id}`} label={mod.name} icon="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    );
+                  })}
                 </>
               )}
             </>
