@@ -404,6 +404,43 @@ export default function DynamicFormBuilder({ targetModule, initialData, onSubmit
                   />
                 </div>
               )}
+              {field.type === "File Upload" && (
+                <div className="mt-1">
+                  <input 
+                    type="file" 
+                    required={field.required && !formData.customData?.[field.name]}
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const uploadFormData = new FormData();
+                        uploadFormData.append("file", file);
+                        try {
+                          // Simple state for UI indication could go here, but for now just upload
+                          const res = await fetch("/api/upload", {
+                            method: "POST",
+                            body: uploadFormData
+                          });
+                          if (res.ok) {
+                            const data = await res.json();
+                            handleCustomDataChange(field.name, data.url);
+                          } else {
+                            alert("Upload failed.");
+                          }
+                        } catch (error) {
+                          console.error("Upload error", error);
+                          alert("Upload failed.");
+                        }
+                      }
+                    }}
+                    className="w-full text-sm text-foreground file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-medium file:bg-primary/10 file:text-primary hover:file:bg-primary/20 transition-all cursor-pointer"
+                  />
+                  {formData.customData?.[field.name] && (
+                    <a href={formData.customData[field.name]} target="_blank" rel="noopener noreferrer" className="inline-block mt-2 text-sm text-blue-600 hover:underline">
+                      View Uploaded File
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>

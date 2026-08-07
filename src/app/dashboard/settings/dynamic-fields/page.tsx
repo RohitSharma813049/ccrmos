@@ -388,6 +388,7 @@ export default function TenantDynamicFieldsPage() {
                     <option value="Dropdown (Select)">Dropdown (Select)</option>
                     <option value="Date">Date</option>
                     <option value="Currency">Currency</option>
+                    <option value="File Upload">File Upload</option>
                   </select>
                 </div>
               </div>
