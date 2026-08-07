@@ -142,27 +142,27 @@ export default function BrandingSettingsPage() {
   return (
     <div className="max-w-3xl mx-auto space-y-8 fade-in pb-12">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Branding & Appearance</h1>
-        <p className="text-gray-600 mt-1">Configure your global platform appearance.</p>
+        <h1 className="text-3xl font-bold text-foreground tracking-tight">Branding & Appearance</h1>
+        <p className="text-muted-foreground mt-1">Configure your workspace appearance.</p>
       </div>
 
       <div className="grid grid-cols-1 gap-8">
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Brand Identity</h2>
+        <form onSubmit={handleSubmit} className="bg-card/50 backdrop-blur-xl border border-border rounded-2xl shadow-xl p-6 md:p-8 space-y-6">
+          <h2 className="text-xl font-bold text-foreground mb-4">Brand Identity</h2>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Platform Name</label>
+            <label className="block text-sm font-medium text-foreground mb-1.5">Platform Name</label>
             <input 
               type="text" 
               required 
               value={formData.platformName}
               onChange={(e) => setFormData({...formData, platformName: e.target.value})}
-              className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none transition-all" 
+              className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:ring-2 focus:ring-primary outline-none transition-all" 
               placeholder="e.g. Acme CRM" 
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Logo Image (Upload)</label>
+            <label className="block text-sm font-medium text-foreground mb-1.5">Logo Image (Upload)</label>
             <div className="flex items-center gap-4">
               <input 
                 type="file" 
@@ -178,30 +178,30 @@ export default function BrandingSettingsPage() {
                     reader.readAsDataURL(file);
                   }
                 }}
-                className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none transition-all file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" 
+                className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none transition-all file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20" 
               />
             </div>
             {formData.logoUrl && (
-              <div className="mt-3 p-4 border border-gray-100 rounded-xl bg-gray-50/50 inline-block">
-                <img src={formData.logoUrl} alt="Logo Preview" className="max-h-12 w-auto object-contain" />
+              <div className="mt-3 p-4 border border-border rounded-xl bg-background inline-block">
+                <img src={formData.logoUrl} alt="Logo Preview" className="max-h-16 w-auto object-contain" />
               </div>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">Primary Theme Color</label>
+            <label className="block text-sm font-medium text-foreground mb-3">Primary Theme Color</label>
             <div className="flex flex-wrap gap-4 items-center">
               {colors.map(c => (
                 <button
                   key={c.value}
                   type="button"
                   onClick={() => setFormData({...formData, primaryColor: c.value})}
-                  className={`w-10 h-10 rounded-full transition-all ${formData.primaryColor === c.value ? 'ring-4 ring-offset-2 ring-gray-300 shadow-lg scale-110' : 'hover:scale-105'}`}
+                  className={`w-10 h-10 rounded-full transition-all ${formData.primaryColor === c.value ? 'ring-4 ring-offset-2 ring-border shadow-lg scale-110' : 'hover:scale-105'}`}
                   style={{ backgroundColor: c.value }}
                   title={c.name}
                 />
               ))}
-              <div className="h-8 w-px bg-gray-200 mx-2"></div>
+              <div className="h-8 w-px bg-border mx-2"></div>
               <div className="flex items-center gap-2">
                 <input
                   type="color"
@@ -210,7 +210,7 @@ export default function BrandingSettingsPage() {
                   className="w-10 h-10 rounded cursor-pointer border-0 p-0"
                   title="Custom Color"
                 />
-                <span className="text-sm font-medium text-gray-500 uppercase">{formData.primaryColor}</span>
+                <span className="text-sm font-medium text-muted-foreground uppercase">{formData.primaryColor}</span>
               </div>
             </div>
           </div>
@@ -219,7 +219,7 @@ export default function BrandingSettingsPage() {
             <button 
               type="submit" 
               disabled={saving}
-              className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/20 transition-all disabled:opacity-50"
+              className="px-6 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl shadow-lg shadow-primary/20 transition-all disabled:opacity-50"
             >
               {saving ? "Saving..." : "Save Branding Settings"}
             </button>
@@ -227,32 +227,33 @@ export default function BrandingSettingsPage() {
         </form>
         
         {/* Custom Domains Section */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Custom Domains</h2>
-          <p className="text-sm text-gray-600 mb-6">Map your own domain to your CRM workspace.</p>
+        <div className="bg-card/50 backdrop-blur-xl border border-border rounded-2xl p-6 md:p-8 shadow-xl">
+          <h2 className="text-xl font-bold text-foreground mb-2">Custom Domains</h2>
+          <p className="text-sm text-muted-foreground mb-6">Map your own domain to your CRM workspace.</p>
           
           <div className="space-y-4">
             {formData.domains && formData.domains.map((domain, i) => (
-              <div key={i} className={`p-4 border rounded-xl flex items-center justify-between ${domain.status === 'Active' ? 'border-indigo-200 bg-indigo-50/50' : 'border-gray-200 bg-gray-50'}`}>
+              <div key={i} className={`p-4 border rounded-xl flex items-center justify-between ${domain.status === 'Active' ? 'border-primary/30 bg-primary/5' : 'border-border bg-background'}`}>
                 <div>
-                  <p className="font-semibold text-gray-900">{domain.name}</p>
-                  <p className={`text-xs mt-1 flex items-center gap-1.5 ${domain.status === 'Active' ? 'text-indigo-600 font-medium' : 'text-amber-500'}`}>
-                    {domain.status === 'Active' && <span className="w-2 h-2 rounded-full bg-indigo-600"></span>}
+                  <p className="font-semibold text-foreground">{domain.name}</p>
+                  <p className={`text-xs mt-1 flex items-center gap-1.5 ${domain.status === 'Active' ? 'text-primary font-medium' : 'text-amber-500'}`}>
+                    {domain.status === 'Active' && <span className="w-2 h-2 rounded-full bg-primary"></span>}
                     {domain.status === 'Pending DNS Verification' && <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>}
                     Status: {domain.status}
                   </p>
                 </div>
                 <button 
+                  type="button"
                   onClick={() => domain.status === 'Active' ? null : verifyDomain(domain.name)} 
                   disabled={verifyingDomain === domain.name}
-                  className={`text-sm font-medium transition-colors focus-visible:outline-none focus-visible:underline ${domain.status === 'Active' ? 'text-gray-400 cursor-default' : 'text-indigo-600 hover:text-indigo-700 hover:underline'} ${verifyingDomain === domain.name ? 'opacity-50' : ''}`}
+                  className={`text-sm font-medium transition-colors focus-visible:outline-none focus-visible:underline ${domain.status === 'Active' ? 'text-muted-foreground/50 cursor-default' : 'text-primary hover:text-primary/80 hover:underline'} ${verifyingDomain === domain.name ? 'opacity-50' : ''}`}
                 >
                   {verifyingDomain === domain.name ? 'Checking DNS...' : (domain.status === 'Active' ? 'Configured' : 'Verify DNS')}
                 </button>
               </div>
             ))}
             
-            <button onClick={registerDomain} className="w-full py-3 border border-dashed border-gray-300 text-gray-500 hover:text-gray-900 hover:border-gray-400 font-medium rounded-xl transition-all">
+            <button type="button" onClick={registerDomain} className="w-full py-3 border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-muted-foreground font-medium rounded-xl transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
               + Register New Domain
             </button>
           </div>

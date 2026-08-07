@@ -173,10 +173,10 @@ export default function WhitelabelClient() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8">
-        <div className="bg-card/50 backdrop-blur-xl border border-border rounded-2xl p-4 md:p-6 shadow-xl">
-          <h2 className="text-xl font-bold text-foreground mb-6">{isPlatformOwner ? 'Global Branding' : 'Your Branding'}</h2>
-          <div className="space-y-5">
+      <div className="grid grid-cols-1 gap-8">
+        <div className="bg-card/50 backdrop-blur-xl border border-border rounded-2xl p-6 md:p-8 shadow-xl">
+          <h2 className="text-xl font-bold text-foreground mb-6">{isPlatformOwner ? 'Global Brand Identity' : 'Your Brand Identity'}</h2>
+          <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Platform Name</label>
               <input 
@@ -186,68 +186,83 @@ export default function WhitelabelClient() {
                 className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:ring-2 focus:ring-ring focus:border-transparent outline-none transition-all" 
               />
             </div>
+            
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Primary Color (Hex)</label>
-              <div className="flex gap-3">
-                <input 
-                  type="text" 
-                  value={primaryColor}
-                  onChange={(e) => setPrimaryColor(e.target.value)}
-                  className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:ring-2 focus:ring-primary outline-none transition-all" 
-                />
-                <div className="w-12 h-12 rounded-xl shrink-0 border border-border shadow-sm" style={{ backgroundColor: primaryColor }}></div>
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Logo Upload</label>
-              
+              <label className="block text-sm font-medium text-foreground mb-2">Logo Image (Upload)</label>
               <div className="flex flex-col gap-4">
-                {logoUrl && (
-                  <div className="p-4 bg-background rounded-xl border border-border flex flex-col items-center gap-3">
-                    <img src={logoUrl} alt="Logo Preview" className="max-h-24 object-contain" />
-                    <button 
-                      type="button" 
-                      onClick={() => setLogoUrl("")}
-                      className="text-xs text-red-500 hover:text-red-700 font-medium px-3 py-1 bg-red-50 hover:bg-red-100 rounded-full transition-colors"
-                    >
-                      Remove Logo
-                    </button>
-                  </div>
-                )}
-                
                 <input 
                   type="file" 
                   ref={fileInputRef} 
                   onChange={handleFileUpload} 
                   accept="image/png, image/jpeg, image/svg+xml"
-                  className="hidden" 
+                  className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-foreground focus:ring-2 focus:ring-primary outline-none transition-all file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20" 
                 />
-                <div 
-                  onClick={() => fileInputRef.current?.click()}
-                  className={`border-2 border-dashed border-border rounded-xl p-8 text-center hover:border-muted-foreground transition-colors cursor-pointer ${uploading ? 'opacity-50 pointer-events-none' : ''}`}
-                >
-                  <svg className="w-8 h-8 text-muted-foreground mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                  </svg>
-                  <p className="text-sm text-muted-foreground">
-                    {uploading ? 'Uploading...' : logoUrl ? 'Click to replace logo or drag and drop' : 'Click to upload or drag and drop SVG/PNG'}
-                  </p>
+                
+                {logoUrl && (
+                  <div className="mt-2 p-4 bg-background rounded-xl border border-border inline-flex flex-col items-start gap-3">
+                    <img src={logoUrl} alt="Logo Preview" className="max-h-16 object-contain" />
+                    <button 
+                      type="button" 
+                      onClick={() => setLogoUrl("")}
+                      className="text-xs text-destructive hover:text-destructive/80 font-medium px-3 py-1 bg-destructive/10 hover:bg-destructive/20 rounded-full transition-colors"
+                    >
+                      Remove Logo
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-3">Primary Theme Color</label>
+              <div className="flex flex-wrap gap-4 items-center">
+                {[
+                  { name: "Indigo", value: "#4f46e5" },
+                  { name: "Blue", value: "#2563eb" },
+                  { name: "Rose", value: "#e11d48" },
+                  { name: "Violet", value: "#7c3aed" },
+                  { name: "Emerald", value: "#059669" },
+                  { name: "Orange", value: "#ea580c" },
+                  { name: "Slate", value: "#475569" },
+                ].map(c => (
+                  <button
+                    key={c.value}
+                    type="button"
+                    onClick={() => setPrimaryColor(c.value)}
+                    className={`w-10 h-10 rounded-full transition-all ${primaryColor === c.value ? 'ring-4 ring-offset-2 ring-border shadow-lg scale-110' : 'hover:scale-105'}`}
+                    style={{ backgroundColor: c.value }}
+                    title={c.name}
+                  />
+                ))}
+                <div className="h-8 w-px bg-border mx-2"></div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={primaryColor}
+                    onChange={(e) => setPrimaryColor(e.target.value)}
+                    className="w-10 h-10 rounded cursor-pointer border-0 p-0"
+                    title="Custom Color"
+                  />
+                  <span className="text-sm font-medium text-muted-foreground uppercase">{primaryColor}</span>
                 </div>
               </div>
             </div>
-            <button 
-              onClick={saveBranding}
-              disabled={saving || uploading}
-              className="w-full py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl transition-all shadow-lg shadow-primary/20 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary flex items-center justify-center gap-2"
-            >
-              {saving && (
-                <svg className="animate-spin h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-              )}
-              {saving ? 'Saving...' : 'Save Branding Options'}
-            </button>
+
+            <div className="pt-6 flex items-center justify-end">
+              <button 
+                onClick={saveBranding}
+                disabled={saving || uploading}
+                className="px-6 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl transition-all shadow-lg shadow-primary/20 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary flex items-center justify-center gap-2"
+              >
+                {saving && (
+                  <svg className="animate-spin h-4 w-4 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                )}
+                {saving ? 'Saving...' : 'Save Branding Settings'}
+              </button>
+            </div>
           </div>
         </div>
 
