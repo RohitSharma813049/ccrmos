@@ -201,7 +201,8 @@ export class CompanyService {
         },
       });
 
-      const checkoutUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/checkout?token=${checkoutToken}`;
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000';
+      const checkoutUrl = `${appUrl}/checkout?token=${checkoutToken}`;
 
       try {
         await transporter.sendMail({
@@ -216,7 +217,8 @@ export class CompanyService {
         console.error(`Failed to send checkout email to ${normalizedEmail}:`, emailError);
       }
     } else {
-      console.warn("Email configuration is missing. Cannot send checkout email. Mock URL:", `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/checkout?token=${checkoutToken}`);
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000';
+      console.warn("Email configuration is missing. Cannot send checkout email. Mock URL:", `${appUrl}/checkout?token=${checkoutToken}`);
     }
     
     return newCompany;
