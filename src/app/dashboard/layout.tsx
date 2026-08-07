@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import dbConnect from "@/lib/db";
 import SystemSetting from "@/modules/settings/schemas/SystemSetting";
 import Company from "@/modules/companies/schemas/Company";
-import Industry from "@/modules/settings/schemas/Industry";
+import "@/modules/settings/schemas/Industry"; // Side-effect import to prevent tree-shaking for populate
 import CustomModule from "@/modules/settings/schemas/CustomModule";
 import NotificationBell from "@/components/ui/NotificationBell";
 import ImpersonationBanner from "@/components/ui/ImpersonationBanner";
