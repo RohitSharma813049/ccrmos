@@ -15,6 +15,7 @@ export default function RolesClient() {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
+    tenantScope: 'Global',
   });
 
   const fetchRoles = async () => {
@@ -78,9 +79,10 @@ export default function RolesClient() {
       setFormData({
         name: role.name || '',
         description: role.description || '',
+        tenantScope: role.tenantScope || 'Global',
       });
     } else {
-      setFormData({ name: '', description: '' });
+      setFormData({ name: '', description: '', tenantScope: 'Global' });
     }
     setIsModalOpen(true);
   };
@@ -115,7 +117,10 @@ export default function RolesClient() {
           {roles.map((role) => (
             <div key={role._id} className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-xl transition-all relative flex flex-col h-full">
               <div className="flex justify-between items-start mb-2">
-                <h3 className="text-lg font-bold text-gray-900">{role.name}</h3>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900">{role.name}</h3>
+                  <span className="inline-block mt-1 text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 bg-gray-100 text-gray-500 rounded">{role.tenantScope || 'Global'} Scope</span>
+                </div>
                 <button 
                   onClick={() => openModal(role)}
                   className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
@@ -176,6 +181,18 @@ export default function RolesClient() {
                   placeholder="Brief description"
                   className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all"
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Scope Target</label>
+                <select
+                  value={formData.tenantScope}
+                  onChange={(e) => setFormData({ ...formData, tenantScope: e.target.value })}
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all appearance-none"
+                >
+                  <option value="Global">Global Scope</option>
+                  <option value="Industry">Industry Scope</option>
+                  <option value="Company">Company Scope</option>
+                </select>
               </div>
               <button 
                 type="submit" 
