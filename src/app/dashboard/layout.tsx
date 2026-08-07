@@ -104,8 +104,21 @@ export default async function DashboardLayout({ children }: { children: React.Re
                 <p className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">CRM Modules</p>
               </div>
               {companyModules.map((mod: any) => {
-                const isCustom = !["leads", "projects", "orders", "channel-partners", "properties", "fb-leads"].includes(mod.module_id);
-                const href = isCustom ? `/dashboard/modules/${mod.module_id}` : `/dashboard/${mod.module_id === "orders" ? "bookings" : mod.module_id === "channel-partners" ? "partners" : mod.module_id}`;
+                const stdRouteMap: Record<string, string> = {
+                  "fb leads": "fb-leads",
+                  "fb-leads": "fb-leads",
+                  "leads": "leads",
+                  "channel partners": "partners",
+                  "channel-partners": "partners",
+                  "bookings/orders": "bookings",
+                  "orders": "bookings",
+                  "projects": "projects",
+                  "properties": "properties"
+                };
+                const normalized = (mod.module_id || "").toLowerCase().trim();
+                const stdRoute = stdRouteMap[normalized];
+                
+                const href = stdRoute ? `/dashboard/${stdRoute}` : `/dashboard/modules/${mod._id}`;
                 // Fallback icon
                 const icon = "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6";
                 return (
@@ -228,8 +241,21 @@ export default async function DashboardLayout({ children }: { children: React.Re
                 <p className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">CRM Modules</p>
               </div>
               {companyModules.map((mod: any) => {
-                const isCustom = !["leads", "projects", "orders", "channel-partners", "properties", "fb-leads"].includes(mod.module_id);
-                const href = isCustom ? `/dashboard/modules/${mod.module_id}` : `/dashboard/${mod.module_id === "orders" ? "bookings" : mod.module_id === "channel-partners" ? "partners" : mod.module_id}`;
+                const stdRouteMap: Record<string, string> = {
+                  "fb leads": "fb-leads",
+                  "fb-leads": "fb-leads",
+                  "leads": "leads",
+                  "channel partners": "partners",
+                  "channel-partners": "partners",
+                  "bookings/orders": "bookings",
+                  "orders": "bookings",
+                  "projects": "projects",
+                  "properties": "properties"
+                };
+                const normalized = (mod.module_id || "").toLowerCase().trim();
+                const stdRoute = stdRouteMap[normalized];
+                
+                const href = stdRoute ? `/dashboard/${stdRoute}` : `/dashboard/modules/${mod._id}`;
                 const icon = "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6";
                 return (
                   <NavItem key={mod._id.toString()} href={href} label={mod.display_name} icon={icon} />
