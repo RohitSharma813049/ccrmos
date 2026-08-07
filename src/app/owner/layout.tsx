@@ -4,6 +4,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import AICopilot from "@/components/ui/AICopilot";
 import OwnerSidebar from "@/components/layout/OwnerSidebar";
+import dbConnect from "@/lib/db";
+import SystemSetting from "@/modules/settings/schemas/SystemSetting";
 
 export default async function OwnerLayout({ children }: { children: React.ReactNode }) {
   try {
@@ -13,8 +15,21 @@ export default async function OwnerLayout({ children }: { children: React.ReactN
     redirect("/dashboard");
   }
 
+  await dbConnect();
+  const globalWhitelabel = await SystemSetting.findOne({ key: 'whitelabel', companyId: null });
+  const branding = globalWhitelabel?.value || {};
+  const primaryColor = branding.primaryColor || null;
+
   return (
     <div className="h-screen w-full bg-background text-foreground flex flex-col md:flex-row overflow-hidden">
+      {primaryColor && (
+        <style dangerouslySetInnerHTML={{ __html: `
+          :root {
+            --primary: ${primaryColor};
+            --ring: ${primaryColor};
+          }
+        `}} />
+      )}
       <OwnerSidebar />
 
       {/* Main Content Area */}
