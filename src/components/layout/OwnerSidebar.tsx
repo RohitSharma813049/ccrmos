@@ -27,10 +27,29 @@ export default function OwnerSidebar() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  const [platformName, setPlatformName] = useState("Platform Owner");
+
   // Close mobile menu on route change
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    async function fetchPlatformName() {
+      try {
+        const res = await fetch("/api/settings/whitelabel");
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.value?.platformName) {
+            setPlatformName(data.value.platformName);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch platform name", e);
+      }
+    }
+    fetchPlatformName();
+  }, []);
 
   const renderNavGroup = (category: string) => {
     return (
@@ -69,7 +88,7 @@ export default function OwnerSidebar() {
     <>
       {/* Mobile Header & Hamburger */}
       <div className="md:hidden flex items-center justify-between p-4 bg-card border-b border-border shrink-0 z-30 relative">
-        <h1 className="font-bold text-xl text-foreground">Platform Owner</h1>
+        <h1 className="font-bold text-xl text-foreground">{platformName}</h1>
         <button
           className="p-2 -mr-2 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -101,7 +120,7 @@ export default function OwnerSidebar() {
       `}>
         <div className="p-6 relative z-10 hidden md:block">
           <Link href="/owner" className="flex items-center gap-3 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg">
-            <h2 className="font-bold text-lg tracking-tight text-foreground">Platform Owner</h2>
+            <h2 className="font-bold text-lg tracking-tight text-foreground">{platformName}</h2>
           </Link>
         </div>
 
