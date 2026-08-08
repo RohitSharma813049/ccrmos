@@ -19,7 +19,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ moduleId
     const moduleDoc = await CustomModule.findOne({
       _id: moduleId,
       active: true,
-      $or: [{ companyId: effectiveCompanyId }, { companyId: null }]
+      $or: [
+        { companyId: effectiveCompanyId }, 
+        { companyId: null },
+        { enabledBy: effectiveCompanyId }
+      ]
     });
 
     if (!moduleDoc) {
@@ -59,7 +63,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ moduleI
     const moduleDoc = await CustomModule.findOne({
       _id: moduleId,
       active: true,
-      $or: [{ companyId: effectiveCompanyId }, { companyId: null }]
+      $or: [
+        { companyId: effectiveCompanyId }, 
+        { companyId: null },
+        { enabledBy: effectiveCompanyId }
+      ]
     });
 
     if (!moduleDoc) {

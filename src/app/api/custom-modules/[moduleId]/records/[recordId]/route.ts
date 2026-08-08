@@ -10,7 +10,8 @@ export async function PUT(req: Request, { params }: { params: Promise<{ moduleId
   try {
     const session = await getSession();
     const user = session?.user as any;
-    if (!user || !user.companyId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const effectiveCompanyId = user.companyId || user.impersonatedFounderId;
+    if (!effectiveCompanyId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { moduleId, recordId } = await params;
     const body = await req.json();
@@ -18,14 +19,18 @@ export async function PUT(req: Request, { params }: { params: Promise<{ moduleId
     const moduleDoc = await CustomModule.findOne({
       _id: moduleId,
       active: true,
-      $or: [{ companyId: user.companyId }, { companyId: null }]
+      $or: [
+        { companyId: effectiveCompanyId }, 
+        { companyId: null },
+        { enabledBy: effectiveCompanyId }
+      ]
     });
 
     if (!moduleDoc) {
       return NextResponse.json({ error: "Module not found" }, { status: 404 });
     }
 
-    const record = await CustomRecord.findOne({ _id: recordId, moduleId, companyId: user.companyId });
+    const record = await CustomRecord.findOne({ _id: recordId, moduleId, companyId: effectiveCompanyId });
     if (!record) {
       return NextResponse.json({ error: "Record not found" }, { status: 404 });
     }
@@ -51,19 +56,20 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ modul
   try {
     const session = await getSession();
     const user = session?.user as any;
-    if (!user || !user.companyId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const effectiveCompanyId = user.companyId || user.impersonatedFounderId;
+    if (!effectiveCompanyId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { moduleId, recordId } = await params;
 
-    const recordToDel = await CustomRecord.findOne({ _id: recordId, moduleId, companyId: user.companyId }).lean();
+    const recordToDel = await CustomRecord.findOne({ _id: recordId, moduleId, companyId: effectiveCompanyId }).lean();
     if (!recordToDel) {
       return NextResponse.json({ error: "Record not found or unauthorized" }, { status: 404 });
     }
 
     // Save to recycle bin
-    if (user.companyId) {
+    if (effectiveCompanyId) {
       await RecycleBin.create({
-        companyId: user.companyId,
+        companyId: effectiveCompanyId,
         originalId: recordToDel._id,
         collectionName: 'customrecords',
         documentData: recordToDel,

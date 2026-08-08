@@ -3,258 +3,305 @@
 import { useState, useEffect } from "react";
 
 export default function AIConfigClient() {
-  const [openAIKey, setOpenAIKey] = useState("");
-  const [openAIModel, setOpenAIModel] = useState("gpt-4o");
-  
-  const [anthropicKey, setAnthropicKey] = useState("");
-  const [anthropicModel, setAnthropicModel] = useState("claude-3-opus-20240229");
-
-  const [groqKey, setGroqKey] = useState("");
-  const [groqModel, setGroqModel] = useState("llama-3.3-70b-versatile");
-
+  const [providers, setProviders] = useState<any[]>([]);
+  const [companies, setCompanies] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [testingOAI, setTestingOAI] = useState(false);
-  const [testingANT, setTestingANT] = useState(false);
-  const [testingGROQ, setTestingGROQ] = useState(false);
-  const [isPlatformOwner, setIsPlatformOwner] = useState(false);
+
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingProvider, setEditingProvider] = useState<any>(null);
+  const [formData, setFormData] = useState({
+    name: "", description: "", endpointUrl: "", apiKey: "", defaultModel: "", isActive: true, allowTenantOverride: true
+  });
 
   useEffect(() => {
-    fetchSettings();
+    fetchData();
   }, []);
 
-  async function fetchSettings() {
+  async function fetchData() {
+    setLoading(true);
     try {
-      // First fetch session to see if user is platform owner
-      const sessionRes = await fetch("/api/auth/session");
-      if (sessionRes.ok) {
-        const sessionData = await sessionRes.json();
-        if (sessionData?.user?.hierarchyLevel === 1) {
-          setIsPlatformOwner(true);
-        }
-      }
+      const [providersRes, permissionsRes] = await Promise.all([
+        fetch("/api/admin/ai-providers"),
+        fetch("/api/admin/ai-permissions")
+      ]);
 
-      const res = await fetch("/api/settings/ai_config");
-      if (res.ok) {
-        const data = await res.json();
-        if (data.value) {
-          if (data.value.openAIKey) setOpenAIKey(data.value.openAIKey);
-          if (data.value.openAIModel) setOpenAIModel(data.value.openAIModel);
-          if (data.value.anthropicKey) setAnthropicKey(data.value.anthropicKey);
-          if (data.value.anthropicModel) setAnthropicModel(data.value.anthropicModel);
-          if (data.value.groqKey) setGroqKey(data.value.groqKey);
-          if (data.value.groqModel) setGroqModel(data.value.groqModel);
-        }
+      if (providersRes.ok) {
+        const data = await providersRes.json();
+        setProviders(data.providers || []);
       }
-    } catch (e) {
-      console.error(e);
+      if (permissionsRes.ok) {
+        const data = await permissionsRes.json();
+        setCompanies(data.companies || []);
+      }
+    } catch (error) {
+      console.error(error);
     } finally {
       setLoading(false);
     }
   }
 
-  async function testAndSave(provider: "openai" | "anthropic" | "groq") {
-    const key = provider === "openai" ? openAIKey : provider === "anthropic" ? anthropicKey : groqKey;
-    const model = provider === "openai" ? openAIModel : provider === "anthropic" ? anthropicModel : groqModel;
-    
-    if (!key) {
-      alert(`Please enter a valid ${provider === "openai" ? "OpenAI" : provider === "anthropic" ? "Anthropic" : "Groq"} key first.`);
-      return;
-    }
-
-    // Set loading states
-    if (provider === "openai") setTestingOAI(true);
-    else if (provider === "anthropic") setTestingANT(true);
-    else setTestingGROQ(true);
-
+  const handleSaveProvider = async () => {
     try {
-      // 1. Test Connection
-      const testRes = await fetch("/api/settings/ai_config/test", {
-        method: "POST",
+      const url = editingProvider ? `/api/admin/ai-providers/${editingProvider._id}` : `/api/admin/ai-providers`;
+      const method = editingProvider ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ provider, key, model })
+        body: JSON.stringify(formData)
       });
 
-      const testData = await testRes.json();
-      if (!testRes.ok || !testData.success) {
-        alert(`API Connection Failed: ${testData.error || "Invalid Key"}`);
-        return;
-      }
-
-      // 2. If test passes, save the configuration
-      const saveRes = await fetch("/api/settings/ai_config", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          global: isPlatformOwner, // Platform owners save globally, tenants save locally (BYOK)
-          value: { openAIKey, openAIModel, anthropicKey, anthropicModel, groqKey, groqModel }
-        })
-      });
-
-      if (saveRes.ok) {
-        alert("Connection successful! Configuration securely saved.");
+      if (res.ok) {
+        setIsModalOpen(false);
+        fetchData();
       } else {
-        alert("Failed to save configuration to database.");
+        const data = await res.json();
+        alert(`Error: ${data.error}`);
       }
     } catch (e) {
       console.error(e);
-      alert("Error testing or saving configuration.");
-    } finally {
-      if (provider === "openai") setTestingOAI(false);
-      else if (provider === "anthropic") setTestingANT(false);
-      else setTestingGROQ(false);
     }
-  }
+  };
 
-  if (loading) return <div className="p-8 text-center text-muted-foreground animate-pulse">Loading settings...</div>;
+  const handleDeleteProvider = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this AI Provider?")) return;
+    try {
+      const res = await fetch(`/api/admin/ai-providers/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        fetchData();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleTogglePermission = async (companyId: string, providerId: string, hasAccess: boolean) => {
+    try {
+      const action = hasAccess ? "revoke" : "grant";
+      const res = await fetch(`/api/admin/ai-permissions/${companyId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ providerId, action })
+      });
+
+      if (res.ok) {
+        fetchData();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  if (loading) return <div className="p-8 text-center text-gray-500">Loading AI Configurations...</div>;
 
   return (
-    <div className="space-y-8 fade-in pb-12">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground tracking-tight">AI Module Configuration</h1>
-        <p className="text-muted-foreground mt-1">Configure global LLM providers, model limits, and semantic engines.</p>
-        {!isPlatformOwner && (
-          <div className="mt-4 p-3 bg-primary/10 border border-primary/20 rounded-lg text-sm text-primary">
-            <strong>Tenant Mode (BYOK):</strong> You are configuring these AI keys exclusively for your own company. This will override the platform's global default keys.
-          </div>
-        )}
+    <div className="p-8 max-w-7xl mx-auto space-y-8">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Dynamic AI Providers</h1>
+          <p className="text-sm text-gray-500 mt-1">Create custom AI providers and manage tenant access.</p>
+        </div>
+        <button 
+          onClick={() => {
+            setEditingProvider(null);
+            setFormData({ name: "", description: "", endpointUrl: "", apiKey: "", defaultModel: "", isActive: true, allowTenantOverride: true });
+            setIsModalOpen(true);
+          }}
+          className="px-5 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors"
+        >
+          + Add AI Provider
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* OpenAI Section */}
-        <div className="bg-card/50 backdrop-blur-xl border border-border rounded-2xl p-6 shadow-xl">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 rounded-full bg-[#10a37f]/20 flex items-center justify-center border border-[#10a37f]/30">
-              <span className="text-[#10a37f] font-bold text-xs">OAI</span>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {providers.map(provider => (
+          <div key={provider._id} className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center bg-${provider.color}-50 text-${provider.color}-600`}>
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={provider.icon || "M13 10V3L4 14h7v7l9-11h-7z"} />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900">{provider.name}</h3>
+                  <p className="text-xs text-gray-500">{provider.defaultModel}</p>
+                </div>
+              </div>
+              <span className={`px-2 py-1 text-xs font-semibold rounded-full ${provider.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                {provider.isActive ? "Active" : "Inactive"}
+              </span>
             </div>
-            <h2 className="text-xl font-bold text-foreground">OpenAI Integration</h2>
-          </div>
-          
-          <div className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">API Key</label>
-              <input 
-                type="password" 
-                placeholder="sk-..." 
-                value={openAIKey}
-                onChange={(e) => setOpenAIKey(e.target.value)}
-                className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:ring-2 focus:ring-[#10a37f] focus:border-transparent outline-none transition-all font-mono text-sm shadow-sm" 
-              />
+            
+            <p className="text-sm text-gray-600 mb-4 flex-grow">{provider.description}</p>
+            
+            <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-xl mb-4 truncate">
+              <span className="font-semibold text-gray-700">Endpoint: </span>
+              {provider.endpointUrl || "N/A"}
             </div>
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Default Completion Model</label>
-              <select 
-                value={openAIModel}
-                onChange={(e) => setOpenAIModel(e.target.value)}
-                className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:ring-2 focus:ring-[#10a37f] focus:border-transparent outline-none transition-all appearance-none shadow-sm"
-              >
-                <option value="gpt-4o">gpt-4o</option>
-                <option value="gpt-4-turbo">gpt-4-turbo</option>
-                <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
-              </select>
-            </div>
-            <button 
-              onClick={() => testAndSave("openai")} 
-              disabled={testingOAI}
-              className="w-full py-3 bg-[#10a37f] hover:bg-[#0e906f] text-white font-semibold rounded-xl transition-all shadow-lg shadow-[#10a37f]/20 mt-4 disabled:opacity-70 flex justify-center items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#10a37f]"
-            >
-              {testingOAI ? (
-                <><svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Testing...</>
-              ) : "Test Connection & Save"}
-            </button>
-          </div>
-        </div>
 
-        {/* Anthropic Section */}
-        <div className="bg-card/50 backdrop-blur-xl border border-border rounded-2xl p-6 shadow-xl">
-           <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 rounded-full bg-[#D97757]/20 flex items-center justify-center border border-[#D97757]/30">
-              <span className="text-[#D97757] font-bold text-xs">ANT</span>
-            </div>
-            <h2 className="text-xl font-bold text-foreground">Anthropic Integration</h2>
-          </div>
-          
-          <div className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">API Key</label>
-              <input 
-                type="password" 
-                placeholder="sk-ant-..." 
-                value={anthropicKey}
-                onChange={(e) => setAnthropicKey(e.target.value)}
-                className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:ring-2 focus:ring-[#D97757] focus:border-transparent outline-none transition-all font-mono text-sm shadow-sm" 
-              />
-            </div>
-             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Default Claude Model</label>
-              <select 
-                value={anthropicModel}
-                onChange={(e) => setAnthropicModel(e.target.value)}
-                className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:ring-2 focus:ring-[#D97757] focus:border-transparent outline-none transition-all appearance-none shadow-sm"
-              >
-                <option value="claude-3-opus-20240229">claude-3-opus-20240229</option>
-                <option value="claude-3-sonnet-20240229">claude-3-sonnet-20240229</option>
-                <option value="claude-3-haiku-20240307">claude-3-haiku-20240307</option>
-              </select>
-            </div>
-            <button 
-              onClick={() => testAndSave("anthropic")} 
-              disabled={testingANT}
-              className="w-full py-3 bg-foreground hover:bg-foreground/90 border border-border text-background font-semibold rounded-xl transition-all mt-4 disabled:opacity-70 flex justify-center items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              {testingANT ? (
-                <><svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-current" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Testing...</>
-              ) : "Test Connection & Save"}
-            </button>
-          </div>
-        </div>
-
-        {/* Groq Section */}
-        <div className="bg-card/50 backdrop-blur-xl border border-border rounded-2xl p-6 shadow-xl lg:col-span-2 max-w-2xl mx-auto w-full">
-           <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center border border-orange-500/20">
-              <span className="text-orange-500 font-bold text-xs">GRQ</span>
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-foreground">Groq Integration (Free AI)</h2>
-              <p className="text-xs text-muted-foreground mt-1">Get a free API key at <a href="https://console.groq.com" target="_blank" className="text-primary hover:underline">console.groq.com</a></p>
+            <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
+              <p className="text-xs text-gray-500">
+                {provider.allowTenantOverride ? "Tenants can BYOK" : "Global Billing (Owner Key)"}
+              </p>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => {
+                    setEditingProvider(provider);
+                    setFormData(provider);
+                    setIsModalOpen(true);
+                  }}
+                  className="px-3 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-md transition-colors"
+                >
+                  Edit
+                </button>
+                <button 
+                  onClick={() => handleDeleteProvider(provider._id)}
+                  className="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-md transition-colors"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
-          
-          <div className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">API Key</label>
-              <input 
-                type="password" 
-                placeholder="gsk_..." 
-                value={groqKey}
-                onChange={(e) => setGroqKey(e.target.value)}
-                className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all font-mono text-sm shadow-sm" 
-              />
-            </div>
-             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Default Llama Model</label>
-              <select 
-                value={groqModel}
-                onChange={(e) => setGroqModel(e.target.value)}
-                className="w-full bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all appearance-none shadow-sm"
-              >
-                <option value="llama-3.3-70b-versatile">Llama 3.3 70B (Recommended)</option>
-                <option value="llama-3.1-8b-instant">Llama 3.1 8B (Fast)</option>
-                <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
-              </select>
-            </div>
-            <button 
-              onClick={() => testAndSave("groq")} 
-              disabled={testingGROQ}
-              className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-xl transition-all mt-4 disabled:opacity-70 flex justify-center items-center shadow-lg shadow-orange-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
-            >
-              {testingGROQ ? (
-                <><svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Testing...</>
-              ) : "Test Connection & Save"}
-            </button>
-          </div>
-        </div>
+        ))}
       </div>
+
+      {providers.length > 0 && (
+        <div className="mt-12 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="p-6 border-b border-gray-200 bg-gray-50">
+            <h2 className="text-lg font-bold text-gray-900">Tenant Permissions</h2>
+            <p className="text-sm text-gray-500">Grant or revoke access to AI Providers for specific companies.</p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Company</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Plan</th>
+                  {providers.map(p => (
+                    <th key={p._id} className="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      {p.name}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {companies.map(company => (
+                  <tr key={company._id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {company.name}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <span className="px-2 py-1 bg-gray-100 rounded-md">{company.plan || "Basic"}</span>
+                    </td>
+                    {providers.map(provider => {
+                      const hasAccess = company.allowedAIProviders?.some((ap: any) => ap._id === provider._id || ap === provider._id);
+                      return (
+                        <td key={provider._id} className="px-6 py-4 whitespace-nowrap text-center">
+                          <button
+                            onClick={() => handleTogglePermission(company._id, provider._id, hasAccess)}
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${hasAccess ? 'bg-emerald-500' : 'bg-gray-200'}`}
+                          >
+                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${hasAccess ? 'translate-x-6' : 'translate-x-1'}`} />
+                          </button>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
+          <div className="relative bg-white border border-gray-300 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900">{editingProvider ? 'Edit' : 'Create'} AI Provider</h2>
+            </div>
+            <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Provider Name</label>
+                <input 
+                  type="text" 
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  placeholder="e.g. OpenAI"
+                  className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none" 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <input 
+                  type="text" 
+                  value={formData.description}
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none" 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Endpoint URL</label>
+                <input 
+                  type="text" 
+                  value={formData.endpointUrl}
+                  onChange={(e) => setFormData({...formData, endpointUrl: e.target.value})}
+                  placeholder="https://api.openai.com/v1"
+                  className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none" 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Global API Key</label>
+                <input 
+                  type="password" 
+                  value={formData.apiKey}
+                  onChange={(e) => setFormData({...formData, apiKey: e.target.value})}
+                  placeholder="sk-..."
+                  className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none" 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Default Model Name</label>
+                <input 
+                  type="text" 
+                  value={formData.defaultModel}
+                  onChange={(e) => setFormData({...formData, defaultModel: e.target.value})}
+                  placeholder="gpt-4o"
+                  className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none" 
+                />
+              </div>
+              
+              <div className="flex items-center gap-3 mt-4">
+                <input 
+                  type="checkbox" 
+                  checked={formData.allowTenantOverride}
+                  onChange={(e) => setFormData({...formData, allowTenantOverride: e.target.checked})}
+                  className="h-4 w-4 text-indigo-600 rounded border-gray-300" 
+                />
+                <label className="text-sm font-medium text-gray-700">Allow Tenants to override with their own API Keys (BYOK)</label>
+              </div>
+            </div>
+            <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
+              <button 
+                onClick={() => setIsModalOpen(false)}
+                className="px-5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleSaveProvider}
+                className="px-5 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors"
+              >
+                Save Provider
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

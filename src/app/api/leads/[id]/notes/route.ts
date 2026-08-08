@@ -31,6 +31,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     } else if (channel === "WhatsApp") {
       activityType = 'WhatsApp Sent';
       // TODO: In a real environment, trigger Twilio API here
+    } else if (channel === "Call") {
+      activityType = 'Call Logged';
+      // message will contain call details (duration, status, etc)
     }
 
     lead.activities.push({

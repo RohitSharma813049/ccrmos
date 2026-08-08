@@ -13,6 +13,23 @@ export default function IntegrationsPage() {
   const [forms, setForms] = useState<any[]>([]);
   const [selectedForm, setSelectedForm] = useState<string>("");
   const [setupModalData, setSetupModalData] = useState<any>(null);
+  
+  const [aiProviders, setAiProviders] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function fetchAiProviders() {
+      try {
+        const res = await fetch("/api/settings/ai-providers");
+        if (res.ok) {
+          const data = await res.json();
+          setAiProviders(data.providers || []);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    fetchAiProviders();
+  }, []);
 
   useEffect(() => {
     async function fetchProjects() {
@@ -162,6 +179,19 @@ export default function IntegrationsPage() {
     }
   ];
 
+  const dynamicIntegrations = aiProviders.map(p => ({
+    id: `ai_${p._id}`,
+    name: p.name,
+    description: p.allowTenantOverride ? `${p.description} (You can provide your own API Key)` : `${p.description} (Managed by Platform Owner)`,
+    actionLabel: p.allowTenantOverride ? "Configure API Key" : "View Access",
+    icon: p.icon || "M13 10V3L4 14h7v7l9-11h-7z",
+    color: p.color || "fuchsia",
+    isDynamicAi: true,
+    providerData: p
+  }));
+
+  const allIntegrations: any[] = [...integrations, ...dynamicIntegrations];
+
   const colorMap: Record<string, string> = {
     blue: "bg-blue-50 text-blue-600 border-blue-200",
     emerald: "bg-emerald-50 text-emerald-600 border-emerald-200",
@@ -223,6 +253,47 @@ export default function IntegrationsPage() {
   const [isWaModalOpen, setIsWaModalOpen] = useState(false);
   const [waStatus, setWaStatus] = useState<any>(null);
   const [waLoading, setWaLoading] = useState(false);
+  
+  const [isTwilioModalOpen, setIsTwilioModalOpen] = useState(false);
+
+  const [isDynamicAiModalOpen, setIsDynamicAiModalOpen] = useState(false);
+  const [selectedDynamicAi, setSelectedDynamicAi] = useState<any>(null);
+  const [dynamicAiKey, setDynamicAiKey] = useState("");
+  const [dynamicAiSaving, setDynamicAiSaving] = useState(false);
+
+  const openDynamicAiModal = async (providerData: any) => {
+    setSelectedDynamicAi(providerData);
+    setDynamicAiKey("");
+    if (providerData.allowTenantOverride) {
+      try {
+        const res = await fetch(`/api/settings/system?key=ai_key_${providerData._id}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.value) setDynamicAiKey(data.value);
+        }
+      } catch (e) { console.error(e); }
+    }
+    setIsDynamicAiModalOpen(true);
+  };
+
+  const saveDynamicAiKey = async () => {
+    if (!selectedDynamicAi) return;
+    setDynamicAiSaving(true);
+    try {
+      const res = await fetch("/api/settings/system", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key: `ai_key_${selectedDynamicAi._id}`, value: dynamicAiKey })
+      });
+      if (res.ok) alert("API Key saved successfully!");
+      else alert("Failed to save.");
+    } catch (e) {
+      console.error(e);
+      alert("Error saving key.");
+    } finally {
+      setDynamicAiSaving(false);
+    }
+  };
 
   const [isJdModalOpen, setIsJdModalOpen] = useState(false);
   const [jdConfigs, setJdConfigs] = useState<any[]>([]);
@@ -457,37 +528,25 @@ export default function IntegrationsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {integrations.map((int: any) => {
-          const sel = selections[int.id] || { project: "", form: "" };
-          const pParam = sel.project ? `&projectId=${sel.project}` : "";
-          const fParam = sel.form ? `&formId=${sel.form}` : "";
-          const webParams = `?companyId=${companyId}${pParam}${fParam}`;
-          const currentWebhookUrl = int.baseWebhookPath ? `${baseUrl}${int.baseWebhookPath}${webParams}` : null;
+        {allIntegrations.map(int => {
+          const sel = selections[int.id] || { project: '', form: '' };
+          const pParam = sel.project ? `&projectId=${sel.project}` : '';
+          const fParam = sel.form ? `&formId=${sel.form}` : '';
+          const currentWebhookUrl = int.baseWebhookPath ? `${baseUrl}${int.baseWebhookPath}?companyId=${companyId}${pParam}${fParam}` : '';
 
           return (
-          <div key={int.id} className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-xl border flex items-center justify-center ${colorMap[int.color]}`}>
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={int.icon} />
-                  </svg>
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-gray-900">{int.name}</h2>
-                </div>
+          <div key={int.id} className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col h-[380px] hover:shadow-md transition-shadow">
+            <div className="flex items-start gap-4 mb-4">
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border ${colorMap[int.color]}`}>
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={int.icon} />
+                </svg>
               </div>
-              {int.steps && (
-                <button 
-                  onClick={() => setSetupModalData({...int, webhookPath: currentWebhookUrl ? `${int.baseWebhookPath}${webParams}` : null})}
-                  className="text-sm font-medium text-indigo-600 hover:text-indigo-700 bg-indigo-50 px-3 py-1 rounded-full transition-colors"
-                >
-                  Setup Guide
-                </button>
-              )}
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 leading-tight">{int.name}</h3>
+                <p className="text-sm text-gray-500 mt-1 line-clamp-3">{int.description}</p>
+              </div>
             </div>
-            
-            <p className="text-gray-600 mb-6 flex-1">{int.description}</p>
             
             {int.baseWebhookPath ? (
               <div className="space-y-4 mt-auto">
@@ -543,11 +602,13 @@ export default function IntegrationsPage() {
               <div className="mt-auto">
                 <button 
                   onClick={() => {
-                    if (int.id === 'whatsapp-web') setIsWaModalOpen(true);
+                    if (int.isDynamicAi) openDynamicAiModal(int.providerData);
+                    else if (int.id === 'whatsapp-web') setIsWaModalOpen(true);
                     else if (int.id === 'justdial') setIsJdModalOpen(true);
                     else if (int.id === 'email') setIsEmailModalOpen(true);
                     else if (int.id === 'elevenlabs') setIsElevenLabsModalOpen(true);
                     else if (int.id === 'groq') setIsGroqModalOpen(true);
+                    else if (int.id === 'twilio') setIsTwilioModalOpen(true);
                   }}
                   className="px-5 py-2.5 bg-gray-100 text-gray-900 border border-gray-300 font-medium rounded-lg hover:bg-gray-200 transition-colors"
                 >
@@ -937,6 +998,62 @@ export default function IntegrationsPage() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        </div>
+      )}
+      {isDynamicAiModalOpen && selectedDynamicAi && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsDynamicAiModalOpen(false)} />
+          <div className="relative bg-white border border-gray-300 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-gray-200 flex items-center gap-4">
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border ${colorMap[selectedDynamicAi.color]}`}>
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={selectedDynamicAi.icon || "M13 10V3L4 14h7v7l9-11h-7z"} />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">{selectedDynamicAi.name} Configuration</h2>
+                <p className="text-sm text-gray-600 mt-1">{selectedDynamicAi.description}</p>
+              </div>
+            </div>
+            <div className="p-6 space-y-6">
+              {!selectedDynamicAi.allowTenantOverride ? (
+                <div className="bg-green-50 text-green-800 p-4 rounded-xl border border-green-200">
+                  <h3 className="font-bold mb-1">Access Granted!</h3>
+                  <p className="text-sm">The Platform Owner has configured and enabled this AI provider for your account. You can now use its features across the CRM.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Your API Key</label>
+                    <input 
+                      type="password" 
+                      value={dynamicAiKey}
+                      onChange={(e) => setDynamicAiKey(e.target.value)}
+                      placeholder="sk-..."
+                      className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none" 
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500">Your API key is stored securely and never shared with other tenants.</p>
+                  
+                  <button 
+                    onClick={saveDynamicAiKey}
+                    disabled={dynamicAiSaving}
+                    className="w-full py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
+                  >
+                    {dynamicAiSaving ? "Saving..." : "Save Configuration"}
+                  </button>
+                </div>
+              )}
+            </div>
+            <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-end">
+              <button 
+                onClick={() => setIsDynamicAiModalOpen(false)}
+                className="px-5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>

@@ -4,6 +4,9 @@ import { useState, useEffect, useRef } from "react";
 import { toast, Toaster } from "react-hot-toast";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import DynamicFormBuilder from "@/components/ui/DynamicFormBuilder";
+import Link from "next/link";
+import LeadForm from "./LeadForm";
+import ScheduleFollowUpModal from "@/components/telephony/ScheduleFollowUpModal";
 import EmptyState from "@/components/ui/EmptyState";
 import PageHeader from "@/components/ui/PageHeader";
 import Button from "@/components/ui/Button";
@@ -37,6 +40,7 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
   const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
   const [bulkStatusModalOpen, setBulkStatusModalOpen] = useState(false);
   const [bulkStatusValue, setBulkStatusValue] = useState("");
+  const [scheduleFollowUpModalOpen, setScheduleFollowUpModalOpen] = useState(false);
   const [convertModalOpen, setConvertModalOpen] = useState<string | null>(null);
 
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -179,6 +183,30 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
       }
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  const handleScheduleFollowUp = async (date: string, remark: string) => {
+    if (!selectedLeadForDetails) return;
+    try {
+      const res = await fetch("/api/leads", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          _id: selectedLeadForDetails._id, 
+          nextFollowUpDate: new Date(date).toISOString(),
+          lastRemark: remark 
+        })
+      });
+      if (res.ok) {
+        toast.success("Follow-up scheduled!");
+        fetchLeads();
+      } else {
+        toast.error("Failed to schedule follow-up");
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error("An error occurred");
     }
   };
 
@@ -799,8 +827,7 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
               </button>
             </div>
             <div className="p-6 max-h-[80vh] overflow-y-auto custom-scrollbar">
-              <DynamicFormBuilder 
-                targetModule="lead" 
+              <LeadForm 
                 initialData={selectedLeadForEdit}
                 onSubmit={handleSave} 
                 onCancel={() => { setIsModalOpen(false); setSelectedLeadForEdit(null); }} 
@@ -993,6 +1020,15 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
                 </label>
                 {attachmentFile && <span className="text-xs text-primary truncate max-w-[200px]">{attachmentFile.name}</span>}
               </div>
+              <div className="flex justify-end mt-2">
+                <button 
+                  onClick={() => setScheduleFollowUpModalOpen(true)}
+                  className="text-xs font-semibold text-orange-500 hover:text-orange-600 flex items-center gap-1"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  Schedule Follow-up
+                </button>
+              </div>
             </div>
 
             <div className="p-4 border-t border-border bg-muted/30 shrink-0">
@@ -1058,6 +1094,14 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
             </div>
           </div>
         </div>
+      )}
+
+      {/* Schedule Follow up Modal */}
+      {scheduleFollowUpModalOpen && (
+        <ScheduleFollowUpModal 
+          onClose={() => setScheduleFollowUpModalOpen(false)}
+          onSave={handleScheduleFollowUp}
+        />
       )}
     </div>
   );

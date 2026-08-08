@@ -15,6 +15,7 @@ import AICopilot from "@/components/ui/AICopilot";
 import SidebarWrapper from "@/components/layout/SidebarWrapper";
 import BottomNav from "@/components/layout/BottomNav";
 import CompanyModule from "@/modules/companies/schemas/CompanyModule";
+import DialerWidget from "@/components/telephony/DialerWidget";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
@@ -132,7 +133,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
                   "bookings/orders": "bookings",
                   "orders": "bookings",
                   "projects": "projects",
-                  "properties": "properties"
+                  "properties": "properties",
+                  "user management": "users"
                 };
                 const normalized = (mod.module_id || "").toLowerCase().trim();
                 const stdRoute = stdRouteMap[normalized];
@@ -155,6 +157,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
                 <>
                   <NavItem href="/dashboard/fb-leads" label="FB Leads" icon="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                   <NavItem href="/dashboard/leads" label="Leads" icon="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  <NavItem href="/dashboard/campaign-dialer" label="Campaign Dialer" icon="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </>
               )}
               <NavItem href="/dashboard/partners" label="Channel Partners" icon="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -270,7 +273,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
                   "bookings/orders": "bookings",
                   "orders": "bookings",
                   "projects": "projects",
-                  "properties": "properties"
+                  "properties": "properties",
+                  "user management": "users"
                 };
                 const normalized = (mod.module_id || "").toLowerCase().trim();
                 const stdRoute = stdRouteMap[normalized];
@@ -292,6 +296,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
                 <>
                   <NavItem href="/dashboard/fb-leads" label="FB Leads" icon="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                   <NavItem href="/dashboard/leads" label="Leads" icon="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  <NavItem href="/dashboard/campaign-dialer" label="Campaign Dialer" icon="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </>
               )}
               <NavItem href="/dashboard/partners" label="Channel Partners" icon="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -414,6 +419,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       </main>
 
       <AICopilot />
+      <DialerWidget />
     </div>
   );
 }

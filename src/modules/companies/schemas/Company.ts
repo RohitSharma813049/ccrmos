@@ -15,6 +15,7 @@ export interface ICompany extends Document {
   stripeSubscriptionId?: string;
   checkoutToken?: string;
   selected_template_id?: mongoose.Types.ObjectId | string;
+  allowedAIProviders?: (mongoose.Types.ObjectId | string)[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -35,6 +36,7 @@ const companySchema = new Schema<ICompany>(
     stripeSubscriptionId: { type: String },
     checkoutToken: { type: String },
     selected_template_id: { type: Schema.Types.ObjectId, ref: 'IndustryTemplate' },
+    allowedAIProviders: [{ type: Schema.Types.ObjectId, ref: 'AIProvider' }],
   },
   { timestamps: true }
 );

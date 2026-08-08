@@ -34,6 +34,37 @@ export interface ILead extends Document {
   budget?: number;
   timeline?: string;
   preferredLocation?: string;
+  bhkOrPlotSize?: string;
+  possessionStatus?: string;
+  
+  // Advanced Categorization & Tracking
+  category?: string;
+  enquiryType?: string;
+  priority?: string;
+  requirementType?: string;
+  tags?: string[];
+  campaignName?: string;
+  
+  // Pipeline & Sales
+  channelPartnerId?: mongoose.Types.ObjectId;
+  dealValue?: number;
+  expectedClosingDate?: Date;
+  lostReason?: string;
+  
+  // Contact Center & Telephony
+  whatsAppStatus?: string;
+  callRecordings?: string[]; // URLs
+  documents?: string[]; // URLs
+  
+  // Location
+  city?: string;
+  state?: string;
+  
+  // Follow-up Tracking
+  nextFollowUpDate?: Date;
+  lastFollowUpDate?: Date;
+  lastRemark?: string;
+  totalFollowUpCount?: number;
 }
 
 const leadSchema = new Schema<ILead>({
@@ -69,7 +100,38 @@ const leadSchema = new Schema<ILead>({
   interestedPropertyId: { type: Schema.Types.ObjectId, ref: "Property" },
   budget: { type: Number },
   timeline: { type: String },
-  preferredLocation: { type: String }
+  preferredLocation: { type: String },
+  bhkOrPlotSize: { type: String },
+  possessionStatus: { type: String },
+  
+  // Advanced Categorization & Tracking
+  category: { type: String },
+  enquiryType: { type: String },
+  priority: { type: String, enum: ['High', 'Medium', 'Low'], default: 'Medium' },
+  requirementType: { type: String },
+  tags: [{ type: String }],
+  campaignName: { type: String },
+  
+  // Pipeline & Sales
+  channelPartnerId: { type: Schema.Types.ObjectId, ref: "User" },
+  dealValue: { type: Number },
+  expectedClosingDate: { type: Date },
+  lostReason: { type: String },
+  
+  // Contact Center & Telephony
+  whatsAppStatus: { type: String },
+  callRecordings: [{ type: String }],
+  documents: [{ type: String }],
+  
+  // Location
+  city: { type: String },
+  state: { type: String },
+  
+  // Follow-up Tracking
+  nextFollowUpDate: { type: Date },
+  lastFollowUpDate: { type: Date },
+  lastRemark: { type: String },
+  totalFollowUpCount: { type: Number, default: 0 }
 }, { timestamps: true, strict: false });
 
 // A contact may exist in different tenants, but a tenant must not receive the
