@@ -4,14 +4,14 @@ import Company from "@/modules/companies/schemas/Company";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
-export async function PUT(req: Request, { params }: { params: { companyId: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ companyId: string }> }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user || (session.user as any).hierarchyLevel !== 1) {
       return NextResponse.json({ error: "Unauthorized. Platform Owner only." }, { status: 401 });
     }
 
-    const { companyId } = params;
+    const { companyId } = await params;
     const body = await req.json(); // Expected: { providerId: string, action: "grant" | "revoke" }
     
     await dbConnect();

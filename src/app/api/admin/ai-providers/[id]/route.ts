@@ -4,14 +4,14 @@ import AIProvider from "@/modules/settings/schemas/AIProvider";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user || (session.user as any).hierarchyLevel !== 1) {
       return NextResponse.json({ error: "Unauthorized. Platform Owner only." }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await params;
     const body = await req.json();
     await dbConnect();
 
@@ -26,14 +26,14 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user || (session.user as any).hierarchyLevel !== 1) {
       return NextResponse.json({ error: "Unauthorized. Platform Owner only." }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await params;
     await dbConnect();
 
     await AIProvider.findByIdAndDelete(id);
