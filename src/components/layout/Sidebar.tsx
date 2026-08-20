@@ -12,7 +12,8 @@ import {
   Phone, 
   CreditCard,
   Settings,
-  Puzzle
+  Puzzle,
+  CheckSquare
 } from 'lucide-react';
 
 const navItems = [
@@ -21,6 +22,7 @@ const navItems = [
   { name: 'Leads', href: '/leads', icon: Users },
   { name: 'Properties', href: '/properties', icon: Building2 },
   { name: 'Projects', href: '/projects', icon: FolderKanban },
+  { name: 'Tasks', href: '/tasks', icon: CheckSquare },
   { name: 'Campaigns', href: '/campaigns', icon: Mail },
   { name: 'Calls', href: '/calls', icon: Phone },
   { name: 'Commissions', href: '/commissions', icon: CreditCard },
