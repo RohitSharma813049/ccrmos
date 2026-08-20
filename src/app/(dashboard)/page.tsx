@@ -1,5 +1,9 @@
+'use client';
+
 import React from 'react';
 import { TrendingUp, Users, Building, DollarSign, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { RevenueChart } from '@/components/dashboard/RevenueChart';
+import { LeadConversionChart } from '@/components/dashboard/LeadConversionChart';
 
 const stats = [
   { name: 'Total Revenue', value: '$2,450,000', change: '+12.5%', changeType: 'positive', icon: DollarSign },
@@ -52,33 +56,24 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* Content Section Placeholder */}
+      {/* Analytics Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-        {/* Chart Area */}
-        <div className="lg:col-span-2 rounded-2xl bg-zinc-900/50 border border-zinc-800/60 p-6 min-h-[400px] flex items-center justify-center">
-          <p className="text-zinc-500 font-medium flex items-center gap-2">
-            <TrendingUp className="w-5 h-5" />
-            Revenue Chart (Recharts) goes here
-          </p>
+        {/* Revenue Chart */}
+        <div className="lg:col-span-2 rounded-2xl bg-zinc-900/50 border border-zinc-800/60 p-6">
+          <div className="mb-6">
+            <h3 className="text-base font-semibold text-zinc-100">Revenue Over Time</h3>
+            <p className="text-sm text-zinc-500">Monthly commission revenue for the last 6 months</p>
+          </div>
+          <RevenueChart />
         </div>
 
-        {/* Recent Activity */}
-        <div className="rounded-2xl bg-zinc-900/50 border border-zinc-800/60 p-6 min-h-[400px]">
-          <h3 className="text-base font-semibold text-zinc-100 mb-6">Recent Activity</h3>
-          <div className="space-y-6">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="flex gap-4">
-                <div className="w-8 h-8 rounded-full bg-zinc-800 flex-shrink-0 ring-1 ring-white/5" />
-                <div>
-                  <p className="text-sm text-zinc-300">
-                    <span className="font-medium text-zinc-100">Sarah Jenkins</span> closed a deal for 
-                    <span className="text-indigo-400 font-medium"> 124 Ocean Ave</span>
-                  </p>
-                  <p className="text-xs text-zinc-500 mt-1">2 hours ago</p>
-                </div>
-              </div>
-            ))}
+        {/* Lead Conversion Chart */}
+        <div className="rounded-2xl bg-zinc-900/50 border border-zinc-800/60 p-6">
+          <div className="mb-6">
+            <h3 className="text-base font-semibold text-zinc-100">Lead Pipeline</h3>
+            <p className="text-sm text-zinc-500">Current status breakdown</p>
           </div>
+          <LeadConversionChart />
         </div>
       </div>
 
