@@ -61,3 +61,5 @@
 - - [x] Build Advanced Data Grid 
 - - [x] Build Cmd+K Global Command Palette 
 - - [x] Build Interactive Calendar UI 
+- - [x] Build Billing & Subscription Hub 
+- - [x] Build Team & Access Management 

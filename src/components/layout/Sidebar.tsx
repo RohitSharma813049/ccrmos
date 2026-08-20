@@ -17,6 +17,7 @@ import {
 
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Team', href: '/team', icon: Users },
   { name: 'Leads', href: '/leads', icon: Users },
   { name: 'Properties', href: '/properties', icon: Building2 },
   { name: 'Projects', href: '/projects', icon: FolderKanban },
