@@ -54,3 +54,4 @@
 - - [x] Build Properties Grid UI 
 - - [x] Build App Marketplace UI 
 - - [x] Build AI Chat Widget UI 
+- - [x] Build Authentication UI 
