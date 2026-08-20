@@ -1,27 +1,18 @@
-import { NextResponse } from "next/server";
-import { getSession } from "@/lib/auth-utils";
-import dbConnect from "@/lib/db";
-import Lead from "@/modules/leads/schemas/Lead";
-import Customer from "@/modules/customers/schemas/Customer";
-import Invoice from "@/modules/invoices/schemas/Invoice";
-import Project from "@/modules/projects/schemas/Project";
-import Task from "@/modules/tasks/schemas/Task";
-
-const MODEL_MAP: Record<string, any> = {
-  leads: Lead,
-  customers: Customer,
-  invoices: Invoice,
-  projects: Project,
-  tasks: Task,
-};
+import { NextResponse } from 'next/server';
+import dbConnect from '@/lib/db';
+import Lead from '@/modules/leads/schemas/Lead';
+import Property from '@/modules/properties/schemas/Property';
+import User from '@/modules/users/schemas/User';
+import AuditLog from '@/modules/core/schemas/AuditLog';
+import { requireAuthenticatedUser, requirePermission } from '@/lib/auth-utils';
 
 function flattenObject(ob: any): any {
-  var toReturn: any = {};
-  for (var i in ob) {
+  const toReturn: any = {};
+  for (const i in ob) {
     if (!ob.hasOwnProperty(i)) continue;
-    if ((typeof ob[i]) == 'object' && ob[i] !== null && !Array.isArray(ob[i]) && !(ob[i] instanceof Date) && ob[i].toString() === '[object Object]') {
-      var flatObject = flattenObject(ob[i]);
-      for (var x in flatObject) {
+    if ((typeof ob[i]) === 'object' && ob[i] !== null && !(ob[i] instanceof Date) && !Array.isArray(ob[i])) {
+      const flatObject = flattenObject(ob[i]);
+      for (const x in flatObject) {
         if (!flatObject.hasOwnProperty(x)) continue;
         toReturn[i + '.' + x] = flatObject[x];
       }
@@ -32,71 +23,89 @@ function flattenObject(ob: any): any {
   return toReturn;
 }
 
-function jsonToCsv(items: any[]): string {
-  if (!items || !items.length) return "";
-
-  // Flatten items
-  const flattened = items.map(i => flattenObject(i));
-
-  // Get all unique keys
-  const keys = Array.from(new Set(flattened.flatMap(Object.keys)));
-
-  const csvRows = [];
-  
-  // Header
-  csvRows.push(keys.map(k => `"${String(k).replace(/"/g, '""')}"`).join(","));
-
-  // Rows
-  for (const row of flattened) {
-    const values = keys.map(k => {
-      let val = row[k];
-      if (val === null || val === undefined) val = "";
-      else if (val instanceof Date) val = val.toISOString();
-      else if (typeof val === 'object') val = JSON.stringify(val);
-      else val = String(val);
-      
-      // Escape quotes
-      return `"${val.replace(/"/g, '""')}"`;
-    });
-    csvRows.push(values.join(","));
-  }
-
-  return csvRows.join("\n");
-}
-
 export async function GET(req: Request) {
   try {
-    const session = await getSession();
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const { searchParams } = new URL(req.url);
-    const moduleName = searchParams.get("module") || "";
-
-    const Model = MODEL_MAP[moduleName];
-    if (!Model) {
-      return NextResponse.json({ error: "Invalid module specified for export." }, { status: 400 });
-    }
+    const user = await requireAuthenticatedUser();
+    // Strict RBAC: Only managers/founders can export data
+    await requirePermission('Exports', 'view'); 
 
     await dbConnect();
 
-    // Enforce data isolation
-    const companyId = session.user.companyId;
-    const records = await Model.find({ companyId }).lean();
+    const { searchParams } = new URL(req.url);
+    const moduleName = searchParams.get('module')?.toLowerCase() || 'leads';
+    
+    let data: any[] = [];
+    let targetModelForAudit: any = "Lead";
 
-    const csvStr = jsonToCsv(records);
+    if (moduleName === 'leads') {
+      data = await Lead.find({ companyId: user.companyId }).lean();
+      targetModelForAudit = "Lead";
+    } else if (moduleName === 'properties') {
+      data = await Property.find({ companyId: user.companyId }).lean();
+      targetModelForAudit = "Property";
+    } else if (moduleName === 'users') {
+      data = await User.find({ companyId: user.companyId }).lean();
+      targetModelForAudit = "User";
+    } else {
+      return NextResponse.json({ error: "Invalid module parameter" }, { status: 400 });
+    }
 
-    return new NextResponse(csvStr, {
+    if (data.length === 0) {
+      return NextResponse.json({ error: "No data found to export" }, { status: 404 });
+    }
+
+    // Security Audit Log - Record the mass export!
+    await AuditLog.create({
+      companyId: user.companyId,
+      actorId: user.id,
+      action: "EXPORT",
+      targetModel: targetModelForAudit,
+      changes: {
+        newValues: { exportCount: data.length, module: moduleName }
+      },
+      ipAddress: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'Unknown',
+      userAgent: req.headers.get('user-agent') || 'Unknown'
+    });
+
+    // Convert JSON to CSV
+    const flattenedData = data.map(doc => flattenObject(doc));
+    
+    // Get all unique keys for headers
+    const headers = Array.from(
+      new Set(flattenedData.flatMap(obj => Object.keys(obj)))
+    );
+
+    const csvRows = [];
+    // Add header row
+    csvRows.push(headers.map(h => `"${h}"`).join(','));
+
+    // Add data rows
+    for (const row of flattenedData) {
+      const values = headers.map(header => {
+        let val = row[header];
+        if (val === null || val === undefined) val = '';
+        if (val instanceof Date) val = val.toISOString();
+        if (Array.isArray(val)) val = val.join('; ');
+        
+        // Escape quotes
+        const stringVal = String(val).replace(/"/g, '""');
+        return `"${stringVal}"`;
+      });
+      csvRows.push(values.join(','));
+    }
+
+    const csvString = csvRows.join('\n');
+
+    return new NextResponse(csvString, {
       status: 200,
       headers: {
-        "Content-Type": "text/csv",
-        "Content-Disposition": `attachment; filename="${moduleName}_export_${new Date().toISOString().split('T')[0]}.csv"`,
-      },
+        'Content-Type': 'text/csv',
+        'Content-Disposition': `attachment; filename="${moduleName}_export_${new Date().toISOString().split('T')[0]}.csv"`
+      }
     });
 
   } catch (error: any) {
-    console.error("Export error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const status = error.message.includes('Forbidden') || error.message.includes('Unauthorized') ? 403 : 500;
+    return NextResponse.json({ error: error.message }, { status });
   }
 }

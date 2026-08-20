@@ -7,6 +7,7 @@ export interface ICompany extends Document {
   usersQuota: number;
   country?: string;
   currency?: string;
+  baseCurrency?: string;
   industryId?: mongoose.Types.ObjectId | string;
   status: "Active" | "Suspended";
   subscriptionPlanId?: mongoose.Types.ObjectId | string;
@@ -28,6 +29,7 @@ const companySchema = new Schema<ICompany>(
     usersQuota: { type: Number, default: 5 },
     country: { type: String, default: "US" },
     currency: { type: String, default: "USD" },
+    baseCurrency: { type: String, default: "USD" },
     industryId: { type: Schema.Types.ObjectId, ref: 'Industry' },
     status: { type: String, enum: ["Active", "Suspended"], default: "Active" },
     subscriptionPlanId: { type: Schema.Types.ObjectId, ref: 'SubscriptionPlan' },

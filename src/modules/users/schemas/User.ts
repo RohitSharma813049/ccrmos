@@ -15,6 +15,7 @@ export interface IUser extends Document {
   directorId?: mongoose.Types.ObjectId;
   managerId?: mongoose.Types.ObjectId;
   teamLeaderId?: mongoose.Types.ObjectId;
+  defaultCommissionSplit?: number;
   isActive?: boolean;
   avatarUrl?: string;
   phone?: string;
@@ -57,6 +58,7 @@ const UserSchema: Schema<IUser> = new Schema({
   directorId: { type: Schema.Types.ObjectId, ref: "User" },
   managerId: { type: Schema.Types.ObjectId, ref: "User" },
   teamLeaderId: { type: Schema.Types.ObjectId, ref: "User" },
+  defaultCommissionSplit: { type: Number, default: 50 },
   isActive: { type: Boolean, default: true },
   avatarUrl: { type: String },
   phone: { type: String },

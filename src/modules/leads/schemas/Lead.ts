@@ -32,6 +32,7 @@ export interface ILead extends Document {
   // Real Estate Fields
   interestedPropertyId?: mongoose.Types.ObjectId;
   budget?: number;
+  currency?: string;
   timeline?: string;
   preferredLocation?: string;
   bhkOrPlotSize?: string;
@@ -65,6 +66,10 @@ export interface ILead extends Document {
   lastFollowUpDate?: Date;
   lastRemark?: string;
   totalFollowUpCount?: number;
+  
+  // Client Portal Access
+  hasPortalAccess?: boolean;
+  portalPasswordHash?: string;
 }
 
 const leadSchema = new Schema<ILead>({
@@ -98,7 +103,13 @@ const leadSchema = new Schema<ILead>({
 
   // Real Estate Fields
   interestedPropertyId: { type: Schema.Types.ObjectId, ref: "Property" },
-  budget: { type: Number },
+  budget: {
+    type: Number,
+  },
+  currency: {
+    type: String,
+    default: "USD"
+  },
   timeline: { type: String },
   preferredLocation: { type: String },
   bhkOrPlotSize: { type: String },
@@ -131,7 +142,11 @@ const leadSchema = new Schema<ILead>({
   nextFollowUpDate: { type: Date },
   lastFollowUpDate: { type: Date },
   lastRemark: { type: String },
-  totalFollowUpCount: { type: Number, default: 0 }
+  totalFollowUpCount: { type: Number, default: 0 },
+  
+  // Client Portal Access
+  hasPortalAccess: { type: Boolean, default: false },
+  portalPasswordHash: { type: String }
 }, { timestamps: true, strict: false });
 
 // A contact may exist in different tenants, but a tenant must not receive the

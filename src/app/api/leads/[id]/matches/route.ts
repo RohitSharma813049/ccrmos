@@ -3,16 +3,18 @@ import dbConnect from '@/lib/db';
 import Lead from '@/modules/leads/schemas/Lead';
 import Property from '@/modules/properties/schemas/Property';
 import { requireAuthenticatedUser } from '@/lib/auth-utils';
+import { convertCurrency } from '@/lib/currency-utils';
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const user = await requireAuthenticatedUser();
     await dbConnect();
 
-    const lead = await Lead.findOne({ _id: params.id, companyId: user.companyId });
+    const lead = await Lead.findOne({ _id: id, companyId: user.companyId });
     if (!lead) {
       return NextResponse.json({ error: "Lead not found" }, { status: 404 });
     }
@@ -29,9 +31,9 @@ export async function GET(
 
       // 1. Budget Matching (40%)
       if (lead.budget && property.price) {
-        // Remove currency symbols and commas, parse to number
-        const propPrice = parseFloat(property.price.replace(/[^0-9.]/g, ''));
-        if (!isNaN(propPrice) && propPrice > 0) {
+        // Convert property price to lead's currency for accurate matching
+        const propPrice = convertCurrency(property.price, property.currency || "USD", lead.currency || "USD");
+        if (propPrice > 0) {
           const diff = Math.abs(lead.budget - propPrice);
           const percentDiff = diff / lead.budget;
           
