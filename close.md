@@ -59,3 +59,5 @@
 - - [x] Build Interactive Analytics Dashboard 
 - - [x] Build Email Campaign Builder UI 
 - - [x] Build Advanced Data Grid 
+- - [x] Build Cmd+K Global Command Palette 
+- - [x] Build Interactive Calendar UI 

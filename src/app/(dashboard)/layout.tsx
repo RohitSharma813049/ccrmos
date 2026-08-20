@@ -2,6 +2,7 @@ import React from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
 import { AIChatWidget } from '@/components/chat/AIChatWidget';
+import { CommandPalette } from '@/components/ui/CommandPalette';
 
 export default function DashboardLayout({
   children,
@@ -29,6 +30,9 @@ export default function DashboardLayout({
       
       {/* Global AI Assistant Widget */}
       <AIChatWidget />
+      
+      {/* Global Command Palette */}
+      <CommandPalette />
     </div>
   );
 }
