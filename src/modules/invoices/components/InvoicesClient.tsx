@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import EmptyState from "@/components/ui/EmptyState";
+import { useState, useEffect, useCallback } from "react";
 import PageHeader from "@/components/ui/PageHeader";
 import Button from "@/components/ui/Button";
 import DynamicFormBuilder from "@/components/ui/DynamicFormBuilder";
@@ -9,6 +8,13 @@ import { formatCurrency } from "@/utils/currency";
 import { generateInvoicePDF } from "@/utils/pdfGenerator";
 import { usePermissions } from "@/hooks/usePermissions";
 import { DataTable, ColumnDef } from "@/components/ui/DataTable";
+
+interface ILineItem {
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  amount?: number;
+}
 
 export default function InvoicesClient() {
   const [items, setItems] = useState<any[]>([]);
@@ -18,17 +24,38 @@ export default function InvoicesClient() {
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState("");
   
-  // New Filters
+  // Filters
   const [statusFilter, setStatusFilter] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { hasPermission, session } = usePermissions();
+  const [activeTab, setActiveTab] = useState<"standard" | "line_items">("line_items");
 
+  // Line items state for backend calculation
+  const [lineItems, setLineItems] = useState<ILineItem[]>([
+    { description: "Item 1", quantity: 1, unitPrice: 100 }
+  ]);
+  const [invoiceNumber, setInvoiceNumber] = useState("");
+  const [taxRate, setTaxRate] = useState<number>(0);
+  const [discountRate, setDiscountRate] = useState<number>(0);
+  const [shippingFee, setShippingFee] = useState<number>(0);
+  const [currency, setCurrency] = useState("USD");
+
+  // Backend calculation state
+  const [calculation, setCalculation] = useState<any>({
+    subtotal: 100,
+    taxAmount: 0,
+    discountAmount: 0,
+    shippingFee: 0,
+    amount: 100,
+    items: lineItems
+  });
+  const [calcLoading, setCalcLoading] = useState(false);
+
+  const { hasPermission, session } = usePermissions();
   const [advancedFilters, setAdvancedFilters] = useState<any[]>([]);
 
-  // Configure fields that can be dynamically filtered
   const filterFields = [
     { name: "invoiceNumber", label: "Invoice #", type: "string" as const },
     { name: "amount", label: "Amount", type: "number" as const },
@@ -36,10 +63,52 @@ export default function InvoicesClient() {
     { name: "customData.notes", label: "Notes (Custom)", type: "string" as const },
   ];
 
+  const [summary, setSummary] = useState<any>({
+    totalAmount: 0,
+    totalSubtotal: 0,
+    taxAmount: 0,
+    discountAmount: 0,
+    count: 0
+  });
+
   useEffect(() => {
     fetchPipeline();
     fetchItems();
   }, [page, search, statusFilter, dateFrom, dateTo]);
+
+  // Request backend calculation whenever items/rates change
+  const fetchBackendCalculation = useCallback(async () => {
+    try {
+      setCalcLoading(true);
+      const res = await fetch("/api/invoices/calculate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: lineItems,
+          taxRate,
+          discountRate,
+          shippingFee,
+          currency
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.calculation) {
+          setCalculation(data.calculation);
+        }
+      }
+    } catch (e) {
+      console.error("Backend calculation error", e);
+    } finally {
+      setCalcLoading(false);
+    }
+  }, [lineItems, taxRate, discountRate, shippingFee, currency]);
+
+  useEffect(() => {
+    if (isModalOpen && activeTab === "line_items") {
+      fetchBackendCalculation();
+    }
+  }, [lineItems, taxRate, discountRate, shippingFee, currency, isModalOpen, activeTab, fetchBackendCalculation]);
 
   async function fetchPipeline() {
     try {
@@ -62,6 +131,7 @@ export default function InvoicesClient() {
         const data = await res.json();
         setItems(data.invoices || []);
         if (data.totalPages) setTotalPages(data.totalPages);
+        if (data.summary) setSummary(data.summary);
       }
     } catch (error) {
       console.error("Failed to fetch", error);
@@ -72,17 +142,31 @@ export default function InvoicesClient() {
 
   const handleSave = async (formData: any) => {
     try {
+      const payload = activeTab === "line_items" ? {
+        invoiceNumber: invoiceNumber || `INV-${Date.now().toString().slice(-4)}`,
+        items: calculation.items || lineItems,
+        taxRate,
+        discountRate,
+        shippingFee,
+        currency,
+        subtotal: calculation.subtotal,
+        taxAmount: calculation.taxAmount,
+        discountAmount: calculation.discountAmount,
+        amount: calculation.amount
+      } : formData;
+
       const res = await fetch("/api/invoices", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(payload)
       });
+
       if (res.ok) {
         setIsModalOpen(false);
         fetchItems();
       } else {
         const err = await res.json();
-        alert(err.error || "Failed to save");
+        alert(err.error || "Failed to save invoice");
       }
     } catch (e) {
       console.error(e);
@@ -148,9 +232,60 @@ export default function InvoicesClient() {
     }
   };
 
+  // Item management helper methods
+  const addLineItem = () => {
+    setLineItems(prev => [...prev, { description: `Item ${prev.length + 1}`, quantity: 1, unitPrice: 0 }]);
+  };
+
+  const updateLineItem = (index: number, field: keyof ILineItem, value: any) => {
+    setLineItems(prev => {
+      const copy = [...prev];
+      copy[index] = { ...copy[index], [field]: value };
+      return copy;
+    });
+  };
+
+  const removeLineItem = (index: number) => {
+    if (lineItems.length <= 1) return;
+    setLineItems(prev => prev.filter((_, i) => i !== index));
+  };
+
   const columns: ColumnDef<any>[] = [
-    { header: "Invoice #", accessorKey: "invoiceNumber", className: "font-medium text-foreground" },
-    { header: "Amount", cell: (item) => formatCurrency(item.amount, item.currency || 'USD') },
+    { 
+      header: "Invoice #", 
+      cell: (item) => (
+        <div>
+          <span className="font-semibold text-foreground">{item.invoiceNumber || item.displayId}</span>
+          {item.displayId && <span className="text-xs text-muted-foreground block">{item.displayId}</span>}
+        </div>
+      )
+    },
+    { 
+      header: "Subtotal", 
+      cell: (item) => (
+        <span className="text-muted-foreground text-sm font-medium">
+          {formatCurrency(item.subtotal || item.amount || 0, item.currency || 'USD')}
+        </span>
+      )
+    },
+    { 
+      header: "Tax / Disc", 
+      cell: (item) => (
+        <div className="text-xs text-muted-foreground">
+          {item.taxRate > 0 && <span className="text-emerald-600 font-medium block">Tax ({item.taxRate}%): +{formatCurrency(item.taxAmount || 0, item.currency || 'USD')}</span>}
+          {item.discountRate > 0 && <span className="text-amber-600 font-medium block">Disc ({item.discountRate}%): -{formatCurrency(item.discountAmount || 0, item.currency || 'USD')}</span>}
+          {!item.taxRate && !item.discountRate && <span>None</span>}
+        </div>
+      )
+    },
+    { 
+      header: "Grand Total", 
+      cell: (item) => (
+        <span className="font-bold text-foreground text-base">
+          {formatCurrency(item.amount, item.currency || 'USD')}
+        </span>
+      ) 
+    },
     { header: "Approval", cell: (item) => (
       <span className={`px-2.5 py-1 rounded-md text-xs font-semibold border ${
         item.approvalStatus === 'Approved' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' :
@@ -161,7 +296,7 @@ export default function InvoicesClient() {
       </span>
     )},
     { header: "Date Added", cell: (item) => <span className="text-muted-foreground text-xs">{new Date(item.createdAt).toLocaleDateString()}</span> },
-    { header: "Status (Pipeline)", className: "min-w-[200px]", cell: (item) => (
+    { header: "Status (Pipeline)", className: "min-w-[180px]", cell: (item) => (
       pipelineStages.length > 0 ? (
         <select
           value={item.status}
@@ -187,21 +322,6 @@ export default function InvoicesClient() {
           {item.status}
         </span>
       )
-    )},
-    { header: "Custom Data", cell: (item) => (
-      <div className="text-xs text-muted-foreground">
-        {item.customData && Object.keys(item.customData).length > 0 ? (
-          <div className="flex flex-wrap gap-2">
-            {Object.entries(item.customData).map(([k, v]) => (
-              <span key={k} className="bg-muted border border-border px-2 py-1 rounded text-foreground">
-                <strong className="text-foreground">{k}:</strong> {String(v)}
-              </span>
-            ))}
-          </div>
-        ) : (
-          <span className="text-muted-foreground/50">None</span>
-        )}
-      </div>
     )},
     { header: "Actions", className: "text-right", cell: (item) => (
       <div className="flex items-center justify-end gap-2">
@@ -288,7 +408,7 @@ export default function InvoicesClient() {
     <div className="space-y-8 fade-in pb-12">
       <PageHeader
         title="Invoices"
-        description="Manage invoices and dynamic fields."
+        description="Manage invoices with automated backend billing calculations."
       >
         {hasPermission("Invoices", "Create") && (
           <button 
@@ -302,6 +422,29 @@ export default function InvoicesClient() {
           </button>
         )}
       </PageHeader>
+
+      {/* Backend Aggregation Summary Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
+          <span className="text-xs text-muted-foreground font-medium block">Total Filtered Invoices</span>
+          <span className="text-2xl font-bold text-foreground mt-1 block">{summary.count || items.length}</span>
+        </div>
+        <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
+          <span className="text-xs text-muted-foreground font-medium block">Total Revenue (Backend Aggregated)</span>
+          <span className="text-2xl font-bold text-emerald-600 mt-1 block">{formatCurrency(summary.totalAmount || 0, 'USD')}</span>
+        </div>
+        <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
+          <span className="text-xs text-muted-foreground font-medium block">Total Subtotal</span>
+          <span className="text-2xl font-bold text-foreground mt-1 block">{formatCurrency(summary.totalSubtotal || 0, 'USD')}</span>
+        </div>
+        <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
+          <span className="text-xs text-muted-foreground font-medium block">Total Taxes & Discounts</span>
+          <div className="flex items-center gap-2 mt-1">
+            <span className="text-sm font-bold text-emerald-600">Tax: +{formatCurrency(summary.totalTax || 0, 'USD')}</span>
+            <span className="text-sm font-bold text-amber-600">Disc: -{formatCurrency(summary.totalDiscount || 0, 'USD')}</span>
+          </div>
+        </div>
+      </div>
 
       <DataTable 
         data={items}
@@ -329,21 +472,210 @@ export default function InvoicesClient() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
-          <div className="relative bg-card border border-border rounded-2xl shadow-xl w-full max-w-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div className="relative bg-card border border-border rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            
+            {/* Modal Header */}
             <div className="p-6 border-b border-border flex justify-between items-center bg-muted/30">
-              <h2 className="text-xl font-bold text-foreground">Add Invoice</h2>
+              <div>
+                <h2 className="text-xl font-bold text-foreground">Create Invoice</h2>
+                <p className="text-xs text-muted-foreground">Calculations calculated real-time by backend API</p>
+              </div>
               <button onClick={() => setIsModalOpen(false)} className="text-muted-foreground hover:text-foreground">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
-            <div className="p-6 max-h-[80vh] overflow-y-auto custom-scrollbar">
-              <DynamicFormBuilder 
-                targetModule="invoice" 
-                onSubmit={handleSave} 
-                onCancel={() => setIsModalOpen(false)} 
-              />
+
+            {/* Mode selector */}
+            <div className="flex border-b border-border bg-muted/20 px-6 pt-2">
+              <button
+                onClick={() => setActiveTab("line_items")}
+                className={`px-4 py-2 text-sm font-semibold border-b-2 transition-colors ${activeTab === "line_items" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+              >
+                Line Items Builder (Backend Engine)
+              </button>
+              <button
+                onClick={() => setActiveTab("standard")}
+                className={`px-4 py-2 text-sm font-semibold border-b-2 transition-colors ${activeTab === "standard" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+              >
+                Custom Dynamic Form
+              </button>
+            </div>
+
+            <div className="p-6 max-h-[75vh] overflow-y-auto custom-scrollbar">
+              {activeTab === "standard" ? (
+                <DynamicFormBuilder 
+                  targetModule="invoice" 
+                  onSubmit={handleSave} 
+                  onCancel={() => setIsModalOpen(false)} 
+                />
+              ) : (
+                <form onSubmit={(e) => { e.preventDefault(); handleSave({}); }} className="space-y-6">
+                  {/* Invoice Header details */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs font-semibold text-muted-foreground block mb-1">Invoice Number <span className="text-red-500">*</span></label>
+                      <input 
+                        type="text" 
+                        required
+                        value={invoiceNumber} 
+                        onChange={(e) => setInvoiceNumber(e.target.value)}
+                        placeholder={`INV-${Date.now().toString().slice(-4)}`}
+                        className="w-full h-10 px-3 border border-border rounded-xl text-sm bg-background text-foreground"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-muted-foreground block mb-1">Currency</label>
+                      <select 
+                        value={currency} 
+                        onChange={(e) => setCurrency(e.target.value)}
+                        className="w-full h-10 px-3 border border-border rounded-xl text-sm bg-background text-foreground"
+                      >
+                        <option value="USD">USD ($)</option>
+                        <option value="EUR">EUR (€)</option>
+                        <option value="GBP">GBP (£)</option>
+                        <option value="INR">INR (₹)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Line Items Table */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-bold text-foreground">Line Items</h3>
+                      <button 
+                        type="button" 
+                        onClick={addLineItem}
+                        className="text-xs font-semibold text-primary hover:underline flex items-center gap-1"
+                      >
+                        + Add Item
+                      </button>
+                    </div>
+
+                    <div className="space-y-2 border border-border rounded-xl p-3 bg-muted/10">
+                      {lineItems.map((item, idx) => (
+                        <div key={idx} className="flex items-center gap-2">
+                          <input 
+                            type="text" 
+                            placeholder="Description"
+                            value={item.description}
+                            onChange={(e) => updateLineItem(idx, "description", e.target.value)}
+                            className="flex-1 h-9 px-3 border border-border rounded-lg text-sm bg-background"
+                          />
+                          <input 
+                            type="number" 
+                            min="1"
+                            placeholder="Qty"
+                            value={item.quantity}
+                            onChange={(e) => updateLineItem(idx, "quantity", Number(e.target.value))}
+                            className="w-16 h-9 px-2 border border-border rounded-lg text-sm bg-background text-center"
+                          />
+                          <input 
+                            type="number" 
+                            min="0"
+                            step="0.01"
+                            placeholder="Unit Price"
+                            value={item.unitPrice}
+                            onChange={(e) => updateLineItem(idx, "unitPrice", Number(e.target.value))}
+                            className="w-24 h-9 px-2 border border-border rounded-lg text-sm bg-background text-right"
+                          />
+                          <div className="w-24 text-right text-xs font-semibold text-foreground">
+                            {formatCurrency((item.quantity || 1) * (item.unitPrice || 0), currency)}
+                          </div>
+                          {lineItems.length > 1 && (
+                            <button 
+                              type="button" 
+                              onClick={() => removeLineItem(idx)}
+                              className="text-destructive hover:text-destructive/80 p-1"
+                            >
+                              &times;
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Taxes, Discounts, Shipping */}
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <label className="text-xs font-semibold text-muted-foreground block mb-1">Tax Rate (%)</label>
+                      <input 
+                        type="number" 
+                        min="0" 
+                        max="100"
+                        value={taxRate} 
+                        onChange={(e) => setTaxRate(Number(e.target.value))}
+                        className="w-full h-9 px-3 border border-border rounded-xl text-sm bg-background text-foreground"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-muted-foreground block mb-1">Discount Rate (%)</label>
+                      <input 
+                        type="number" 
+                        min="0" 
+                        max="100"
+                        value={discountRate} 
+                        onChange={(e) => setDiscountRate(Number(e.target.value))}
+                        className="w-full h-9 px-3 border border-border rounded-xl text-sm bg-background text-foreground"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-muted-foreground block mb-1">Shipping Fee</label>
+                      <input 
+                        type="number" 
+                        min="0" 
+                        value={shippingFee} 
+                        onChange={(e) => setShippingFee(Number(e.target.value))}
+                        className="w-full h-9 px-3 border border-border rounded-xl text-sm bg-background text-foreground"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Backend Calculation Output Card */}
+                  <div className="border border-primary/20 bg-primary/5 rounded-xl p-4 space-y-2">
+                    <div className="flex justify-between items-center text-xs text-muted-foreground">
+                      <span>Backend Calculated Subtotal:</span>
+                      <span className="font-semibold text-foreground">{formatCurrency(calculation.subtotal || 0, currency)}</span>
+                    </div>
+
+                    {calculation.discountAmount > 0 && (
+                      <div className="flex justify-between items-center text-xs text-amber-600">
+                        <span>Discount ({calculation.discountRate}%):</span>
+                        <span className="font-semibold">-{formatCurrency(calculation.discountAmount, currency)}</span>
+                      </div>
+                    )}
+
+                    {calculation.taxAmount > 0 && (
+                      <div className="flex justify-between items-center text-xs text-emerald-600">
+                        <span>Tax ({calculation.taxRate}%):</span>
+                        <span className="font-semibold">+{formatCurrency(calculation.taxAmount, currency)}</span>
+                      </div>
+                    )}
+
+                    {calculation.shippingFee > 0 && (
+                      <div className="flex justify-between items-center text-xs text-muted-foreground">
+                        <span>Shipping Fee:</span>
+                        <span className="font-semibold text-foreground">+{formatCurrency(calculation.shippingFee, currency)}</span>
+                      </div>
+                    )}
+
+                    <div className="pt-2 border-t border-primary/20 flex justify-between items-center">
+                      <span className="text-sm font-bold text-foreground">Grand Total (Backend):</span>
+                      <span className="text-lg font-bold text-primary">{formatCurrency(calculation.amount || 0, currency)}</span>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex justify-end gap-2 pt-2">
+                    <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>Cancel</Button>
+                    <Button type="submit" disabled={calcLoading}>
+                      {calcLoading ? "Calculating..." : "Save Invoice"}
+                    </Button>
+                  </div>
+                </form>
+              )}
             </div>
           </div>
         </div>

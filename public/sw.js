@@ -1,6 +1,9 @@
+const CACHE_NAME = 'crmos-cache-v2';
+const API_CACHE = 'crmos-api-cache';
+
 self.addEventListener('install', function (event) {
   event.waitUntil(
-    caches.open('crmos-cache-v1').then(function (cache) {
+    caches.open(CACHE_NAME).then(function (cache) {
       return cache.addAll([
         '/',
         '/dashboard',
@@ -11,6 +14,25 @@ self.addEventListener('install', function (event) {
 });
 
 self.addEventListener('fetch', function (event) {
+  const url = new URL(event.request.url);
+
+  // API Requests: Network First, fallback to cache
+  if (url.pathname.startsWith('/api/')) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          const responseClone = response.clone();
+          caches.open(API_CACHE).then((cache) => {
+            cache.put(event.request, responseClone);
+          });
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // Static assets: Cache First, fallback to network
   event.respondWith(
     caches.match(event.request).then(function (response) {
       return response || fetch(event.request);

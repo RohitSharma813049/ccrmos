@@ -4,7 +4,8 @@ import GlobalRole, { IGlobalRole } from "@/modules/owner/schemas/GlobalRole";
 export interface IUser extends Document {
   email: string;
   name?: string;
-  role?: mongoose.Types.ObjectId | IGlobalRole;
+  role?: mongoose.Types.ObjectId | IGlobalRole | any;
+  roleModel?: "GlobalRole" | "Role";
   companyId?: mongoose.Types.ObjectId;
   founderId?: mongoose.Types.ObjectId;
   hierarchyLevel?: number; // 1: Platform Owner, 2: Founder, 3: Director, 4: Manager, 5: Team Leader, 6: Team Member
@@ -21,6 +22,7 @@ export interface IUser extends Document {
   fcmTokens?: string[];
   twoFactorEnabled?: boolean;
   twoFactorSecret?: string;
+  webPushSubscriptions?: any[];
 }
 
 const UserSchema: Schema<IUser> = new Schema({
@@ -36,7 +38,12 @@ const UserSchema: Schema<IUser> = new Schema({
   },
   role: {
     type: Schema.Types.ObjectId,
-    ref: "GlobalRole",
+    refPath: "roleModel",
+  },
+  roleModel: {
+    type: String,
+    enum: ["GlobalRole", "Role"],
+    default: "GlobalRole"
   },
   companyId: {
     type: Schema.Types.ObjectId,
@@ -57,6 +64,7 @@ const UserSchema: Schema<IUser> = new Schema({
   fcmTokens: [{ type: String }],
   twoFactorEnabled: { type: Boolean, default: false },
   twoFactorSecret: { type: String },
+  webPushSubscriptions: [{ type: Schema.Types.Mixed }]
 }, { timestamps: true });
 
 const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>("User", UserSchema);

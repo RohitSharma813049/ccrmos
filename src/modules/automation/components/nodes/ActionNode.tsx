@@ -27,6 +27,8 @@ export default function ActionNode({ data }: { data: any }) {
           <option value="Create Task">Create Task</option>
           <option value="Send Email">Send Email</option>
           <option value="Assign User">Assign User</option>
+          <option value="Trigger Webhook">Trigger Webhook</option>
+          <option value="Send SMS / WhatsApp">Send SMS / WhatsApp</option>
         </select>
 
         {data.actionType === 'Create Task' && (
@@ -47,6 +49,26 @@ export default function ActionNode({ data }: { data: any }) {
           <>
             <input type="text" placeholder="Target User ID" value={data.payload?.userId || ''} onChange={(e) => onChangePayload('userId', e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded p-1.5 text-xs text-gray-700 outline-none" />
             <p className="text-[10px] text-gray-500 mt-1 leading-tight">Enter the 24-character Object ID of the user to assign.</p>
+          </>
+        )}
+
+        {data.actionType === 'Trigger Webhook' && (
+          <>
+            <input type="text" placeholder="Webhook URL (https://...)" value={data.payload?.url || ''} onChange={(e) => onChangePayload('url', e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded p-1.5 text-xs text-gray-700 outline-none" />
+            <select value={data.payload?.method || 'POST'} onChange={(e) => onChangePayload('method', e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded p-1.5 text-xs text-gray-700 outline-none">
+              <option value="POST">POST</option>
+              <option value="GET">GET</option>
+              <option value="PUT">PUT</option>
+            </select>
+            <input type="text" placeholder="Authorization Header (Optional)" value={data.payload?.authHeader || ''} onChange={(e) => onChangePayload('authHeader', e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded p-1.5 text-xs text-gray-700 outline-none" />
+            <p className="text-[10px] text-gray-500 mt-1 leading-tight">The event payload will be sent automatically as JSON.</p>
+          </>
+        )}
+
+        {data.actionType === 'Send SMS / WhatsApp' && (
+          <>
+            <input type="text" placeholder="To Phone (+1234567890)" value={data.payload?.to || ''} onChange={(e) => onChangePayload('to', e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded p-1.5 text-xs text-gray-700 outline-none" />
+            <textarea placeholder="Message Body" value={data.payload?.body || ''} onChange={(e) => onChangePayload('body', e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded p-1.5 text-xs text-gray-700 outline-none h-16 resize-none" />
           </>
         )}
       </div>

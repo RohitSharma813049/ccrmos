@@ -9,11 +9,43 @@ class MockQueue {
   }
   async add(name: string, data: any) {
     console.log(`[MockQueue] Added job ${name} to ${this.name}`);
-    // Process inline for the prototype to avoid needing a real Redis server
     if (this.name === "executionQueue") {
        setTimeout(() => processExecutionJob({ data }), 100);
+    } else if (this.name === "emailQueue") {
+       setTimeout(() => processEmailJob({ data }), 100);
     }
     return { id: Date.now().toString() };
+  }
+}
+
+async function processEmailJob(job: any) {
+  const { to, subject, html, campaignId } = job.data;
+  console.log(`[EmailWorker] Sending email to ${to} for campaign ${campaignId}`);
+
+  const nodemailer = require('nodemailer');
+  
+  // We use streamTransport to mock sending in dev mode without needing real SMTP credentials
+  const transporter = nodemailer.createTransport({
+    streamTransport: true,
+    newline: 'windows'
+  });
+
+  try {
+    await transporter.sendMail({
+      from: '"CRM Marketing" <no-reply@crmos.com>',
+      to,
+      subject,
+      html
+    });
+
+    if (campaignId) {
+      await dbConnect();
+      const EmailCampaign = require('@/modules/marketing/schemas/EmailCampaign').default;
+      await EmailCampaign.updateOne({ _id: campaignId }, { $inc: { totalSent: 1 } });
+    }
+    console.log(`[EmailWorker] Successfully sent email to ${to}`);
+  } catch (err: any) {
+    console.error(`[EmailWorker] Failed to send email to ${to}: ${err.message}`);
   }
 }
 
@@ -54,6 +86,60 @@ async function processExecutionJob(job: any) {
           const Project = require('@/modules/projects/schemas/Project').default;
           await Project.findByIdAndUpdate(targetId, { assignedUserId: userId });
         }
+      } else if (action.type === "Trigger Webhook") {
+        const { url, method, authHeader } = action.payload;
+        if (!url) throw new Error("No URL provided for webhook.");
+        
+        const headers: Record<string, string> = {
+          "Content-Type": "application/json"
+        };
+        if (authHeader) {
+          headers["Authorization"] = authHeader;
+        }
+
+        const fetchOptions: RequestInit = {
+          method: method || "POST",
+          headers
+        };
+        
+        // Pass the triggering event's payload to the external service
+        if (fetchOptions.method !== "GET") {
+          fetchOptions.body = JSON.stringify(job.data.payload);
+        }
+
+        const response = await fetch(url, fetchOptions);
+        if (!response.ok) {
+          throw new Error(`Webhook responded with status ${response.status}`);
+        }
+        
+        actionDetails = `Webhook triggered successfully. Status: ${response.status}`;
+      } else if (action.type === "Send SMS / WhatsApp") {
+        let { to, body } = action.payload;
+        
+        if (!to) {
+          // Fallback to payload phone
+          to = job.data.payload.phone || job.data.payload.whatsAppNumber || job.data.payload.whatsappNumber;
+        }
+        
+        if (!to) throw new Error("No destination phone number found.");
+
+        const IntegrationSetting = require('@/modules/integrations/schemas/IntegrationSetting').default;
+        const twilioSetting = await IntegrationSetting.findOne({ companyId, integrationType: 'Twilio' });
+        
+        if (!twilioSetting || !twilioSetting.isActive || !twilioSetting.config.accountSid) {
+          throw new Error("Twilio integration is not configured or is inactive for this tenant.");
+        }
+
+        const { accountSid, authToken, fromNumber } = twilioSetting.config;
+        const twilioClient = require('twilio')(accountSid, authToken);
+
+        const message = await twilioClient.messages.create({
+          body,
+          from: fromNumber,
+          to
+        });
+
+        actionDetails = `Message sent successfully to ${to}. Twilio SID: ${message.sid}`;
       }
     } catch (err: any) {
       actionSuccess = false;

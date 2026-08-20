@@ -4,14 +4,6 @@ import { authOptions } from "@/lib/auth";
 import dbConnect from "@/lib/db";
 import LoyaltyProfile from "@/modules/rewards/schemas/LoyaltyProfile";
 
-// Helper to determine tier based on lifetime points
-function calculateTier(lifetimePoints: number) {
-  if (lifetimePoints >= 10000) return 'Platinum';
-  if (lifetimePoints >= 5000) return 'Gold';
-  if (lifetimePoints >= 1000) return 'Silver';
-  return 'Bronze';
-}
-
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -39,30 +31,14 @@ export async function POST(req: Request) {
 
     const numAmount = Number(amount);
 
-    // Apply the transaction
-    if (type === 'EARNED') {
-      profile.pointsBalance += numAmount;
-      profile.lifetimePoints += numAmount;
-    } else if (type === 'REDEEMED') {
-      if (profile.pointsBalance < numAmount) {
-        return NextResponse.json({ error: "Insufficient points balance" }, { status: 400 });
-      }
-      profile.pointsBalance -= numAmount;
-    } else if (type === 'ADJUSTED') {
-      // Amount can be positive or negative
-      profile.pointsBalance += numAmount;
-      if (numAmount > 0) {
-        profile.lifetimePoints += numAmount;
-      }
+    if (type === 'REDEEMED' && profile.pointsBalance < numAmount) {
+      return NextResponse.json({ error: "Insufficient points balance" }, { status: 400 });
     }
 
-    // Recalculate tier based on lifetime points
-    profile.tier = calculateTier(profile.lifetimePoints);
-
-    // Add to history
+    // Add to history - the Mongoose pre('save') hook will auto-calculate balances and tier
     profile.history.push({
       type,
-      amount: Math.abs(numAmount), // store absolute amount
+      amount: numAmount, 
       reason,
       date: new Date()
     });

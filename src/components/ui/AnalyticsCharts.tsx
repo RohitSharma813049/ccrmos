@@ -43,6 +43,14 @@ export default function AnalyticsCharts() {
           setTeamBreakdown(res.teamBreakdown.map((t: any) => ({ name: t.name, count: t.count })));
         }
 
+        if (res.leadsByStatus) {
+          setLeadsByStatus(res.leadsByStatus);
+        }
+
+        if (res.tasksByStatus) {
+          setTasksByStatus(res.tasksByStatus);
+        }
+
       } catch (e) {
         console.error("Failed to fetch dashboard metrics");
       } finally {

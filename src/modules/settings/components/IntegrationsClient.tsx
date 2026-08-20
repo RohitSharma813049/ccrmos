@@ -8,6 +8,10 @@ export default function IntegrationsClient() {
   const [error, setError] = useState<string | null>(null);
   const [newKeyName, setNewKeyName] = useState("");
   const [justGeneratedKey, setJustGeneratedKey] = useState<{name: string, key: string} | null>(null);
+  const [twilioSid, setTwilioSid] = useState("");
+  const [twilioToken, setTwilioToken] = useState("");
+  const [twilioFrom, setTwilioFrom] = useState("");
+  const [isSavingTwilio, setIsSavingTwilio] = useState(false);
 
   const fetchApiKeys = async () => {
     try {
@@ -22,9 +26,40 @@ export default function IntegrationsClient() {
     }
   };
 
+  const fetchTwilio = async () => {
+    try {
+      const res = await fetch("/api/integrations/twilio");
+      const data = await res.json();
+      if (res.ok && data.config) {
+        setTwilioSid(data.config.accountSid || "");
+        setTwilioToken(data.config.authToken || "");
+        setTwilioFrom(data.config.fromNumber || "");
+      }
+    } catch (e) {}
+  };
+
   useEffect(() => {
     fetchApiKeys();
+    fetchTwilio();
   }, []);
+
+  const saveTwilio = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingTwilio(true);
+    try {
+      const res = await fetch("/api/integrations/twilio", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ accountSid: twilioSid, authToken: twilioToken, fromNumber: twilioFrom })
+      });
+      if (!res.ok) throw new Error("Failed to save Twilio settings");
+      alert("Twilio settings saved successfully!");
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setIsSavingTwilio(false);
+    }
+  };
 
   const generateKey = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -174,6 +209,34 @@ export default function IntegrationsClient() {
 <div id="crm-form-container"></div>`}
               </pre>
             </div>
+          </div>
+
+          {/* Twilio Integration */}
+          <div className="bg-card rounded-3xl p-6 shadow-sm border border-border">
+            <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+              <svg className="w-6 h-6 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12c0 1.54.36 3.03 1 4.38L1.6 22l5.72-1.5c1.32.6 2.78.94 4.31.94 5.52 0 10-4.48 10-10S17.52 2 12 2zm0 17.55c-1.35 0-2.65-.34-3.83-.98l-.27-.15-2.85.75.76-2.77-.17-.28a8.55 8.55 0 01-1.19-4.34c0-4.72 3.84-8.56 8.55-8.56 4.72 0 8.56 3.84 8.56 8.56s-3.84 8.56-8.56 8.56zm4.7-6.42c-.26-.13-1.53-.75-1.77-.84-.24-.09-.42-.13-.59.13-.18.26-.67.84-.82 1.01-.15.18-.3.2-.56.07-1.76-.88-2.9-2.18-3.7-4-.13-.26.07-.25.32-.75.09-.18.04-.34-.02-.47-.07-.13-.59-1.42-.81-1.95-.21-.5-.43-.44-.59-.45-.15 0-.32-.01-.5-.01-.17 0-.46.06-.7.32-.24.26-.92.9-.92 2.19 0 1.29.94 2.54 1.07 2.71.13.18 1.85 2.82 4.48 3.95 2.19.95 2.71.79 3.2.75.49-.04 1.53-.62 1.75-1.22.21-.59.21-1.1.15-1.22-.06-.11-.23-.18-.49-.31z"/>
+              </svg>
+              Twilio SMS & WhatsApp
+            </h2>
+            <p className="text-muted-foreground text-sm mb-6">Configure Twilio to send automated SMS and WhatsApp messages from CRM workflows.</p>
+            <form onSubmit={saveTwilio} className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-foreground mb-1.5">Account SID</label>
+                <input type="text" value={twilioSid} onChange={e => setTwilioSid(e.target.value)} className="w-full px-4 py-2.5 rounded-xl border border-border bg-background" required />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-foreground mb-1.5">Auth Token</label>
+                <input type="password" value={twilioToken} onChange={e => setTwilioToken(e.target.value)} className="w-full px-4 py-2.5 rounded-xl border border-border bg-background" required />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-foreground mb-1.5">Sender Phone Number</label>
+                <input type="text" placeholder="+1234567890" value={twilioFrom} onChange={e => setTwilioFrom(e.target.value)} className="w-full px-4 py-2.5 rounded-xl border border-border bg-background" required />
+              </div>
+              <button type="submit" disabled={isSavingTwilio} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-2.5 rounded-xl transition-all disabled:opacity-50 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                {isSavingTwilio ? "Saving..." : "Save Configuration"}
+              </button>
+            </form>
           </div>
         </div>
 

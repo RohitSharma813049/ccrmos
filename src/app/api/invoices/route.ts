@@ -7,6 +7,7 @@ import { requireAuthenticatedUser, requirePermission } from '@/lib/auth-utils';
 import { buildTenantQuery } from "@/lib/access-control";
 import { getRecordScopeFilter } from "@/lib/permissions";
 import { parseFiltersToMongo } from "@/utils/parseFilters";
+import { calculateInvoice } from '@/lib/invoice-calculator';
 
 export async function GET(req: Request) {
   await dbConnect();
@@ -52,7 +53,36 @@ export async function GET(req: Request) {
     const total = await Invoice.countDocuments(queryObj);
     const invoices = await Invoice.find(queryObj).sort({ createdAt: -1 }).skip(skip).limit(limit);
     
-    return NextResponse.json({ invoices, total, page, totalPages: Math.ceil(total / limit) });
+    // Backend calculation of total metrics across filtered query
+    const summaryAgg = await Invoice.aggregate([
+      { $match: queryObj },
+      {
+        $group: {
+          _id: null,
+          totalAmount: { $sum: "$amount" },
+          totalSubtotal: { $sum: "$subtotal" },
+          totalTax: { $sum: "$taxAmount" },
+          totalDiscount: { $sum: "$discountAmount" },
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    const summary = summaryAgg[0] || {
+      totalAmount: 0,
+      totalSubtotal: 0,
+      totalTax: 0,
+      totalDiscount: 0,
+      count: 0
+    };
+
+    return NextResponse.json({ 
+      invoices, 
+      total, 
+      page, 
+      totalPages: Math.ceil(total / limit) || 1,
+      summary 
+    });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -70,6 +100,10 @@ export async function POST(req: Request) {
       body.founderId = user.hierarchyLevel === 2 ? user.id : user.founderId;
       body.createdBy = user._id;
     }
+
+    // Apply backend calculations to request payload
+    const calc = calculateInvoice(body);
+    Object.assign(body, calc);
 
     const newInvoice = await Invoice.create(body);
     return NextResponse.json({ invoice: newInvoice }, { status: 201 });
@@ -117,6 +151,23 @@ export async function PUT(req: Request) {
       invoice.status = status;
     }
 
+    // Apply backend calculations to updateData if items/amounts/rates are being updated
+    if (updateData.items || updateData.amount || updateData.subtotal || updateData.taxRate || updateData.discountRate || updateData.shippingFee) {
+      const mergedInput = {
+        items: updateData.items !== undefined ? updateData.items : invoice.items,
+        amount: updateData.amount !== undefined ? updateData.amount : invoice.amount,
+        subtotal: updateData.subtotal !== undefined ? updateData.subtotal : invoice.subtotal,
+        taxRate: updateData.taxRate !== undefined ? updateData.taxRate : invoice.taxRate,
+        discountRate: updateData.discountRate !== undefined ? updateData.discountRate : invoice.discountRate,
+        discountAmount: updateData.discountAmount !== undefined ? updateData.discountAmount : invoice.discountAmount,
+        shippingFee: updateData.shippingFee !== undefined ? updateData.shippingFee : invoice.shippingFee,
+        currency: updateData.currency !== undefined ? updateData.currency : invoice.currency,
+      };
+
+      const calc = calculateInvoice(mergedInput);
+      Object.assign(updateData, calc);
+    }
+
     Object.assign(invoice, updateData);
     await invoice.save();
 
@@ -125,3 +176,4 @@ export async function PUT(req: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+

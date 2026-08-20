@@ -88,6 +88,19 @@ export async function GET(req: Request) {
       ]);
     }
 
+    const [leadsByStatus, tasksByStatus] = await Promise.all([
+      Lead.aggregate([
+        { $match: leadsQuery },
+        { $group: { _id: "$status", count: { $sum: 1 } } },
+        { $project: { name: { $ifNull: ["$_id", "Unknown"] }, value: "$count", _id: 0 } }
+      ]),
+      Task.aggregate([
+        { $match: tasksQuery },
+        { $group: { _id: "$status", count: { $sum: 1 } } },
+        { $project: { name: { $ifNull: ["$_id", "Unknown"] }, count: 1, _id: 0 } }
+      ])
+    ]);
+
     return NextResponse.json({
       summary: {
         leads: leadsCount,
@@ -97,7 +110,9 @@ export async function GET(req: Request) {
         orders: ordersCount,
         invoices: invoicesCount
       },
-      teamBreakdown
+      teamBreakdown,
+      leadsByStatus,
+      tasksByStatus
     });
   } catch (error: any) {
     console.error("Dashboard API Error:", error);

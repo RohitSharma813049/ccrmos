@@ -3,6 +3,7 @@ import Invoice from '@/modules/invoices/schemas/Invoice';
 import dbConnect from '@/lib/db';
 import { requireAuthenticatedUser, requirePermission } from '@/lib/auth-utils';
 import { buildTenantQuery } from '@/lib/access-control';
+import { calculateInvoice } from '@/lib/invoice-calculator';
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -17,13 +18,14 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       body.approvedAt = new Date();
     }
 
+    const { id } = await params;
+    const existing = await Invoice.findOne({ _id: id, ...buildTenantQuery(user) });
+    if (!existing) {
+      return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
+    }
+
     // State transition validation
     if (body.status) {
-      const existing = await Invoice.findOne({ _id: (await params).id, ...buildTenantQuery(user) });
-      if (!existing) {
-        return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
-      }
-
       const terminalStatuses = ['closed', 'complete', 'closed won', 'closed lost'];
       const isTerminal = terminalStatuses.includes(existing.status?.toLowerCase() || "");
       
@@ -45,8 +47,24 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       }
     }
 
-    const item = await Invoice.findOneAndUpdate({ _id: (await params).id, ...buildTenantQuery(user) }, body, { new: true, runValidators: true });
-    return NextResponse.json({ message: 'Updated successfully', invoice: item }, { status: 200 });
+    // Recalculate invoice totals via backend engine
+    const mergedInput = {
+      items: body.items !== undefined ? body.items : existing.items,
+      amount: body.amount !== undefined ? body.amount : existing.amount,
+      subtotal: body.subtotal !== undefined ? body.subtotal : existing.subtotal,
+      taxRate: body.taxRate !== undefined ? body.taxRate : existing.taxRate,
+      discountRate: body.discountRate !== undefined ? body.discountRate : existing.discountRate,
+      discountAmount: body.discountAmount !== undefined ? body.discountAmount : existing.discountAmount,
+      shippingFee: body.shippingFee !== undefined ? body.shippingFee : existing.shippingFee,
+      currency: body.currency !== undefined ? body.currency : existing.currency,
+    };
+    const calc = calculateInvoice(mergedInput);
+    Object.assign(body, calc);
+
+    Object.assign(existing, body);
+    await existing.save();
+
+    return NextResponse.json({ message: 'Updated successfully', invoice: existing }, { status: 200 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -64,3 +82,4 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+

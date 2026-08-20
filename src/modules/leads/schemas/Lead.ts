@@ -155,6 +155,18 @@ leadSchema.pre('save', async function (this: ILead) {
     );
     this.displayId = `CRM-${String(counter.seq).padStart(4, '0')}`;
   }
+
+  // Calculate dynamic leadScore based on completion and priority
+  let score = 2; // Base score
+
+  if (this.email || this.phone) score += 2;
+  if (this.budget && this.budget > 0) score += 2;
+  if (this.priority === 'High') score += 2;
+  if (this.preferredLocation || this.timeline) score += 1;
+  if (this.channelPartnerId || (this.dealValue && this.dealValue > 0)) score += 1;
+
+  // Ensure score stays between 1 and 10
+  this.leadScore = Math.min(Math.max(score, 1), 10);
 });
 
 const Lead: Model<ILead> = mongoose.models.Lead || mongoose.model<ILead>('Lead', leadSchema);
