@@ -50,3 +50,4 @@
 - - [x] Implement Enterprise Data Warehouse ETL Engine 
 - - [x] Implement E2EE Cryptography Engine 
 - - [x] Build Premium Frontend Shell 
+- - [x] Build Leads Kanban Board 
