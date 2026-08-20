@@ -13,3 +13,5 @@
 - [x] Build Calendar and Scheduling module
 - [x] Integrate Cloudflare R2 and Logo Edit/Delete options
 - [x] Fix AI Sound Effects module and Voice categories
+- [x] Seeded tenant roles, hierarchical users, dummy forms, form submissions, and complete CRM data for rohitsharma813049@gmail.com
+
