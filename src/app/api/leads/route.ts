@@ -191,9 +191,27 @@ export async function PUT(req: Request) {
         const startTime = updateData.nextFollowUpDate;
         const endDate = new Date(new Date(startTime).getTime() + 30 * 60000).toISOString(); // 30 min duration
         
+        let zoomJoinUrl = '';
+        try {
+          // Attempt to create a Zoom meeting if connected
+          const { createZoomMeeting } = await import('@/lib/zoomClient');
+          zoomJoinUrl = await createZoomMeeting(user._id.toString(), companyIdStr || '', {
+            topic: `Follow up with ${lead.firstName} ${lead.lastName || ''}`,
+            startTime: startTime,
+            duration: 30
+          });
+          console.log(`[Zoom] Meeting created: ${zoomJoinUrl}`);
+        } catch (zoomErr: any) {
+          console.warn(`[Zoom Error] Could not create meeting: ${zoomErr.message}`);
+        }
+
+        const description = zoomJoinUrl 
+          ? `${updateData.lastRemark || 'CRM Scheduled Follow-up'}\n\nJoin Zoom Meeting:\n${zoomJoinUrl}`
+          : (updateData.lastRemark || 'CRM Scheduled Follow-up');
+
         await createGoogleCalendarEvent(user._id.toString(), companyIdStr || '', {
           summary: `Follow up with ${lead.firstName} ${lead.lastName || ''}`,
-          description: updateData.lastRemark || 'CRM Scheduled Follow-up',
+          description,
           startTime,
           endTime: endDate
         });

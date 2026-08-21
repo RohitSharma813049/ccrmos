@@ -25,6 +25,7 @@ export interface IUser extends Document {
   twoFactorSecret?: string;
   webPushSubscriptions?: any[];
   googleRefreshToken?: string;
+  zoomRefreshToken?: string;
 }
 
 const UserSchema: Schema<IUser> = new Schema({
@@ -68,7 +69,10 @@ const UserSchema: Schema<IUser> = new Schema({
   twoFactorEnabled: { type: Boolean, default: false },
   twoFactorSecret: { type: String },
   webPushSubscriptions: [{ type: Schema.Types.Mixed }],
-  googleRefreshToken: { type: String }
+  googleRefreshToken: { type: String },
+  zoomRefreshToken: {
+    type: String,
+  }
 }, { timestamps: true });
 
 const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
