@@ -25,14 +25,14 @@ export async function GET(req: Request, { params }: { params: Promise<{ companyI
 
     const meetings = await Task.find({
       companyId,
-      type: 'meeting',
-      dueDate: { $gte: startDate, $lte: endDate }
-    }).select('dueDate');
+      type: 'Meeting',
+      startTime: { $gte: startDate, $lte: endDate }
+    }).select('startTime');
 
     // Return the company info and booked slots
     return NextResponse.json({ 
       company,
-      bookedSlots: meetings.map(m => m.dueDate)
+      bookedSlots: meetings.map(m => m.startTime)
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -85,12 +85,13 @@ export async function POST(req: Request, { params }: { params: Promise<{ company
       companyId,
       title: `Introductory Call with ${name}`,
       description: `Meeting booked via public scheduling link. \nContact: ${email} | ${phone}`,
-      type: 'meeting',
-      status: 'pending',
-      priority: 'high',
-      dueDate: meetingDate,
-      leadId: lead._id,
-      assignedTo: company.founderId // Assign to founder by default
+      type: 'Meeting',
+      status: 'Pending',
+      startTime: meetingDate,
+      customData: {
+        priority: 'high',
+        leadId: lead._id
+      }
     });
 
     // 3. Log interaction
