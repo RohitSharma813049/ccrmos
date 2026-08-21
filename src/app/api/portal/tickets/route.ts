@@ -6,7 +6,7 @@ import { cookies } from "next/headers";
 
 export async function GET(req: Request) {
   try {
-    const token = cookies().get("portal_token")?.value;
+    const token = (await cookies()).get("portal_token")?.value;
     if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const payload = await verifyPortalToken(token);
@@ -25,7 +25,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const token = cookies().get("portal_token")?.value;
+    const token = (await cookies()).get("portal_token")?.value;
     if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const payload = await verifyPortalToken(token);
