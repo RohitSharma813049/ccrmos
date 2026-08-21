@@ -125,12 +125,12 @@ export default function FbLeadsPage() {
                       <h4 className="font-semibold text-zinc-100">satvik</h4>
                       <p className="text-xs text-zinc-400">Aug 1, 2026, 12:24 PM</p>
                       <div className="mt-2 space-y-1 text-sm text-zinc-400">
-                        <div className="flex items-center gap-2"><span className="text-slate-400 w-24">Phone Number:</span> +919625977690</div>
-                        <div className="flex items-center gap-2"><span className="text-slate-400 w-24">Email:</span> kumaralpana890@gmail.com</div>
-                        <div className="flex items-center gap-2"><span className="text-slate-400 w-24">City:</span> Gurugram</div>
-                        <div className="flex items-center gap-2"><span className="text-slate-400 w-24">State:</span> Uttar Pradesh</div>
+                        <div className="flex items-center gap-2"><span className="text-zinc-400 w-24">Phone Number:</span> +919625977690</div>
+                        <div className="flex items-center gap-2"><span className="text-zinc-400 w-24">Email:</span> kumaralpana890@gmail.com</div>
+                        <div className="flex items-center gap-2"><span className="text-zinc-400 w-24">City:</span> Gurugram</div>
+                        <div className="flex items-center gap-2"><span className="text-zinc-400 w-24">State:</span> Uttar Pradesh</div>
                       </div>
-                      <p className="text-xs text-slate-400 mt-2 font-medium">+1 more fields</p>
+                      <p className="text-xs text-zinc-400 mt-2 font-medium">+1 more fields</p>
                     </div>
                   </div>
                 </div>
@@ -148,8 +148,8 @@ export default function FbLeadsPage() {
                       <h4 className="font-semibold text-zinc-100">Aftab Ahmed</h4>
                       <p className="text-xs text-zinc-400">Aug 1, 2026, 09:44 AM</p>
                       <div className="mt-2 space-y-1 text-sm text-zinc-400">
-                        <div className="flex items-center gap-2"><span className="text-slate-400 w-24">Phone Number:</span> +916005479924</div>
-                        <div className="flex items-center gap-2"><span className="text-slate-400 w-24">Email:</span> aftabahmedawan5@gmail.com</div>
+                        <div className="flex items-center gap-2"><span className="text-zinc-400 w-24">Phone Number:</span> +916005479924</div>
+                        <div className="flex items-center gap-2"><span className="text-zinc-400 w-24">Email:</span> aftabahmedawan5@gmail.com</div>
                       </div>
                     </div>
                   </div>

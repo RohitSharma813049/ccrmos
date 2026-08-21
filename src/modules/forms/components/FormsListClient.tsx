@@ -103,10 +103,10 @@ export default function FormsListClient() {
             <Link key={form._id} href={`/dashboard/forms/${form._id}`} className="block group">
               <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl p-6 border border-zinc-700/50 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all">
                 <div className="flex justify-between items-start mb-4">
-                  <div className={`px-2.5 py-1 rounded-full text-xs font-semibold ${form.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-zinc-400'}`}>
+                  <div className={`px-2.5 py-1 rounded-full text-xs font-semibold ${form.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-zinc-800/50 text-zinc-400'}`}>
                     {form.isActive ? "Active" : "Draft"}
                   </div>
-                  <button onClick={(e) => deleteForm(form._id, e)} className="text-gray-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
+                  <button onClick={(e) => deleteForm(form._id, e)} className="text-zinc-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                   </button>
                 </div>

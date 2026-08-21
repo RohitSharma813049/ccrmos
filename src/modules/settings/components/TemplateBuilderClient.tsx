@@ -80,7 +80,7 @@ export default function TemplateBuilderClient({ template }: { template: any }) {
           <p className="text-zinc-400 mt-1">Select the global modules that should be cloned into this template.</p>
         </div>
         <div className="flex gap-3">
-          <button onClick={() => window.history.back()} className="px-4 py-2 bg-gray-100 text-zinc-300 rounded-lg hover:bg-gray-200 transition-colors">
+          <button onClick={() => window.history.back()} className="px-4 py-2 bg-zinc-800/50 text-zinc-300 rounded-lg hover:bg-zinc-700/50 transition-colors">
             Back
           </button>
           <button 

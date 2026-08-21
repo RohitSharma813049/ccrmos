@@ -194,7 +194,7 @@ export default function AIConfigClient() {
                       {company.name}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-400">
-                      <span className="px-2 py-1 bg-gray-100 rounded-md">{company.plan || "Basic"}</span>
+                      <span className="px-2 py-1 bg-zinc-800/50 rounded-md">{company.plan || "Basic"}</span>
                     </td>
                     {providers.map(provider => {
                       const hasAccess = company.allowedAIProviders?.some((ap: any) => ap._id === provider._id || ap === provider._id);
@@ -202,7 +202,7 @@ export default function AIConfigClient() {
                         <td key={provider._id} className="px-6 py-4 whitespace-nowrap text-center">
                           <button
                             onClick={() => handleTogglePermission(company._id, provider._id, hasAccess)}
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${hasAccess ? 'bg-emerald-500' : 'bg-gray-200'}`}
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${hasAccess ? 'bg-emerald-500' : 'bg-zinc-700/50'}`}
                           >
                             <span className={`inline-block h-4 w-4 transform rounded-full bg-zinc-900/40 backdrop-blur-xl transition-transform ${hasAccess ? 'translate-x-6' : 'translate-x-1'}`} />
                           </button>

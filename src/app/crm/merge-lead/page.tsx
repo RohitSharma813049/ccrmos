@@ -102,7 +102,7 @@ export default function MergeLeadPage() {
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 font-bold text-zinc-100">
-                    <Phone className="w-4 h-4 text-slate-400" /> 7042416001
+                    <Phone className="w-4 h-4 text-zinc-400" /> 7042416001
                   </div>
                   <span className="bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
                     2 Duplicates
@@ -111,10 +111,10 @@ export default function MergeLeadPage() {
               </div>
               <div className="p-3 bg-zinc-950/50/50 space-y-2 text-sm text-zinc-400 font-medium">
                 <div className="flex items-center gap-2">
-                  <ChevronRight className="w-4 h-4 text-slate-400" /> Krishan Sharma
+                  <ChevronRight className="w-4 h-4 text-zinc-400" /> Krishan Sharma
                 </div>
                 <div className="flex items-center gap-2">
-                  <ChevronRight className="w-4 h-4 text-slate-400" /> Krishan Sharma
+                  <ChevronRight className="w-4 h-4 text-zinc-400" /> Krishan Sharma
                 </div>
               </div>
             </div>
@@ -127,7 +127,7 @@ export default function MergeLeadPage() {
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 font-bold text-zinc-100">
-                    <Phone className="w-4 h-4 text-slate-400" /> 9999077764
+                    <Phone className="w-4 h-4 text-zinc-400" /> 9999077764
                   </div>
                   <span className="bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
                     2 Duplicates
@@ -136,10 +136,10 @@ export default function MergeLeadPage() {
               </div>
               <div className="p-3 bg-zinc-950/50/50 space-y-2 text-sm text-zinc-400 font-medium">
                 <div className="flex items-center gap-2">
-                  <ChevronRight className="w-4 h-4 text-slate-400" /> Manish Guptav
+                  <ChevronRight className="w-4 h-4 text-zinc-400" /> Manish Guptav
                 </div>
                 <div className="flex items-center gap-2">
-                  <ChevronRight className="w-4 h-4 text-slate-400" /> Mansi Sunil
+                  <ChevronRight className="w-4 h-4 text-zinc-400" /> Mansi Sunil
                 </div>
               </div>
             </div>
@@ -150,7 +150,7 @@ export default function MergeLeadPage() {
         {/* Right Pane - Empty State */}
         <div className="flex-1 bg-zinc-900/40 backdrop-blur-xl rounded-2xl border border-zinc-800/60 shadow-sm flex flex-col items-center justify-center text-center p-8">
           <div className="w-24 h-24 bg-zinc-950/50 rounded-full flex items-center justify-center mb-6">
-            <AlertCircle className="w-10 h-10 text-slate-400" />
+            <AlertCircle className="w-10 h-10 text-zinc-400" />
           </div>
           <h2 className="text-xl font-bold text-zinc-100 mb-2">Select a Group</h2>
           <p className="text-zinc-400 font-medium">Choose a duplicate group from the left to start merging...</p>

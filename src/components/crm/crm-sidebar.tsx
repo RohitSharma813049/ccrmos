@@ -101,7 +101,7 @@ export function CrmSidebar() {
             </div>
           </div>
           <button 
-            className="lg:hidden p-1.5 text-slate-400 hover:text-zinc-400 hover:bg-slate-100 rounded-lg transition-colors"
+            className="lg:hidden p-1.5 text-zinc-400 hover:text-zinc-400 hover:bg-zinc-800/50 rounded-lg transition-colors"
             onClick={() => setIsOpen(false)}
           >
             <X className="w-5 h-5" />
@@ -123,9 +123,9 @@ export function CrmSidebar() {
                 <span className="font-medium text-sm">AI Features</span>
               </div>
               {isAiFeaturesOpen ? (
-                <ChevronDown className="w-4 h-4 text-slate-400" />
+                <ChevronDown className="w-4 h-4 text-zinc-400" />
               ) : (
-                <ChevronRight className="w-4 h-4 text-slate-400" />
+                <ChevronRight className="w-4 h-4 text-zinc-400" />
               )}
             </button>
             
@@ -170,9 +170,9 @@ export function CrmSidebar() {
                 <span className="font-medium text-sm">LM</span>
               </div>
               {isLmOpen ? (
-                <ChevronDown className="w-4 h-4 text-slate-400" />
+                <ChevronDown className="w-4 h-4 text-zinc-400" />
               ) : (
-                <ChevronRight className="w-4 h-4 text-slate-400" />
+                <ChevronRight className="w-4 h-4 text-zinc-400" />
               )}
             </button>
             
@@ -231,8 +231,8 @@ export function CrmSidebar() {
               <span className="text-xs text-zinc-400 capitalize">{userRole}</span>
             </div>
           </div>
-          <div className="flex items-center gap-1 text-slate-400 shrink-0">
-            <button className="p-1.5 hover:bg-slate-100 rounded-md transition-colors text-zinc-400">
+          <div className="flex items-center gap-1 text-zinc-400 shrink-0">
+            <button className="p-1.5 hover:bg-zinc-800/50 rounded-md transition-colors text-zinc-400">
               <UserIcon className="w-4 h-4" />
             </button>
             <button 

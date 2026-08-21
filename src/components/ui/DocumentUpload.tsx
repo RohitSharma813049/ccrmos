@@ -117,7 +117,7 @@ export default function DocumentUpload({ documents = [], onChange, maxFiles = 10
                 <button 
                   type="button" 
                   onClick={() => removeDocument(index)}
-                  className="p-1 text-slate-400 hover:text-red-500 rounded-md transition-colors"
+                  className="p-1 text-zinc-400 hover:text-red-500 rounded-md transition-colors"
                 >
                   <X className="w-4 h-4" />
                 </button>

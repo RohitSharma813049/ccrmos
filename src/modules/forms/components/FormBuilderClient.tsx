@@ -141,24 +141,24 @@ export default function FormBuilderClient({ formId }: { formId: string }) {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-zinc-900/40 backdrop-blur-xl p-4 sm:p-6 rounded-2xl shadow-sm border border-zinc-800/60">
         <div className="flex items-center gap-4">
-          <button onClick={() => router.push('/dashboard/forms')} className="p-2 text-gray-400 hover:text-zinc-100 bg-zinc-950/50 hover:bg-gray-100 rounded-lg transition-colors">
+          <button onClick={() => router.push('/dashboard/forms')} className="p-2 text-zinc-400 hover:text-zinc-100 bg-zinc-950/50 hover:bg-zinc-800/50 rounded-lg transition-colors">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
           </button>
           <div>
             <h1 className="text-xl sm:text-2xl font-bold text-zinc-100 line-clamp-1">{form.title}</h1>
             <div className="flex items-center gap-3 mt-1">
-              <span className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-md ${form.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-zinc-400'}`}>
+              <span className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-md ${form.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-zinc-800/50 text-zinc-400'}`}>
                 <span className={`w-1.5 h-1.5 rounded-full ${form.isActive ? 'bg-emerald-500' : 'bg-gray-400'}`}></span>
                 {form.isActive ? "Accepting Responses" : "Draft (Closed)"}
               </span>
-              <span className="text-xs text-gray-400">{saving ? "Saving..." : "Saved"}</span>
+              <span className="text-xs text-zinc-400">{saving ? "Saving..." : "Saved"}</span>
             </div>
           </div>
         </div>
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <button 
             onClick={() => saveForm({ ...form, isActive: !form.isActive })}
-            className="flex-1 sm:flex-none px-4 py-2 bg-zinc-950/50 hover:bg-gray-100 border border-zinc-700/50 text-zinc-300 rounded-xl text-sm font-medium transition-colors"
+            className="flex-1 sm:flex-none px-4 py-2 bg-zinc-950/50 hover:bg-zinc-800/50 border border-zinc-700/50 text-zinc-300 rounded-xl text-sm font-medium transition-colors"
           >
             {form.isActive ? "Close Form" : "Publish"}
           </button>
@@ -217,7 +217,7 @@ export default function FormBuilderClient({ formId }: { formId: string }) {
                             className={`bg-zinc-900/40 backdrop-blur-xl rounded-2xl border transition-all ${snapshot.isDragging ? 'shadow-lg border-indigo-500 z-50 ring-2 ring-indigo-200' : 'shadow-sm border-zinc-700/50 hover:border-zinc-700/50'}`}
                           >
                             <div className="flex">
-                              <div {...provided.dragHandleProps} className="w-10 flex flex-col items-center justify-center border-r border-zinc-800/60 text-gray-400 hover:text-zinc-400 cursor-grab active:cursor-grabbing bg-zinc-950/50 rounded-l-2xl">
+                              <div {...provided.dragHandleProps} className="w-10 flex flex-col items-center justify-center border-r border-zinc-800/60 text-zinc-400 hover:text-zinc-400 cursor-grab active:cursor-grabbing bg-zinc-950/50 rounded-l-2xl">
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" /></svg>
                               </div>
                               
@@ -232,9 +232,9 @@ export default function FormBuilderClient({ formId }: { formId: string }) {
                                     {/* Field Preview */}
                                     <div className="mt-4 opacity-70 pointer-events-none">
                                       {field.type === 'textarea' ? (
-                                        <div className="h-20 w-full border border-zinc-700/50 rounded-lg bg-zinc-950/50 p-3 text-sm text-gray-400">{field.placeholder || "Long answer text"}</div>
+                                        <div className="h-20 w-full border border-zinc-700/50 rounded-lg bg-zinc-950/50 p-3 text-sm text-zinc-400">{field.placeholder || "Long answer text"}</div>
                                       ) : field.type === 'select' ? (
-                                        <div className="h-10 w-full md:w-64 border border-zinc-700/50 rounded-lg bg-zinc-950/50 px-3 flex items-center justify-between text-sm text-gray-400">
+                                        <div className="h-10 w-full md:w-64 border border-zinc-700/50 rounded-lg bg-zinc-950/50 px-3 flex items-center justify-between text-sm text-zinc-400">
                                           <span>Select option...</span>
                                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                                         </div>
@@ -245,13 +245,13 @@ export default function FormBuilderClient({ formId }: { formId: string }) {
                                           ))}
                                         </div>
                                       ) : (
-                                        <div className="h-10 w-full md:w-64 border border-zinc-700/50 rounded-lg bg-zinc-950/50 p-3 text-sm text-gray-400 flex items-center">{field.placeholder || "Short answer text"}</div>
+                                        <div className="h-10 w-full md:w-64 border border-zinc-700/50 rounded-lg bg-zinc-950/50 p-3 text-sm text-zinc-400 flex items-center">{field.placeholder || "Short answer text"}</div>
                                       )}
                                     </div>
                                   </div>
 
                                   <div className="flex items-center gap-2 flex-shrink-0">
-                                    <span className="text-[10px] font-bold tracking-wider uppercase text-gray-400 bg-gray-100 px-2 py-1 rounded-md">{field.type}</span>
+                                    <span className="text-[10px] font-bold tracking-wider uppercase text-zinc-400 bg-zinc-800/50 px-2 py-1 rounded-md">{field.type}</span>
                                     <button onClick={(e) => removeField(field.id, e)} className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
                                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                     </button>
@@ -344,7 +344,7 @@ export default function FormBuilderClient({ formId }: { formId: string }) {
             <div className="mt-8 pt-6 border-t border-zinc-800/60 flex flex-col gap-2">
               <Link href={`/dashboard/forms/${form._id}/submissions`} className="w-full flex items-center justify-between px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-semibold transition-colors">
                 View Submissions
-                <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                <svg className="w-4 h-4 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
               </Link>
             </div>
           </div>
@@ -359,7 +359,7 @@ export default function FormBuilderClient({ formId }: { formId: string }) {
           <div className="relative bg-zinc-900/40 backdrop-blur-xl rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
             <div className="p-5 border-b border-zinc-800/60 flex justify-between items-center bg-zinc-950/50/50">
               <h3 className="font-bold text-zinc-100">{editingFieldId ? "Edit Question" : "New Question"}</h3>
-              <button onClick={() => setIsFieldModalOpen(false)} className="text-gray-400 hover:text-zinc-400">
+              <button onClick={() => setIsFieldModalOpen(false)} className="text-zinc-400 hover:text-zinc-400">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
@@ -422,14 +422,14 @@ export default function FormBuilderClient({ formId }: { formId: string }) {
                   <span className="text-sm font-semibold text-zinc-300">Required Question</span>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" checked={fieldData.required} onChange={e => setFieldData({...fieldData, required: e.target.checked})} className="sr-only peer" />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-zinc-900/40 backdrop-blur-xl after:border-zinc-700/50 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                    <div className="w-11 h-6 bg-zinc-700/50 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-zinc-900/40 backdrop-blur-xl after:border-zinc-700/50 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
                   </label>
                 </div>
               </form>
             </div>
             
             <div className="p-5 border-t border-zinc-800/60 bg-zinc-950/50/50 flex justify-end gap-3">
-              <button onClick={() => setIsFieldModalOpen(false)} className="px-5 py-2 text-zinc-400 hover:bg-gray-200 font-semibold rounded-xl transition-colors">Cancel</button>
+              <button onClick={() => setIsFieldModalOpen(false)} className="px-5 py-2 text-zinc-400 hover:bg-zinc-700/50 font-semibold rounded-xl transition-colors">Cancel</button>
               <button form="fieldForm" type="submit" className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-sm transition-colors">Save Question</button>
             </div>
           </div>
@@ -444,7 +444,7 @@ export default function FormBuilderClient({ formId }: { formId: string }) {
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold text-zinc-100">Share Form</h2>
-                <button onClick={() => setIsShareModalOpen(false)} className="text-gray-400 hover:text-zinc-400">
+                <button onClick={() => setIsShareModalOpen(false)} className="text-zinc-400 hover:text-zinc-400">
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
               </div>
@@ -472,7 +472,7 @@ export default function FormBuilderClient({ formId }: { formId: string }) {
                         navigator.clipboard.writeText(publicUrl);
                         alert("Link copied!");
                       }}
-                      className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-zinc-300 font-medium rounded-xl transition-colors"
+                      className="px-4 py-2.5 bg-zinc-800/50 hover:bg-zinc-700/50 text-zinc-300 font-medium rounded-xl transition-colors"
                     >
                       Copy
                     </button>

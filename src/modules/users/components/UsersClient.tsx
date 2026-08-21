@@ -175,7 +175,7 @@ export default function UsersClient({ isOwner = false }: { isOwner?: boolean }) 
           {item.directorId && <p><span className="text-zinc-400">Dir:</span> {item.directorId.name}</p>}
           {item.managerId && <p><span className="text-zinc-400">Mgr:</span> {item.managerId.name}</p>}
           {item.teamLeaderId && <p><span className="text-zinc-400">TL:</span> {item.teamLeaderId.name}</p>}
-          {!item.directorId && !item.managerId && !item.teamLeaderId && <span className="text-gray-400">None</span>}
+          {!item.directorId && !item.managerId && !item.teamLeaderId && <span className="text-zinc-400">None</span>}
         </div>
       )
     },

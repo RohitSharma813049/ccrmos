@@ -65,7 +65,7 @@ export default async function BillingPage() {
             <p className="mt-4 text-sm text-blue-600 font-bold bg-blue-50 inline-block px-3 py-1 rounded-full w-max">{plan.users} Users</p>
             
             <div className="mt-8 pt-6 border-t border-zinc-800/60 flex-1">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Included Features</p>
+              <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-4">Included Features</p>
               <ul className="space-y-4 mb-8">
                 {plan.features.map((feature: string, idx: number) => (
                   <li key={idx} className="flex gap-3 text-sm text-zinc-300 font-medium">
@@ -80,7 +80,7 @@ export default async function BillingPage() {
 
             <div className="mt-auto">
               {(currentCompany?.subscriptionPlanId as any)?._id?.toString() === plan._id.toString() && currentCompany?.subscriptionStatus === 'active' ? (
-                <button disabled className="w-full px-6 py-3 bg-gray-100 text-zinc-400 font-bold rounded-xl border border-zinc-700/50">
+                <button disabled className="w-full px-6 py-3 bg-zinc-800/50 text-zinc-400 font-bold rounded-xl border border-zinc-700/50">
                   Current Plan
                 </button>
               ) : (

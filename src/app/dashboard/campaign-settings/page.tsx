@@ -234,7 +234,7 @@ function CampaignSettingFormModal({ onClose, onSuccess, users }: { onClose: () =
       <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col">
         <div className="flex items-center justify-between p-6 border-b border-zinc-800/60">
           <h2 className="text-xl font-bold text-zinc-100">Add Configuration</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-zinc-400 p-2">
+          <button onClick={onClose} className="text-zinc-400 hover:text-zinc-400 p-2">
             <X className="w-5 h-5" />
           </button>
         </div>

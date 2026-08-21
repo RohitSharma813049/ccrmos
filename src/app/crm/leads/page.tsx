@@ -127,7 +127,7 @@ export default function LeadsPage() {
         {/* Search */}
         <div className="p-4 border-b border-zinc-800/60">
           <div className="relative max-w-2xl">
-            <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
             <input 
               type="text" 
               placeholder="Search by name, email, phone, ID..." 
@@ -190,7 +190,7 @@ export default function LeadsPage() {
               {leads.map((lead, i) => (
                 <tr key={i} className="hover:bg-zinc-950/50/50 transition-colors group">
                   <td className="px-4 py-4"><input type="checkbox" className="rounded border-zinc-700/50" /></td>
-                  <td className="px-2 py-4 text-slate-400 hover:text-zinc-400 cursor-pointer"><MoreVertical className="w-4 h-4" /></td>
+                  <td className="px-2 py-4 text-zinc-400 hover:text-zinc-400 cursor-pointer"><MoreVertical className="w-4 h-4" /></td>
                   
                   {/* Schedule Icons */}
                   <td className="px-2 py-4">
@@ -204,7 +204,7 @@ export default function LeadsPage() {
                     <button className="text-blue-500 hover:bg-blue-50 p-1 rounded"><Calendar className="w-4 h-4" /></button>
                   </td>
                   
-                  <td className="px-4 py-4 text-center text-xs text-slate-400 italic">No<br/>follow-up</td>
+                  <td className="px-4 py-4 text-center text-xs text-zinc-400 italic">No<br/>follow-up</td>
                   <td className="px-4 py-4 text-center font-medium text-zinc-300">{lead.sno}</td>
                   <td className="px-4 py-4 font-bold text-zinc-100">{lead.id}</td>
                   <td className="px-4 py-4 font-semibold text-zinc-300">{lead.date}</td>
@@ -248,11 +248,11 @@ export default function LeadsPage() {
                     </select>
                   </td>
                   
-                  <td className="px-4 py-4 text-center text-slate-400 italic text-xs">
+                  <td className="px-4 py-4 text-center text-zinc-400 italic text-xs">
                     {lead.assigned}
                   </td>
                   
-                  <td className="px-4 py-4 text-center text-slate-400 text-xs">
+                  <td className="px-4 py-4 text-center text-zinc-400 text-xs">
                     {lead.property}
                   </td>
                 </tr>

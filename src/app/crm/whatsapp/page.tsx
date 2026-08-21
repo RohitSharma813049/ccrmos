@@ -60,7 +60,7 @@ export default function WhatsAppPage() {
         {/* Decorative background pattern optional, but screenshot is plain beige */}
         <div className="text-center flex flex-col items-center">
           <div className="w-24 h-24 bg-zinc-900/40 backdrop-blur-xl/60 rounded-full flex items-center justify-center mb-6 shadow-sm">
-            <MessageSquare className="w-10 h-10 text-slate-400" />
+            <MessageSquare className="w-10 h-10 text-zinc-400" />
           </div>
           <h2 className="text-2xl font-bold text-zinc-300 mb-2">WhatsApp CRM</h2>
           <p className="text-zinc-400">Select a chat to start messaging <br/>or create a new chat</p>

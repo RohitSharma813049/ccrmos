@@ -93,7 +93,7 @@ export default function PermissionMatrix({ role, isOpen, onClose }: PermissionMa
           <h2 className="text-xl font-bold text-zinc-100">
             Permission Matrix: <span className="text-blue-600">{role.name}</span>
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-zinc-400 p-1">
+          <button onClick={onClose} className="text-zinc-400 hover:text-zinc-400 p-1">
             <X className="w-5 h-5" />
           </button>
         </div>

@@ -119,7 +119,7 @@ export default function RolesClient() {
               <div className="flex justify-between items-start mb-2">
                 <div>
                   <h3 className="text-lg font-bold text-zinc-100">{role.name}</h3>
-                  <span className="inline-block mt-1 text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 bg-gray-100 text-zinc-400 rounded">{role.tenantScope || 'Global'} Scope</span>
+                  <span className="inline-block mt-1 text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 bg-zinc-800/50 text-zinc-400 rounded">{role.tenantScope || 'Global'} Scope</span>
                 </div>
                 <button 
                   onClick={() => openModal(role)}
@@ -133,7 +133,7 @@ export default function RolesClient() {
               <div className="flex items-center justify-between pt-4 border-t border-zinc-800/60 mt-auto">
                 <button 
                   onClick={() => openMatrix(role)}
-                  className="px-4 py-2 text-sm font-medium text-zinc-300 bg-zinc-950/50 border border-zinc-700/50 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-zinc-300 bg-zinc-950/50 border border-zinc-700/50 rounded-lg hover:bg-zinc-800/50 transition-colors"
                 >
                   Edit Matrix
                 </button>
@@ -158,7 +158,7 @@ export default function RolesClient() {
               <h2 className="text-xl font-bold text-zinc-100">
                 {editingRole ? 'Edit Role Details' : 'Create New Role'}
               </h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-zinc-400 p-1">
+              <button onClick={() => setIsModalOpen(false)} className="text-zinc-400 hover:text-zinc-400 p-1">
                 <X className="w-5 h-5" />
               </button>
             </div>

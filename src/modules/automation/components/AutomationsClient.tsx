@@ -131,7 +131,7 @@ export default function AutomationsClient({ isGlobal = false }: { isGlobal?: boo
                 <div className="flex items-center gap-4">
                   <button 
                     onClick={(e) => { e.stopPropagation(); toggleStatus(wf); }}
-                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium cursor-pointer transition-colors ${wf.active ? 'bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20' : 'bg-gray-100 text-zinc-400 hover:bg-gray-200'}`}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium cursor-pointer transition-colors ${wf.active ? 'bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20' : 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-700/50'}`}
                   >
                     {wf.active && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>}
                     {wf.active ? 'Active' : 'Idle'}
@@ -190,7 +190,7 @@ export default function AutomationsClient({ isGlobal = false }: { isGlobal?: boo
             </div>
 
             <div className="flex justify-end gap-3 mt-8">
-              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-zinc-400 hover:bg-gray-100 rounded-lg">Cancel</button>
+              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-zinc-400 hover:bg-zinc-800/50 rounded-lg">Cancel</button>
               <button onClick={createWorkflow} className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium shadow">Create Pipeline</button>
             </div>
           </div>

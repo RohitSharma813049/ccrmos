@@ -134,7 +134,7 @@ export default function VoicesPage() {
           {/* Search Bar */}
           <div className="flex items-center gap-4">
             <div className="flex-1 relative">
-              <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
               <input 
                 type="text" 
                 placeholder="Search voices by name or category..." 
@@ -187,19 +187,19 @@ export default function VoicesPage() {
                   </div>
                   {!voice.isElevenLabs && (
                     <div className="flex items-center gap-2">
-                      <button onClick={() => { setEditingVoice(voice); setIsModalOpen(true); }} className="p-2 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
+                      <button onClick={() => { setEditingVoice(voice); setIsModalOpen(true); }} className="p-2 text-zinc-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors">
                         <Edit3 className="w-4 h-4" />
                       </button>
                       <button 
                         onClick={() => handleDelete(voice._id)}
-                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        className="p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   )}
                   {voice.isElevenLabs && (
-                    <div className="px-2 py-1 bg-slate-100 text-zinc-400 text-xs rounded font-medium">
+                    <div className="px-2 py-1 bg-zinc-800/50 text-zinc-400 text-xs rounded font-medium">
                       ElevenLabs
                     </div>
                   )}
@@ -270,7 +270,7 @@ function VoiceFormModal({ onClose, onSuccess, voiceToEdit }: { onClose: () => vo
       <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b border-zinc-800/60">
           <h2 className="text-xl font-bold text-zinc-100">{voiceToEdit ? 'Edit Voice' : 'Add New Voice'}</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-zinc-400 p-2">
+          <button onClick={onClose} className="text-zinc-400 hover:text-zinc-400 p-2">
             <X className="w-5 h-5" />
           </button>
         </div>

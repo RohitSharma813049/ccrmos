@@ -137,7 +137,7 @@ export default function SoundEffectPage() {
                   className="w-full border border-zinc-700/50 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/50 focus:border-fuchsia-500 resize-none"
                   placeholder="e.g., Thunder and lightning storm with heavy rain"
                 ></textarea>
-                <p className="text-xs text-slate-400 mt-2">
+                <p className="text-xs text-zinc-400 mt-2">
                   Be specific and descriptive about the sound you want to create
                 </p>
               </div>
@@ -148,7 +148,7 @@ export default function SoundEffectPage() {
                   Duration: {duration} seconds
                 </label>
                 <div className="flex items-center gap-4">
-                  <span className="text-xs text-slate-400 font-medium">0.5s (min)</span>
+                  <span className="text-xs text-zinc-400 font-medium">0.5s (min)</span>
                   <input 
                     type="range" 
                     min="0.5" 
@@ -156,9 +156,9 @@ export default function SoundEffectPage() {
                     step="0.5"
                     value={duration}
                     onChange={(e) => setDuration(parseFloat(e.target.value))}
-                    className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-fuchsia-500"
+                    className="flex-1 h-2 bg-zinc-700/50 rounded-lg appearance-none cursor-pointer accent-fuchsia-500"
                   />
-                  <span className="text-xs text-slate-400 font-medium">22s (max)</span>
+                  <span className="text-xs text-zinc-400 font-medium">22s (max)</span>
                 </div>
               </div>
 
@@ -246,7 +246,7 @@ export default function SoundEffectPage() {
                 </div>
               ) : isGenerating ? (
                 <div className="animate-pulse flex flex-col items-center gap-4">
-                  <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center">
+                  <div className="w-16 h-16 bg-zinc-800/50 rounded-full flex items-center justify-center">
                     <div className="w-8 h-8 border-4 border-fuchsia-500 border-t-transparent rounded-full animate-spin"></div>
                   </div>
                   <h3 className="font-semibold text-zinc-400">Creating magic...</h3>
@@ -258,7 +258,7 @@ export default function SoundEffectPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-zinc-300">No sound effect yet</h3>
-                    <p className="text-sm text-slate-400 mt-1">Enter a description and generate</p>
+                    <p className="text-sm text-zinc-400 mt-1">Enter a description and generate</p>
                   </div>
                 </>
               )}

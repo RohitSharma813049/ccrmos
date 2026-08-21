@@ -610,7 +610,7 @@ export default function IntegrationsPage() {
                     else if (int.id === 'groq') setIsGroqModalOpen(true);
                     else if (int.id === 'twilio') setIsTwilioModalOpen(true);
                   }}
-                  className="px-5 py-2.5 bg-gray-100 text-zinc-100 border border-zinc-700/50 font-medium rounded-lg hover:bg-gray-200 transition-colors"
+                  className="px-5 py-2.5 bg-zinc-800/50 text-zinc-100 border border-zinc-700/50 font-medium rounded-lg hover:bg-zinc-700/50 transition-colors"
                 >
                   {int.actionLabel}
                 </button>
@@ -804,7 +804,7 @@ export default function IntegrationsPage() {
               <div className="space-y-4">
                 {setupModalData.steps.map((step: string, index: number) => (
                   <div key={index} className="flex gap-4 items-start">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-sm font-bold text-zinc-400 border border-zinc-700/50">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-zinc-800/50 flex items-center justify-center text-sm font-bold text-zinc-400 border border-zinc-700/50">
                       {index + 1}
                     </div>
                     <div className="pt-1 text-zinc-300 leading-relaxed">
@@ -965,10 +965,10 @@ export default function IntegrationsPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-400">
-                        {link.projectId?.name || <span className="text-gray-400 italic">None</span>}
+                        {link.projectId?.name || <span className="text-zinc-400 italic">None</span>}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-400">
-                        {link.formId?.name || <span className="text-gray-400 italic">None</span>}
+                        {link.formId?.name || <span className="text-zinc-400 italic">None</span>}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <div className="flex items-center gap-2 max-w-[300px] overflow-hidden text-ellipsis bg-zinc-950/50 px-3 py-1.5 rounded border border-zinc-700/50 text-zinc-400" title={link.url}>

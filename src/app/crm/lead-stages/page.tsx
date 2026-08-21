@@ -112,7 +112,7 @@ export default function LeadStagesPage() {
         {/* Search */}
         <div className="p-4 border-b border-zinc-800/60">
           <div className="relative">
-            <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
             <input 
               type="text" 
               placeholder="Search lead stages..." 
@@ -124,7 +124,7 @@ export default function LeadStagesPage() {
         {/* Pipeline Flow Visualization */}
         <div className="p-6 border-b border-zinc-800/60 bg-zinc-950/50/30 overflow-x-auto">
           <div className="flex items-center gap-2 mb-6">
-            <GitBranch className="w-5 h-5 text-slate-400" />
+            <GitBranch className="w-5 h-5 text-zinc-400" />
             <h3 className="font-semibold text-zinc-300">Pipeline Flow</h3>
           </div>
           

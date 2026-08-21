@@ -29,19 +29,19 @@ export default function SettingsPage() {
         <button className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-full text-sm font-semibold shadow-sm transition-colors">
           <User className="w-4 h-4" /> My Profile
         </button>
-        <button className="flex items-center gap-2 px-5 py-2.5 text-zinc-400 hover:bg-slate-100 rounded-full text-sm font-medium transition-colors">
+        <button className="flex items-center gap-2 px-5 py-2.5 text-zinc-400 hover:bg-zinc-800/50 rounded-full text-sm font-medium transition-colors">
           <Building2 className="w-4 h-4" /> Company Profile
         </button>
-        <button className="flex items-center gap-2 px-5 py-2.5 text-zinc-400 hover:bg-slate-100 rounded-full text-sm font-medium transition-colors">
+        <button className="flex items-center gap-2 px-5 py-2.5 text-zinc-400 hover:bg-zinc-800/50 rounded-full text-sm font-medium transition-colors">
           <Users className="w-4 h-4" /> Team Management
         </button>
-        <button className="flex items-center gap-2 px-5 py-2.5 text-zinc-400 hover:bg-slate-100 rounded-full text-sm font-medium transition-colors">
+        <button className="flex items-center gap-2 px-5 py-2.5 text-zinc-400 hover:bg-zinc-800/50 rounded-full text-sm font-medium transition-colors">
           <Bell className="w-4 h-4" /> Notifications
         </button>
-        <button className="flex items-center gap-2 px-5 py-2.5 text-zinc-400 hover:bg-slate-100 rounded-full text-sm font-medium transition-colors">
+        <button className="flex items-center gap-2 px-5 py-2.5 text-zinc-400 hover:bg-zinc-800/50 rounded-full text-sm font-medium transition-colors">
           <LinkIcon className="w-4 h-4" /> API Integration
         </button>
-        <button className="flex items-center gap-2 px-5 py-2.5 text-zinc-400 hover:bg-slate-100 rounded-full text-sm font-medium transition-colors">
+        <button className="flex items-center gap-2 px-5 py-2.5 text-zinc-400 hover:bg-zinc-800/50 rounded-full text-sm font-medium transition-colors">
           <ShieldCheck className="w-4 h-4" /> Security
         </button>
       </div>
@@ -81,7 +81,7 @@ export default function SettingsPage() {
                 Full Name <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-                <User className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <User className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
                 <input 
                   type="text" 
                   defaultValue="Darpann Investment" 
@@ -94,7 +94,7 @@ export default function SettingsPage() {
                 Email <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-                <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
                 <input 
                   type="email" 
                   defaultValue="webesidetechnologyindia@gmail.com" 
@@ -109,7 +109,7 @@ export default function SettingsPage() {
               </label>
               <div className="relative flex">
                 <div className="px-3 border border-r-0 border-zinc-700/50 rounded-l-xl bg-zinc-950/50 flex items-center justify-center">
-                   <Phone className="w-4 h-4 text-slate-400" />
+                   <Phone className="w-4 h-4 text-zinc-400" />
                 </div>
                 <input 
                   type="text" 

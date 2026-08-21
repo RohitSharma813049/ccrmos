@@ -114,7 +114,7 @@ export default function LeadStatusPage() {
       {/* Controls: Search and Filters */}
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-zinc-900/40 backdrop-blur-xl p-4 rounded-2xl border border-zinc-800/60 shadow-sm">
         <div className="relative w-full sm:max-w-md">
-          <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
           <input 
             type="text" 
             placeholder="Search lead status..." 
@@ -122,7 +122,7 @@ export default function LeadStatusPage() {
           />
         </div>
         
-        <div className="flex bg-slate-100 p-1 rounded-xl w-full sm:w-auto">
+        <div className="flex bg-zinc-800/50 p-1 rounded-xl w-full sm:w-auto">
           <button className="flex-1 sm:flex-none px-6 py-2 bg-blue-600 text-white font-medium text-sm rounded-lg shadow-sm">
             All
           </button>
@@ -160,7 +160,7 @@ export default function LeadStatusPage() {
                 <h3 className="font-semibold text-zinc-100 text-lg leading-tight mb-1">
                   {status.name}
                 </h3>
-                <p className="text-slate-400 text-sm">-</p>
+                <p className="text-zinc-400 text-sm">-</p>
               </div>
 
               {/* Category Pill */}
@@ -172,7 +172,7 @@ export default function LeadStatusPage() {
 
             {/* Footer */}
             <div className="mt-8 pt-4 border-t border-slate-50 flex items-center justify-between">
-              <span className="text-xs text-slate-400 font-medium">
+              <span className="text-xs text-zinc-400 font-medium">
                 Created {status.created}
               </span>
               {status.active && (

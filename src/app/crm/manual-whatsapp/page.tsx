@@ -24,7 +24,7 @@ export default function ManualWhatsAppPage() {
             
             <div className="space-y-2">
               <p className="text-zinc-300 font-medium text-lg">Restoring WhatsApp sessions...</p>
-              <p className="text-slate-400 text-sm">This may take a few seconds</p>
+              <p className="text-zinc-400 text-sm">This may take a few seconds</p>
             </div>
           </div>
         </div>

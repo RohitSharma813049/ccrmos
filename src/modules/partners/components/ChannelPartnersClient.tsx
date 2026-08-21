@@ -105,7 +105,7 @@ export default function ChannelPartnersClient() {
       {/* Controls */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
-          <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
           <input 
             type="text" 
             value={search}
@@ -115,7 +115,7 @@ export default function ChannelPartnersClient() {
           />
         </div>
         <div className="relative w-full sm:w-64 shrink-0">
-          <Filter className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Filter className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
           <select 
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
@@ -138,7 +138,7 @@ export default function ChannelPartnersClient() {
       ) : (
         <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl border border-zinc-800/60 shadow-sm overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="text-xs text-slate-400 font-semibold uppercase border-b border-zinc-800/60">
+            <thead className="text-xs text-zinc-400 font-semibold uppercase border-b border-zinc-800/60">
               <tr>
                 <th className="px-6 py-5">Partner Info</th>
                 <th className="px-6 py-5">Contact</th>
@@ -176,14 +176,14 @@ export default function ChannelPartnersClient() {
                     <div className="text-zinc-400 text-xs">{partner.state}</div>
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-zinc-400">
+                    <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-zinc-800/50 text-zinc-400">
                       {partner.type}
                     </span>
                   </td>
                   <td className="px-6 py-4">
                     <div className="text-zinc-300 font-medium">{partner.experience || 'N/A'}</div>
                     {partner.focusedProject && (
-                      <div className="text-slate-400 text-[10px] mt-0.5 truncate max-w-[120px]">{partner.focusedProject}</div>
+                      <div className="text-zinc-400 text-[10px] mt-0.5 truncate max-w-[120px]">{partner.focusedProject}</div>
                     )}
                   </td>
                   <td className="px-6 py-4 text-center font-semibold text-zinc-100">
@@ -217,7 +217,7 @@ export default function ChannelPartnersClient() {
           <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-xl">
             <div className="sticky top-0 bg-zinc-900/40 backdrop-blur-xl border-b border-zinc-800/60 p-6 flex justify-between items-center z-10">
               <h2 className="text-xl font-bold text-zinc-100">Add Channel Partner</h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-zinc-400 bg-zinc-950/50 hover:bg-slate-100 p-2 rounded-full transition-colors">
+              <button onClick={() => setIsModalOpen(false)} className="text-zinc-400 hover:text-zinc-400 bg-zinc-950/50 hover:bg-zinc-800/50 p-2 rounded-full transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -313,7 +313,7 @@ export default function ChannelPartnersClient() {
               </div>
 
               <div className="pt-6 border-t border-zinc-800/60 flex justify-end gap-3">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 rounded-xl font-medium text-zinc-400 bg-zinc-950/50 border border-zinc-700/50 hover:bg-slate-100 transition-colors">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 rounded-xl font-medium text-zinc-400 bg-zinc-950/50 border border-zinc-700/50 hover:bg-zinc-800/50 transition-colors">
                   Cancel
                 </button>
                 <button type="submit" disabled={submitting} className="px-6 py-2.5 rounded-xl font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors disabled:opacity-70 flex items-center gap-2">

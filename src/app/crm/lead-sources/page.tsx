@@ -100,7 +100,7 @@ export default function LeadSourcesPage() {
         {/* Search */}
         <div className="p-4 border-b border-zinc-800/60">
           <div className="relative">
-            <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
             <input 
               type="text" 
               placeholder="Search lead sources by name or description..." 
@@ -127,12 +127,12 @@ export default function LeadSourcesPage() {
                 <tr key={i} className="hover:bg-zinc-950/50/50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="font-semibold text-zinc-100">{source.name}</div>
-                    <div className="text-xs text-slate-400">ID: {source.id}</div>
+                    <div className="text-xs text-zinc-400">ID: {source.id}</div>
                   </td>
                   <td className="px-6 py-4 text-zinc-400 max-w-[300px] truncate">
                     {source.desc}
                   </td>
-                  <td className="px-6 py-4 text-slate-400 italic text-xs">
+                  <td className="px-6 py-4 text-zinc-400 italic text-xs">
                     Not set
                   </td>
                   <td className="px-6 py-4 text-center font-semibold text-zinc-100">

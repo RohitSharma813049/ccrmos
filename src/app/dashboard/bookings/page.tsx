@@ -159,7 +159,7 @@ export default function BookingsPage() {
       {/* Controls */}
       <div className="bg-zinc-900/40 backdrop-blur-xl p-4 rounded-2xl border border-zinc-800/60 shadow-sm flex flex-col md:flex-row gap-4">
         <div className="relative flex-[2]">
-          <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
           <input 
             type="text" 
             placeholder="Search by name, email, phone, ID..." 
@@ -211,7 +211,7 @@ export default function BookingsPage() {
                     </div>
                     <div>
                       <div className="flex items-center gap-3 mb-1">
-                        <h3 className="font-bold text-lg text-zinc-100">{booking.name} <span className="text-slate-400 text-sm font-normal">({booking.bookingId})</span></h3>
+                        <h3 className="font-bold text-lg text-zinc-100">{booking.name} <span className="text-zinc-400 text-sm font-normal">({booking.bookingId})</span></h3>
                         <span className={`px-2.5 py-0.5 rounded-md text-[11px] font-bold ${statusColor}`}>
                           {booking.status}
                         </span>
@@ -220,32 +220,32 @@ export default function BookingsPage() {
                       {/* Detailed Grid */}
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-8 gap-y-4 mt-6">
                         <div>
-                          <div className="flex items-center gap-1.5 text-slate-400 text-xs mb-1"><Phone className="w-3.5 h-3.5" /> Contact</div>
+                          <div className="flex items-center gap-1.5 text-zinc-400 text-xs mb-1"><Phone className="w-3.5 h-3.5" /> Contact</div>
                           <div className="font-medium text-zinc-300 text-sm">{booking.contact}</div>
                         </div>
                         <div>
-                          <div className="flex items-center gap-1.5 text-slate-400 text-xs mb-1"><Mail className="w-3.5 h-3.5" /> Email</div>
+                          <div className="flex items-center gap-1.5 text-zinc-400 text-xs mb-1"><Mail className="w-3.5 h-3.5" /> Email</div>
                           <div className="font-medium text-zinc-300 text-sm">{booking.email || 'N/A'}</div>
                         </div>
                         <div>
-                          <div className="flex items-center gap-1.5 text-slate-400 text-xs mb-1"><Building2 className="w-3.5 h-3.5" /> Property</div>
+                          <div className="flex items-center gap-1.5 text-zinc-400 text-xs mb-1"><Building2 className="w-3.5 h-3.5" /> Property</div>
                           <div className="font-medium text-zinc-300 text-sm">{booking.property}</div>
                         </div>
                         <div>
-                          <div className="flex items-center gap-1.5 text-slate-400 text-xs mb-1"><Hash className="w-3.5 h-3.5" /> Unit</div>
+                          <div className="flex items-center gap-1.5 text-zinc-400 text-xs mb-1"><Hash className="w-3.5 h-3.5" /> Unit</div>
                           <div className="font-medium text-zinc-300 text-sm">{booking.unit}</div>
                         </div>
                         
                         <div>
-                          <div className="flex items-center gap-1.5 text-slate-400 text-xs mb-1"><IndianRupee className="w-3.5 h-3.5" /> Total</div>
+                          <div className="flex items-center gap-1.5 text-zinc-400 text-xs mb-1"><IndianRupee className="w-3.5 h-3.5" /> Total</div>
                           <div className="font-bold text-zinc-100 text-sm">{formatCurrency(booking.totalValue)}</div>
                         </div>
                         <div>
-                          <div className="flex items-center gap-1.5 text-slate-400 text-xs mb-1"><Wallet className="w-3.5 h-3.5" /> Paid</div>
+                          <div className="flex items-center gap-1.5 text-zinc-400 text-xs mb-1"><Wallet className="w-3.5 h-3.5" /> Paid</div>
                           <div className="font-bold text-green-600 text-sm">{formatCurrency(booking.paidAmount)}</div>
                         </div>
                         <div className="col-span-2">
-                          <div className="flex items-center gap-1.5 text-slate-400 text-xs mb-1"><CalendarDays className="w-3.5 h-3.5" /> Booked</div>
+                          <div className="flex items-center gap-1.5 text-zinc-400 text-xs mb-1"><CalendarDays className="w-3.5 h-3.5" /> Booked</div>
                           <div className="font-medium text-zinc-300 text-sm">{new Date(booking.createdAt).toLocaleDateString()}</div>
                         </div>
                       </div>
@@ -328,7 +328,7 @@ function BookingFormModal({ onClose, onSuccess }: { onClose: () => void, onSucce
       <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl shadow-xl w-full max-w-xl overflow-hidden flex flex-col max-h-[90vh]">
         <div className="flex items-center justify-between p-6 border-b border-zinc-800/60">
           <h2 className="text-xl font-bold text-zinc-100">Add New Booking</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-zinc-400 p-2">
+          <button onClick={onClose} className="text-zinc-400 hover:text-zinc-400 p-2">
             <X className="w-5 h-5" />
           </button>
         </div>

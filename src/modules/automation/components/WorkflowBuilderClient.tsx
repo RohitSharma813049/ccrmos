@@ -171,7 +171,7 @@ export default function WorkflowBuilderClient({ workflow, isGlobal = false }: { 
           <p className="text-zinc-400 text-sm mt-1">{workflow.description}</p>
         </div>
         <div className="flex gap-3">
-          <button onClick={() => window.history.back()} className="px-4 py-2 bg-gray-100 text-zinc-300 rounded-lg hover:bg-gray-200 transition-colors">
+          <button onClick={() => window.history.back()} className="px-4 py-2 bg-zinc-800/50 text-zinc-300 rounded-lg hover:bg-zinc-700/50 transition-colors">
             Back
           </button>
           <button onClick={addConditionNode} className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors">

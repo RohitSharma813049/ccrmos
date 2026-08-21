@@ -169,12 +169,12 @@ export default function TenantCustomModulesClient() {
           <button 
             onClick={() => isEditable(mod) ? toggleStatus(mod) : undefined}
             disabled={!isEditable(mod)}
-            className={`px-2.5 py-1 rounded-md text-xs font-semibold border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${mod.active ? 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800' : 'bg-slate-100 text-zinc-400 border-zinc-700/50 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'} ${!isEditable(mod) && 'opacity-50 cursor-not-allowed'}`}
+            className={`px-2.5 py-1 rounded-md text-xs font-semibold border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${mod.active ? 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800' : 'bg-zinc-800/50 text-zinc-400 border-zinc-700/50 hover:bg-zinc-700/50 dark:bg-slate-800 dark:text-zinc-400 dark:border-slate-700'} ${!isEditable(mod) && 'opacity-50 cursor-not-allowed'}`}
           >
             {mod.active ? 'Published' : 'Draft'}
           </button>
           <div className="flex gap-1 mt-1">
-            <span className={`px-2 py-0.5 rounded text-[10px] font-medium border ${mod.tenantScope === 'Global' || mod.tenantScope === 'Industry' ? 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800' : 'bg-slate-100 text-zinc-400 border-zinc-700/50 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'}`}>
+            <span className={`px-2 py-0.5 rounded text-[10px] font-medium border ${mod.tenantScope === 'Global' || mod.tenantScope === 'Industry' ? 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800' : 'bg-zinc-800/50 text-zinc-400 border-zinc-700/50 dark:bg-slate-800 dark:text-zinc-400 dark:border-slate-700'}`}>
               {mod.tenantScope || "Global"}
             </span>
           </div>

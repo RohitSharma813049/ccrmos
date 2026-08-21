@@ -164,7 +164,7 @@ export default function CustomModuleClient({ moduleSchema }: { moduleSchema: any
           <div className="relative bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[85vh]">
             <div className="p-6 border-b border-zinc-800/60 flex justify-between items-center">
               <h2 className="text-xl font-bold text-zinc-100">{editingRecordId ? 'Edit' : 'Create'} {moduleSchema.name}</h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-zinc-400">
+              <button onClick={() => setIsModalOpen(false)} className="text-zinc-400 hover:text-zinc-400">
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
@@ -252,7 +252,7 @@ export default function CustomModuleClient({ moduleSchema }: { moduleSchema: any
             </div>
 
             <div className="p-4 border-t border-zinc-800/60 flex justify-end gap-3 bg-zinc-950/50">
-              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-zinc-400 hover:bg-gray-200 rounded-lg">Cancel</button>
+              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-zinc-400 hover:bg-zinc-700/50 rounded-lg">Cancel</button>
               <button onClick={saveRecord} className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium shadow">Save</button>
             </div>
           </div>

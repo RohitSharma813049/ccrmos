@@ -56,7 +56,7 @@ export default function WhatsAppTemplatesPage() {
       {/* Controls */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
-          <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
           <input 
             type="text" 
             placeholder="Search templates..." 
@@ -65,7 +65,7 @@ export default function WhatsAppTemplatesPage() {
         </div>
         <div className="flex items-center gap-4 shrink-0">
           <div className="relative">
-            <Filter className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Filter className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
             <select className="pl-10 pr-8 py-2.5 rounded-xl border border-zinc-700/50 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all text-sm appearance-none bg-zinc-900/40 backdrop-blur-xl font-medium text-zinc-300 min-w-[160px]">
               <option>All Categories</option>
             </select>
@@ -91,24 +91,24 @@ export default function WhatsAppTemplatesPage() {
               <span className="flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-700 text-xs font-semibold rounded-full border border-blue-100">
                 ↑ {tpl.filesCount} file(s)
               </span>
-              <span className="text-xs font-medium text-slate-400">{tpl.size}</span>
+              <span className="text-xs font-medium text-zinc-400">{tpl.size}</span>
             </div>
 
             {/* Media Grid Placeholder */}
             <div className="grid grid-cols-3 gap-2 mb-6">
               <div className="aspect-square bg-zinc-950/50 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-center p-2 text-center">
                 <ImageIcon className="w-6 h-6 text-slate-300 mb-1" />
-                <span className="text-[9px] text-slate-400 line-clamp-2">WhatsApp Image...</span>
+                <span className="text-[9px] text-zinc-400 line-clamp-2">WhatsApp Image...</span>
               </div>
               <div className="aspect-square bg-zinc-950/50 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-center p-2 text-center">
                 <ImageIcon className="w-6 h-6 text-slate-300 mb-1" />
-                <span className="text-[9px] text-slate-400 line-clamp-2">WhatsApp Image...</span>
+                <span className="text-[9px] text-zinc-400 line-clamp-2">WhatsApp Image...</span>
               </div>
               <div className="aspect-square bg-red-50/50 rounded-xl border border-red-100 flex flex-col items-center justify-center p-2 text-center text-red-500">
                 <FileText className="w-6 h-6 mb-1" />
                 <span className="text-[9px] line-clamp-2">PDF Document</span>
               </div>
-              <div className="aspect-square bg-slate-100 rounded-xl flex flex-col items-center justify-center text-zinc-400 font-bold text-lg">
+              <div className="aspect-square bg-zinc-800/50 rounded-xl flex flex-col items-center justify-center text-zinc-400 font-bold text-lg">
                 +{tpl.filesCount > 3 ? tpl.filesCount - 3 : 0}
               </div>
             </div>
@@ -119,7 +119,7 @@ export default function WhatsAppTemplatesPage() {
             </p>
 
             {/* Footer */}
-            <div className="mt-auto pt-4 border-t border-zinc-800/60 flex items-center justify-between text-xs text-slate-400 font-medium">
+            <div className="mt-auto pt-4 border-t border-zinc-800/60 flex items-center justify-between text-xs text-zinc-400 font-medium">
               <div>Variables: <span className="text-slate-300">none</span></div>
               <div className="flex gap-4">
                 {tpl.used > 0 && <span>Used {tpl.used} times</span>}

@@ -24,7 +24,7 @@ export function Button({
     primary: "bg-indigo-600 hover:bg-indigo-500 text-white focus:ring-indigo-600 shadow-md shadow-indigo-500/20",
     secondary: "bg-zinc-900/40 backdrop-blur-xl hover:bg-zinc-950/50 text-zinc-100 border border-zinc-700/50 focus:ring-gray-200",
     danger: "bg-red-600 hover:bg-red-500 text-white focus:ring-red-600 shadow-md shadow-red-500/20",
-    ghost: "bg-transparent hover:bg-gray-100 text-zinc-300 shadow-none border-none focus:ring-gray-200"
+    ghost: "bg-transparent hover:bg-zinc-800/50 text-zinc-300 shadow-none border-none focus:ring-gray-200"
   };
 
   const sizes = {

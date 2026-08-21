@@ -130,7 +130,7 @@ export default function LeadStatusPage() {
       {/* Controls: Search and Filters */}
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-zinc-900/40 backdrop-blur-xl p-4 rounded-2xl border border-zinc-800/60 shadow-sm">
         <div className="relative w-full sm:max-w-md">
-          <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
           <input 
             type="text" 
             placeholder="Search lead status..." 
@@ -140,7 +140,7 @@ export default function LeadStatusPage() {
           />
         </div>
         
-        <div className="flex bg-slate-100 p-1 rounded-xl w-full sm:w-auto">
+        <div className="flex bg-zinc-800/50 p-1 rounded-xl w-full sm:w-auto">
           {['All', 'Active', 'Inactive'].map(f => (
             <button 
               key={f}
@@ -170,7 +170,7 @@ export default function LeadStatusPage() {
           {statuses.map((status) => {
             const catColor = status.category === 'Interested' ? 'bg-green-100 text-green-600' :
                              status.category === 'Not Interested' ? 'bg-red-100 text-red-600' :
-                             'bg-slate-100 text-zinc-400';
+                             'bg-zinc-800/50 text-zinc-400';
             const CatIcon = status.category === 'Interested' ? TrendingUp : TrendingDown;
             const createdDate = new Date(status.createdAt).toLocaleDateString();
 
@@ -208,7 +208,7 @@ export default function LeadStatusPage() {
 
                 {/* Footer */}
                 <div className="mt-8 pt-4 border-t border-slate-50 flex items-center justify-between">
-                  <span className="text-xs text-slate-400 font-medium">
+                  <span className="text-xs text-zinc-400 font-medium">
                     Created {createdDate}
                   </span>
                   
@@ -217,7 +217,7 @@ export default function LeadStatusPage() {
                     className={`text-[10px] font-bold px-2 py-1 rounded-md transition-colors ${
                       status.active 
                         ? 'text-green-600 bg-green-50 hover:bg-red-50 hover:text-red-600' 
-                        : 'text-zinc-400 bg-slate-100 hover:bg-green-50 hover:text-green-600'
+                        : 'text-zinc-400 bg-zinc-800/50 hover:bg-green-50 hover:text-green-600'
                     }`}
                   >
                     {status.active ? 'Active' : 'Inactive'}
@@ -289,7 +289,7 @@ function LeadStatusFormModal({ onClose, onSuccess }: { onClose: () => void, onSu
       <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
         <div className="flex items-center justify-between p-6 border-b border-zinc-800/60">
           <h2 className="text-xl font-bold text-zinc-100">Add Lead Status</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-zinc-400 p-2">
+          <button onClick={onClose} className="text-zinc-400 hover:text-zinc-400 p-2">
             <X className="w-5 h-5" />
           </button>
         </div>

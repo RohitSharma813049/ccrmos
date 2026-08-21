@@ -78,7 +78,7 @@ export default function PropertiesPage() {
       <div className="bg-zinc-900/40 backdrop-blur-xl p-4 rounded-2xl border border-zinc-800/60 shadow-sm space-y-4">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
-            <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
             <input 
               type="text" 
               placeholder="Search properties..." 
@@ -100,7 +100,7 @@ export default function PropertiesPage() {
                 className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
                   activeProject === proj.id 
                     ? 'bg-blue-600 text-white shadow-sm' 
-                    : 'bg-zinc-950/50 hover:bg-slate-100 text-zinc-400'
+                    : 'bg-zinc-950/50 hover:bg-zinc-800/50 text-zinc-400'
                 }`}
               >
                 {proj.name} {proj.count !== null && <span className="ml-1 opacity-70">({proj.count})</span>}
@@ -117,7 +117,7 @@ export default function PropertiesPage() {
             <div className="w-4 h-4 bg-gradient-to-tr from-blue-600 to-purple-600 rounded-sm"></div>
           </div>
           <div>
-            <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Overview</div>
+            <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Overview</div>
           </div>
         </div>
         
@@ -144,7 +144,7 @@ export default function PropertiesPage() {
         {properties.map((prop) => (
           <div key={prop.id} className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl border border-zinc-800/60 shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-shadow">
             {/* Image */}
-            <div className="h-48 w-full bg-slate-100 relative">
+            <div className="h-48 w-full bg-zinc-800/50 relative">
               <img src={prop.image} alt={prop.title} className="w-full h-full object-cover" />
             </div>
 
@@ -176,7 +176,7 @@ export default function PropertiesPage() {
                   <div>
                     <div className="text-xs font-medium text-green-600 mb-1">Total Price</div>
                     <div className="text-2xl font-bold text-green-600">{prop.price}</div>
-                    <div className="text-xs text-slate-400 mt-1">{prop.priceDesc}</div>
+                    <div className="text-xs text-zinc-400 mt-1">{prop.priceDesc}</div>
                   </div>
                   {prop.available && (
                     <div className="bg-green-100 text-green-700 text-xs font-bold px-2.5 py-1 rounded-full">
@@ -200,7 +200,7 @@ export default function PropertiesPage() {
                   </button>
                 </div>
 
-                <div className="text-[10px] text-slate-400 font-medium space-y-0.5">
+                <div className="text-[10px] text-zinc-400 font-medium space-y-0.5">
                   <div>Property ID: <span className="font-mono text-zinc-400">{prop.id}</span></div>
                   <div>Project: {prop.project}</div>
                 </div>
@@ -219,7 +219,7 @@ export default function PropertiesPage() {
               <h2 className="text-xl font-bold text-zinc-100">Manage Amenities</h2>
               <button 
                 onClick={() => setIsAmenitiesModalOpen(false)}
-                className="text-slate-400 hover:text-zinc-400 p-2"
+                className="text-zinc-400 hover:text-zinc-400 p-2"
               >
                 <X className="w-5 h-5" />
               </button>

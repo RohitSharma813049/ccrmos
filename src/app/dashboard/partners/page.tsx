@@ -119,7 +119,7 @@ export default function ChannelPartnersPage() {
       {/* Controls */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
-          <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
           <input 
             type="text" 
             placeholder="Search by name, company, email, phone, or city..." 
@@ -129,7 +129,7 @@ export default function ChannelPartnersPage() {
           />
         </div>
         <div className="relative w-full sm:w-64 shrink-0">
-          <Filter className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Filter className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
           <select 
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
@@ -159,7 +159,7 @@ export default function ChannelPartnersPage() {
       ) : (
         <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl border border-zinc-800/60 shadow-sm overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="text-xs text-slate-400 font-semibold uppercase border-b border-zinc-800/60">
+            <thead className="text-xs text-zinc-400 font-semibold uppercase border-b border-zinc-800/60">
               <tr>
                 <th className="px-6 py-5">Partner Info</th>
                 <th className="px-6 py-5">Contact</th>
@@ -220,7 +220,7 @@ export default function ChannelPartnersPage() {
                     <td className="px-6 py-4">
                       <div className="text-zinc-300 font-medium">{partner.experience || 'N/A'}</div>
                       {partner.expDesc && (
-                        <div className="text-slate-400 text-[10px] mt-0.5 truncate max-w-[120px]">{partner.expDesc}</div>
+                        <div className="text-zinc-400 text-[10px] mt-0.5 truncate max-w-[120px]">{partner.expDesc}</div>
                       )}
                     </td>
                     
@@ -315,7 +315,7 @@ function PartnerFormModal({ onClose, onSuccess }: { onClose: () => void, onSucce
       <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
         <div className="flex items-center justify-between p-6 border-b border-zinc-800/60">
           <h2 className="text-xl font-bold text-zinc-100">Add Channel Partner</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-zinc-400 p-2">
+          <button onClick={onClose} className="text-zinc-400 hover:text-zinc-400 p-2">
             <X className="w-5 h-5" />
           </button>
         </div>

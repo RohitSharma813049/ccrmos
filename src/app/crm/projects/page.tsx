@@ -64,7 +64,7 @@ export default function ProjectsPage() {
       {/* Controls Area */}
       <div className="bg-zinc-900/40 backdrop-blur-xl p-4 rounded-2xl border border-zinc-800/60 shadow-sm flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
-          <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
           <input 
             type="text" 
             placeholder="Search projects..." 
@@ -118,7 +118,7 @@ export default function ProjectsPage() {
                     Available
                   </span>
                 )}
-                <button className="text-slate-400 hover:text-zinc-400">
+                <button className="text-zinc-400 hover:text-zinc-400">
                   <MoreVertical className="w-5 h-5" />
                 </button>
               </div>
@@ -164,7 +164,7 @@ export default function ProjectsPage() {
                 </button>
               </div>
 
-              <div className="flex items-center justify-between text-[11px] text-slate-400 font-medium pt-4 border-t border-slate-50">
+              <div className="flex items-center justify-between text-[11px] text-zinc-400 font-medium pt-4 border-t border-slate-50">
                 <div>Possession: {project.possession}</div>
                 <div>Added: {project.added}</div>
               </div>

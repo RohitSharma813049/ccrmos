@@ -125,7 +125,7 @@ export default function ProfilePage() {
               <button 
                 type="button" 
                 onClick={() => fileInputRef.current?.click()}
-                className="mt-3 px-4 py-1.5 bg-zinc-950/50 border border-zinc-700/50 text-sm font-medium text-zinc-300 rounded-lg hover:bg-gray-100 transition-colors"
+                className="mt-3 px-4 py-1.5 bg-zinc-950/50 border border-zinc-700/50 text-sm font-medium text-zinc-300 rounded-lg hover:bg-zinc-800/50 transition-colors"
               >
                 Upload new image
               </button>

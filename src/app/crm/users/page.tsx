@@ -22,7 +22,7 @@ const users = [
     phone: '8860876087',
     role: 'Admin',
     type: 'Normal',
-    typeColor: 'bg-slate-100 text-zinc-300',
+    typeColor: 'bg-zinc-800/50 text-zinc-300',
     joinDate: '13 Nov 2025',
     lastUpdate: '01 Aug 2026'
   },
@@ -44,7 +44,7 @@ const users = [
     phone: '9540627370',
     role: 'Manager',
     type: 'Normal',
-    typeColor: 'bg-slate-100 text-zinc-300',
+    typeColor: 'bg-zinc-800/50 text-zinc-300',
     joinDate: '29 Nov 2025',
     lastUpdate: '07 Jan 2026'
   }
@@ -73,16 +73,16 @@ export default function UsersPage() {
       {/* Tabs */}
       <div className="flex flex-wrap gap-2 pt-2">
         <button className="px-5 py-2 bg-blue-600 text-white rounded-full text-sm font-semibold shadow-sm">All Users (15)</button>
-        <button className="px-5 py-2 bg-zinc-950/50 hover:bg-slate-100 text-zinc-400 rounded-full text-sm font-medium transition-colors">Admin (1)</button>
-        <button className="px-5 py-2 bg-zinc-950/50 hover:bg-slate-100 text-zinc-400 rounded-full text-sm font-medium transition-colors">Managers (8)</button>
-        <button className="px-5 py-2 bg-zinc-950/50 hover:bg-slate-100 text-zinc-400 rounded-full text-sm font-medium transition-colors">Sales (6)</button>
-        <button className="px-5 py-2 bg-zinc-950/50 hover:bg-slate-100 text-zinc-400 rounded-full text-sm font-medium transition-colors">Support (0)</button>
+        <button className="px-5 py-2 bg-zinc-950/50 hover:bg-zinc-800/50 text-zinc-400 rounded-full text-sm font-medium transition-colors">Admin (1)</button>
+        <button className="px-5 py-2 bg-zinc-950/50 hover:bg-zinc-800/50 text-zinc-400 rounded-full text-sm font-medium transition-colors">Managers (8)</button>
+        <button className="px-5 py-2 bg-zinc-950/50 hover:bg-zinc-800/50 text-zinc-400 rounded-full text-sm font-medium transition-colors">Sales (6)</button>
+        <button className="px-5 py-2 bg-zinc-950/50 hover:bg-zinc-800/50 text-zinc-400 rounded-full text-sm font-medium transition-colors">Support (0)</button>
       </div>
 
       {/* Controls Area */}
       <div className="bg-zinc-900/40 backdrop-blur-xl p-4 rounded-2xl border border-zinc-800/60 shadow-sm flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
-          <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
           <input 
             type="text" 
             placeholder="Search users..." 
@@ -148,10 +148,10 @@ export default function UsersPage() {
                 {/* Contact */}
                 <td className="px-6 py-4 space-y-1 text-zinc-400 text-xs font-medium">
                   <div className="flex items-center gap-2">
-                    <Mail className="w-3.5 h-3.5 text-slate-400" /> {user.email}
+                    <Mail className="w-3.5 h-3.5 text-zinc-400" /> {user.email}
                   </div>
                   <div className="flex items-center gap-2">
-                    <Phone className="w-3.5 h-3.5 text-slate-400" /> {user.phone}
+                    <Phone className="w-3.5 h-3.5 text-zinc-400" /> {user.phone}
                   </div>
                 </td>
                 
@@ -184,10 +184,10 @@ export default function UsersPage() {
                     <button className="text-blue-500 hover:text-blue-700 transition-colors p-1.5 hover:bg-blue-50 rounded-lg">
                       <Activity className="w-4 h-4" />
                     </button>
-                    <button className="text-slate-400 hover:text-zinc-400 transition-colors p-1.5 hover:bg-slate-100 rounded-lg">
+                    <button className="text-zinc-400 hover:text-zinc-400 transition-colors p-1.5 hover:bg-zinc-800/50 rounded-lg">
                       <Edit3 className="w-4 h-4" />
                     </button>
-                    <button className="text-slate-400 hover:text-zinc-400 transition-colors p-1.5 hover:bg-slate-100 rounded-lg">
+                    <button className="text-zinc-400 hover:text-zinc-400 transition-colors p-1.5 hover:bg-zinc-800/50 rounded-lg">
                       <MoreVertical className="w-4 h-4" />
                     </button>
                   </div>

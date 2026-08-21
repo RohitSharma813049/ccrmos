@@ -19,7 +19,7 @@ export function CrmHeader() {
       <div className="flex items-center gap-3 lg:hidden mr-3">
         <button 
           onClick={() => setIsOpen(!isOpen)}
-          className="p-2 -ml-2 text-zinc-400 hover:bg-slate-100 rounded-lg transition-colors"
+          className="p-2 -ml-2 text-zinc-400 hover:bg-zinc-800/50 rounded-lg transition-colors"
         >
           <Menu className="h-6 w-6" />
         </button>
@@ -29,7 +29,7 @@ export function CrmHeader() {
       <div className="flex-1 max-w-xl">
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-4 w-4 text-slate-400" />
+            <Search className="h-4 w-4 text-zinc-400" />
           </div>
           <input
             type="text"
@@ -42,7 +42,7 @@ export function CrmHeader() {
       {/* Right Actions */}
       <div className="flex items-center gap-6">
         {/* Notifications */}
-        <button className="relative p-2 text-zinc-400 hover:bg-slate-100 rounded-full transition-colors">
+        <button className="relative p-2 text-zinc-400 hover:bg-zinc-800/50 rounded-full transition-colors">
           <Bell className="h-5 w-5" />
           <span className="absolute top-1.5 right-1.5 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
         </button>

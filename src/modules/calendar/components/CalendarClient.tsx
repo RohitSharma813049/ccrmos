@@ -265,7 +265,7 @@ export default function CalendarClient() {
         </div>
 
         {/* Calendar Cells */}
-        <div className="grid grid-cols-7 bg-slate-100 gap-[1px]">
+        <div className="grid grid-cols-7 bg-zinc-800/50 gap-[1px]">
           {gridCells.map((day, idx) => {
             const isToday = day === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear();
             const dayEvents = day ? getEventsForDay(day) : [];
@@ -323,7 +323,7 @@ export default function CalendarClient() {
           <div className="fixed right-0 top-0 bottom-0 w-[400px] bg-zinc-900/40 backdrop-blur-xl shadow-2xl z-[9999] border-l border-zinc-700/50 flex flex-col transform transition-transform duration-300">
             <div className="p-6 border-b border-zinc-800/60 flex items-center justify-between">
               <h3 className="font-serif font-bold text-xl text-zinc-100">Event Details</h3>
-              <button onClick={() => setIsSidePanelOpen(false)} className="text-slate-400 hover:text-zinc-400 text-2xl font-light">&times;</button>
+              <button onClick={() => setIsSidePanelOpen(false)} className="text-zinc-400 hover:text-zinc-400 text-2xl font-light">&times;</button>
             </div>
             
             <div className="p-6 flex-1 overflow-y-auto space-y-6">
@@ -336,7 +336,7 @@ export default function CalendarClient() {
 
               <div className="space-y-4 bg-zinc-950/50 p-5 rounded-xl border border-zinc-800/60">
                 <div className="flex items-start gap-3">
-                  <Clock className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
+                  <Clock className="w-5 h-5 text-zinc-400 shrink-0 mt-0.5" />
                   <div>
                     <p className="text-sm font-semibold text-zinc-100">Date & Time</p>
                     <p className="text-sm text-zinc-400">{new Date(selectedEvent.startTime).toLocaleDateString()} • {new Date(selectedEvent.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(selectedEvent.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
@@ -345,7 +345,7 @@ export default function CalendarClient() {
 
                 {selectedEvent.location && (
                   <div className="flex items-start gap-3">
-                    <MapPin className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
+                    <MapPin className="w-5 h-5 text-zinc-400 shrink-0 mt-0.5" />
                     <div>
                       <p className="text-sm font-semibold text-zinc-100">Location</p>
                       <p className="text-sm text-zinc-400">{selectedEvent.location}</p>
@@ -355,7 +355,7 @@ export default function CalendarClient() {
 
                 {selectedEvent.attendees && selectedEvent.attendees.length > 0 && (
                   <div className="flex items-start gap-3">
-                    <Users className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
+                    <Users className="w-5 h-5 text-zinc-400 shrink-0 mt-0.5" />
                     <div>
                       <p className="text-sm font-semibold text-zinc-100">Attendees</p>
                       <div className="flex flex-wrap gap-1 mt-1">
@@ -387,7 +387,7 @@ export default function CalendarClient() {
           <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
             <div className="px-6 py-4 border-b border-zinc-800/60 flex items-center justify-between">
               <h3 className="font-bold text-lg text-zinc-100">{selectedEvent ? 'Edit Event' : 'Schedule Event'}</h3>
-              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-zinc-400 text-xl font-bold">&times;</button>
+              <button onClick={() => setIsModalOpen(false)} className="text-zinc-400 hover:text-zinc-400 text-xl font-bold">&times;</button>
             </div>
             <form onSubmit={handleSaveEvent} className="p-6 space-y-4">
               <div>
@@ -422,7 +422,7 @@ export default function CalendarClient() {
                 <label className="block text-sm font-medium text-zinc-300 mb-1">Location (Optional)</label>
                 <div className="flex gap-2">
                   <div className="relative flex-1">
-                    <MapPin className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                    <MapPin className="w-4 h-4 text-zinc-400 absolute left-3 top-3" />
                     <input type="text" value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} className="w-full pl-9 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Office, Zoom link, Address..." />
                   </div>
                   {formData.type === 'Meeting' && (
@@ -442,7 +442,7 @@ export default function CalendarClient() {
               <div>
                 <label className="block text-sm font-medium text-zinc-300 mb-1">Attendees (Emails, comma separated)</label>
                 <div className="relative">
-                  <Users className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                  <Users className="w-4 h-4 text-zinc-400 absolute left-3 top-3" />
                   <input type="text" value={formData.attendees} onChange={e => setFormData({...formData, attendees: e.target.value})} className="w-full pl-9 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="john@example.com, sarah@..." />
                 </div>
                 
@@ -461,7 +461,7 @@ export default function CalendarClient() {
                             const newEmails = Array.from(new Set([...current, ...teamEmails]));
                             setFormData({...formData, attendees: newEmails.join(', ')});
                           }}
-                          className="text-xs px-2.5 py-1 bg-slate-100 hover:bg-slate-200 border border-zinc-700/50 rounded-full text-zinc-300 font-medium transition-colors"
+                          className="text-xs px-2.5 py-1 bg-zinc-800/50 hover:bg-zinc-700/50 border border-zinc-700/50 rounded-full text-zinc-300 font-medium transition-colors"
                         >
                           + {team}
                         </button>

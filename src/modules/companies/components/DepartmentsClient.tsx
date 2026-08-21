@@ -278,7 +278,7 @@ export default function DepartmentsClient() {
               )}
 
               <div className="pt-4 flex items-center justify-end gap-3 border-t border-zinc-800/60 mt-6">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 text-sm font-medium text-zinc-300 hover:text-zinc-100 transition-colors bg-gray-100 hover:bg-gray-200 rounded-xl">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 text-sm font-medium text-zinc-300 hover:text-zinc-100 transition-colors bg-zinc-800/50 hover:bg-zinc-700/50 rounded-xl">
                   Cancel
                 </button>
                 <button type="submit" className="px-6 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold rounded-xl shadow-lg transition-all">

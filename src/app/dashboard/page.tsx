@@ -49,7 +49,7 @@ export default function DashboardPage() {
                         >
                           Join Now
                         </a>
-                        <button onClick={() => toast.dismiss(t.id)} className="px-3 py-1.5 bg-slate-100 text-zinc-300 rounded-md text-xs font-semibold">
+                        <button onClick={() => toast.dismiss(t.id)} className="px-3 py-1.5 bg-zinc-800/50 text-zinc-300 rounded-md text-xs font-semibold">
                           Dismiss
                         </button>
                       </div>

@@ -193,7 +193,7 @@ export default function IndustriesClient() {
               <h2 className="text-xl font-bold text-zinc-100">
                 {editingIndustry ? 'Edit Industry' : 'Add New Industry'}
               </h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-zinc-400 p-1">
+              <button onClick={() => setIsModalOpen(false)} className="text-zinc-400 hover:text-zinc-400 p-1">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -249,7 +249,7 @@ export default function IndustriesClient() {
                         const isSelected = formData.defaultModules.includes(modName);
                         if (isSelected) return null;
                         return (
-                          <label key={modName} className="flex items-center space-x-2 cursor-pointer p-1 hover:bg-gray-100 rounded transition-colors">
+                          <label key={modName} className="flex items-center space-x-2 cursor-pointer p-1 hover:bg-zinc-800/50 rounded transition-colors">
                             <input 
                               type="checkbox" 
                               checked={false}
@@ -275,7 +275,7 @@ export default function IndustriesClient() {
                             const isSelected = formData.defaultModules.includes(mod.name);
                             if (isSelected) return null;
                             return (
-                              <label key={mod._id} className="flex items-center space-x-2 cursor-pointer p-1 hover:bg-gray-100 rounded transition-colors">
+                              <label key={mod._id} className="flex items-center space-x-2 cursor-pointer p-1 hover:bg-zinc-800/50 rounded transition-colors">
                                 <input 
                                   type="checkbox" 
                                   checked={false}

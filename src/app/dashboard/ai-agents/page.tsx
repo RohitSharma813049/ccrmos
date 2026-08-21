@@ -328,18 +328,18 @@ function AgentFormModal({ onClose, onSuccess, agentToEdit }: { onClose: () => vo
       <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b border-zinc-800/60">
           <h2 className="text-xl font-bold text-[var(--foreground)]">{agentToEdit ? 'Edit AI Agent' : 'Create AI Agent'}</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-zinc-400 p-2">
+          <button onClick={onClose} className="text-zinc-400 hover:text-zinc-400 p-2">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto custom-scrollbar">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-slate-100 border border-zinc-700/50 overflow-hidden flex items-center justify-center shrink-0">
+            <div className="w-16 h-16 rounded-full bg-zinc-800/50 border border-zinc-700/50 overflow-hidden flex items-center justify-center shrink-0">
               {formData.avatarUrl ? (
                 <img src={formData.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
               ) : (
-                <Bot className="w-8 h-8 text-slate-400" />
+                <Bot className="w-8 h-8 text-zinc-400" />
               )}
             </div>
             <div>
