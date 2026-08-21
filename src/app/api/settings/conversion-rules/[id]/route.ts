@@ -4,7 +4,7 @@ import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import ConversionRule from '@/modules/settings/schemas/ConversionRule';
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -13,14 +13,15 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
     if (!userCompanyId) return NextResponse.json({ error: 'Company ID required' }, { status: 400 });
 
     await dbConnect();
-    await ConversionRule.findOneAndDelete({ _id: params.id, companyId: userCompanyId });
+    const { id } = await params;
+    await ConversionRule.findOneAndDelete({ _id: id, companyId: userCompanyId });
     return NextResponse.json({ success: true });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -31,8 +32,9 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     const body = await req.json();
     await dbConnect();
     
+    const { id } = await params;
     const updated = await ConversionRule.findOneAndUpdate(
-      { _id: params.id, companyId: userCompanyId },
+      { _id: id, companyId: userCompanyId },
       body,
       { new: true }
     );
