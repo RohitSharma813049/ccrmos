@@ -28,7 +28,7 @@ const navItems = [
   { name: 'Tasks', href: '/dashboard/tasks', icon: CheckSquare },
   { name: 'Campaigns', href: '/dashboard/campaigns', icon: Mail },
   { name: 'Commissions', href: '/dashboard/commissions', icon: CreditCard },
-  { name: 'Integrations', href: '/dashboard/integrations', icon: Puzzle },
+  { name: 'Integrations', href: '/dashboard/settings/integrations', icon: Puzzle },
 ];
 
 export function Sidebar() {
