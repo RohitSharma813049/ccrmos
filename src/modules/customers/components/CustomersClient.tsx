@@ -108,6 +108,29 @@ export default function CustomersClient() {
     }
   };
 
+  const togglePortalAccess = async (customerId: string, action: 'enable' | 'disable') => {
+    try {
+      const res = await fetch(`/api/customers/${customerId}/portal`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (action === 'enable' && data.password) {
+          alert(`Portal access enabled! The temporary password is:\n\n${data.password}\n\nPlease share this with the customer. They can log in at /portal/login.`);
+        }
+        fetchCustomers();
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to toggle portal access");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("An error occurred");
+    }
+  };
+
   const isStageDisabled = (currentStatus: string, targetStage: any) => {
     const currentIndex = pipelineStages.findIndex(s => s.name === currentStatus);
     if (currentIndex === -1) return false;
@@ -158,6 +181,30 @@ export default function CustomersClient() {
           </div>
         ) : (
           <span className="text-muted-foreground/50">None</span>
+        )}
+      </div>
+    )},
+    { header: "Portal", cell: (item) => (
+      <div>
+        {item.hasPortalAccess ? (
+          <div className="space-y-1">
+            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200">
+              Enabled
+            </span>
+            <button 
+              onClick={() => togglePortalAccess(item._id, 'disable')}
+              className="block text-xs text-destructive hover:underline mt-1"
+            >
+              Disable Access
+            </button>
+          </div>
+        ) : (
+          <button 
+            onClick={() => togglePortalAccess(item._id, 'enable')}
+            className="text-xs font-medium text-primary bg-primary/10 hover:bg-primary/20 px-2 py-1 rounded transition-colors"
+          >
+            Enable Portal
+          </button>
         )}
       </div>
     )}

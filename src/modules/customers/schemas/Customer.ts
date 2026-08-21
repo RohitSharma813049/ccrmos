@@ -19,6 +19,9 @@ export interface ICustomer extends Document {
   customData: Record<string, any>;
   createdBy?: mongoose.Types.ObjectId;
   updatedBy?: mongoose.Types.ObjectId;
+  hasPortalAccess?: boolean;
+  portalPassword?: string;
+  portalLastLogin?: Date;
   
   // Ownership Chain
   departmentId?: mongoose.Types.ObjectId;
@@ -42,6 +45,9 @@ const customerSchema = new Schema<ICustomer>({
   customData: { type: Schema.Types.Mixed, default: {} },
   createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
   updatedBy: { type: Schema.Types.ObjectId, ref: 'User' },
+  hasPortalAccess: { type: Boolean, default: false },
+  portalPassword: { type: String },
+  portalLastLogin: { type: Date },
   
   departmentId: { type: Schema.Types.ObjectId, ref: "Department" },
   directorId: { type: Schema.Types.ObjectId, ref: "User" },

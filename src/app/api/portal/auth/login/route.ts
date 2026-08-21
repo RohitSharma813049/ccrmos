@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
-import Lead from '@/modules/leads/schemas/Lead';
-import bcrypt from 'bcryptjs';
+import Customer from '@/modules/customers/schemas/Customer';
+import { createPortalToken, setPortalCookie } from '@/lib/portal-auth';
 
 export async function POST(req: Request) {
   try {
@@ -9,38 +9,36 @@ export async function POST(req: Request) {
     const { email, password } = await req.json();
 
     if (!email || !password) {
-      return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
+      return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
     }
 
-    const lead = await Lead.findOne({ email: email.toLowerCase(), hasPortalAccess: true });
+    const customer = await Customer.findOne({ email: { $regex: new RegExp(`^${email}$`, 'i') } });
 
-    if (!lead || !lead.portalPasswordHash) {
-      return NextResponse.json({ error: "Invalid credentials or portal access disabled" }, { status: 401 });
+    if (!customer) {
+      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
-    const isValid = await bcrypt.compare(password, lead.portalPasswordHash);
-
-    if (!isValid) {
-      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+    if (!customer.hasPortalAccess) {
+      return NextResponse.json({ error: 'Portal access is not enabled for this account' }, { status: 403 });
     }
 
-    // In production, sign a JWT for the client portal.
-    const token = `client_portal_token_${lead._id}`;
-    
-    const response = NextResponse.json({ 
-      message: "Logged in successfully",
-      leadId: lead._id,
-      name: `${lead.firstName} ${lead.lastName}`
-    });
-    
-    response.cookies.set('portal_session', token, { 
-      httpOnly: true, 
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/'
+    if (customer.portalPassword !== password) {
+      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+    }
+
+    // Update last login
+    customer.portalLastLogin = new Date();
+    await customer.save();
+
+    const token = await createPortalToken({
+      customerId: customer._id.toString(),
+      companyId: customer.companyId?.toString() || '',
+      email: customer.email || ''
     });
 
-    return response;
+    await setPortalCookie(token);
+
+    return NextResponse.json({ success: true });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
