@@ -176,6 +176,30 @@ export default function IntegrationsPage() {
       actionLabel: "Configure API Key",
       icon: "M13 10V3L4 14h7v7l9-11h-7z",
       color: "orange"
+    },
+    {
+      id: "stripe",
+      name: "Stripe",
+      description: "Configure your Stripe secret key to automatically mark invoices as paid when charges succeed.",
+      actionLabel: "Configure Stripe",
+      icon: "M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z",
+      color: "purple"
+    },
+    {
+      id: "twilio",
+      name: "Twilio",
+      description: "Connect Twilio to send standard SMS and manage voice calls directly from the CRM.",
+      actionLabel: "Configure Twilio",
+      icon: "M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z",
+      color: "blue"
+    },
+    {
+      id: "google",
+      name: "Google Workspace",
+      description: "Connect your Google account to sync Calendars and use the official Gmail API for outbound email.",
+      actionLabel: "Connect Google",
+      icon: "M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z",
+      color: "emerald"
     }
   ];
 
@@ -254,8 +278,6 @@ export default function IntegrationsPage() {
   const [waStatus, setWaStatus] = useState<any>(null);
   const [waLoading, setWaLoading] = useState(false);
   
-  const [isTwilioModalOpen, setIsTwilioModalOpen] = useState(false);
-
   const [isDynamicAiModalOpen, setIsDynamicAiModalOpen] = useState(false);
   const [selectedDynamicAi, setSelectedDynamicAi] = useState<any>(null);
   const [dynamicAiKey, setDynamicAiKey] = useState("");
@@ -452,7 +474,7 @@ export default function IntegrationsPage() {
       else alert(data.error || "Failed to send test email.");
     } catch (e) {
       console.error(e);
-      alert("An error occurred during testing.");
+      alert("Error testing email.");
     } finally {
       setEmailTesting(false);
     }
@@ -473,6 +495,69 @@ export default function IntegrationsPage() {
       setEmailSaving(false);
     }
   };
+
+  // Stripe
+  const [isStripeModalOpen, setIsStripeModalOpen] = useState(false);
+  const [stripeConfig, setStripeConfig] = useState({ secretKey: "", webhookSecret: "" });
+  const [stripeSaving, setStripeSaving] = useState(false);
+
+  const fetchStripeConfig = async () => {
+    try {
+      const res = await fetch("/api/settings/stripe_config");
+      const data = await res.json();
+      if (data.value) setStripeConfig(data.value);
+    } catch (e) {}
+  };
+  useEffect(() => {
+    if (isStripeModalOpen) fetchStripeConfig();
+  }, [isStripeModalOpen]);
+
+  const handleStripeSave = async () => {
+    setStripeSaving(true);
+    try {
+      await fetch("/api/settings/stripe_config", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ value: stripeConfig })
+      });
+      setIsStripeModalOpen(false);
+    } catch (e) {} finally {
+      setStripeSaving(false);
+    }
+  };
+
+  // Twilio
+  const [isTwilioModalOpen, setIsTwilioModalOpen] = useState(false);
+  const [twilioConfig, setTwilioConfig] = useState({ accountSid: "", authToken: "", fromNumber: "" });
+  const [twilioSaving, setTwilioSaving] = useState(false);
+
+  const fetchTwilioConfig = async () => {
+    try {
+      const res = await fetch("/api/settings/twilio_config");
+      const data = await res.json();
+      if (data.value) setTwilioConfig(data.value);
+    } catch (e) {}
+  };
+  useEffect(() => {
+    if (isTwilioModalOpen) fetchTwilioConfig();
+  }, [isTwilioModalOpen]);
+
+  const handleTwilioSave = async () => {
+    setTwilioSaving(true);
+    try {
+      await fetch("/api/settings/twilio_config", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ value: twilioConfig })
+      });
+      setIsTwilioModalOpen(false);
+    } catch (e) {} finally {
+      setTwilioSaving(false);
+    }
+  };
+
+  // Google Workspace
+  const [isGoogleModalOpen, setIsGoogleModalOpen] = useState(false);
 
   const fetchWaStatus = async () => {
     try {
@@ -609,6 +694,8 @@ export default function IntegrationsPage() {
                     else if (int.id === 'elevenlabs') setIsElevenLabsModalOpen(true);
                     else if (int.id === 'groq') setIsGroqModalOpen(true);
                     else if (int.id === 'twilio') setIsTwilioModalOpen(true);
+                    else if (int.id === 'stripe') setIsStripeModalOpen(true);
+                    else if (int.id === 'google') setIsGoogleModalOpen(true);
                   }}
                   className="px-5 py-2.5 bg-zinc-800/50 text-zinc-100 border border-zinc-700/50 font-medium rounded-lg hover:bg-zinc-700/50 transition-colors"
                 >
@@ -934,6 +1021,159 @@ export default function IntegrationsPage() {
                 className="px-5 py-2 text-sm font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50"
               >
                 {groqSaving ? "Saving..." : "Save Configuration"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Stripe Modal */}
+      {isStripeModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsStripeModalOpen(false)} />
+          <div className="relative bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-zinc-700/50 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg border flex items-center justify-center bg-purple-50 text-purple-600 border-purple-200">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-zinc-100">Stripe Configuration</h2>
+                <p className="text-sm text-zinc-400 mt-0.5">Enter your Stripe API keys</p>
+              </div>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-zinc-300 mb-1">Secret Key</label>
+                <input 
+                  type="password" 
+                  value={stripeConfig.secretKey}
+                  onChange={(e) => setStripeConfig({...stripeConfig, secretKey: e.target.value})}
+                  placeholder="sk_live_..."
+                  className="w-full bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-purple-500 outline-none" 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-zinc-300 mb-1">Webhook Secret (Optional)</label>
+                <input 
+                  type="password" 
+                  value={stripeConfig.webhookSecret}
+                  onChange={(e) => setStripeConfig({...stripeConfig, webhookSecret: e.target.value})}
+                  placeholder="whsec_..."
+                  className="w-full bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-purple-500 outline-none" 
+                />
+              </div>
+            </div>
+            <div className="p-4 bg-zinc-950/50 border-t border-zinc-700/50 flex justify-end gap-3">
+              <button 
+                onClick={() => setIsStripeModalOpen(false)}
+                className="px-5 py-2 text-sm font-medium text-zinc-300 bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-lg hover:bg-zinc-950/50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleStripeSave}
+                disabled={stripeSaving}
+                className="px-5 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50"
+              >
+                {stripeSaving ? "Saving..." : "Save Configuration"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Twilio Modal */}
+      {isTwilioModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsTwilioModalOpen(false)} />
+          <div className="relative bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-zinc-700/50 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg border flex items-center justify-center bg-blue-50 text-blue-600 border-blue-200">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-zinc-100">Twilio Configuration</h2>
+                <p className="text-sm text-zinc-400 mt-0.5">Enter your Twilio API keys</p>
+              </div>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-zinc-300 mb-1">Account SID</label>
+                <input 
+                  type="text" 
+                  value={twilioConfig.accountSid}
+                  onChange={(e) => setTwilioConfig({...twilioConfig, accountSid: e.target.value})}
+                  className="w-full bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none" 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-zinc-300 mb-1">Auth Token</label>
+                <input 
+                  type="password" 
+                  value={twilioConfig.authToken}
+                  onChange={(e) => setTwilioConfig({...twilioConfig, authToken: e.target.value})}
+                  className="w-full bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none" 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-zinc-300 mb-1">Twilio Phone Number</label>
+                <input 
+                  type="text" 
+                  value={twilioConfig.fromNumber}
+                  onChange={(e) => setTwilioConfig({...twilioConfig, fromNumber: e.target.value})}
+                  placeholder="+1234567890"
+                  className="w-full bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none" 
+                />
+              </div>
+            </div>
+            <div className="p-4 bg-zinc-950/50 border-t border-zinc-700/50 flex justify-end gap-3">
+              <button 
+                onClick={() => setIsTwilioModalOpen(false)}
+                className="px-5 py-2 text-sm font-medium text-zinc-300 bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-lg hover:bg-zinc-950/50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleTwilioSave}
+                disabled={twilioSaving}
+                className="px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+              >
+                {twilioSaving ? "Saving..." : "Save Configuration"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Google Modal */}
+      {isGoogleModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsGoogleModalOpen(false)} />
+          <div className="relative bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-zinc-700/50 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg border flex items-center justify-center bg-emerald-50 text-emerald-600 border-emerald-200">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-zinc-100">Google Workspace</h2>
+                <p className="text-sm text-zinc-400 mt-0.5">Connect your Google Account</p>
+              </div>
+            </div>
+            <div className="p-8 text-center space-y-4">
+              <p className="text-zinc-300 text-sm">
+                OAuth 2.0 Integration coming soon. This will allow you to sync your Google Calendar and send emails directly from your Gmail account.
+              </p>
+              <button 
+                onClick={() => setIsGoogleModalOpen(false)}
+                className="px-5 py-2 text-sm font-medium text-zinc-300 bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-lg hover:bg-zinc-950/50 transition-colors mt-4"
+              >
+                Close
               </button>
             </div>
           </div>

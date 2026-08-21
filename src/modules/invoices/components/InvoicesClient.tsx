@@ -232,6 +232,21 @@ export default function InvoicesClient() {
     }
   };
 
+  const handleStripePay = async (id: string) => {
+    try {
+      const res = await fetch(`/api/invoices/${id}/pay`, { method: "POST" });
+      const data = await res.json();
+      if (res.ok && data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || "Failed to initiate Stripe checkout");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error initiating payment");
+    }
+  };
+
   // Item management helper methods
   const addLineItem = () => {
     setLineItems(prev => [...prev, { description: `Item ${prev.length + 1}`, quantity: 1, unitPrice: 0 }]);
@@ -325,6 +340,17 @@ export default function InvoicesClient() {
     )},
     { header: "Actions", className: "text-right", cell: (item) => (
       <div className="flex items-center justify-end gap-2">
+        {item.status !== 'Paid' && (
+          <button 
+            onClick={() => handleStripePay(item._id)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors text-xs shadow-sm"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+            </svg>
+            Pay Now
+          </button>
+        )}
         <button 
           onClick={() => handleShare(item._id)}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-muted hover:bg-primary/10 text-primary hover:text-primary/80 font-medium rounded-lg transition-colors text-xs border border-transparent hover:border-primary/20"
