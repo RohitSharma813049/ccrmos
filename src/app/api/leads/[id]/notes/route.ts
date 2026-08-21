@@ -3,6 +3,7 @@ import dbConnect from '@/lib/db';
 import Lead from '@/modules/leads/schemas/Lead';
 import { requireAuthenticatedUser, requirePermission } from '@/lib/auth-utils';
 import { buildTenantQuery } from '@/lib/access-control';
+import { sendWhatsAppMessage } from '@/lib/whatsappClient';
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   await dbConnect();
@@ -27,10 +28,19 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     if (channel === "Email") {
       activityType = 'Email Sent';
       activityDescription = subject ? `Subject: ${subject}\n\n${message}` : message;
-      // TODO: In a real environment, trigger SES/Nodemailer here
+      // TODO: Simulated Email send logic
+      console.log(`[SMTP SIMULATION] Sending email to ${lead.email} with subject: ${subject}`);
     } else if (channel === "WhatsApp") {
       activityType = 'WhatsApp Sent';
-      // TODO: In a real environment, trigger Twilio API here
+      try {
+        const phone = lead.phone || lead.customData?.phoneNumber || lead.customData?.phone;
+        if (!phone) {
+          return NextResponse.json({ error: 'Lead does not have a valid phone number' }, { status: 400 });
+        }
+        await sendWhatsAppMessage(user.companyId || user.impersonatedFounderId, phone, message);
+      } catch (waError: any) {
+        return NextResponse.json({ error: waError.message || 'Failed to send WhatsApp message' }, { status: 500 });
+      }
     } else if (channel === "Call") {
       activityType = 'Call Logged';
       // message will contain call details (duration, status, etc)
