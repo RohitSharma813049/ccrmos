@@ -21,16 +21,14 @@ import {
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Inbox', href: '/dashboard/inbox', icon: MessageSquare },
+  { name: 'WhatsApp', href: '/dashboard/whatsapp', icon: Phone },
   { name: 'Tickets', href: '/dashboard/tickets', icon: LifeBuoy },
-  { name: 'Team', href: '/team', icon: Users },
-  { name: 'Leads', href: '/leads', icon: Users },
-  { name: 'Properties', href: '/properties', icon: Building2 },
-  { name: 'Projects', href: '/projects', icon: FolderKanban },
-  { name: 'Tasks', href: '/tasks', icon: CheckSquare },
-  { name: 'Campaigns', href: '/campaigns', icon: Mail },
-  { name: 'Calls', href: '/calls', icon: Phone },
-  { name: 'Commissions', href: '/commissions', icon: CreditCard },
-  { name: 'Integrations', href: '/integrations', icon: Puzzle },
+  { name: 'Leads', href: '/dashboard/leads', icon: Users },
+  { name: 'Projects', href: '/dashboard/projects', icon: FolderKanban },
+  { name: 'Tasks', href: '/dashboard/tasks', icon: CheckSquare },
+  { name: 'Campaigns', href: '/dashboard/campaigns', icon: Mail },
+  { name: 'Commissions', href: '/dashboard/commissions', icon: CreditCard },
+  { name: 'Integrations', href: '/dashboard/integrations', icon: Puzzle },
 ];
 
 export function Sidebar() {
@@ -79,12 +77,10 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Bottom Settings Link */}
       <div className="p-4 border-t border-zinc-800/60">
         <Link
-          href="/settings"
+          href="/dashboard/settings/profile"
           className={`
-            group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200
             ${pathname.startsWith('/settings') 
               ? 'bg-indigo-500/10 text-indigo-400' 
               : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-100'
