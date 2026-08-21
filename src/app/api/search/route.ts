@@ -24,8 +24,8 @@ export async function GET(req: Request) {
     // Search Leads
     const leads = await Lead.find({
       companyId,
-      $or: [{ firstName: regex }, { lastName: regex }, { email: regex }, { companyName: regex }, { displayId: regex }]
-    }).limit(5).select("_id firstName lastName companyName email displayId status");
+      $or: [{ firstName: regex }, { lastName: regex }, { email: regex }, { company: regex }, { displayId: regex }]
+    }).limit(5).select("_id firstName lastName company email displayId status");
 
     // Search Customers
     const customers = await Customer.find({
@@ -46,7 +46,7 @@ export async function GET(req: Request) {
     }).limit(5).select("_id invoiceNumber status amount displayId");
 
     const results = [
-      ...leads.map(l => ({ id: l._id, type: "Lead", title: `${l.firstName || ''} ${l.lastName || ''} - ${l.companyName || ''}`.trim() || l.email, subtitle: l.displayId, url: `/dashboard/leads?id=${l._id}` })),
+      ...leads.map(l => ({ id: l._id, type: "Lead", title: `${l.firstName || ''} ${l.lastName || ''} - ${l.company || ''}`.trim() || l.email, subtitle: l.displayId, url: `/dashboard/leads?id=${l._id}` })),
       ...customers.map(c => ({ id: c._id, type: "Customer", title: c.companyName || c.contactName || c.email, subtitle: c.email, url: `/dashboard/customers?id=${c._id}` })),
       ...projects.map(p => ({ id: p._id, type: "Project", title: p.name, subtitle: p.displayId, url: `/dashboard/projects?id=${p._id}` })),
       ...invoices.map(i => ({ id: i._id, type: "Invoice", title: i.invoiceNumber, subtitle: `$${i.amount || 0}`, url: `/dashboard/invoices?id=${i._id}` }))
