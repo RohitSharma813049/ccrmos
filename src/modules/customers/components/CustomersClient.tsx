@@ -7,6 +7,7 @@ import Button from "@/components/ui/Button";
 import DynamicFormBuilder from "@/components/ui/DynamicFormBuilder";
 import { usePermissions } from "@/hooks/usePermissions";
 import { DataTable, ColumnDef } from "@/components/ui/DataTable";
+import DocumentGeneratorModal from "@/components/ui/DocumentGeneratorModal";
 
 export default function CustomersClient() {
   const [customers, setCustomers] = useState<any[]>([]);
@@ -22,6 +23,7 @@ export default function CustomersClient() {
   const [dateTo, setDateTo] = useState("");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [generatorCustomerId, setGeneratorCustomerId] = useState<string | null>(null);
   const { hasPermission } = usePermissions();
 
   const [advancedFilters, setAdvancedFilters] = useState<any[]>([]);
@@ -207,6 +209,20 @@ export default function CustomersClient() {
           </button>
         )}
       </div>
+    )},
+    { header: "Actions", cell: (item) => (
+      <div className="flex justify-end gap-2">
+        <button 
+          onClick={() => setGeneratorCustomerId(item._id)}
+          className="text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-2 py-1 rounded transition-colors flex items-center gap-1"
+          title="Generate Document"
+        >
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+          </svg>
+          Doc
+        </button>
+      </div>
     )}
   ];
 
@@ -322,6 +338,13 @@ export default function CustomersClient() {
             </div>
           </div>
         </div>
+      )}
+
+      {generatorCustomerId && (
+        <DocumentGeneratorModal 
+          customerId={generatorCustomerId} 
+          onClose={() => setGeneratorCustomerId(null)} 
+        />
       )}
     </div>
   );
