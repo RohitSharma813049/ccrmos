@@ -25,6 +25,7 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState<"list" | "board">("list");
   const [dynamicFields, setDynamicFields] = useState<any[]>([]);
+  const [conversionRules, setConversionRules] = useState<any[]>([]);
   
   // New Filters
   const [statusFilter, setStatusFilter] = useState("");
@@ -75,7 +76,20 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
     fetchProjects();
     fetchLeads();
     fetchDynamicFields();
+    fetchConversionRules();
   }, [page, search, statusFilter, dateFrom, dateTo, viewMode]);
+
+  async function fetchConversionRules() {
+    try {
+      const res = await fetch("/api/settings/conversion-rules?sourceModule=Leads");
+      if (res.ok) {
+        const data = await res.json();
+        setConversionRules(data.rules || []);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
 
   async function fetchDynamicFields() {
     try {
@@ -384,6 +398,27 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
     }
   };
 
+  const executeDynamicConvert = async (leadId: string, ruleId: string, buttonLabel: string) => {
+    try {
+      const toastId = toast.loading(`Executing ${buttonLabel}...`);
+      const res = await fetch("/api/settings/conversion-rules/execute", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ruleId, sourceRecordId: leadId })
+      });
+      if (res.ok) {
+        setActiveDropdown(null);
+        fetchLeads();
+        toast.success(`${buttonLabel} successful!`, { id: toastId });
+      } else {
+        const err = await res.json();
+        toast.error(err.error || `Failed to ${buttonLabel}`, { id: toastId });
+      }
+    } catch (e) {
+      toast.error("An error occurred during conversion");
+    }
+  };
+
   const handleImportSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -617,15 +652,16 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
               Quick View
             </button>
-            {item.status !== "Converted" && (
+            {item.status !== "Converted" && conversionRules.map(rule => (
               <button 
-                onClick={(e) => { e.stopPropagation(); setActiveDropdown(null); setConvertModalOpen(item._id); }}
+                key={rule._id}
+                onClick={(e) => { e.stopPropagation(); executeDynamicConvert(item._id, rule._id, rule.buttonLabel); }}
                 className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors flex items-center gap-2"
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                Convert
+                <svg className="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                {rule.buttonLabel}
               </button>
-            )}
+            ))}
             <button 
               onClick={(e) => { e.stopPropagation(); setActiveDropdown(null); setSelectedLeadForEdit(item); setIsModalOpen(true); }}
               className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors flex items-center gap-2"
