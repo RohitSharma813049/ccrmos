@@ -13,6 +13,7 @@ import Button from "@/components/ui/Button";
 import { usePermissions } from "@/hooks/usePermissions";
 import { DataTable, ColumnDef } from "@/components/ui/DataTable";
 import KanbanBoard, { KanbanCard } from "@/components/ui/KanbanBoard";
+import { Device, Call } from "@twilio/voice-sdk";
 
 export default function LeadsClient({ initialShowRecycleBin = false }: { initialShowRecycleBin?: boolean }) {
   const [leads, setLeads] = useState<any[]>([]);
@@ -324,11 +325,83 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
   const [newNote, setNewNote] = useState("");
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
   const [submittingNote, setSubmittingNote] = useState(false);
-  const [communicationChannel, setCommunicationChannel] = useState<"Note"|"Email"|"WhatsApp"|"SMS">("Note");
+  const [communicationChannel, setCommunicationChannel] = useState<"Note"|"Email"|"WhatsApp"|"SMS"|"Call">("Note");
   const [emailSubject, setEmailSubject] = useState("");
 
-  const handleAddNote = async (leadId: string) => {
-    if (!newNote.trim() && !attachmentFile) return;
+  // Dialer State
+  const [twilioDevice, setTwilioDevice] = useState<Device | null>(null);
+  const [activeCall, setActiveCall] = useState<Call | null>(null);
+  const [callStatus, setCallStatus] = useState("Idle");
+
+  // Initialize Twilio Device when switching to Call tab
+  useEffect(() => {
+    if (communicationChannel === "Call" && !twilioDevice) {
+      setCallStatus("Initializing Dialer...");
+      fetch("/api/twilio/token")
+        .then(res => res.json())
+        .then(data => {
+          if (data.token) {
+            const device = new Device(data.token, {
+              codecPreferences: [Call.Codec.Opus, Call.Codec.PCMU]
+            });
+            device.on('ready', () => setCallStatus("Ready to Call"));
+            device.on('error', (err) => {
+              console.error(err);
+              setCallStatus(`Error: ${err.message}`);
+            });
+            device.register();
+            setTwilioDevice(device);
+          } else {
+            setCallStatus("Failed to get Twilio token.");
+          }
+        })
+        .catch(() => setCallStatus("Error connecting to dialer."));
+    }
+  }, [communicationChannel, twilioDevice]);
+
+  const handleDial = async () => {
+    if (!twilioDevice || !selectedLeadForDetails) return;
+    const phone = selectedLeadForDetails.phone || selectedLeadForDetails.customData?.phoneNumber || selectedLeadForDetails.customData?.phone;
+    if (!phone) {
+      toast.error("Lead has no phone number");
+      return;
+    }
+    try {
+      const call = await twilioDevice.connect({
+        params: {
+          To: phone
+        }
+      });
+      setActiveCall(call);
+      setCallStatus("Dialing...");
+      
+      call.on('accept', () => setCallStatus("In Call"));
+      call.on('disconnect', () => {
+        setCallStatus("Ready to Call");
+        setActiveCall(null);
+        // Log the call automatically
+        handleAddNote(selectedLeadForDetails._id, "Call", `Outbound call to ${phone} completed.`);
+      });
+      call.on('error', (err) => {
+        setCallStatus(`Call Error: ${err.message}`);
+        setActiveCall(null);
+      });
+    } catch (e: any) {
+      toast.error(e.message || "Failed to make call");
+    }
+  };
+
+  const handleHangup = () => {
+    if (activeCall) {
+      activeCall.disconnect();
+    }
+  };
+
+  // Generic note addition helper
+  const handleAddNote = async (leadId: string, overrideChannel?: string, overrideMessage?: string) => {
+    const channelToUse = overrideChannel || communicationChannel;
+    const msgToUse = overrideMessage || newNote;
+    if (!msgToUse.trim() && !attachmentFile) return;
     setSubmittingNote(true);
     try {
       let attachmentUrl = "";
@@ -363,12 +436,22 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
       });
       if (res.ok) {
         const data = await res.json();
-        setNewNote("");
-        setEmailSubject("");
-        setAttachmentFile(null);
-        setSelectedLeadForDetails({ ...selectedLeadForDetails, activities: data.activities, customData: data.customData });
-        fetchLeads(); // refresh the list to show new lastMessage
-        toast.success(`${communicationChannel} sent successfully`);
+        const updatedLead = { ...selectedLeadForDetails, activities: data.activities, customData: data.customData };
+        setSelectedLeadForDetails(updatedLead);
+        setLeads(leads.map(l => l._id === leadId ? updatedLead : l));
+        
+        // Only clear message if it's the manual note channel
+        if (!overrideMessage) {
+          setNewNote("");
+          setAttachmentFile(null);
+          setEmailSubject("");
+        }
+        
+        if (channelToUse !== "Note" && !overrideMessage) {
+          toast.success(`${channelToUse} Sent!`);
+        } else if (!overrideMessage) {
+          toast.success("Note Added");
+        }
       } else {
         const err = await res.json();
         toast.error(err.error || "Failed to add note");
@@ -995,8 +1078,8 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
             
             {/* Quick Notes Input */}
             <div className="p-4 bg-muted/20 border-t border-border flex flex-col gap-3 shrink-0">
-              <div className="flex items-center gap-2 mb-1 border-b border-border pb-2">
-                {(["Note", "Email", "WhatsApp", "SMS"] as const).map(channel => (
+              <div className="flex items-center gap-2 mb-1 border-b border-border pb-2 overflow-x-auto">
+                {(["Note", "Email", "WhatsApp", "SMS", "Call"] as const).map(channel => (
                   <button
                     key={channel}
                     onClick={() => setCommunicationChannel(channel)}
@@ -1005,14 +1088,16 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
                         ? channel === "WhatsApp" ? "bg-green-100 text-green-700 border border-green-200" 
                         : channel === "Email" ? "bg-blue-100 text-blue-700 border border-blue-200"
                         : channel === "SMS" ? "bg-purple-100 text-purple-700 border border-purple-200"
+                        : channel === "Call" ? "bg-orange-100 text-orange-700 border border-orange-200"
                         : "bg-primary text-primary-foreground border border-primary"
-                        : "bg-transparent text-muted-foreground hover:bg-muted"
+                        : "bg-transparent text-muted-foreground hover:bg-muted whitespace-nowrap"
                     }`}
                   >
                     {channel === "Note" && "Internal Note"}
                     {channel === "Email" && "Send Email"}
                     {channel === "WhatsApp" && "Send WhatsApp"}
                     {channel === "SMS" && "Send SMS"}
+                    {channel === "Call" && "Dialer"}
                   </button>
                 ))}
               </div>
@@ -1027,9 +1112,25 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
                 />
               )}
 
-              <div className="flex gap-2">
-                <textarea 
-                  value={newNote}
+              {communicationChannel === "Call" && (
+                <div className="flex flex-col items-center justify-center py-4 bg-zinc-950 rounded-xl border border-zinc-800">
+                  <div className="text-zinc-400 text-xs mb-2">Status: <span className="font-medium text-zinc-100">{callStatus}</span></div>
+                  {activeCall ? (
+                    <button onClick={handleHangup} className="w-16 h-16 rounded-full bg-red-600 flex items-center justify-center text-white hover:bg-red-700 shadow-lg shadow-red-900/50 transition-transform active:scale-95">
+                      <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 8l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M5 3a2 2 0 00-2 2v1c0 8.284 6.716 15 15 15h1a2 2 0 002-2v-3.28a1 1 0 00-.684-.948l-4.493-1.498a1 1 0 00-1.21.502l-1.13 2.257a11.042 11.042 0 01-5.516-5.517l2.257-1.128a1 1 0 00.502-1.21L9.228 3.683A1 1 0 008.279 3H5z" /></svg>
+                    </button>
+                  ) : (
+                    <button onClick={handleDial} disabled={callStatus !== "Ready to Call"} className="w-16 h-16 rounded-full bg-emerald-600 flex items-center justify-center text-white hover:bg-emerald-700 shadow-lg shadow-emerald-900/50 transition-transform active:scale-95 disabled:opacity-50">
+                      <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {communicationChannel !== "Call" && (
+                <div className="flex gap-2">
+                  <textarea 
+                    value={newNote}
                   onChange={(e) => setNewNote(e.target.value)}
                   placeholder={
                     communicationChannel === "Note" ? "Type an internal note..." :
@@ -1052,14 +1153,17 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
                   {submittingNote ? '...' : 'Send'}
                 </button>
               </div>
-              <div className="flex items-center gap-2 mt-1">
-                <label className="cursor-pointer text-xs flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
-                  Attach File
-                  <input type="file" className="hidden" onChange={(e) => setAttachmentFile(e.target.files?.[0] || null)} />
-                </label>
-                {attachmentFile && <span className="text-xs text-primary truncate max-w-[200px]">{attachmentFile.name}</span>}
-              </div>
+              )}
+              {communicationChannel !== "Call" && (
+                <div className="flex items-center gap-2 mt-1">
+                  <label className="cursor-pointer text-xs flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
+                    Attach File
+                    <input type="file" className="hidden" onChange={(e) => setAttachmentFile(e.target.files?.[0] || null)} />
+                  </label>
+                  {attachmentFile && <span className="text-xs text-primary truncate max-w-[200px]">{attachmentFile.name}</span>}
+                </div>
+              )}
               <div className="flex justify-end mt-2">
                 <button 
                   onClick={() => setScheduleFollowUpModalOpen(true)}
