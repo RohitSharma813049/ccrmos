@@ -110,9 +110,16 @@ export async function POST(req: Request) {
       if (newHierarchyLevel <= authUser.hierarchyLevel) {
         return NextResponse.json({ error: "Forbidden: Cannot create users at or above your own hierarchy level." }, { status: 403 });
       }
+      
+      if (body.role) {
+        body.roleModel = "Role";
+      }
     } else {
       body.companyId = authUser.companyId || null;
       body.founderId = null;
+      if (body.role) {
+        body.roleModel = "GlobalRole"; // Platform owners assign global roles
+      }
     }
 
     // In a real system, you would send an invite email and they would set their password.
@@ -151,6 +158,14 @@ export async function PUT(req: Request) {
       
       if (updateData.hierarchyLevel && updateData.hierarchyLevel <= authUser.hierarchyLevel && targetUser._id.toString() !== authUser.id) {
         return NextResponse.json({ error: "Forbidden: Cannot promote users to or above your own hierarchy level." }, { status: 403 });
+      }
+
+      if (updateData.role) {
+        updateData.roleModel = "Role";
+      }
+    } else {
+      if (updateData.role) {
+        updateData.roleModel = "GlobalRole";
       }
     }
 

@@ -3,6 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import dbConnect from "@/lib/db";
 import User from "@/modules/users/schemas/User";
 import "@/modules/owner/schemas/GlobalRole"; // Side-effect import to prevent tree-shaking
+import "@/modules/users/schemas/Role"; // Side-effect import to prevent tree-shaking
 
 export const authOptions: NextAuthOptions = {
   providers: [

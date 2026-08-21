@@ -122,12 +122,13 @@ export default function RolesManager() {
     if (!confirm("Are you sure you want to delete this role?")) return;
     
     try {
-      const res = await fetch(`/api/owner/roles?id=${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/roles?id=${id}`, { method: "DELETE" });
       if (res.ok) {
         toast.success("Role deleted successfully!");
         fetchRoles();
       } else {
-        toast.error("Failed to delete role.");
+        const errData = await res.json().catch(() => ({}));
+        toast.error(`Failed to delete role: ${errData.error || res.statusText}`);
       }
     } catch (e) {
       console.error(e);
