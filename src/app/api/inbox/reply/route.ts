@@ -23,7 +23,7 @@ export async function POST(req: Request) {
       companyId: user.companyId,
       leadId: originalLog?.leadId,
       customerId: originalLog?.customerId,
-      userId: user._id,
+      agentId: user._id,
       channel: channel || "Email",
       direction: "outbound",
       status: "sent",
