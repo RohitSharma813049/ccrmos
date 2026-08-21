@@ -38,7 +38,7 @@ export async function getTeamMembers() {
       email: user.email,
       role: (user.role as any)?.name || 'Agent',
       status,
-      lastActive: user.updatedAt ? new Date(user.updatedAt).toLocaleDateString() : 'Never'
+      lastActive: (user as any).updatedAt ? new Date((user as any).updatedAt).toLocaleDateString() : 'Never'
     };
   });
   
