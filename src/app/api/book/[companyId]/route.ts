@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Task from '@/modules/tasks/schemas/Task';
 import Lead from '@/modules/leads/schemas/Lead';
-import Company from '@/modules/core/schemas/Company';
+import Company from '@/modules/companies/schemas/Company';
 import { evaluateWorkflows } from '@/modules/automation/services/workflow.service';
 import CallLog from '@/modules/core/schemas/CallLog';
 import mongoose from 'mongoose';
