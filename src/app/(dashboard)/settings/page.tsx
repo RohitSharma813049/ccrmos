@@ -1,17 +1,19 @@
 'use client';
 
 import React, { useState } from 'react';
-import { User, Key, Webhook } from 'lucide-react';
+import { User, Key, Webhook, Smartphone } from 'lucide-react';
 import { ApiKeysTab } from '@/components/settings/ApiKeysTab';
 import { WebhooksTab } from '@/components/settings/WebhooksTab';
+import { WhatsAppTab } from '@/components/settings/WhatsAppTab';
 
-type TabId = 'profile' | 'apikeys' | 'webhooks';
+type TabId = 'profile' | 'apikeys' | 'webhooks' | 'whatsapp';
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<TabId>('apikeys');
 
   const tabs = [
     { id: 'profile', name: 'Profile', icon: User },
+    { id: 'whatsapp', name: 'WhatsApp', icon: Smartphone },
     { id: 'apikeys', name: 'API Keys', icon: Key },
     { id: 'webhooks', name: 'Webhooks', icon: Webhook },
   ];
@@ -66,6 +68,7 @@ export default function SettingsPage() {
             </div>
           )}
           
+          {activeTab === 'whatsapp' && <WhatsAppTab />}
           {activeTab === 'apikeys' && <ApiKeysTab />}
           {activeTab === 'webhooks' && <WebhooksTab />}
         </div>

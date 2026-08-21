@@ -64,3 +64,4 @@
 - - [x] Build Billing & Subscription Hub 
 - - [x] Build Team & Access Management 
 - - [x] Build Tasks & Workflows 
+- - [x] Build WhatsApp UI Widget 
