@@ -1,42 +1,67 @@
-const CACHE_NAME = 'crmos-cache-v2';
-const API_CACHE = 'crmos-api-cache';
+const CACHE_NAME = 'crmos-cache-v3';
+const API_CACHE = 'crmos-api-cache-v3';
 
 self.addEventListener('install', function (event) {
+  // Force new service worker to install immediately
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then(function (cache) {
       return cache.addAll([
         '/',
         '/dashboard',
         '/manifest.json'
-      ]);
+      ]).catch((err) => console.warn('Failed to pre-cache some assets:', err));
     })
   );
 });
 
-self.addEventListener('fetch', function (event) {
-  const url = new URL(event.request.url);
-
-  // API Requests: Network First, fallback to cache
-  if (url.pathname.startsWith('/api/')) {
-    event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          const responseClone = response.clone();
-          caches.open(API_CACHE).then((cache) => {
-            cache.put(event.request, responseClone);
-          });
-          return response;
+self.addEventListener('activate', function (event) {
+  // Claim clients immediately and clear old caches
+  event.waitUntil(
+    caches.keys().then(function (cacheNames) {
+      return Promise.all(
+        cacheNames.map(function (cacheName) {
+          if (cacheName !== CACHE_NAME && cacheName !== API_CACHE) {
+            return caches.delete(cacheName);
+          }
         })
-        .catch(() => caches.match(event.request))
-    );
-    return;
-  }
+      );
+    }).then(() => self.clients.claim())
+  );
+});
 
-  // Static assets: Cache First, fallback to network
+self.addEventListener('fetch', function (event) {
+  // Only handle GET requests
+  if (event.request.method !== 'GET') return;
+
+  const url = new URL(event.request.url);
+  
+  // Skip chrome-extension requests or other non-http schemes
+  if (!url.protocol.startsWith('http')) return;
+
+  // Network First strategy for everything to ensure fresh Next.js chunks
   event.respondWith(
-    caches.match(event.request).then(function (response) {
-      return response || fetch(event.request);
-    })
+    fetch(event.request)
+      .then((response) => {
+        // Don't cache non-successful responses
+        if (!response || response.status !== 200 || response.type !== 'basic') {
+          return response;
+        }
+        
+        // Cache successful network responses
+        const responseClone = response.clone();
+        const cacheToUse = url.pathname.startsWith('/api/') ? API_CACHE : CACHE_NAME;
+        
+        caches.open(cacheToUse).then((cache) => {
+          cache.put(event.request, responseClone);
+        });
+        
+        return response;
+      })
+      .catch(() => {
+        // Fallback to cache if network fails (offline)
+        return caches.match(event.request);
+      })
   );
 });
 
