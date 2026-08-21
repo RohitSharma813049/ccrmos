@@ -11,7 +11,9 @@ import {
   RefreshCcw,
   ChevronRight,
   ChevronDown,
-  AlertTriangle
+  AlertTriangle,
+  Settings,
+  X
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import Link from 'next/link'
@@ -40,6 +42,9 @@ export default function FbLeadsPage() {
   const [expandedCampaign, setExpandedCampaign] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [isSyncing, setIsSyncing] = useState(false)
+  const [isConfigOpen, setIsConfigOpen] = useState(false)
+  const [accessToken, setAccessToken] = useState("")
+  const [isSavingConfig, setIsSavingConfig] = useState(false)
 
   useEffect(() => {
     fetchData()
@@ -74,13 +79,64 @@ export default function FbLeadsPage() {
 
   const handleSync = async () => {
     setIsSyncing(true)
-    // Simulate sync
-    setTimeout(() => {
-      setIsSyncing(false)
-      toast.success('Synced successfully with Meta')
-      fetchData()
-    }, 1500)
+    try {
+      const res = await fetch('/api/leads/meta/sync', { method: 'POST' });
+      if (res.ok) {
+        const data = await res.json();
+        toast.success(`Successfully synced ${data.imported || 0} new leads from Meta!`);
+        fetchData();
+      } else {
+        const err = await res.json();
+        if (err.error === "Meta API Access Token not configured.") {
+          toast.error("Please configure your Meta API Access Token first.");
+          setIsConfigOpen(true);
+        } else {
+          toast.error(err.error || 'Sync failed');
+        }
+      }
+    } catch (error) {
+      toast.error('An error occurred during sync');
+    } finally {
+      setIsSyncing(false);
+    }
   }
+
+  const loadConfig = async () => {
+    try {
+      const res = await fetch('/api/settings/fb-leads');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.config) {
+          setAccessToken(data.config.accessToken || "");
+        }
+      }
+    } catch (e) {}
+  }
+
+  const saveConfig = async () => {
+    setIsSavingConfig(true);
+    try {
+      const res = await fetch('/api/settings/fb-leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accessToken })
+      });
+      if (res.ok) {
+        toast.success('Configuration saved');
+        setIsConfigOpen(false);
+      } else {
+        toast.error('Failed to save configuration');
+      }
+    } catch (e) {
+      toast.error('Error saving config');
+    } finally {
+      setIsSavingConfig(false);
+    }
+  }
+
+  useEffect(() => {
+    if (isConfigOpen) loadConfig();
+  }, [isConfigOpen]);
 
   const totalLeads = campaigns.reduce((acc, c) => acc + c.leads.length, 0)
   const totalProcessed = campaigns.reduce((acc, c) => acc + c.processed, 0)
@@ -131,6 +187,13 @@ export default function FbLeadsPage() {
             <p className="text-muted-foreground text-sm mt-1">Manage leads captured directly from Meta forms</p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <button 
+              onClick={() => setIsConfigOpen(true)}
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-card hover:bg-muted border border-border text-foreground rounded-xl text-sm font-medium transition-all shadow-sm"
+            >
+              <Settings className="w-4 h-4" />
+              API Config
+            </button>
             <Link href="/dashboard/campaign-settings" className="flex items-center justify-center gap-2 px-4 py-2 bg-card hover:bg-muted border border-border text-foreground rounded-xl text-sm font-medium transition-all shadow-sm">
               <Plus className="w-4 h-4" />
               Manage Maps
@@ -238,6 +301,49 @@ export default function FbLeadsPage() {
           </div>
         )}
       </div>
+
+      {isConfigOpen && (
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-card border border-border rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between p-5 border-b border-border">
+              <h3 className="text-lg font-bold">Meta Graph API Config</h3>
+              <button onClick={() => setIsConfigOpen(false)} className="text-muted-foreground hover:text-foreground">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1 text-foreground">System User Access Token</label>
+                <textarea
+                  value={accessToken}
+                  onChange={(e) => setAccessToken(e.target.value)}
+                  className="w-full h-32 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary font-mono"
+                  placeholder="EAAGm0PX4ZC... (Long lived access token with leads_retrieval and pages_manage_metadata permissions)"
+                />
+                <p className="text-xs text-muted-foreground mt-2">
+                  This token requires <code className="bg-muted px-1 py-0.5 rounded">leads_retrieval</code> and <code className="bg-muted px-1 py-0.5 rounded">pages_manage_metadata</code> permissions.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-3 p-5 border-t border-border bg-muted/20">
+              <button 
+                onClick={() => setIsConfigOpen(false)}
+                className="px-4 py-2 text-sm font-medium rounded-xl border border-border hover:bg-muted"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={saveConfig}
+                disabled={isSavingConfig}
+                className="px-5 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-xl hover:bg-primary/90 disabled:opacity-50 flex items-center gap-2"
+              >
+                {isSavingConfig ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : null}
+                Save Configuration
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
