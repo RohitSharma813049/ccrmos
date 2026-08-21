@@ -3,18 +3,24 @@
 import React, { useEffect, useState } from 'react'
 import { SummaryCard } from '@/components/crm/summary-card'
 import { ActivityList, ActivityItemProps } from '@/components/crm/activity-list'
+import LeadStatusChart from '@/components/analytics/LeadStatusChart'
+import BookingRevenueChart from '@/components/analytics/BookingRevenueChart'
 import { Users, Building, Calendar, Phone, MapPin, CheckCircle } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 
 export default function DashboardClient() {
   const [stats, setStats] = useState<any>(null);
+  const [analytics, setAnalytics] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchData = () => {
-    fetch('/api/dashboard/stats')
-      .then(res => res.json())
-      .then(data => {
+    Promise.all([
+      fetch('/api/dashboard/stats').then(res => res.json()),
+      fetch('/api/dashboard/analytics').then(res => res.json())
+    ])
+      .then(([data, analyticsData]) => {
         setStats(data);
+        setAnalytics(analyticsData);
         setLoading(false);
 
         // Check for upcoming meetings (within 15 minutes)
@@ -108,6 +114,11 @@ export default function DashboardClient() {
             {...item}
           />
         ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <LeadStatusChart data={analytics?.leadStatusData || []} />
+        <BookingRevenueChart data={analytics?.bookingRevenueData || []} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
