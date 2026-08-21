@@ -102,7 +102,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ company
       direction: 'inbound',
       status: 'completed',
       notes: `Customer booked a meeting for ${meetingDate.toLocaleString()}`,
-      toNumber: company.phone || "System",
+      toNumber: "System",
       fromNumber: phone || email
     });
 
