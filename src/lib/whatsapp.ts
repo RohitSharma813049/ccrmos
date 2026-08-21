@@ -65,12 +65,16 @@ if (!client.listenerCount('qr')) {
     // Client must be re-initialized when disconnected
   });
 
-  // Only call initialize if it hasn't been initialized yet
-  // whatsapp-web.js can throw an error if initialize is called multiple times
-  try {
-    client.initialize();
-  } catch (e) {
-    console.log('WhatsApp client already initializing', e);
+  // Prevent Puppeteer from crashing the Vercel build process
+  // Vercel sets CI=1 during the build phase, but not at runtime
+  if (process.env.CI || process.env.VERCEL_ENV === 'production' && !process.env.NEXT_PUBLIC_SITE_URL) {
+    console.log('Skipping WhatsApp initialization during build phase');
+  } else {
+    try {
+      client.initialize();
+    } catch (e) {
+      console.log('WhatsApp client already initializing', e);
+    }
   }
 }
 
