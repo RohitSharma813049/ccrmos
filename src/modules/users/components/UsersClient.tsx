@@ -229,7 +229,7 @@ export default function UsersClient({ isOwner = false }: { isOwner?: boolean }) 
             
             <div className="p-6 overflow-y-auto flex-1">
               <form id="user-form" onSubmit={handleSave} className="space-y-6">
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-zinc-300 mb-1">Full Name</label>
                     <input 
@@ -284,7 +284,7 @@ export default function UsersClient({ isOwner = false }: { isOwner?: boolean }) 
 
                 <div className="pt-6 border-t border-zinc-800/60">
                   <h3 className="text-lg font-bold text-zinc-100 mb-4">Reporting Structure</h3>
-                  <div className="grid grid-cols-1 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     
                     {formData.hierarchyLevel > 3 && (
                       <div>

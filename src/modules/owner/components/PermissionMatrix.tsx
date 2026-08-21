@@ -99,7 +99,7 @@ export default function PermissionMatrix({ role, isOpen, onClose }: PermissionMa
         </div>
 
         <div className="overflow-y-auto p-6 bg-zinc-950/50 flex-grow">
-          <div className="bg-zinc-900/40 backdrop-blur-xl rounded-xl border border-zinc-700/50 overflow-hidden shadow-sm">
+          <div className="bg-zinc-900/40 backdrop-blur-xl rounded-xl border border-zinc-700/50 overflow-x-auto shadow-sm">
             <table className="w-full border-collapse">
               <thead>
                 <tr className="border-b border-zinc-700/50 bg-zinc-950/50/50">

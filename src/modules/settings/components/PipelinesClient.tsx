@@ -127,35 +127,37 @@ export default function PipelinesClient() {
             <p className="mt-1 text-sm">Add custom statuses for the {selectedModule} module.</p>
           </div>
         ) : (
-          <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-zinc-900/80 border-b border-zinc-800/60 text-zinc-400 font-medium">
-              <tr>
-                <th className="px-6 py-4">Order</th>
-                <th className="px-6 py-4">Name</th>
-                <th className="px-6 py-4">Type</th>
-                <th className="px-6 py-4">Color</th>
-                <th className="px-6 py-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-800/40">
-              {statuses.map((status) => (
-                <tr key={status._id} className="hover:bg-zinc-800/20 transition-colors">
-                  <td className="px-6 py-4 text-zinc-400">{status.order}</td>
-                  <td className="px-6 py-4 font-medium text-zinc-100">{status.name}</td>
-                  <td className="px-6 py-4 capitalize text-zinc-400">{status.type}</td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 rounded-full" style={{ backgroundColor: status.color }}></div>
-                      <span className="text-zinc-500 font-mono text-xs">{status.color}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <button onClick={() => deleteStatus(status._id)} className="text-red-400 hover:text-red-300 text-xs font-medium">Delete</button>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm whitespace-nowrap">
+              <thead className="bg-zinc-900/80 border-b border-zinc-800/60 text-zinc-400 font-medium">
+                <tr>
+                  <th className="px-6 py-4">Order</th>
+                  <th className="px-6 py-4">Name</th>
+                  <th className="px-6 py-4">Type</th>
+                  <th className="px-6 py-4">Color</th>
+                  <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-zinc-800/40">
+                {statuses.map((status) => (
+                  <tr key={status._id} className="hover:bg-zinc-800/20 transition-colors">
+                    <td className="px-6 py-4 text-zinc-400">{status.order}</td>
+                    <td className="px-6 py-4 font-medium text-zinc-100">{status.name}</td>
+                    <td className="px-6 py-4 capitalize text-zinc-400">{status.type}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 rounded-full" style={{ backgroundColor: status.color }}></div>
+                        <span className="text-zinc-500 font-mono text-xs">{status.color}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <button onClick={() => deleteStatus(status._id)} className="text-red-400 hover:text-red-300 text-xs font-medium">Delete</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
@@ -176,7 +178,7 @@ export default function PipelinesClient() {
                   <option value="stage">Pipeline Stage</option>
                 </select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-zinc-400 mb-1">Order Index</label>
                   <input type="number" value={formData.order} onChange={e => setFormData({...formData, order: Number(e.target.value)})} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2 text-zinc-100" />

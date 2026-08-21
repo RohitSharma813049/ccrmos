@@ -130,17 +130,18 @@ export default function ConversionsClient() {
             <p className="mt-1 text-sm">Create mappings to convert data across modules.</p>
           </div>
         ) : (
-          <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-zinc-900/80 border-b border-zinc-800/60 text-zinc-400 font-medium">
-              <tr>
-                <th className="px-6 py-4">Source Module</th>
-                <th className="px-6 py-4">Target Module</th>
-                <th className="px-6 py-4">Button Label</th>
-                <th className="px-6 py-4">Mapped Fields</th>
-                <th className="px-6 py-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-800/40">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm whitespace-nowrap">
+              <thead className="bg-zinc-900/80 border-b border-zinc-800/60 text-zinc-400 font-medium">
+                <tr>
+                  <th className="px-6 py-4">Source Module</th>
+                  <th className="px-6 py-4">Target Module</th>
+                  <th className="px-6 py-4">Button Label</th>
+                  <th className="px-6 py-4">Mapped Fields</th>
+                  <th className="px-6 py-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-800/40">
               {rules.map((rule) => (
                 <tr key={rule._id} className="hover:bg-zinc-800/20 transition-colors">
                   <td className="px-6 py-4 font-medium text-zinc-100">{rule.sourceModule}</td>
@@ -155,7 +156,8 @@ export default function ConversionsClient() {
                 </tr>
               ))}
             </tbody>
-          </table>
+            </table>
+          </div>
         )}
       </div>
 
@@ -165,7 +167,7 @@ export default function ConversionsClient() {
           <div className="relative bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6">
             <h2 className="text-xl font-bold text-zinc-100 mb-6">Create Conversion Rule</h2>
             <form className="space-y-6" onSubmit={saveRule}>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-zinc-400 mb-1">Source Module</label>
                   <select value={formData.sourceModule} onChange={e => setFormData({...formData, sourceModule: e.target.value})} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2 text-zinc-100">

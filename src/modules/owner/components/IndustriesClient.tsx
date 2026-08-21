@@ -244,7 +244,7 @@ export default function IndustriesClient() {
                   {/* Basic CRM Core Modules */}
                   <div>
                     <h4 className="text-xs font-bold text-zinc-400 uppercase mb-2 tracking-wider">Base CRM Modules</h4>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       {CORE_MODULES.map(modName => {
                         const isSelected = formData.defaultModules.includes(modName);
                         if (isSelected) return null;
@@ -270,7 +270,7 @@ export default function IndustriesClient() {
                     return (
                       <div key={scope} className="pt-4 border-t border-zinc-700/50">
                         <h4 className="text-xs font-bold text-zinc-400 uppercase mb-2 tracking-wider">{scope} Scope Custom Modules</h4>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           {scopedModules.map(mod => {
                             const isSelected = formData.defaultModules.includes(mod.name);
                             if (isSelected) return null;
