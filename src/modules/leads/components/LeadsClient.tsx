@@ -325,8 +325,12 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
   const [newNote, setNewNote] = useState("");
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
   const [submittingNote, setSubmittingNote] = useState(false);
-  const [communicationChannel, setCommunicationChannel] = useState<"Note"|"Email"|"WhatsApp"|"SMS"|"Call">("Note");
+  const [communicationChannel, setCommunicationChannel] = useState<"Note"|"Email"|"WhatsApp"|"SMS"|"Call"|"Inbox">("Note");
   const [emailSubject, setEmailSubject] = useState("");
+  
+  // Inbox State
+  const [leadEmails, setLeadEmails] = useState<any[]>([]);
+  const [loadingEmails, setLoadingEmails] = useState(false);
 
   // Dialer State
   const [twilioDevice, setTwilioDevice] = useState<Device | null>(null);
@@ -358,6 +362,27 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
         .catch(() => setCallStatus("Error connecting to dialer."));
     }
   }, [communicationChannel, twilioDevice]);
+
+  // Fetch emails when switching to Inbox tab
+  useEffect(() => {
+    if (communicationChannel === "Inbox" && selectedLeadForDetails) {
+      setLoadingEmails(true);
+      fetch(`/api/leads/${selectedLeadForDetails._id}/emails`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.emails) {
+            setLeadEmails(data.emails);
+          } else {
+            toast.error(data.error || "Failed to load emails");
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          toast.error("Failed to load emails");
+        })
+        .finally(() => setLoadingEmails(false));
+    }
+  }, [communicationChannel, selectedLeadForDetails]);
 
   const handleDial = async () => {
     if (!twilioDevice || !selectedLeadForDetails) return;
@@ -1079,7 +1104,7 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
             {/* Quick Notes Input */}
             <div className="p-4 bg-muted/20 border-t border-border flex flex-col gap-3 shrink-0">
               <div className="flex items-center gap-2 mb-1 border-b border-border pb-2 overflow-x-auto">
-                {(["Note", "Email", "WhatsApp", "SMS", "Call"] as const).map(channel => (
+                {(["Note", "Email", "WhatsApp", "SMS", "Call", "Inbox"] as const).map(channel => (
                   <button
                     key={channel}
                     onClick={() => setCommunicationChannel(channel)}
@@ -1089,6 +1114,7 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
                         : channel === "Email" ? "bg-blue-100 text-blue-700 border border-blue-200"
                         : channel === "SMS" ? "bg-purple-100 text-purple-700 border border-purple-200"
                         : channel === "Call" ? "bg-orange-100 text-orange-700 border border-orange-200"
+                        : channel === "Inbox" ? "bg-indigo-100 text-indigo-700 border border-indigo-200"
                         : "bg-primary text-primary-foreground border border-primary"
                         : "bg-transparent text-muted-foreground hover:bg-muted whitespace-nowrap"
                     }`}
@@ -1098,6 +1124,7 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
                     {channel === "WhatsApp" && "Send WhatsApp"}
                     {channel === "SMS" && "Send SMS"}
                     {channel === "Call" && "Dialer"}
+                    {channel === "Inbox" && "Inbox"}
                   </button>
                 ))}
               </div>
@@ -1127,7 +1154,34 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
                 </div>
               )}
 
-              {communicationChannel !== "Call" && (
+              {communicationChannel === "Inbox" && (
+                <div className="flex flex-col gap-2 max-h-[300px] overflow-y-auto">
+                  {loadingEmails ? (
+                    <div className="flex justify-center p-4">
+                      <span className="text-muted-foreground text-sm">Loading emails...</span>
+                    </div>
+                  ) : leadEmails.length === 0 ? (
+                    <div className="text-center p-4 text-muted-foreground text-sm bg-card border border-border rounded-lg">
+                      No emails found.
+                    </div>
+                  ) : (
+                    leadEmails.map((email: any) => (
+                      <div key={email.id} className="bg-card border border-border rounded-lg p-3 shadow-sm text-sm">
+                        <div className="flex justify-between items-start mb-1">
+                          <span className="font-semibold text-foreground truncate max-w-[70%]">{email.subject}</span>
+                          <span className="text-xs text-muted-foreground whitespace-nowrap">{new Date(email.date).toLocaleDateString()}</span>
+                        </div>
+                        <div className="text-xs text-muted-foreground mb-2 truncate">
+                          From: {email.from}
+                        </div>
+                        <p className="text-foreground/80 line-clamp-3 leading-relaxed">{email.snippet}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+
+              {communicationChannel !== "Call" && communicationChannel !== "Inbox" && (
                 <div className="flex gap-2">
                   <textarea 
                     value={newNote}
@@ -1154,7 +1208,7 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
                 </button>
               </div>
               )}
-              {communicationChannel !== "Call" && (
+              {communicationChannel !== "Call" && communicationChannel !== "Inbox" && (
                 <div className="flex items-center gap-2 mt-1">
                   <label className="cursor-pointer text-xs flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
