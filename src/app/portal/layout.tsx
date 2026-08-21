@@ -26,6 +26,7 @@ export default async function PortalLayout({
                 <Link href="/portal" className="text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors">Dashboard</Link>
                 <Link href="/portal/projects" className="text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors">Projects</Link>
                 <Link href="/portal/invoices" className="text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors">Invoices</Link>
+                <Link href="/portal/tickets" className="text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors">Support</Link>
               </nav>
             )}
           </div>

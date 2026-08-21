@@ -14,12 +14,14 @@ import {
   Settings,
   Puzzle,
   CheckSquare,
-  MessageSquare
+  MessageSquare,
+  LifeBuoy
 } from 'lucide-react';
 
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Inbox', href: '/dashboard/inbox', icon: MessageSquare },
+  { name: 'Tickets', href: '/dashboard/tickets', icon: LifeBuoy },
   { name: 'Team', href: '/team', icon: Users },
   { name: 'Leads', href: '/leads', icon: Users },
   { name: 'Properties', href: '/properties', icon: Building2 },
