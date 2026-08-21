@@ -26,7 +26,7 @@ export async function POST(req: Request) {
       agentId: user._id,
       channel: channel || "Email",
       direction: "outbound",
-      status: "sent",
+      status: "completed",
       notes: content,
       toNumber: to,
     });
