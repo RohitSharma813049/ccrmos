@@ -208,6 +208,14 @@ export default function IntegrationsPage() {
       actionLabel: "Connect Zoom",
       icon: "M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z",
       color: "blue"
+    },
+    {
+      id: "quickbooks",
+      name: "QuickBooks Online",
+      description: "Connect QuickBooks to automatically sync and generate invoices for your accounting records.",
+      actionLabel: "Connect QuickBooks",
+      icon: "M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z",
+      color: "emerald"
     }
   ];
 
@@ -624,6 +632,36 @@ export default function IntegrationsPage() {
     }
   };
 
+  // QuickBooks
+  const [isQuickBooksModalOpen, setIsQuickBooksModalOpen] = useState(false);
+  const [quickBooksConfig, setQuickBooksConfig] = useState({ clientId: "", clientSecret: "" });
+  const [quickBooksSaving, setQuickBooksSaving] = useState(false);
+
+  const fetchQuickBooksConfig = async () => {
+    try {
+      const res = await fetch("/api/settings/quickbooks_config");
+      const data = await res.json();
+      if (data.value) setQuickBooksConfig(data.value);
+    } catch (e) {}
+  };
+  useEffect(() => {
+    if (isQuickBooksModalOpen) fetchQuickBooksConfig();
+  }, [isQuickBooksModalOpen]);
+
+  const handleQuickBooksSave = async () => {
+    setQuickBooksSaving(true);
+    try {
+      await fetch("/api/settings/quickbooks_config", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ value: quickBooksConfig })
+      });
+      setIsQuickBooksModalOpen(false);
+    } catch (e) {} finally {
+      setQuickBooksSaving(false);
+    }
+  };
+
   const fetchWaStatus = async () => {
     try {
       const res = await fetch("/api/settings/whatsapp");
@@ -762,6 +800,7 @@ export default function IntegrationsPage() {
                     else if (int.id === 'stripe') setIsStripeModalOpen(true);
                     if (int.id === 'google') return setIsGoogleModalOpen(true);
                     if (int.id === 'zoom') return setIsZoomModalOpen(true);
+                    if (int.id === 'quickbooks') return setIsQuickBooksModalOpen(true);
                   }}
                   className="px-5 py-2.5 bg-zinc-800/50 text-zinc-100 border border-zinc-700/50 font-medium rounded-lg hover:bg-zinc-700/50 transition-colors"
                 >
@@ -1445,6 +1484,61 @@ export default function IntegrationsPage() {
                 <button onClick={() => setIsZoomModalOpen(false)} className="px-4 py-2 text-sm font-medium hover:bg-muted rounded-lg">Cancel</button>
                 <button onClick={handleZoomSave} disabled={zoomSaving} className="px-4 py-2 text-sm font-semibold bg-primary text-primary-foreground rounded-lg">
                   {zoomSaving ? "Saving..." : "Save Settings"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* QuickBooks Modal */}
+      {isQuickBooksModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-card w-full max-w-md rounded-2xl shadow-xl border border-border flex flex-col max-h-[90vh]">
+            <div className="p-6 border-b border-border flex justify-between items-center bg-muted/20">
+              <h2 className="text-xl font-bold">QuickBooks Configuration</h2>
+              <button onClick={() => setIsQuickBooksModalOpen(false)} className="text-muted-foreground hover:text-foreground">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">QuickBooks Client ID</label>
+                  <input
+                    type="text"
+                    value={quickBooksConfig.clientId}
+                    onChange={(e) => setQuickBooksConfig({ ...quickBooksConfig, clientId: e.target.value })}
+                    className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                    placeholder="Enter Client ID"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">QuickBooks Client Secret</label>
+                  <input
+                    type="password"
+                    value={quickBooksConfig.clientSecret}
+                    onChange={(e) => setQuickBooksConfig({ ...quickBooksConfig, clientSecret: e.target.value })}
+                    className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary outline-none"
+                    placeholder="Enter Client Secret"
+                  />
+                </div>
+                {quickBooksConfig.clientId && (
+                  <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg flex justify-between items-center">
+                    <div>
+                      <p className="text-sm font-medium text-emerald-900">Authorize QuickBooks</p>
+                      <p className="text-xs text-emerald-700">Connect your account</p>
+                    </div>
+                    <a href="/api/auth/quickbooks" className="px-4 py-2 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700">
+                      Sign in with Intuit
+                    </a>
+                  </div>
+                )}
+              </div>
+              <div className="mt-6 flex justify-end gap-2">
+                <button onClick={() => setIsQuickBooksModalOpen(false)} className="px-4 py-2 text-sm font-medium hover:bg-muted rounded-lg">Cancel</button>
+                <button onClick={handleQuickBooksSave} disabled={quickBooksSaving} className="px-4 py-2 text-sm font-semibold bg-primary text-primary-foreground rounded-lg">
+                  {quickBooksSaving ? "Saving..." : "Save Settings"}
                 </button>
               </div>
             </div>

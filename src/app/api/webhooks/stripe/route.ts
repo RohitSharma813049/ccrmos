@@ -69,6 +69,17 @@ export async function POST(req: Request) {
           invoice.customData.stripePaymentIntent = session.payment_intent;
           await invoice.save();
           console.log(`[Stripe] Invoice ${invoiceId} marked as Paid`);
+
+          // Sync to QuickBooks
+          try {
+            if (companyId) {
+              const { syncInvoiceToQuickbooks } = await import('@/lib/quickbooksClient');
+              const qboId = await syncInvoiceToQuickbooks(invoiceId, companyId);
+              console.log(`[QuickBooks] Synced invoice to QBO: ${qboId}`);
+            }
+          } catch (err: any) {
+            console.warn(`[QuickBooks Sync Error]: ${err.message}`);
+          }
         }
       }
     }
@@ -84,6 +95,17 @@ export async function POST(req: Request) {
           invoice.customData.stripePaymentIntent = paymentIntent.id;
           await invoice.save();
           console.log(`[Stripe] Invoice ${invoiceId} marked as Paid via payment_intent.succeeded`);
+
+          // Sync to QuickBooks
+          try {
+            if (companyId) {
+              const { syncInvoiceToQuickbooks } = await import('@/lib/quickbooksClient');
+              const qboId = await syncInvoiceToQuickbooks(invoiceId, companyId);
+              console.log(`[QuickBooks] Synced invoice to QBO: ${qboId}`);
+            }
+          } catch (err: any) {
+            console.warn(`[QuickBooks Sync Error]: ${err.message}`);
+          }
         }
       }
     }
