@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
-    "build": "rm -rf .next && next build --webpack",
+    "build": "npx rimraf .next && next build --webpack",
     "start": "next start",
     "lint": "eslint"
   },
@@ -21,6 +21,7 @@
     "@types/nodemailer": "^8.0.1",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.38.0",
+    "@vercel/speed-insights": "^2.0.0",
     "@xyflow/react": "^12.11.2",
     "bcryptjs": "^3.0.3",
     "bullmq": "^5.80.10",
