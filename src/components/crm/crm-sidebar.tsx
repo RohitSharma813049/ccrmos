@@ -187,22 +187,6 @@ export function CrmSidebar() {
                   <Filter className="w-4 h-4" />
                   Lead Sources
                 </Link>
-                <Link 
-                  href="/crm/lead-stages" 
-                  onClick={handleLinkClick}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-sm ${pathname === '/crm/lead-stages' ? 'bg-blue-50 text-blue-700 font-medium' : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-950/50'}`}
-                >
-                  <GitBranch className="w-4 h-4" />
-                  Lead Stages
-                </Link>
-                <Link 
-                  href="/crm/lead-status" 
-                  onClick={handleLinkClick}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-sm ${pathname === '/crm/lead-status' ? 'bg-blue-50 text-blue-700 font-medium' : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-950/50'}`}
-                >
-                  <Tag className="w-4 h-4" />
-                  Lead Status
-                </Link>
               </div>
             )}
           </div>
