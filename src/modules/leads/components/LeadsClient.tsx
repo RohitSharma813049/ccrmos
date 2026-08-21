@@ -41,6 +41,8 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
   const [selectedLeadForEdit, setSelectedLeadForEdit] = useState<any | null>(null);
 
   // Custom Modal States
+  const [aiSummary, setAiSummary] = useState<string | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
   const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
   const [bulkStatusModalOpen, setBulkStatusModalOpen] = useState(false);
   const [bulkStatusValue, setBulkStatusValue] = useState("");
@@ -275,6 +277,24 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
 
   const handleBulkDelete = () => setBulkDeleteModalOpen(true);
   
+  const [isSummarizing, setIsSummarizing] = useState(false);
+  const [summary, setSummary] = useState("");
+
+  const handleSummarize = async () => {
+    if (!selectedLeadForDetails) return;
+    setIsSummarizing(true);
+    try {
+      const res = await fetch(`/api/leads/${selectedLeadForDetails._id}/summarize`, { method: "POST" });
+      const data = await res.json();
+      if (res.ok) setSummary(data.summary);
+      else toast.error("Summarization failed");
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsSummarizing(false);
+    }
+  };
+
   const executeBulkDelete = async () => {
     try {
       const res = await fetch("/api/leads/bulk", {
@@ -1047,7 +1067,7 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
 
       {selectedLeadForDetails && (
         <div className="fixed inset-0 z-50 flex justify-end">
-          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm transition-opacity" onClick={() => setSelectedLeadForDetails(null)} />
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm transition-opacity" onClick={() => { setSelectedLeadForDetails(null); setAiSummary(null); }} />
           <div className="relative w-full max-w-md bg-card h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
             <div className="p-6 border-b border-border flex justify-between items-center bg-muted/30">
               <div>
@@ -1069,6 +1089,38 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
                 <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 Activity Timeline
               </h3>
+              
+              <div className="mb-8">
+                <div className="flex justify-between items-center mb-3">
+                  <h4 className="text-sm font-bold text-foreground flex items-center gap-2">
+                    <svg className="w-4 h-4 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                    AI Agent Insights
+                  </h4>
+                  {!aiSummary && (
+                    <button 
+                      onClick={async () => {
+                        setAiLoading(true);
+                        try {
+                          const res = await fetch("/api/ai/summarize-lead", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ leadId: selectedLeadForDetails._id }) });
+                          const data = await res.json();
+                          if (res.ok) setAiSummary(data.summary);
+                          else toast.error("Failed to generate summary");
+                        } catch (e) { toast.error("Error generating summary"); } 
+                        finally { setAiLoading(false); }
+                      }}
+                      disabled={aiLoading}
+                      className="text-xs px-3 py-1.5 bg-purple-500/10 text-purple-500 font-semibold rounded-md hover:bg-purple-500/20 transition-colors disabled:opacity-50"
+                    >
+                      {aiLoading ? "Analyzing..." : "Generate AI Summary"}
+                    </button>
+                  )}
+                </div>
+                {aiSummary && (
+                  <div className="p-4 bg-purple-500/10 border border-purple-500/20 rounded-xl">
+                    <p className="text-sm text-purple-900 dark:text-purple-100 leading-relaxed">{aiSummary}</p>
+                  </div>
+                )}
+              </div>
               
               <div className="relative border-l-2 border-border ml-3 space-y-8 pb-8">
                 {(!selectedLeadForDetails.activities || selectedLeadForDetails.activities.length === 0) ? (
