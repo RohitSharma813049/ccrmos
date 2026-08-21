@@ -101,6 +101,18 @@ export const processIncomingWhatsAppMessage = async (companyId: string, fromNumb
       await lead.save();
     }
     
+    // Log the message for the Omnichannel Inbox & WhatsApp Chat
+    const CallLog = (await import('@/modules/core/schemas/CallLog')).default;
+    await CallLog.create({
+      companyId,
+      leadId: lead._id,
+      channel: "WhatsApp",
+      direction: "inbound",
+      status: "received",
+      notes: messageBody,
+      fromNumber: fromNumber
+    });
+
     return lead;
   } catch (error) {
     console.error('Error processing incoming WhatsApp message:', error);

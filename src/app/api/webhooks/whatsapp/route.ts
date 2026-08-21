@@ -50,7 +50,6 @@ export async function POST(req: Request) {
         ...lead.toObject(),
         ...lead.customData
       }).catch(console.error);
-
     } else {
       // Update existing lead with latest message
       lead.customData = { 
@@ -61,6 +60,18 @@ export async function POST(req: Request) {
       };
       await lead.save();
     }
+
+    // Log the message for the Omnichannel Inbox & WhatsApp Chat
+    const CallLog = (await import('@/modules/core/schemas/CallLog')).default;
+    await CallLog.create({
+      companyId,
+      leadId: lead._id,
+      channel: "WhatsApp",
+      direction: "inbound",
+      status: "received",
+      notes: message,
+      fromNumber: phoneNumber
+    });
 
     return NextResponse.json({ success: true, message: "WhatsApp lead processed." }, { status: 200 });
 
