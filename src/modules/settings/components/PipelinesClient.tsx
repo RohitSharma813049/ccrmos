@@ -17,8 +17,6 @@ export default function PipelinesClient() {
     order: 0,
   });
 
-  const stdModules = ["Leads", "Projects", "Bookings", "Tasks", "Invoices"];
-
   useEffect(() => {
     fetchModules();
   }, []);
@@ -29,16 +27,18 @@ export default function PipelinesClient() {
 
   async function fetchModules() {
     try {
-      const res = await fetch("/api/settings/custom-modules");
+      const res = await fetch("/api/settings/active-modules");
       if (res.ok) {
         const data = await res.json();
-        const customNames = data.modules.map((m: any) => m.name);
-        setModules([...stdModules, ...customNames]);
+        setModules(data.modules || []);
+        if (data.modules && data.modules.length > 0 && selectedModule === "Leads") {
+          setSelectedModule(data.modules[0]);
+        }
       } else {
-        setModules(stdModules);
+        setModules(["Leads", "Projects", "Tasks", "Invoices"]);
       }
     } catch (e) {
-      setModules(stdModules);
+      setModules(["Leads", "Projects", "Tasks", "Invoices"]);
     }
   }
 

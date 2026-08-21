@@ -16,8 +16,6 @@ export default function ConversionsClient() {
     fieldMappings: [{ sourceField: "", targetField: "" }]
   });
 
-  const stdModules = ["Leads", "Projects", "Bookings", "Tasks", "Invoices"];
-
   useEffect(() => {
     fetchModules();
     fetchRules();
@@ -25,16 +23,15 @@ export default function ConversionsClient() {
 
   async function fetchModules() {
     try {
-      const res = await fetch("/api/settings/custom-modules");
+      const res = await fetch("/api/settings/active-modules");
       if (res.ok) {
         const data = await res.json();
-        const customNames = data.modules.map((m: any) => m.name);
-        setModules([...stdModules, ...customNames]);
+        setModules(data.modules || []);
       } else {
-        setModules(stdModules);
+        setModules(["Leads", "Projects", "Tasks", "Invoices"]);
       }
     } catch (e) {
-      setModules(stdModules);
+      setModules(["Leads", "Projects", "Tasks", "Invoices"]);
     }
   }
 

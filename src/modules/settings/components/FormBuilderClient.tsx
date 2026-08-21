@@ -18,7 +18,8 @@ interface DynamicField {
 }
 
 export default function FormBuilderClient() {
-  const [activeTab, setActiveTab] = useState<"lead" | "customer" | "project" | "invoice">("lead");
+  const [activeTab, setActiveTab] = useState<string>("Leads");
+  const [modules, setModules] = useState<string[]>(["Leads", "Customers", "Projects", "Invoices"]);
   const [fields, setFields] = useState<DynamicField[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -40,7 +41,23 @@ export default function FormBuilderClient() {
 
   useEffect(() => {
     fetchSession();
+    fetchModules();
   }, []);
+
+  async function fetchModules() {
+    try {
+      const res = await fetch("/api/settings/active-modules");
+      if (res.ok) {
+        const data = await res.json();
+        setModules(data.modules || []);
+        if (data.modules && data.modules.length > 0) {
+          setActiveTab(data.modules[0]);
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
 
   useEffect(() => {
     if (hierarchyLevel !== null && hierarchyLevel <= 2) {
@@ -232,7 +249,7 @@ export default function FormBuilderClient() {
       </div>
 
       <div className="flex border-b border-border overflow-x-auto">
-        {["lead", "customer", "project", "invoice"].map((tab) => (
+        {modules.map((tab) => (
           <button 
             key={tab}
             onClick={() => setActiveTab(tab as any)}
