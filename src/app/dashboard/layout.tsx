@@ -6,6 +6,7 @@ import Company from "@/modules/companies/schemas/Company";
 import "@/modules/settings/schemas/Industry"; // Side-effect import to prevent tree-shaking for populate
 import CustomModule from "@/modules/settings/schemas/CustomModule";
 import NotificationBell from "@/components/ui/NotificationBell";
+import { GlobalSearch } from "@/components/ui/GlobalSearch";
 import ImpersonationBanner from "@/components/ui/ImpersonationBanner";
 import SubscriptionAlert from "@/components/ui/SubscriptionAlert";
 import { hasModulePermission } from "@/lib/permissions";
@@ -405,11 +406,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </div>
           
           <div className="flex items-center flex-1 min-w-0">
-            <div className="relative w-full max-w-md">
-              <svg className="w-5 h-5 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <input type="text" placeholder="Search..." className="w-full bg-muted/50 border border-border rounded-full pl-10 pr-4 py-1.5 text-sm text-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all placeholder:text-muted-foreground" />
+            <div className="relative w-full max-w-md hidden md:block">
+              <GlobalSearch />
             </div>
           </div>
           <div className="flex items-center shrink-0">

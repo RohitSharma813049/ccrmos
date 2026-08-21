@@ -275,7 +275,7 @@ async function seedRohitTenant() {
     await LeadStatus.insertMany([
       { name: "Hot Prospect", stageId: stages[2]._id, active: true, color: "#EF4444", iconColor: "bg-red-500", category: "Interested", companyId },
       { name: "Warm Opportunity", stageId: stages[1]._id, active: true, color: "#F59E0B", iconColor: "bg-yellow-500", category: "Interested", companyId },
-      { name: "Nurturing", stageId: stages[0]._id, active: true, color: "#3B82F6", iconColor: "bg-blue-500", category: "New", companyId },
+      { name: "Nurturing", stageId: stages[0]._id, active: true, color: "#3B82F6", iconColor: "bg-blue-500", category: "Fresh Lead", companyId },
       { name: "Unresponsive", stageId: stages[5]._id, active: true, color: "#6B7280", iconColor: "bg-gray-500", category: "Not Interested", companyId }
     ]);
     console.log("✅ Seeded Lead Statuses");

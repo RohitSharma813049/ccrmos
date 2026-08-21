@@ -8,6 +8,7 @@ import DynamicFormBuilder from "@/components/ui/DynamicFormBuilder";
 import { usePermissions } from "@/hooks/usePermissions";
 import { DataTable, ColumnDef } from "@/components/ui/DataTable";
 import DocumentGeneratorModal from "@/components/ui/DocumentGeneratorModal";
+import NotesPanel from "@/components/ui/NotesPanel";
 
 export default function CustomersClient() {
   const [customers, setCustomers] = useState<any[]>([]);
@@ -24,6 +25,7 @@ export default function CustomersClient() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [generatorCustomerId, setGeneratorCustomerId] = useState<string | null>(null);
+  const [notesCustomerId, setNotesCustomerId] = useState<string | null>(null);
   const { hasPermission } = usePermissions();
 
   const [advancedFilters, setAdvancedFilters] = useState<any[]>([]);
@@ -222,6 +224,16 @@ export default function CustomersClient() {
           </svg>
           Doc
         </button>
+        <button 
+          onClick={() => setNotesCustomerId(item._id)}
+          className="text-xs font-medium text-emerald-600 bg-emerald-50 hover:bg-emerald-100 px-2 py-1 rounded transition-colors flex items-center gap-1"
+          title="Notes & Activity"
+        >
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+          Notes
+        </button>
       </div>
     )}
   ];
@@ -345,6 +357,20 @@ export default function CustomersClient() {
           customerId={generatorCustomerId} 
           onClose={() => setGeneratorCustomerId(null)} 
         />
+      )}
+
+      {notesCustomerId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setNotesCustomerId(null)} />
+          <div className="relative bg-card border border-border rounded-2xl shadow-xl w-full max-w-lg h-[80vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex justify-end p-2 bg-zinc-50 dark:bg-zinc-950 absolute top-0 right-0 z-10">
+              <button onClick={() => setNotesCustomerId(null)} className="text-zinc-500 hover:text-zinc-900 bg-white dark:bg-zinc-800 rounded-full p-1 shadow-sm border border-zinc-200 dark:border-zinc-700">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <NotesPanel recordId={notesCustomerId} recordModel="Customer" />
+          </div>
+        </div>
       )}
     </div>
   );
