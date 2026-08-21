@@ -5,7 +5,7 @@ import Role from '@/modules/settings/schemas/Role';
 import User from '@/modules/users/schemas/User';
 import { PERMISSIONS } from '@/config/permissions';
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await requireAuthenticatedUser();
     if (user.hierarchyLevel !== 1) {
@@ -13,6 +13,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     }
     await dbConnect();
     
+    const { id } = await params;
     const companyId = user.companyId || user.impersonatedFounderId;
     if (!companyId) return NextResponse.json({ error: 'Company ID required' }, { status: 400 });
 
@@ -20,14 +21,14 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     
     // Check if renaming to an existing name
     if (body.name) {
-      const existing = await Role.findOne({ companyId, name: body.name, _id: { $ne: params.id } });
+      const existing = await Role.findOne({ companyId, name: body.name, _id: { $ne: id } });
       if (existing) {
         return NextResponse.json({ error: 'A role with this name already exists' }, { status: 400 });
       }
     }
 
     const role = await Role.findOneAndUpdate(
-      { _id: params.id, companyId },
+      { _id: id, companyId },
       { $set: body },
       { new: true }
     );
@@ -40,7 +41,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await requireAuthenticatedUser();
     if (user.hierarchyLevel !== 1) {
@@ -48,16 +49,17 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
     }
     await dbConnect();
     
+    const { id } = await params;
     const companyId = user.companyId || user.impersonatedFounderId;
     if (!companyId) return NextResponse.json({ error: 'Company ID required' }, { status: 400 });
 
     // Check if role is assigned to any users
-    const usersWithRole = await User.countDocuments({ companyId, role: params.id, roleModel: "Role" });
+    const usersWithRole = await User.countDocuments({ companyId, role: id, roleModel: "Role" });
     if (usersWithRole > 0) {
       return NextResponse.json({ error: `Cannot delete role because it is assigned to ${usersWithRole} user(s).` }, { status: 400 });
     }
 
-    const role = await Role.findOneAndDelete({ _id: params.id, companyId });
+    const role = await Role.findOneAndDelete({ _id: id, companyId });
     if (!role) return NextResponse.json({ error: 'Role not found' }, { status: 404 });
 
     return NextResponse.json({ success: true });

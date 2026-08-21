@@ -6,7 +6,7 @@ import Lead from '@/modules/leads/schemas/Lead';
 import { sendGmail } from '@/lib/googleClient';
 import { sendTwilioSMS } from '@/lib/twilioClient';
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     await dbConnect();
     const user = await requireAuthenticatedUser();
@@ -14,7 +14,8 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     
     if (!companyId) return NextResponse.json({ error: 'Company ID required' }, { status: 400 });
 
-    const campaign = await Campaign.findOne({ _id: params.id, companyId });
+    const { id } = await params;
+    const campaign = await Campaign.findOne({ _id: id, companyId });
     if (!campaign) return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
 
     if (campaign.status === 'Sending' || campaign.status === 'Completed') {

@@ -3,7 +3,7 @@ import dbConnect from '@/lib/db';
 import { requireAuthenticatedUser } from '@/lib/auth-utils';
 import Campaign from '@/modules/campaigns/schemas/Campaign';
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     await dbConnect();
     const user = await requireAuthenticatedUser();
@@ -11,7 +11,8 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     
     if (!companyId) return NextResponse.json({ error: 'Company ID required' }, { status: 400 });
 
-    const campaign = await Campaign.findOne({ _id: params.id, companyId });
+    const { id } = await params;
+    const campaign = await Campaign.findOne({ _id: id, companyId });
     if (!campaign) return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
 
     return NextResponse.json({ campaign });
@@ -20,7 +21,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     await dbConnect();
     const user = await requireAuthenticatedUser();
@@ -28,10 +29,11 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     
     if (!companyId) return NextResponse.json({ error: 'Company ID required' }, { status: 400 });
 
+    const { id } = await params;
     const body = await req.json();
     
     const campaign = await Campaign.findOneAndUpdate(
-      { _id: params.id, companyId },
+      { _id: id, companyId },
       { $set: body },
       { new: true }
     );
@@ -44,7 +46,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     await dbConnect();
     const user = await requireAuthenticatedUser();
@@ -52,7 +54,8 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
     
     if (!companyId) return NextResponse.json({ error: 'Company ID required' }, { status: 400 });
 
-    const campaign = await Campaign.findOneAndDelete({ _id: params.id, companyId });
+    const { id } = await params;
+    const campaign = await Campaign.findOneAndDelete({ _id: id, companyId });
     if (!campaign) return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
 
     return NextResponse.json({ success: true });

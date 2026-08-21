@@ -4,14 +4,15 @@ import Customer from '@/modules/customers/schemas/Customer';
 import { requireAuthenticatedUser } from '@/lib/auth-utils';
 import crypto from 'crypto';
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await requireAuthenticatedUser();
     await dbConnect();
 
+    const { id } = await params;
     const { action } = await req.json(); // "enable", "disable", "reset"
 
-    const customer = await Customer.findOne({ _id: params.id, companyId: user.companyId });
+    const customer = await Customer.findOne({ _id: id, companyId: user.companyId });
     if (!customer) {
       return NextResponse.json({ error: 'Customer not found' }, { status: 404 });
     }
