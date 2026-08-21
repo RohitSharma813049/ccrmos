@@ -1,19 +1,66 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Mail, Lock, ArrowRight, Building } from 'lucide-react';
-import Link from 'next/link';
+import { Mail, Lock, ArrowRight, Building, KeyRound } from 'lucide-react';
+import { signIn } from 'next-auth/react';
+import { toast } from 'react-hot-toast';
 
 export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [otp, setOtp] = useState('');
+  const [step, setStep] = useState<'email' | 'otp'>('email');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleRequestOtp = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email) return toast.error("Please enter your email address");
+    
     setIsLoading(true);
-    // Mock login delay
-    setTimeout(() => {
-      window.location.href = '/dashboard';
-    }, 1000);
+    try {
+      const res = await fetch('/api/auth/request-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      
+      const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to request OTP');
+      }
+      
+      toast.success("If your email is registered, an OTP has been sent.");
+      setStep('otp');
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!otp) return toast.error("Please enter the OTP");
+
+    setIsLoading(true);
+    try {
+      const result = await signIn('credentials', {
+        email,
+        otp,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        toast.error(result.error);
+        setIsLoading(false);
+      } else {
+        toast.success("Successfully logged in!");
+        window.location.href = '/dashboard';
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Login failed");
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -23,7 +70,7 @@ export function LoginForm() {
         <p className="text-sm text-zinc-400">Enter your credentials to access your workspace.</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={step === 'email' ? handleRequestOtp : handleLogin} className="space-y-4">
         {/* Email Input */}
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-zinc-300 mb-1.5">
@@ -37,35 +84,47 @@ export function LoginForm() {
               id="email"
               type="email"
               required
-              className="block w-full pl-10 pr-3 py-2.5 border border-zinc-800 rounded-xl leading-5 bg-zinc-900/50 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:bg-zinc-900 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 sm:text-sm transition-all duration-200"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={step === 'otp' || isLoading}
+              className="block w-full pl-10 pr-3 py-2.5 border border-zinc-800 rounded-xl leading-5 bg-zinc-900/50 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:bg-zinc-900 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 sm:text-sm transition-all duration-200 disabled:opacity-50"
               placeholder="agent@brokerage.com"
             />
           </div>
         </div>
 
-        {/* Password Input */}
-        <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <label htmlFor="password" className="block text-sm font-medium text-zinc-300">
-              Password
-            </label>
-            <Link href="/forgot-password" className="text-xs font-medium text-indigo-400 hover:text-indigo-300 transition-colors">
-              Forgot password?
-            </Link>
-          </div>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Lock className="h-5 w-5 text-zinc-500" />
+        {/* OTP Input */}
+        {step === 'otp' && (
+          <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="flex items-center justify-between mb-1.5">
+              <label htmlFor="otp" className="block text-sm font-medium text-zinc-300">
+                One-Time Password (OTP)
+              </label>
+              <button 
+                type="button" 
+                onClick={() => setStep('email')}
+                className="text-xs font-medium text-indigo-400 hover:text-indigo-300 transition-colors"
+              >
+                Change Email?
+              </button>
             </div>
-            <input
-              id="password"
-              type="password"
-              required
-              className="block w-full pl-10 pr-3 py-2.5 border border-zinc-800 rounded-xl leading-5 bg-zinc-900/50 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:bg-zinc-900 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 sm:text-sm transition-all duration-200"
-              placeholder="••••••••"
-            />
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <KeyRound className="h-5 w-5 text-zinc-500" />
+              </div>
+              <input
+                id="otp"
+                type="text"
+                required
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                disabled={isLoading}
+                className="block w-full pl-10 pr-3 py-2.5 border border-zinc-800 rounded-xl leading-5 bg-zinc-900/50 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:bg-zinc-900 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 sm:text-sm transition-all duration-200"
+                placeholder="123456"
+              />
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Submit Button */}
         <button
@@ -75,9 +134,14 @@ export function LoginForm() {
         >
           {isLoading ? (
             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          ) : step === 'email' ? (
+            <>
+              Request OTP
+              <ArrowRight className="w-4 h-4" />
+            </>
           ) : (
             <>
-              Sign in
+              Sign In
               <ArrowRight className="w-4 h-4" />
             </>
           )}
