@@ -75,7 +75,20 @@ async function processExecutionJob(job: any) {
           dueDate: new Date(Date.now() + 86400000) // Default +1 day
         });
       } else if (action.type === "Send Email") {
-        console.log(`[Workflow Engine] Email sent to ${action.payload.to} with subject: ${action.payload.subject}`);
+        let { to, subject, body } = action.payload;
+        if (!to) to = job.data.payload.email;
+        if (to) {
+          const { sendGmail } = await import('@/lib/googleClient');
+          const userId = job.data.payload.assignedTo || job.data.payload.createdBy || job.data.payload.assignedUserId;
+          if (userId) {
+            await sendGmail(userId.toString(), companyId.toString(), to, subject || 'Automated Email', body || 'Hello');
+            actionDetails = `Email sent successfully to ${to}`;
+          } else {
+             throw new Error('Cannot send email via workflow: No userId found in payload to use for OAuth.');
+          }
+        } else {
+          throw new Error('No destination email found.');
+        }
       } else if (action.type === "Assign User") {
         const { userId } = action.payload;
         if (!userId) throw new Error("No User ID provided for assignment.");
@@ -113,7 +126,7 @@ async function processExecutionJob(job: any) {
         }
         
         actionDetails = `Webhook triggered successfully. Status: ${response.status}`;
-      } else if (action.type === "Send SMS / WhatsApp") {
+      } else if (action.type === "Send SMS / WhatsApp" || action.type === "Send SMS") {
         let { to, body } = action.payload;
         
         if (!to) {
@@ -123,23 +136,14 @@ async function processExecutionJob(job: any) {
         
         if (!to) throw new Error("No destination phone number found.");
 
-        const IntegrationSetting = require('@/modules/integrations/schemas/IntegrationSetting').default;
-        const twilioSetting = await IntegrationSetting.findOne({ companyId, integrationType: 'Twilio' });
+        const { sendTwilioSMS } = await import('@/lib/twilioClient');
+        const twilioRes = await sendTwilioSMS(to, body, companyId.toString());
         
-        if (!twilioSetting || !twilioSetting.isActive || !twilioSetting.config.accountSid) {
-          throw new Error("Twilio integration is not configured or is inactive for this tenant.");
+        if (!twilioRes.success) {
+          throw new Error(twilioRes.error || "Twilio error");
         }
 
-        const { accountSid, authToken, fromNumber } = twilioSetting.config;
-        const twilioClient = require('twilio')(accountSid, authToken);
-
-        const message = await twilioClient.messages.create({
-          body,
-          from: fromNumber,
-          to
-        });
-
-        actionDetails = `Message sent successfully to ${to}. Twilio SID: ${message.sid}`;
+        actionDetails = `Message sent successfully to ${to}. Twilio SID: ${twilioRes.messageId}`;
       }
     } catch (err: any) {
       actionSuccess = false;
