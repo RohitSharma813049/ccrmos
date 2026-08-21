@@ -13,11 +13,13 @@ import {
   CreditCard,
   Settings,
   Puzzle,
-  CheckSquare
+  CheckSquare,
+  MessageSquare
 } from 'lucide-react';
 
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Inbox', href: '/dashboard/inbox', icon: MessageSquare },
   { name: 'Team', href: '/team', icon: Users },
   { name: 'Leads', href: '/leads', icon: Users },
   { name: 'Properties', href: '/properties', icon: Building2 },
