@@ -67,3 +67,4 @@
 - - [x] Build WhatsApp UI Widget 
 - - [x] Build Post-Sale Projects Module 
 - [x] Backend integration completed for Post-Sale Projects and Tasks modules with Server Actions 
+- [x] Backend integration completed for Team Management module with Server Actions 

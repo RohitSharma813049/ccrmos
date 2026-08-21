@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { DataTable, ColumnDef } from '@/components/ui/DataTable';
 import { Mail, Plus, Shield, UserPlus, MoreHorizontal } from 'lucide-react';
+import { getTeamMembers, inviteTeamMember, toggleSuspendMember } from '@/app/(dashboard)/team/actions';
+import { toast } from 'react-hot-toast';
 
 interface TeamMember {
   id: string;
@@ -13,30 +15,74 @@ interface TeamMember {
   lastActive: string;
 }
 
-const mockTeam: TeamMember[] = [
-  { id: '1', name: 'System Admin', email: 'admin@ccrmos.com', role: 'Owner', status: 'Active', lastActive: 'Just now' },
-  { id: '2', name: 'Sarah Jenkins', email: 'sarah@ccrmos.com', role: 'Manager', status: 'Active', lastActive: '2 hours ago' },
-  { id: '3', name: 'Michael Chen', email: 'mchen@ccrmos.com', role: 'Agent', status: 'Active', lastActive: 'Yesterday' },
-  { id: '4', name: 'Emily Davis', email: 'emily@ccrmos.com', role: 'Agent', status: 'Invited', lastActive: 'Never' },
-  { id: '5', name: 'Robert Taylor', email: 'robert@ccrmos.com', role: 'Agent', status: 'Suspended', lastActive: '2 months ago' },
-];
-
 export function TeamClient() {
+  const [team, setTeam] = useState<TeamMember[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const rowsPerPage = 10;
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  
+  // Modal states
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState('Agent');
+  const [isInviting, setIsInviting] = useState(false);
+
+  const fetchTeam = async () => {
+    try {
+      const data = await getTeamMembers();
+      setTeam(data as TeamMember[]);
+    } catch (error) {
+      toast.error('Failed to load team members');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTeam();
+  }, []);
+
+  const handleInvite = async () => {
+    if (!inviteEmail) return toast.error("Please enter an email");
+    setIsInviting(true);
+    try {
+      await inviteTeamMember({ email: inviteEmail, role: inviteRole });
+      toast.success('Invitation sent');
+      setIsInviteModalOpen(false);
+      setInviteEmail('');
+      fetchTeam();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to send invite');
+    } finally {
+      setIsInviting(false);
+    }
+  };
+
+  const handleSuspend = async (ids: string[]) => {
+    try {
+      // For simplicity, just handling the first selected for now or looping
+      for (const id of ids) {
+        await toggleSuspendMember(id);
+      }
+      toast.success('Status updated');
+      fetchTeam();
+      setSelectedIds([]);
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update status');
+    }
+  };
 
   // Filtering
   const filteredData = useMemo(() => {
-    if (!search) return mockTeam;
-    return mockTeam.filter(row => 
+    if (!search) return team;
+    return team.filter(row => 
       Object.values(row).some(val => 
         String(val).toLowerCase().includes(search.toLowerCase())
       )
     );
-  }, [search]);
+  }, [search, team]);
 
   // Pagination
   const totalPages = Math.ceil(filteredData.length / rowsPerPage);
@@ -95,13 +141,28 @@ export function TeamClient() {
       id: 'actions',
       header: '',
       className: 'w-10 text-right',
-      cell: () => (
-        <button className="p-2 text-zinc-500 hover:text-zinc-300 transition-colors rounded-lg hover:bg-zinc-800">
+      cell: (item) => (
+        <button 
+          onClick={() => handleSuspend([item.id])}
+          className="p-2 text-zinc-500 hover:text-zinc-300 transition-colors rounded-lg hover:bg-zinc-800"
+          title={item.status === 'Suspended' ? 'Unsuspend User' : 'Suspend User'}
+        >
           <MoreHorizontal className="w-4 h-4" />
         </button>
       )
     }
   ];
+
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
+      </div>
+    );
+  }
+
+  const activeMembers = team.filter(t => t.status === 'Active').length;
+  const pendingInvites = team.filter(t => t.status === 'Invited').length;
 
   return (
     <div className="animate-in fade-in duration-500 space-y-6">
@@ -111,7 +172,7 @@ export function TeamClient() {
         <div className="bg-zinc-900/40 border border-zinc-800/60 p-4 rounded-xl flex items-center justify-between">
           <div>
             <p className="text-sm font-medium text-zinc-400">Total Members</p>
-            <p className="text-2xl font-bold text-zinc-100 mt-1">{mockTeam.length}</p>
+            <p className="text-2xl font-bold text-zinc-100 mt-1">{team.length}</p>
           </div>
           <div className="p-3 bg-indigo-500/10 rounded-lg text-indigo-400">
             <UserPlus className="w-5 h-5" />
@@ -120,7 +181,7 @@ export function TeamClient() {
         <div className="bg-zinc-900/40 border border-zinc-800/60 p-4 rounded-xl flex items-center justify-between">
           <div>
             <p className="text-sm font-medium text-zinc-400">Active Licenses</p>
-            <p className="text-2xl font-bold text-zinc-100 mt-1">3 <span className="text-sm text-zinc-500 font-normal">/ 5 seats</span></p>
+            <p className="text-2xl font-bold text-zinc-100 mt-1">{activeMembers} <span className="text-sm text-zinc-500 font-normal">/ unlimited seats</span></p>
           </div>
           <div className="p-3 bg-emerald-500/10 rounded-lg text-emerald-400">
             <Shield className="w-5 h-5" />
@@ -129,7 +190,7 @@ export function TeamClient() {
         <div className="bg-zinc-900/40 border border-zinc-800/60 p-4 rounded-xl flex items-center justify-between">
           <div>
             <p className="text-sm font-medium text-zinc-400">Pending Invites</p>
-            <p className="text-2xl font-bold text-zinc-100 mt-1">1</p>
+            <p className="text-2xl font-bold text-zinc-100 mt-1">{pendingInvites}</p>
           </div>
           <div className="p-3 bg-blue-500/10 rounded-lg text-blue-400">
             <Mail className="w-5 h-5" />
@@ -161,13 +222,9 @@ export function TeamClient() {
           }
           bulkActions={[
             {
-              label: 'Change Role',
-              onClick: (ids) => alert(`Changing role for ${ids.length} users`)
-            },
-            {
-              label: 'Suspend Selected',
+              label: 'Toggle Suspend Selected',
               variant: 'destructive',
-              onClick: (ids) => alert(`Suspending ${ids.length} users`)
+              onClick: (ids) => handleSuspend(ids)
             }
           ]}
         />
@@ -181,13 +238,23 @@ export function TeamClient() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-zinc-400 mb-1">Email Address</label>
-                <input type="email" placeholder="colleague@company.com" className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-zinc-100 focus:outline-none focus:border-indigo-500 transition-colors" />
+                <input 
+                  type="email" 
+                  placeholder="colleague@company.com" 
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-zinc-100 focus:outline-none focus:border-indigo-500 transition-colors" 
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-zinc-400 mb-1">Role</label>
-                <select className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-zinc-100 focus:outline-none focus:border-indigo-500 transition-colors">
-                  <option>Manager</option>
-                  <option>Agent</option>
+                <select 
+                  value={inviteRole}
+                  onChange={(e) => setInviteRole(e.target.value)}
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-zinc-100 focus:outline-none focus:border-indigo-500 transition-colors"
+                >
+                  <option value="Manager">Manager</option>
+                  <option value="Agent">Agent</option>
                 </select>
               </div>
             </div>
@@ -199,10 +266,11 @@ export function TeamClient() {
                 Cancel
               </button>
               <button 
-                onClick={() => setIsInviteModalOpen(false)}
-                className="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 rounded-lg text-sm font-medium text-white transition-colors"
+                onClick={handleInvite}
+                disabled={isInviting}
+                className="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 rounded-lg text-sm font-medium text-white transition-colors disabled:opacity-50"
               >
-                Send Invite
+                {isInviting ? 'Sending...' : 'Send Invite'}
               </button>
             </div>
           </div>
