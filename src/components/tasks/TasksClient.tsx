@@ -1,40 +1,71 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Check, Search, Calendar, Flag, MoreHorizontal, User, Filter, AlertCircle } from 'lucide-react';
-
-interface Task {
-  id: string;
-  title: string;
-  description?: string;
-  dueDate: string;
-  priority: 'Urgent' | 'High' | 'Medium' | 'Low';
-  status: 'Open' | 'Completed';
-  assignee: string;
-  category: 'Call' | 'Meeting' | 'Admin' | 'Follow Up';
-}
-
-const initialTasks: Task[] = [
-  { id: '1', title: 'Call Sarah Jenkins regarding Ocean Dr property', dueDate: 'Today', priority: 'Urgent', status: 'Open', assignee: 'Sarah J.', category: 'Call' },
-  { id: '2', title: 'Prepare closing documents for Acme Corp', dueDate: 'Tomorrow', priority: 'High', status: 'Open', assignee: 'System Admin', category: 'Admin' },
-  { id: '3', title: 'Follow up with Emily Davis', dueDate: 'Aug 24, 2026', priority: 'Medium', status: 'Open', assignee: 'Michael C.', category: 'Follow Up' },
-  { id: '4', title: 'Weekly Pipeline Sync', dueDate: 'Aug 25, 2026', priority: 'Low', status: 'Open', assignee: 'System Admin', category: 'Meeting' },
-  { id: '5', title: 'Send marketing brochure to new leads', dueDate: 'Yesterday', priority: 'High', status: 'Completed', assignee: 'System Admin', category: 'Admin' },
-];
+import { getTasks, createTask, toggleTaskStatus } from '@/app/(dashboard)/tasks/actions';
+import { toast } from 'react-hot-toast';
 
 export function TasksClient() {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const [tasks, setTasks] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState<'All' | 'My Tasks' | 'Completed'>('My Tasks');
+  const [isCreating, setIsCreating] = useState(false);
 
-  const toggleTaskStatus = (id: string) => {
+  const fetchTasks = async () => {
+    try {
+      const data = await getTasks();
+      setTasks(data);
+    } catch (error) {
+      toast.error('Failed to load tasks');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
+  const handleToggleTaskStatus = async (id: string, currentStatus: string) => {
+    // Optimistic UI update
     setTasks(tasks.map(t => 
-      t.id === id ? { ...t, status: t.status === 'Open' ? 'Completed' : 'Open' } : t
+      t._id === id ? { ...t, status: currentStatus === 'Open' ? 'Completed' : 'Open' } : t
     ));
+    
+    try {
+      await toggleTaskStatus(id);
+    } catch (error) {
+      toast.error('Failed to update task');
+      // Revert on failure
+      fetchTasks();
+    }
+  };
+
+  const handleCreateTestTask = async () => {
+    setIsCreating(true);
+    try {
+      await createTask({
+        title: `Test Task ${Math.floor(Math.random() * 1000)}`,
+        status: 'Open',
+        priority: ['Urgent', 'High', 'Medium', 'Low'][Math.floor(Math.random() * 4)],
+        category: ['Call', 'Meeting', 'Admin', 'Follow Up'][Math.floor(Math.random() * 4)],
+        dueDate: new Date(Date.now() + Math.random() * 864000000).toISOString()
+      });
+      toast.success('Task created');
+      fetchTasks();
+    } catch (error) {
+      toast.error('Failed to create task');
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   const filteredTasks = tasks.filter(task => {
-    if (activeTab === 'My Tasks' && (task.assignee !== 'System Admin' || task.status === 'Completed')) return false;
+    // Basic assignment simulation since we don't have active user context easily in this client component without providers
+    const isAssigneeMe = true; 
+    
+    if (activeTab === 'My Tasks' && (!isAssigneeMe || task.status === 'Completed')) return false;
     if (activeTab === 'Completed' && task.status !== 'Completed') return false;
     if (activeTab === 'All' && task.status === 'Completed') return false; // Default 'All' hides completed unless on 'Completed' tab
     
@@ -61,6 +92,14 @@ export function TasksClient() {
       default: return 'text-zinc-400';
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-[calc(100vh-12rem)] animate-in fade-in duration-500">
@@ -94,7 +133,11 @@ export function TasksClient() {
               className="w-full sm:w-64 bg-zinc-900/50 border border-zinc-800/60 rounded-xl pl-9 pr-4 py-2 text-sm text-zinc-100 focus:outline-none focus:border-indigo-500 transition-colors"
             />
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-sm font-semibold text-white rounded-xl shadow-sm transition-all active:scale-95">
+          <button 
+            disabled={isCreating}
+            onClick={handleCreateTestTask}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-sm font-semibold text-white rounded-xl shadow-sm transition-all active:scale-95 disabled:opacity-50"
+          >
             <Plus className="w-4 h-4" />
             <span className="hidden sm:inline">New Task</span>
           </button>
@@ -125,73 +168,77 @@ export function TasksClient() {
             </div>
           ) : (
             <div className="space-y-1">
-              {filteredTasks.map((task) => (
-                <div 
-                  key={task.id} 
-                  className={`group grid grid-cols-[auto_1fr_auto_auto_auto_auto] gap-4 px-4 py-3 rounded-xl items-center transition-all cursor-pointer ${
-                    task.status === 'Completed' 
-                      ? 'bg-zinc-900/20 hover:bg-zinc-900/40 opacity-60' 
-                      : 'hover:bg-zinc-800/50 bg-zinc-950/20'
-                  }`}
-                >
-                  {/* Checkbox */}
-                  <div className="flex items-center justify-center">
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); toggleTaskStatus(task.id); }}
-                      className={`w-5 h-5 rounded flex items-center justify-center transition-colors ${
-                        task.status === 'Completed' 
-                          ? 'bg-indigo-500 text-white' 
-                          : 'border border-zinc-600 bg-zinc-900/50 hover:border-indigo-400 group-hover:bg-zinc-800'
-                      }`}
-                    >
-                      {task.status === 'Completed' && <Check className="w-3.5 h-3.5" />}
-                    </button>
-                  </div>
+              {filteredTasks.map((task) => {
+                const isCompleted = task.status === 'Completed';
+                const assigneeName = task.assignee?.name || task.assignee?.email || 'Unknown';
+                const dateStr = task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No Date';
 
-                  {/* Title & Assignee */}
-                  <div className="min-w-0 flex flex-col">
-                    <span className={`text-sm font-medium truncate ${task.status === 'Completed' ? 'line-through text-zinc-500' : 'text-zinc-200'}`}>
-                      {task.title}
-                    </span>
-                    <div className="flex items-center gap-1.5 mt-1 sm:hidden">
-                       <span className={`text-xs px-1.5 py-0.5 rounded border ${getPriorityColor(task.priority)}`}>
-                         {task.priority}
-                       </span>
-                       <span className="text-xs text-zinc-500">{task.dueDate}</span>
+                return (
+                  <div 
+                    key={task._id} 
+                    className={`group grid grid-cols-[auto_1fr_auto_auto_auto_auto] gap-4 px-4 py-3 rounded-xl items-center transition-all cursor-pointer ${
+                      isCompleted 
+                        ? 'bg-zinc-900/20 hover:bg-zinc-900/40 opacity-60' 
+                        : 'hover:bg-zinc-800/50 bg-zinc-950/20'
+                    }`}
+                  >
+                    {/* Checkbox */}
+                    <div className="flex items-center justify-center">
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); handleToggleTaskStatus(task._id, task.status); }}
+                        className={`w-5 h-5 rounded flex items-center justify-center transition-colors ${
+                          isCompleted 
+                            ? 'bg-indigo-500 text-white' 
+                            : 'border border-zinc-600 bg-zinc-900/50 hover:border-indigo-400 group-hover:bg-zinc-800'
+                        }`}
+                      >
+                        {isCompleted && <Check className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
+
+                    {/* Title & Assignee */}
+                    <div className="min-w-0 flex flex-col">
+                      <span className={`text-sm font-medium truncate ${isCompleted ? 'line-through text-zinc-500' : 'text-zinc-200'}`}>
+                        {task.title}
+                      </span>
+                      <div className="flex items-center gap-1.5 mt-1 sm:hidden">
+                        <span className={`text-xs px-1.5 py-0.5 rounded border ${getPriorityColor(task.priority)}`}>
+                          {task.priority || 'Medium'}
+                        </span>
+                        <span className="text-xs text-zinc-500">{dateStr}</span>
+                      </div>
+                    </div>
+
+                    {/* Category */}
+                    <div className="w-24 hidden md:flex items-center gap-1.5">
+                      <span className={`text-xs font-medium ${getCategoryColor(task.category || 'General')}`}>
+                        {task.category || 'General'}
+                      </span>
+                    </div>
+
+                    {/* Priority */}
+                    <div className="w-24 hidden sm:block">
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold border uppercase tracking-wider ${getPriorityColor(task.priority)}`}>
+                        {task.priority === 'Urgent' && <AlertCircle className="w-3 h-3" />}
+                        {task.priority || 'Medium'}
+                      </span>
+                    </div>
+
+                    {/* Due Date */}
+                    <div className="w-32 hidden sm:flex items-center gap-1.5 text-xs font-medium text-zinc-400">
+                      <Calendar className="w-3.5 h-3.5 opacity-70" />
+                      <span>{dateStr}</span>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="w-8 flex justify-end">
+                      <button className="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-300 hover:bg-zinc-700/50 opacity-0 group-hover:opacity-100 transition-all">
+                        <MoreHorizontal className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
-
-                  {/* Category */}
-                  <div className="w-24 hidden md:flex items-center gap-1.5">
-                    <span className={`text-xs font-medium ${getCategoryColor(task.category)}`}>
-                      {task.category}
-                    </span>
-                  </div>
-
-                  {/* Priority */}
-                  <div className="w-24 hidden sm:block">
-                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold border uppercase tracking-wider ${getPriorityColor(task.priority)}`}>
-                      {task.priority === 'Urgent' && <AlertCircle className="w-3 h-3" />}
-                      {task.priority}
-                    </span>
-                  </div>
-
-                  {/* Due Date */}
-                  <div className="w-32 hidden sm:flex items-center gap-1.5 text-xs font-medium text-zinc-400">
-                    <Calendar className="w-3.5 h-3.5 opacity-70" />
-                    <span className={task.dueDate === 'Today' || task.dueDate === 'Yesterday' ? 'text-rose-400 font-semibold' : ''}>
-                      {task.dueDate}
-                    </span>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="w-8 flex justify-end">
-                    <button className="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-300 hover:bg-zinc-700/50 opacity-0 group-hover:opacity-100 transition-all">
-                      <MoreHorizontal className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

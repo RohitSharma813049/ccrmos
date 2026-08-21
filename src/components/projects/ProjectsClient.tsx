@@ -1,38 +1,62 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Plus, Search, Calendar, FolderKanban, MoreHorizontal, Clock, CheckCircle2, AlertTriangle, AlertCircle } from 'lucide-react';
-
-interface Project {
-  id: string;
-  title: string;
-  client: string;
-  type: 'Escrow' | 'Renovation' | 'Onboarding' | 'Marketing';
-  status: 'On Track' | 'At Risk' | 'Delayed' | 'Completed';
-  progress: number;
-  dueDate: string;
-  assigneeInitials: string;
-}
-
-const mockProjects: Project[] = [
-  { id: '1', title: '123 Ocean Dr - Escrow', client: 'Sarah Jenkins', type: 'Escrow', status: 'On Track', progress: 65, dueDate: 'Aug 30, 2026', assigneeInitials: 'ES' },
-  { id: '2', title: 'Kitchen Remodel - 456 City Center', client: 'Michael Chen', type: 'Renovation', status: 'Delayed', progress: 30, dueDate: 'Sep 15, 2026', assigneeInitials: 'CA' },
-  { id: '3', title: 'New Agent Onboarding - Team Alpha', client: 'Emily Davis', type: 'Onboarding', status: 'On Track', progress: 90, dueDate: 'Aug 22, 2026', assigneeInitials: 'M' },
-  { id: '4', title: 'Fall Advertising Campaign', client: 'Acme Corp', type: 'Marketing', status: 'At Risk', progress: 45, dueDate: 'Sep 01, 2026', assigneeInitials: 'TA' },
-  { id: '5', title: '789 Pine Ln - Escrow', client: 'Robert Taylor', type: 'Escrow', status: 'Completed', progress: 100, dueDate: 'Aug 15, 2026', assigneeInitials: 'JM' },
-  { id: '6', title: 'Landscaping - Estate #4', client: 'Amanda Lewis', type: 'Renovation', status: 'On Track', progress: 15, dueDate: 'Oct 10, 2026', assigneeInitials: 'ES' },
-];
+import React, { useState, useEffect } from 'react';
+import { Plus, Search, Calendar, FolderKanban, MoreHorizontal, CheckCircle2, AlertTriangle, AlertCircle } from 'lucide-react';
+import { getProjects, createProject } from '@/app/(dashboard)/projects/actions';
+import { toast } from 'react-hot-toast';
 
 export function ProjectsClient() {
+  const [projects, setProjects] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState<'All' | 'Escrow' | 'Renovation' | 'Other'>('All');
+  const [isCreating, setIsCreating] = useState(false);
 
-  const filteredProjects = mockProjects.filter(project => {
-    if (activeTab === 'Escrow' && project.type !== 'Escrow') return false;
-    if (activeTab === 'Renovation' && project.type !== 'Renovation') return false;
-    if (activeTab === 'Other' && (project.type === 'Escrow' || project.type === 'Renovation')) return false;
+  const fetchProjects = async () => {
+    try {
+      const data = await getProjects();
+      setProjects(data);
+    } catch (error) {
+      toast.error('Failed to load projects');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const handleCreateTestProject = async () => {
+    setIsCreating(true);
+    try {
+      await createProject({
+        name: `New Project ${Math.floor(Math.random() * 1000)}`,
+        status: 'On Track',
+        customData: {
+          client: 'Test Client',
+          type: ['Escrow', 'Renovation', 'Onboarding', 'Marketing'][Math.floor(Math.random() * 4)],
+          progress: Math.floor(Math.random() * 100),
+          dueDate: 'Dec 31, 2026',
+          assigneeInitials: 'TC'
+        }
+      });
+      toast.success('Project created');
+      fetchProjects();
+    } catch (error) {
+      toast.error('Failed to create project');
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const filteredProjects = projects.filter(project => {
+    const type = project.customData?.type || 'Other';
+    if (activeTab === 'Escrow' && type !== 'Escrow') return false;
+    if (activeTab === 'Renovation' && type !== 'Renovation') return false;
+    if (activeTab === 'Other' && (type === 'Escrow' || type === 'Renovation')) return false;
     
-    if (search && !project.title.toLowerCase().includes(search.toLowerCase()) && !project.client.toLowerCase().includes(search.toLowerCase())) return false;
+    if (search && !project.name.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
 
@@ -66,17 +90,25 @@ export function ProjectsClient() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       
       {/* Header Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div className="flex bg-zinc-900/50 backdrop-blur-xl border border-zinc-800/60 p-1 rounded-xl">
+        <div className="flex bg-zinc-900/50 backdrop-blur-xl border border-zinc-800/60 p-1 rounded-xl overflow-x-auto">
           {['All', 'Escrow', 'Renovation', 'Other'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab as any)}
-              className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${
+              className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                 activeTab === tab 
                   ? 'bg-zinc-800/80 text-zinc-100 shadow-sm' 
                   : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40'
@@ -98,7 +130,11 @@ export function ProjectsClient() {
               className="w-full sm:w-64 bg-zinc-900/50 border border-zinc-800/60 rounded-xl pl-9 pr-4 py-2 text-sm text-zinc-100 focus:outline-none focus:border-indigo-500 transition-colors"
             />
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-sm font-semibold text-white rounded-xl shadow-sm transition-all active:scale-95">
+          <button 
+            disabled={isCreating}
+            onClick={handleCreateTestProject}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-sm font-semibold text-white rounded-xl shadow-sm transition-all active:scale-95 disabled:opacity-50"
+          >
             <Plus className="w-4 h-4" />
             <span className="hidden sm:inline">New Project</span>
           </button>
@@ -107,65 +143,73 @@ export function ProjectsClient() {
 
       {/* Projects Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {filteredProjects.map((project) => (
-          <div 
-            key={project.id}
-            className="group relative bg-zinc-900/40 backdrop-blur-xl rounded-2xl border border-zinc-800/60 p-5 hover:border-zinc-700/80 transition-all shadow-sm hover:shadow-xl hover:-translate-y-0.5"
-          >
-            {/* Top Row: Type & Actions */}
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <div className={`w-2 h-2 rounded-full ${getTypeColor(project.type)}`} />
-                <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">{project.type}</span>
-              </div>
-              <button className="text-zinc-500 hover:text-zinc-300 transition-colors opacity-0 group-hover:opacity-100 p-1">
-                <MoreHorizontal className="w-4 h-4" />
-              </button>
-            </div>
+        {filteredProjects.map((project) => {
+          const type = project.customData?.type || 'Other';
+          const client = project.customData?.client || 'Unknown Client';
+          const progress = project.customData?.progress || 0;
+          const dueDate = project.customData?.dueDate || 'No date set';
+          const assignee = project.customData?.assigneeInitials || 'UN';
 
-            {/* Title & Client */}
-            <div className="mb-6">
-              <h3 className="text-lg font-bold text-zinc-100 mb-1">{project.title}</h3>
-              <p className="text-sm text-zinc-400">Client: <span className="text-zinc-300 font-medium">{project.client}</span></p>
-            </div>
-
-            {/* Progress Bar */}
-            <div className="mb-6">
-              <div className="flex justify-between items-end mb-2">
-                <span className="text-sm font-semibold text-zinc-300">Progress</span>
-                <span className="text-xs font-bold text-zinc-400">{project.progress}%</span>
+          return (
+            <div 
+              key={project._id}
+              className="group relative bg-zinc-900/40 backdrop-blur-xl rounded-2xl border border-zinc-800/60 p-5 hover:border-zinc-700/80 transition-all shadow-sm hover:shadow-xl hover:-translate-y-0.5"
+            >
+              {/* Top Row: Type & Actions */}
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${getTypeColor(type)}`} />
+                  <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">{type}</span>
+                </div>
+                <button className="text-zinc-500 hover:text-zinc-300 transition-colors opacity-0 group-hover:opacity-100 p-1">
+                  <MoreHorizontal className="w-4 h-4" />
+                </button>
               </div>
-              <div className="w-full bg-zinc-800/50 rounded-full h-2.5 border border-zinc-800/80">
-                <div 
-                  className={`h-2.5 rounded-full transition-all duration-1000 ${
-                    project.progress === 100 ? 'bg-blue-500' : 'bg-indigo-500'
-                  }`}
-                  style={{ width: `${project.progress}%` }}
-                />
-              </div>
-            </div>
 
-            {/* Bottom Row: Status, Date, Avatar */}
-            <div className="flex items-center justify-between pt-4 border-t border-zinc-800/60">
-              <div className="flex flex-col gap-2">
-                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${getStatusColor(project.status)}`}>
-                  {getStatusIcon(project.status)}
-                  {project.status}
-                </span>
-                <div className="flex items-center gap-1.5 text-xs font-medium text-zinc-400">
-                  <Calendar className="w-3.5 h-3.5 opacity-70" />
-                  <span className={project.status === 'Delayed' ? 'text-rose-400 font-semibold' : ''}>
-                    {project.dueDate}
-                  </span>
+              {/* Title & Client */}
+              <div className="mb-6">
+                <h3 className="text-lg font-bold text-zinc-100 mb-1">{project.name}</h3>
+                <p className="text-sm text-zinc-400">Client: <span className="text-zinc-300 font-medium">{client}</span></p>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="mb-6">
+                <div className="flex justify-between items-end mb-2">
+                  <span className="text-sm font-semibold text-zinc-300">Progress</span>
+                  <span className="text-xs font-bold text-zinc-400">{progress}%</span>
+                </div>
+                <div className="w-full bg-zinc-800/50 rounded-full h-2.5 border border-zinc-800/80">
+                  <div 
+                    className={`h-2.5 rounded-full transition-all duration-1000 ${
+                      progress >= 100 ? 'bg-blue-500' : 'bg-indigo-500'
+                    }`}
+                    style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
+                  />
                 </div>
               </div>
 
-              <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-xs font-bold text-zinc-300 border border-zinc-700 shadow-sm">
-                {project.assigneeInitials}
+              {/* Bottom Row: Status, Date, Avatar */}
+              <div className="flex items-center justify-between pt-4 border-t border-zinc-800/60">
+                <div className="flex flex-col gap-2">
+                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${getStatusColor(project.status)}`}>
+                    {getStatusIcon(project.status)}
+                    {project.status || 'Planning'}
+                  </span>
+                  <div className="flex items-center gap-1.5 text-xs font-medium text-zinc-400">
+                    <Calendar className="w-3.5 h-3.5 opacity-70" />
+                    <span className={project.status === 'Delayed' ? 'text-rose-400 font-semibold' : ''}>
+                      {dueDate}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-xs font-bold text-zinc-300 border border-zinc-700 shadow-sm">
+                  {assignee}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {filteredProjects.length === 0 && (
