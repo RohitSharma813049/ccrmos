@@ -13,6 +13,7 @@ import { getSession } from "@/lib/auth-utils";
 import User from "@/modules/users/schemas/User";
 import AICopilot from "@/components/ui/AICopilot";
 import SidebarWrapper from "@/components/layout/SidebarWrapper";
+import CollapsibleNavGroup from "@/components/layout/CollapsibleNavGroup";
 import BottomNav from "@/components/layout/BottomNav";
 import CompanyModule from "@/modules/companies/schemas/CompanyModule";
 import DialerWidget from "@/components/telephony/DialerWidget";
@@ -103,26 +104,22 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
 
         <nav className="flex-1 px-4 space-y-1 overflow-y-auto pb-6 relative z-10 custom-scrollbar">
-          <div className="pt-2 pb-2">
-            <p className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Main Menu</p>
-          </div>
-          <NavItem href="/dashboard" label="Overview" icon="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-          <NavItem href="/dashboard/calendar" label="Calendar" icon="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          <NavItem href="/dashboard/workbench" label="Workbench" icon="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          <CollapsibleNavGroup title="Main Menu" defaultOpen={true}>
+            <NavItem href="/dashboard" label="Overview" icon="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            <NavItem href="/dashboard/calendar" label="Calendar" icon="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            <NavItem href="/dashboard/workbench" label="Workbench" icon="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </CollapsibleNavGroup>
 
           {/* AI Features */}
-          <div className="pt-6 pb-2">
-            <p className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-fuchsia-500">AI Features</p>
-          </div>
-          <NavItem href="/dashboard/ai-agents" label="AI Agents" icon="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-          <NavItem href="/dashboard/sound-effect" label="Sound Effects" icon="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-          <NavItem href="/dashboard/voices" label="Voices" icon="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+          <CollapsibleNavGroup title={<span className="text-fuchsia-500">AI Features</span>} defaultOpen={false}>
+            <NavItem href="/dashboard/ai-agents" label="AI Agents" icon="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            <NavItem href="/dashboard/sound-effect" label="Sound Effects" icon="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+            <NavItem href="/dashboard/voices" label="Voices" icon="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+          </CollapsibleNavGroup>
+
 
           {companyModules.length > 0 ? (
-            <>
-              <div className="pt-6 pb-2">
-                <p className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{industryName} Modules</p>
-              </div>
+            <CollapsibleNavGroup title={`${industryName} Modules`} defaultOpen={true}>
               {companyModules.map((mod: any) => {
                 const stdRouteMap: Record<string, string> = {
                   "fb leads": "fb-leads",
@@ -161,14 +158,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
                   <NavItem key={mod._id.toString()} href={href} label={mod.display_name} icon={icon} />
                 );
               })}
-            </>
+            </CollapsibleNavGroup>
           ) : (
-            <>
-              {/* Legacy fallback if companyModules is empty */}
-              <div className="pt-6 pb-2">
-                <p className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Real Estate CRM</p>
-              </div>
-              {isModuleEnabled("Leads") && (
+            <CollapsibleNavGroup title="Legacy Modules" defaultOpen={true}>
+              {isModuleEnabled("Leads") && hasModulePermission(session.user as any, "Leads", "view") && (
                 <>
                   <NavItem href="/dashboard/fb-leads" label="FB Leads" icon="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                   <NavItem href="/dashboard/leads" label="Leads" icon="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
@@ -183,41 +176,34 @@ export default async function DashboardLayout({ children }: { children: React.Re
               )}
 
               {customModules.length > 0 && (
-                <>
-                  <div className="pt-6 pb-2">
-                    <p className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Custom Modules</p>
-                  </div>
+                <CollapsibleNavGroup title="Custom Modules" defaultOpen={false}>
                   {customModules.map((mod: any) => {
                     if (!isPlatformOwner && !hasModulePermission(session.user as any, mod.name, "view")) return null;
                     return (
                       <NavItem key={mod._id.toString()} href={`/dashboard/modules/${mod._id}`} label={mod.name} icon="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                     );
                   })}
-                </>
+                </CollapsibleNavGroup>
               )}
-            </>
+            </CollapsibleNavGroup>
           )}
 
           {/* Roles, Users & Integrations (Based on Permissions) */}
-          <div className="pt-6 pb-2">
-            <p className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Configuration</p>
-          </div>
-          {(isPlatformOwner || session?.user?.hierarchyLevel === 2 || hasModulePermission(session.user as any, "User Management", "view")) && (
-            <NavItem href="/dashboard/users" label="User Management" icon="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-          )}
-          {(isPlatformOwner || session?.user?.hierarchyLevel === 2 || hasModulePermission(session.user as any, "Roles & Permissions", "view")) && (
-            <NavItem href="/dashboard/settings/roles" label="Roles & Permissions" icon="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-          )}
-          {(isPlatformOwner || session?.user?.hierarchyLevel === 2 || hasModulePermission(session.user as any, "API Configuration", "view") || hasModulePermission(session.user as any, "WhatsApp", "view")) && (
-            <NavItem href="/dashboard/settings/integrations" label="API & Integrations" icon="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-          )}
+          <CollapsibleNavGroup title="Configuration" defaultOpen={false}>
+            {(isPlatformOwner || session?.user?.hierarchyLevel === 2 || hasModulePermission(session.user as any, "User Management", "view")) && (
+              <NavItem href="/dashboard/users" label="User Management" icon="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            )}
+            {(isPlatformOwner || session?.user?.hierarchyLevel === 2 || hasModulePermission(session.user as any, "Roles & Permissions", "view")) && (
+              <NavItem href="/dashboard/settings/roles" label="Roles & Permissions" icon="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            )}
+            {(isPlatformOwner || session?.user?.hierarchyLevel === 2 || hasModulePermission(session.user as any, "API Configuration", "view") || hasModulePermission(session.user as any, "WhatsApp", "view")) && (
+              <NavItem href="/dashboard/settings/integrations" label="API & Integrations" icon="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+            )}
+          </CollapsibleNavGroup>
 
           {/* Conditional Admin Menus */}
           {((session?.user?.hierarchyLevel === 2) || isPlatformOwner) && (
-            <>
-              <div className="pt-6 pb-2">
-                <p className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">System Settings</p>
-              </div>
+            <CollapsibleNavGroup title="System Settings" defaultOpen={false}>
               <NavItem href="/dashboard/settings/branding" label="Branding" icon="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
               <NavItem href="/dashboard/settings/custom-modules" label="Custom Modules" icon="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
               <NavItem href="/dashboard/settings/module-fields" label="Module Fields" icon="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
@@ -230,7 +216,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
               <NavItem href="/dashboard/settings/audit" label="Audit Logs" icon="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
               <NavItem href="/dashboard/settings/export" label="Export Data" icon="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
               <NavItem href="/dashboard/settings/recycle-bin" label="Recycle Bin" icon="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </>
+            </CollapsibleNavGroup>
           )}
         </nav>
 
@@ -264,21 +250,18 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <BottomNav>
         {/* We reuse the same NavItems logic for the BottomNav "More" menu */}
         <div className="flex flex-col space-y-1">
-          <NavItem href="/dashboard" label="Overview" icon="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-          
-          <NavItem href="/dashboard/workbench" label="Workbench" icon="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          <CollapsibleNavGroup title="Main Menu" defaultOpen={true}>
+            <NavItem href="/dashboard" label="Overview" icon="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            <NavItem href="/dashboard/workbench" label="Workbench" icon="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </CollapsibleNavGroup>
           
           {/* AI Features Mobile */}
-          <div className="pt-6 pb-2">
-            <p className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-fuchsia-500">AI Features</p>
-          </div>
-          <NavItem href="/dashboard/ai-agents" label="AI Agents" icon="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          <CollapsibleNavGroup title={<span className="text-fuchsia-500">AI Features</span>} defaultOpen={false}>
+            <NavItem href="/dashboard/ai-agents" label="AI Agents" icon="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </CollapsibleNavGroup>
 
           {companyModules.length > 0 ? (
-            <>
-              <div className="pt-6 pb-2">
-                <p className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{industryName} Modules</p>
-              </div>
+            <CollapsibleNavGroup title={`${industryName} Modules`} defaultOpen={true}>
               {companyModules.map((mod: any) => {
                 const stdRouteMap: Record<string, string> = {
                   "fb leads": "fb-leads",
@@ -317,13 +300,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
                   <NavItem key={mod._id.toString()} href={href} label={mod.display_name} icon={icon} />
                 );
               })}
-            </>
+            </CollapsibleNavGroup>
           ) : (
-            <>
-              {/* Legacy fallback */}
-              <div className="pt-6 pb-2">
-                <p className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Real Estate</p>
-              </div>
+            <CollapsibleNavGroup title="Legacy Modules" defaultOpen={true}>
               {isModuleEnabled("Leads") && hasModulePermission(session.user as any, "Leads", "view") && (
                 <>
                   <NavItem href="/dashboard/fb-leads" label="FB Leads" icon="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -337,25 +316,20 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
 
               {customModules.length > 0 && (
-                <>
-                  <div className="pt-6 pb-2">
-                    <p className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Custom Modules</p>
-                  </div>
+                <CollapsibleNavGroup title="Custom Modules" defaultOpen={false}>
                   {customModules.map((mod: any) => {
                     if (!isPlatformOwner && !hasModulePermission(session.user as any, mod.name, "view")) return null;
                     return (
                       <NavItem key={mod._id.toString()} href={`/dashboard/modules/${mod._id}`} label={mod.name} icon="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                     );
                   })}
-                </>
+                </CollapsibleNavGroup>
               )}
-            </>
+            </CollapsibleNavGroup>
           )}
 
           {/* Roles, Users & Integrations (Mobile) */}
-          <div className="pt-6 pb-2">
-            <p className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Configuration</p>
-          </div>
+          <CollapsibleNavGroup title="Configuration" defaultOpen={false}>
           {(isPlatformOwner || session?.user?.hierarchyLevel === 2 || hasModulePermission(session.user as any, "User Management", "view")) && (
             <NavItem href="/dashboard/users" label="User Management" icon="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
           )}
@@ -366,12 +340,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
             <NavItem href="/dashboard/settings/integrations" label="API & Integrations" icon="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
           )}
 
-          {((session?.user?.hierarchyLevel === 2) || isPlatformOwner) && (
-            <>
-              <div className="pt-6 pb-2">
-                <p className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">System Settings</p>
-              </div>
+          </CollapsibleNavGroup>
 
+          {((session?.user?.hierarchyLevel === 2) || isPlatformOwner) && (
+            <CollapsibleNavGroup title="System Settings" defaultOpen={false}>
               <NavItem href="/dashboard/settings/branding" label="Branding" icon="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
 
               <NavItem href="/dashboard/settings/custom-modules" label="Custom Modules" icon="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
@@ -386,7 +358,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
               <NavItem href="/dashboard/settings/audit" label="Audit Logs" icon="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
               <NavItem href="/dashboard/settings/export" label="Export Data" icon="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
               <NavItem href="/dashboard/settings/recycle-bin" label="Recycle Bin" icon="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </>
+            </CollapsibleNavGroup>
           )}
 
           {/* Mobile User Profile Footer */}
