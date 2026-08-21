@@ -324,7 +324,7 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
   const [newNote, setNewNote] = useState("");
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
   const [submittingNote, setSubmittingNote] = useState(false);
-  const [communicationChannel, setCommunicationChannel] = useState<"Note" | "Email" | "WhatsApp">("Note");
+  const [communicationChannel, setCommunicationChannel] = useState<"Note"|"Email"|"WhatsApp"|"SMS">("Note");
   const [emailSubject, setEmailSubject] = useState("");
 
   const handleAddNote = async (leadId: string) => {
@@ -996,7 +996,7 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
             {/* Quick Notes Input */}
             <div className="p-4 bg-muted/20 border-t border-border flex flex-col gap-3 shrink-0">
               <div className="flex items-center gap-2 mb-1 border-b border-border pb-2">
-                {(["Note", "Email", "WhatsApp"] as const).map(channel => (
+                {(["Note", "Email", "WhatsApp", "SMS"] as const).map(channel => (
                   <button
                     key={channel}
                     onClick={() => setCommunicationChannel(channel)}
@@ -1004,6 +1004,7 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
                       communicationChannel === channel
                         ? channel === "WhatsApp" ? "bg-green-100 text-green-700 border border-green-200" 
                         : channel === "Email" ? "bg-blue-100 text-blue-700 border border-blue-200"
+                        : channel === "SMS" ? "bg-purple-100 text-purple-700 border border-purple-200"
                         : "bg-primary text-primary-foreground border border-primary"
                         : "bg-transparent text-muted-foreground hover:bg-muted"
                     }`}
@@ -1011,6 +1012,7 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
                     {channel === "Note" && "Internal Note"}
                     {channel === "Email" && "Send Email"}
                     {channel === "WhatsApp" && "Send WhatsApp"}
+                    {channel === "SMS" && "Send SMS"}
                   </button>
                 ))}
               </div>
@@ -1032,6 +1034,7 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
                   placeholder={
                     communicationChannel === "Note" ? "Type an internal note..." :
                     communicationChannel === "Email" ? "Type your email message..." :
+                    communicationChannel === "SMS" ? "Type your SMS message..." :
                     "Type your WhatsApp message..."
                   }
                   className="flex-1 px-3 py-2 text-sm bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary resize-none min-h-[60px]"
@@ -1042,6 +1045,7 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
                   className={`px-4 font-medium rounded-lg disabled:opacity-50 transition-colors flex flex-col items-center justify-center gap-1 ${
                     communicationChannel === "WhatsApp" ? "bg-[#25D366] hover:bg-[#128C7E] text-white" :
                     communicationChannel === "Email" ? "bg-blue-600 hover:bg-blue-700 text-white" :
+                    communicationChannel === "SMS" ? "bg-purple-600 hover:bg-purple-700 text-white" :
                     "bg-primary text-primary-foreground hover:bg-primary/90"
                   }`}
                 >

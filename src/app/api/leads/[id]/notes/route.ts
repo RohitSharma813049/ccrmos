@@ -4,6 +4,7 @@ import Lead from '@/modules/leads/schemas/Lead';
 import { requireAuthenticatedUser, requirePermission } from '@/lib/auth-utils';
 import { buildTenantQuery } from '@/lib/access-control';
 import { sendWhatsAppMessage } from '@/lib/whatsappClient';
+import { sendTwilioSMS } from '@/lib/twilioClient';
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   await dbConnect();
@@ -40,6 +41,21 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         await sendWhatsAppMessage(user.companyId || user.impersonatedFounderId, phone, message);
       } catch (waError: any) {
         return NextResponse.json({ error: waError.message || 'Failed to send WhatsApp message' }, { status: 500 });
+      }
+    } else if (channel === "SMS") {
+      activityType = 'SMS Sent';
+      try {
+        const phone = lead.phone || lead.customData?.phoneNumber || lead.customData?.phone;
+        if (!phone) {
+          return NextResponse.json({ error: 'Lead does not have a valid phone number' }, { status: 400 });
+        }
+        const companyIdStr = user.companyId ? user.companyId.toString() : (user.impersonatedFounderId ? user.impersonatedFounderId.toString() : undefined);
+        const result = await sendTwilioSMS(phone, message, companyIdStr);
+        if (!result.success) {
+           return NextResponse.json({ error: result.error || 'Failed to send SMS' }, { status: 500 });
+        }
+      } catch (smsError: any) {
+        return NextResponse.json({ error: smsError.message || 'Failed to send SMS message' }, { status: 500 });
       }
     } else if (channel === "Call") {
       activityType = 'Call Logged';
