@@ -35,27 +35,27 @@ export default function FbLeadsPage() {
           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white">
             <Share2 className="w-5 h-5" />
           </div>
-          <h2 className="font-bold text-lg text-slate-800">Meta Ads</h2>
+          <h2 className="font-bold text-lg text-zinc-100">Meta Ads</h2>
         </div>
 
         <div className="bg-blue-50/50 rounded-xl p-4 border border-blue-100">
-          <p className="text-xs font-medium text-slate-500 mb-1">Total Leads</p>
+          <p className="text-xs font-medium text-zinc-400 mb-1">Total Leads</p>
           <h3 className="text-2xl font-bold text-blue-600">1000</h3>
         </div>
 
         <div className="bg-green-50/50 rounded-xl p-4 border border-green-100">
-          <p className="text-xs font-medium text-slate-500 mb-1">Processed</p>
+          <p className="text-xs font-medium text-zinc-400 mb-1">Processed</p>
           <h3 className="text-2xl font-bold text-green-600">988</h3>
         </div>
 
         <div className="bg-orange-50/50 rounded-xl p-4 border border-orange-100">
-          <p className="text-xs font-medium text-slate-500 mb-1">Pending</p>
+          <p className="text-xs font-medium text-zinc-400 mb-1">Pending</p>
           <h3 className="text-2xl font-bold text-orange-600">12</h3>
         </div>
 
-        <div className="bg-slate-50/80 rounded-xl p-4 border border-slate-100 flex gap-2">
+        <div className="bg-zinc-950/50/80 rounded-xl p-4 border border-zinc-800/60 flex gap-2">
           <Zap className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-          <p className="text-xs text-slate-500 leading-relaxed">
+          <p className="text-xs text-zinc-400 leading-relaxed">
             Auto-sync runs every 20 minutes
           </p>
         </div>
@@ -67,8 +67,8 @@ export default function FbLeadsPage() {
         {/* Header & Actions */}
         <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 leading-tight">Meta Leads Database</h1>
-            <p className="text-slate-500 text-sm">Leads are synced automatically from Facebook/Instagram</p>
+            <h1 className="text-2xl font-bold text-zinc-100 leading-tight">Meta Leads Database</h1>
+            <p className="text-zinc-400 text-sm">Leads are synced automatically from Facebook/Instagram</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <button className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm">
@@ -94,7 +94,7 @@ export default function FbLeadsPage() {
         <div className="space-y-4">
           
           {/* Campaign 1 - Expanded */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="bg-zinc-900/40 backdrop-blur-xl rounded-xl shadow-sm border border-zinc-700/50 overflow-hidden">
             <div 
               onClick={() => toggleCampaign('09-July-2026 Channel Partner')}
               className="bg-blue-600 hover:bg-blue-700 cursor-pointer text-white p-4 flex items-center gap-3 transition-colors"
@@ -111,9 +111,9 @@ export default function FbLeadsPage() {
             </div>
             
             {expandedCampaign === '09-July-2026 Channel Partner' && (
-              <div className="p-4 space-y-4 bg-slate-50">
+              <div className="p-4 space-y-4 bg-zinc-950/50">
                 {/* Lead Item 1 */}
-                <div className="bg-white rounded-xl border border-green-200 p-4 shadow-sm relative">
+                <div className="bg-zinc-900/40 backdrop-blur-xl rounded-xl border border-green-200 p-4 shadow-sm relative">
                   <div className="absolute top-4 right-4 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-md flex items-center gap-1">
                     <CheckCircle2 className="w-3 h-3" /> Processed
                   </div>
@@ -122,9 +122,9 @@ export default function FbLeadsPage() {
                       <CheckCircle2 className="w-5 h-5 text-green-500" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-slate-800">satvik</h4>
-                      <p className="text-xs text-slate-500">Aug 1, 2026, 12:24 PM</p>
-                      <div className="mt-2 space-y-1 text-sm text-slate-600">
+                      <h4 className="font-semibold text-zinc-100">satvik</h4>
+                      <p className="text-xs text-zinc-400">Aug 1, 2026, 12:24 PM</p>
+                      <div className="mt-2 space-y-1 text-sm text-zinc-400">
                         <div className="flex items-center gap-2"><span className="text-slate-400 w-24">Phone Number:</span> +919625977690</div>
                         <div className="flex items-center gap-2"><span className="text-slate-400 w-24">Email:</span> kumaralpana890@gmail.com</div>
                         <div className="flex items-center gap-2"><span className="text-slate-400 w-24">City:</span> Gurugram</div>
@@ -136,7 +136,7 @@ export default function FbLeadsPage() {
                 </div>
 
                 {/* Lead Item 2 */}
-                <div className="bg-white rounded-xl border border-green-200 p-4 shadow-sm relative">
+                <div className="bg-zinc-900/40 backdrop-blur-xl rounded-xl border border-green-200 p-4 shadow-sm relative">
                   <div className="absolute top-4 right-4 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-md flex items-center gap-1">
                     <CheckCircle2 className="w-3 h-3" /> Processed
                   </div>
@@ -145,9 +145,9 @@ export default function FbLeadsPage() {
                       <CheckCircle2 className="w-5 h-5 text-green-500" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-slate-800">Aftab Ahmed</h4>
-                      <p className="text-xs text-slate-500">Aug 1, 2026, 09:44 AM</p>
-                      <div className="mt-2 space-y-1 text-sm text-slate-600">
+                      <h4 className="font-semibold text-zinc-100">Aftab Ahmed</h4>
+                      <p className="text-xs text-zinc-400">Aug 1, 2026, 09:44 AM</p>
+                      <div className="mt-2 space-y-1 text-sm text-zinc-400">
                         <div className="flex items-center gap-2"><span className="text-slate-400 w-24">Phone Number:</span> +916005479924</div>
                         <div className="flex items-center gap-2"><span className="text-slate-400 w-24">Email:</span> aftabahmedawan5@gmail.com</div>
                       </div>
@@ -159,7 +159,7 @@ export default function FbLeadsPage() {
           </div>
 
           {/* Campaign 2 */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="bg-zinc-900/40 backdrop-blur-xl rounded-xl shadow-sm border border-zinc-700/50 overflow-hidden">
             <div 
               onClick={() => toggleCampaign('08-july-2026 Gurugram-copy')}
               className="bg-blue-600 hover:bg-blue-700 cursor-pointer text-white p-4 flex items-center gap-3 transition-colors"
@@ -178,7 +178,7 @@ export default function FbLeadsPage() {
           </div>
 
           {/* Campaign 3 */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="bg-zinc-900/40 backdrop-blur-xl rounded-xl shadow-sm border border-zinc-700/50 overflow-hidden">
             <div 
               onClick={() => toggleCampaign('01-aug-2026 nancy dugal final')}
               className="bg-blue-600 hover:bg-blue-700 cursor-pointer text-white p-4 flex items-center gap-3 transition-colors"

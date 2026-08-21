@@ -522,8 +522,8 @@ export default function IntegrationsPage() {
     <div className="max-w-6xl mx-auto space-y-8 fade-in pb-12">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Third-Party Integrations</h1>
-          <p className="text-gray-600 mt-1">Connect external platforms to sync leads into your CRM automatically.</p>
+          <h1 className="text-3xl font-bold text-zinc-100 tracking-tight">Third-Party Integrations</h1>
+          <p className="text-zinc-400 mt-1">Connect external platforms to sync leads into your CRM automatically.</p>
         </div>
       </div>
 
@@ -535,7 +535,7 @@ export default function IntegrationsPage() {
           const currentWebhookUrl = int.baseWebhookPath ? `${baseUrl}${int.baseWebhookPath}?companyId=${companyId}${pParam}${fParam}` : '';
 
           return (
-          <div key={int.id} className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col h-[380px] hover:shadow-md transition-shadow">
+          <div key={int.id} className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl shadow-sm border border-zinc-700/50 p-6 flex flex-col h-[380px] hover:shadow-md transition-shadow">
             <div className="flex items-start gap-4 mb-4">
               <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border ${colorMap[int.color]}`}>
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -543,20 +543,20 @@ export default function IntegrationsPage() {
                 </svg>
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-900 leading-tight">{int.name}</h3>
-                <p className="text-sm text-gray-500 mt-1 line-clamp-3">{int.description}</p>
+                <h3 className="text-lg font-bold text-zinc-100 leading-tight">{int.name}</h3>
+                <p className="text-sm text-zinc-400 mt-1 line-clamp-3">{int.description}</p>
               </div>
             </div>
             
             {int.baseWebhookPath ? (
               <div className="space-y-4 mt-auto">
-                <div className="flex flex-col gap-2 p-3 bg-gray-50 rounded-xl border border-gray-200">
+                <div className="flex flex-col gap-2 p-3 bg-zinc-950/50 rounded-xl border border-zinc-700/50">
                   <div className="flex items-center gap-2">
-                    <label className="text-xs font-semibold text-gray-600 w-16">Project:</label>
+                    <label className="text-xs font-semibold text-zinc-400 w-16">Project:</label>
                     <select 
                       value={sel.project}
                       onChange={(e) => handleSelection(int.id, 'project', e.target.value)}
-                      className="w-full bg-white border border-gray-300 rounded-md px-2 py-1 text-xs focus:ring-1 focus:ring-indigo-500 outline-none"
+                      className="w-full bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-md px-2 py-1 text-xs focus:ring-1 focus:ring-indigo-500 outline-none"
                     >
                       <option value="">Select a Project...</option>
                       {projects.map(p => (
@@ -565,12 +565,12 @@ export default function IntegrationsPage() {
                     </select>
                   </div>
                   <div className="flex items-center gap-2">
-                    <label className="text-xs font-semibold text-gray-600 w-16">Form:</label>
+                    <label className="text-xs font-semibold text-zinc-400 w-16">Form:</label>
                     <select 
                       value={sel.form}
                       onChange={(e) => handleSelection(int.id, 'form', e.target.value)}
                       disabled={!sel.project}
-                      className="w-full bg-white border border-gray-300 rounded-md px-2 py-1 text-xs focus:ring-1 focus:ring-indigo-500 outline-none disabled:opacity-50"
+                      className="w-full bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-md px-2 py-1 text-xs focus:ring-1 focus:ring-indigo-500 outline-none disabled:opacity-50"
                     >
                       <option value="">Select a Form (Optional)</option>
                       {forms.filter(f => f.projectId === sel.project).map(f => (
@@ -581,13 +581,13 @@ export default function IntegrationsPage() {
                 </div>
                 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">Your Unique Webhook URL</label>
+                  <label className="text-sm font-medium text-zinc-300">Your Unique Webhook URL</label>
                   <div className="flex items-center gap-2">
                     <input 
                       type="text" 
                       readOnly 
                       value={currentWebhookUrl || ''}
-                      className="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-2.5 text-sm text-gray-600 focus:outline-none"
+                      className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-lg px-4 py-2.5 text-sm text-zinc-400 focus:outline-none"
                     />
                     <button 
                       onClick={() => copyWebhookUrl(int.id, int.name, currentWebhookUrl || '', sel.project, sel.form)}
@@ -610,7 +610,7 @@ export default function IntegrationsPage() {
                     else if (int.id === 'groq') setIsGroqModalOpen(true);
                     else if (int.id === 'twilio') setIsTwilioModalOpen(true);
                   }}
-                  className="px-5 py-2.5 bg-gray-100 text-gray-900 border border-gray-300 font-medium rounded-lg hover:bg-gray-200 transition-colors"
+                  className="px-5 py-2.5 bg-gray-100 text-zinc-100 border border-zinc-700/50 font-medium rounded-lg hover:bg-gray-200 transition-colors"
                 >
                   {int.actionLabel}
                 </button>
@@ -623,15 +623,15 @@ export default function IntegrationsPage() {
       {isWaModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsWaModalOpen(false)} />
-          <div className="relative bg-white border border-gray-300 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200 text-center">
-            <div className="p-6 border-b border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900">WhatsApp Web Connection</h2>
-              <p className="text-sm text-gray-600 mt-1">Scan to connect your WhatsApp directly to CRM OS.</p>
+          <div className="relative bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200 text-center">
+            <div className="p-6 border-b border-zinc-700/50">
+              <h2 className="text-xl font-bold text-zinc-100">WhatsApp Web Connection</h2>
+              <p className="text-sm text-zinc-400 mt-1">Scan to connect your WhatsApp directly to CRM OS.</p>
             </div>
             
             <div className="p-8 space-y-6 flex flex-col items-center min-h-[300px] justify-center">
               {waLoading ? (
-                <div className="text-gray-500">Processing...</div>
+                <div className="text-zinc-400">Processing...</div>
               ) : waStatus?.status === 'CONNECTED' ? (
                 <div className="text-emerald-600 font-bold text-xl flex flex-col items-center gap-4">
                   <svg className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -642,17 +642,17 @@ export default function IntegrationsPage() {
                 </div>
               ) : waStatus?.status === 'QR_READY' && waStatus.qr ? (
                 <div className="flex flex-col items-center">
-                  <img src={waStatus.qr} alt="WhatsApp QR Code" className="w-64 h-64 rounded-xl border border-gray-200 shadow-sm" />
-                  <p className="text-sm text-gray-500 mt-4">Open WhatsApp on your phone and scan this code.</p>
+                  <img src={waStatus.qr} alt="WhatsApp QR Code" className="w-64 h-64 rounded-xl border border-zinc-700/50 shadow-sm" />
+                  <p className="text-sm text-zinc-400 mt-4">Open WhatsApp on your phone and scan this code.</p>
                 </div>
               ) : waStatus?.status === 'INITIALIZING' ? (
-                <div className="text-gray-500 flex flex-col items-center gap-3">
+                <div className="text-zinc-400 flex flex-col items-center gap-3">
                   <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
                   Generating QR Code... Please wait.
                 </div>
               ) : (
                 <div className="text-center">
-                  <p className="text-gray-600 mb-6">You are currently disconnected.</p>
+                  <p className="text-zinc-400 mb-6">You are currently disconnected.</p>
                   <button 
                     onClick={() => handleWaAction('INITIALIZE')}
                     className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-xl shadow-lg shadow-emerald-500/30 transition-all"
@@ -663,10 +663,10 @@ export default function IntegrationsPage() {
               )}
             </div>
 
-            <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-end">
+            <div className="p-4 bg-zinc-950/50 border-t border-zinc-700/50 flex justify-end">
               <button 
                 onClick={() => setIsWaModalOpen(false)}
-                className="px-5 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+                className="px-5 py-2 text-sm font-medium text-zinc-300 hover:text-zinc-100 transition-colors"
               >
                 Close
               </button>
@@ -678,46 +678,46 @@ export default function IntegrationsPage() {
       {isJdModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsJdModalOpen(false)} />
-          <div className="relative bg-white border border-gray-300 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-gray-200 flex items-center gap-3">
+          <div className="relative bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-zinc-700/50 flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg border flex items-center justify-center bg-orange-50 text-orange-600 border-orange-200">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </svg>
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900">Configure Justdial</h2>
-                <p className="text-sm text-gray-600 mt-0.5">Enter your API credentials below</p>
+                <h2 className="text-xl font-bold text-zinc-100">Configure Justdial</h2>
+                <p className="text-sm text-zinc-400 mt-0.5">Enter your API credentials below</p>
               </div>
             </div>
             
             <div className="p-6 max-h-[60vh] overflow-y-auto">
               <div className="space-y-6">
                 {jdConfigs.map((config, index) => (
-                  <div key={config.id} className="p-4 border border-gray-200 rounded-xl bg-gray-50/50 space-y-4 relative">
+                  <div key={config.id} className="p-4 border border-zinc-700/50 rounded-xl bg-zinc-950/50/50 space-y-4 relative">
                     <div className="absolute top-4 right-4">
                       <button onClick={() => removeJdConfig(config.id)} className="text-red-500 hover:text-red-700 p-1">
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                       </button>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Vendor API Key {index + 1}</label>
+                      <label className="block text-sm font-medium text-zinc-300 mb-1">Vendor API Key {index + 1}</label>
                       <input 
                         type="text" 
                         value={config.apiKey}
                         onChange={(e) => updateJdConfig(config.id, 'apiKey', e.target.value)}
                         placeholder="Enter your Justdial Vendor API Key"
-                        className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-orange-500 outline-none" 
+                        className="w-full bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-orange-500 outline-none" 
                       />
                     </div>
                     
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Schedule Mode</label>
+                        <label className="block text-sm font-medium text-zinc-300 mb-1">Schedule Mode</label>
                         <select 
                           value={config.scheduleType}
                           onChange={(e) => updateJdConfig(config.id, 'scheduleType', e.target.value)}
-                          className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-orange-500 outline-none"
+                          className="w-full bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-orange-500 outline-none"
                         >
                           <option value="interval">Time Gap (Interval)</option>
                           <option value="fixed">Fixed Time (Daily)</option>
@@ -726,24 +726,24 @@ export default function IntegrationsPage() {
                       
                       {config.scheduleType === 'interval' ? (
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Every (Hours)</label>
+                          <label className="block text-sm font-medium text-zinc-300 mb-1">Every (Hours)</label>
                           <input 
                             type="number" 
                             min="1"
                             max="24"
                             value={config.intervalHours}
                             onChange={(e) => updateJdConfig(config.id, 'intervalHours', parseInt(e.target.value) || 2)}
-                            className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-orange-500 outline-none" 
+                            className="w-full bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-orange-500 outline-none" 
                           />
                         </div>
                       ) : (
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
+                          <label className="block text-sm font-medium text-zinc-300 mb-1">Time</label>
                           <input 
                             type="time" 
                             value={config.fixedTime}
                             onChange={(e) => updateJdConfig(config.id, 'fixedTime', e.target.value)}
-                            className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-orange-500 outline-none" 
+                            className="w-full bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-orange-500 outline-none" 
                           />
                         </div>
                       )}
@@ -753,22 +753,22 @@ export default function IntegrationsPage() {
 
                 <button 
                   onClick={addJdConfig}
-                  className="w-full py-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-600 font-medium hover:border-orange-500 hover:text-orange-600 transition-colors flex items-center justify-center gap-2"
+                  className="w-full py-3 border-2 border-dashed border-zinc-700/50 rounded-xl text-zinc-400 font-medium hover:border-orange-500 hover:text-orange-600 transition-colors flex items-center justify-center gap-2"
                 >
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
                   Add Another Account
                 </button>
 
-                <p className="text-xs text-gray-500 mt-2">
+                <p className="text-xs text-zinc-400 mt-2">
                   Add multiple API keys if you have multiple vendor accounts. The system will automatically fetch leads for each account according to its schedule.
                 </p>
               </div>
             </div>
 
-            <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
+            <div className="p-4 bg-zinc-950/50 border-t border-zinc-700/50 flex justify-end gap-3">
               <button 
                 onClick={() => setIsJdModalOpen(false)}
-                className="px-5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-5 py-2 text-sm font-medium text-zinc-300 bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-lg hover:bg-zinc-950/50 transition-colors"
               >
                 Cancel
               </button>
@@ -787,16 +787,16 @@ export default function IntegrationsPage() {
       {setupModalData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setSetupModalData(null)} />
-          <div className="relative bg-white border border-gray-300 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-gray-200 flex items-center gap-3">
+          <div className="relative bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-zinc-700/50 flex items-center gap-3">
               <div className={`w-10 h-10 rounded-lg border flex items-center justify-center ${colorMap[setupModalData.color]}`}>
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={setupModalData.icon} />
                 </svg>
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900">{setupModalData.name} Setup</h2>
-                <p className="text-sm text-gray-600 mt-0.5">Step-by-step instructions to connect</p>
+                <h2 className="text-xl font-bold text-zinc-100">{setupModalData.name} Setup</h2>
+                <p className="text-sm text-zinc-400 mt-0.5">Step-by-step instructions to connect</p>
               </div>
             </div>
             
@@ -804,10 +804,10 @@ export default function IntegrationsPage() {
               <div className="space-y-4">
                 {setupModalData.steps.map((step: string, index: number) => (
                   <div key={index} className="flex gap-4 items-start">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-sm font-bold text-gray-600 border border-gray-200">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-sm font-bold text-zinc-400 border border-zinc-700/50">
                       {index + 1}
                     </div>
-                    <div className="pt-1 text-gray-700 leading-relaxed">
+                    <div className="pt-1 text-zinc-300 leading-relaxed">
                       {step}
                     </div>
                   </div>
@@ -815,7 +815,7 @@ export default function IntegrationsPage() {
               </div>
             </div>
 
-            <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
+            <div className="p-4 bg-zinc-950/50 border-t border-zinc-700/50 flex justify-end gap-3">
               {setupModalData.webhookPath && (
                 <button 
                   onClick={() => {
@@ -829,7 +829,7 @@ export default function IntegrationsPage() {
               )}
               <button 
                 onClick={() => setSetupModalData(null)}
-                className="px-5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-5 py-2 text-sm font-medium text-zinc-300 bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-lg hover:bg-zinc-950/50 transition-colors"
               >
                 Close
               </button>
@@ -841,39 +841,39 @@ export default function IntegrationsPage() {
       {isElevenLabsModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsElevenLabsModalOpen(false)} />
-          <div className="relative bg-white border border-gray-300 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-gray-200 flex items-center gap-3">
+          <div className="relative bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-zinc-700/50 flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg border flex items-center justify-center bg-fuchsia-50 text-fuchsia-600 border-fuchsia-200">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
                 </svg>
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900">ElevenLabs Configuration</h2>
-                <p className="text-sm text-gray-600 mt-0.5">Enter your API key below</p>
+                <h2 className="text-xl font-bold text-zinc-100">ElevenLabs Configuration</h2>
+                <p className="text-sm text-zinc-400 mt-0.5">Enter your API key below</p>
               </div>
             </div>
             <div className="p-6">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">API Key</label>
+                  <label className="block text-sm font-medium text-zinc-300 mb-1">API Key</label>
                   <input 
                     type="text" 
                     value={elevenLabsConfig}
                     onChange={(e) => setElevenLabsConfig(e.target.value)}
                     placeholder="Enter your ElevenLabs API Key"
-                    className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-fuchsia-500 outline-none" 
+                    className="w-full bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-fuchsia-500 outline-none" 
                   />
                 </div>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-zinc-400">
                   This key will be used to generate AI sound effects and voices.
                 </p>
               </div>
             </div>
-            <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
+            <div className="p-4 bg-zinc-950/50 border-t border-zinc-700/50 flex justify-end gap-3">
               <button 
                 onClick={() => setIsElevenLabsModalOpen(false)}
-                className="px-5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-5 py-2 text-sm font-medium text-zinc-300 bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-lg hover:bg-zinc-950/50 transition-colors"
               >
                 Cancel
               </button>
@@ -892,39 +892,39 @@ export default function IntegrationsPage() {
       {isGroqModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsGroqModalOpen(false)} />
-          <div className="relative bg-white border border-gray-300 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-gray-200 flex items-center gap-3">
+          <div className="relative bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-zinc-700/50 flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg border flex items-center justify-center bg-orange-50 text-orange-600 border-orange-200">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900">Groq (Llama) Configuration</h2>
-                <p className="text-sm text-gray-600 mt-0.5">Enter your API key below</p>
+                <h2 className="text-xl font-bold text-zinc-100">Groq (Llama) Configuration</h2>
+                <p className="text-sm text-zinc-400 mt-0.5">Enter your API key below</p>
               </div>
             </div>
             <div className="p-6">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">API Key</label>
+                  <label className="block text-sm font-medium text-zinc-300 mb-1">API Key</label>
                   <input 
                     type="text" 
                     value={groqConfig}
                     onChange={(e) => setGroqConfig(e.target.value)}
                     placeholder="Enter your Groq API Key"
-                    className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-orange-500 outline-none" 
+                    className="w-full bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-orange-500 outline-none" 
                   />
                 </div>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-zinc-400">
                   This key will be used to power your conversational AI agents with Llama models.
                 </p>
               </div>
             </div>
-            <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
+            <div className="p-4 bg-zinc-950/50 border-t border-zinc-700/50 flex justify-end gap-3">
               <button 
                 onClick={() => setIsGroqModalOpen(false)}
-                className="px-5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-5 py-2 text-sm font-medium text-zinc-300 bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-lg hover:bg-zinc-950/50 transition-colors"
               >
                 Cancel
               </button>
@@ -943,35 +943,35 @@ export default function IntegrationsPage() {
       {/* History Table */}
       {integrationLinks.length > 0 && (
         <div className="mt-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 tracking-tight">Active Configured Webhooks</h2>
-          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+          <h2 className="text-2xl font-bold text-zinc-100 mb-6 tracking-tight">Active Configured Webhooks</h2>
+          <div className="bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-2xl shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+                <thead className="bg-zinc-950/50">
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Integration</th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Project</th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Form</th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Webhook URL</th>
-                    <th className="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-zinc-400 uppercase tracking-wider">Integration</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-zinc-400 uppercase tracking-wider">Project</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-zinc-400 uppercase tracking-wider">Form</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-zinc-400 uppercase tracking-wider">Webhook URL</th>
+                    <th className="px-6 py-4 text-right text-xs font-bold text-zinc-400 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-zinc-900/40 backdrop-blur-xl divide-y divide-gray-200">
                   {integrationLinks.map((link) => (
-                    <tr key={link._id} className="hover:bg-gray-50 transition-colors">
+                    <tr key={link._id} className="hover:bg-zinc-950/50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="inline-flex items-center gap-1.5 font-medium text-gray-900">
+                        <span className="inline-flex items-center gap-1.5 font-medium text-zinc-100">
                           {link.integrationName}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-400">
                         {link.projectId?.name || <span className="text-gray-400 italic">None</span>}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-400">
                         {link.formId?.name || <span className="text-gray-400 italic">None</span>}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <div className="flex items-center gap-2 max-w-[300px] overflow-hidden text-ellipsis bg-gray-50 px-3 py-1.5 rounded border border-gray-200 text-gray-500" title={link.url}>
+                        <div className="flex items-center gap-2 max-w-[300px] overflow-hidden text-ellipsis bg-zinc-950/50 px-3 py-1.5 rounded border border-zinc-700/50 text-zinc-400" title={link.url}>
                           {link.url}
                         </div>
                       </td>
@@ -1005,16 +1005,16 @@ export default function IntegrationsPage() {
       {isDynamicAiModalOpen && selectedDynamicAi && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsDynamicAiModalOpen(false)} />
-          <div className="relative bg-white border border-gray-300 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-gray-200 flex items-center gap-4">
+          <div className="relative bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-zinc-700/50 flex items-center gap-4">
               <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border ${colorMap[selectedDynamicAi.color]}`}>
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={selectedDynamicAi.icon || "M13 10V3L4 14h7v7l9-11h-7z"} />
                 </svg>
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900">{selectedDynamicAi.name} Configuration</h2>
-                <p className="text-sm text-gray-600 mt-1">{selectedDynamicAi.description}</p>
+                <h2 className="text-xl font-bold text-zinc-100">{selectedDynamicAi.name} Configuration</h2>
+                <p className="text-sm text-zinc-400 mt-1">{selectedDynamicAi.description}</p>
               </div>
             </div>
             <div className="p-6 space-y-6">
@@ -1026,16 +1026,16 @@ export default function IntegrationsPage() {
               ) : (
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Your API Key</label>
+                    <label className="block text-sm font-medium text-zinc-300 mb-1">Your API Key</label>
                     <input 
                       type="password" 
                       value={dynamicAiKey}
                       onChange={(e) => setDynamicAiKey(e.target.value)}
                       placeholder="sk-..."
-                      className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none" 
+                      className="w-full bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-indigo-500 outline-none" 
                     />
                   </div>
-                  <p className="text-xs text-gray-500">Your API key is stored securely and never shared with other tenants.</p>
+                  <p className="text-xs text-zinc-400">Your API key is stored securely and never shared with other tenants.</p>
                   
                   <button 
                     onClick={saveDynamicAiKey}
@@ -1047,10 +1047,10 @@ export default function IntegrationsPage() {
                 </div>
               )}
             </div>
-            <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-end">
+            <div className="p-4 bg-zinc-950/50 border-t border-zinc-700/50 flex justify-end">
               <button 
                 onClick={() => setIsDynamicAiModalOpen(false)}
-                className="px-5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-5 py-2 text-sm font-medium text-zinc-300 bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-lg hover:bg-zinc-950/50 transition-colors"
               >
                 Close
               </button>

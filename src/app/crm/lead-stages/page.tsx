@@ -43,15 +43,15 @@ export default function LeadStagesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Lead Stages</h1>
-          <p className="text-slate-500 text-sm">Manage your lead pipeline stages</p>
+          <h1 className="text-2xl font-bold text-zinc-100">Lead Stages</h1>
+          <p className="text-zinc-400 text-sm">Manage your lead pipeline stages</p>
         </div>
         <div className="flex gap-3">
           <div className="flex items-center gap-2 px-3 py-2 bg-green-50 border border-green-200 text-green-600 rounded-lg text-sm font-medium">
             <Server className="w-4 h-4" />
             Server Online
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-lg text-sm font-medium transition-colors shadow-sm">
+          <button className="flex items-center gap-2 px-4 py-2 bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 text-zinc-300 hover:bg-zinc-950/50 rounded-lg text-sm font-medium transition-colors shadow-sm">
             <RefreshCcw className="w-4 h-4" />
             Refresh
           </button>
@@ -65,67 +65,67 @@ export default function LeadStagesPage() {
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {/* Card 1 */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center justify-between border-l-4 border-l-blue-500">
+        <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl p-5 border border-zinc-800/60 shadow-sm flex items-center justify-between border-l-4 border-l-blue-500">
           <div>
-            <p className="text-sm font-medium text-slate-500 mb-1">Total Stages</p>
+            <p className="text-sm font-medium text-zinc-400 mb-1">Total Stages</p>
             <h3 className="text-3xl font-bold text-blue-600">8</h3>
           </div>
-          <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
+          <div className="w-12 h-12 bg-zinc-900/40 backdrop-blur-xl rounded-xl flex items-center justify-center">
             
           </div>
         </div>
         {/* Card 2 */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center justify-between">
+        <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl p-5 border border-zinc-800/60 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-slate-500 mb-1">Total Leads</p>
+            <p className="text-sm font-medium text-zinc-400 mb-1">Total Leads</p>
             <h3 className="text-3xl font-bold text-purple-600">0</h3>
           </div>
-          <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
+          <div className="w-12 h-12 bg-zinc-900/40 backdrop-blur-xl rounded-xl flex items-center justify-center">
             
           </div>
         </div>
         {/* Card 3 */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center justify-between">
+        <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl p-5 border border-zinc-800/60 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-slate-500 mb-1">Conversion Rate</p>
+            <p className="text-sm font-medium text-zinc-400 mb-1">Conversion Rate</p>
             <h3 className="text-3xl font-bold text-green-600">0%</h3>
           </div>
-          <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
+          <div className="w-12 h-12 bg-zinc-900/40 backdrop-blur-xl rounded-xl flex items-center justify-center">
             
           </div>
         </div>
         {/* Card 4 */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center justify-between">
+        <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl p-5 border border-zinc-800/60 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-slate-500 mb-1">Most Active</p>
+            <p className="text-sm font-medium text-zinc-400 mb-1">Most Active</p>
             <h3 className="text-lg font-bold text-orange-800">Fresh Lead</h3>
           </div>
-          <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shrink-0">
+          <div className="w-12 h-12 bg-zinc-900/40 backdrop-blur-xl rounded-xl flex items-center justify-center shrink-0">
             
           </div>
         </div>
       </div>
 
       {/* Main Content Area */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden flex flex-col">
+      <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl border border-zinc-800/60 shadow-sm overflow-hidden flex flex-col">
         
         {/* Search */}
-        <div className="p-4 border-b border-slate-100">
+        <div className="p-4 border-b border-zinc-800/60">
           <div className="relative">
             <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input 
               type="text" 
               placeholder="Search lead stages..." 
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-zinc-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
             />
           </div>
         </div>
 
         {/* Pipeline Flow Visualization */}
-        <div className="p-6 border-b border-slate-100 bg-slate-50/30 overflow-x-auto">
+        <div className="p-6 border-b border-zinc-800/60 bg-zinc-950/50/30 overflow-x-auto">
           <div className="flex items-center gap-2 mb-6">
             <GitBranch className="w-5 h-5 text-slate-400" />
-            <h3 className="font-semibold text-slate-700">Pipeline Flow</h3>
+            <h3 className="font-semibold text-zinc-300">Pipeline Flow</h3>
           </div>
           
           <div className="flex items-center min-w-[800px] relative px-4">
@@ -135,7 +135,7 @@ export default function LeadStagesPage() {
             {/* Nodes */}
             <div className="flex justify-between w-full relative z-10">
               {pipeline.map((node, i) => (
-                <div key={i} className="flex flex-col items-center gap-3 bg-slate-50/30 px-2 py-1">
+                <div key={i} className="flex flex-col items-center gap-3 bg-zinc-950/50/30 px-2 py-1">
                   <div className={`w-16 h-16 rounded-full ${node.color} flex items-center justify-center text-white font-bold text-xl shadow-lg border-4 border-white transition-transform hover:scale-110 cursor-pointer`}>
                     {node.count}
                   </div>
@@ -151,7 +151,7 @@ export default function LeadStagesPage() {
         {/* Data Table */}
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="text-xs text-slate-500 font-semibold bg-slate-50/50 uppercase border-b border-slate-100">
+            <thead className="text-xs text-zinc-400 font-semibold bg-zinc-950/50/50 uppercase border-b border-zinc-800/60">
               <tr>
                 <th className="px-6 py-4">Order</th>
                 <th className="px-6 py-4">Stage Name</th>
@@ -164,26 +164,26 @@ export default function LeadStagesPage() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {stages.map((stage, i) => (
-                <tr key={i} className="hover:bg-slate-50/50 transition-colors">
+                <tr key={i} className="hover:bg-zinc-950/50/50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <span className="font-bold text-lg text-slate-800">{stage.order}</span>
+                      <span className="font-bold text-lg text-zinc-100">{stage.order}</span>
                       <div className="flex flex-col gap-0.5">
-                        <button className="text-slate-300 hover:text-slate-500"><ArrowUp className="w-3 h-3" /></button>
-                        <button className="text-slate-300 hover:text-slate-500"><ArrowDown className="w-3 h-3" /></button>
+                        <button className="text-slate-300 hover:text-zinc-400"><ArrowUp className="w-3 h-3" /></button>
+                        <button className="text-slate-300 hover:text-zinc-400"><ArrowDown className="w-3 h-3" /></button>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 font-semibold text-slate-800">
+                  <td className="px-6 py-4 font-semibold text-zinc-100">
                     {stage.name}
                   </td>
-                  <td className="px-6 py-4 text-slate-500">
+                  <td className="px-6 py-4 text-zinc-400">
                     {stage.desc}
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
                       <div className="w-6 h-6 rounded-full shadow-sm" style={{ backgroundColor: stage.color }} />
-                      <span className="text-xs font-medium text-slate-500">{stage.color}</span>
+                      <span className="text-xs font-medium text-zinc-400">{stage.color}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4">
@@ -195,7 +195,7 @@ export default function LeadStagesPage() {
                       ))}
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-center font-semibold text-slate-800">
+                  <td className="px-6 py-4 text-center font-semibold text-zinc-100">
                     {stage.leads}
                   </td>
                   <td className="px-6 py-4">

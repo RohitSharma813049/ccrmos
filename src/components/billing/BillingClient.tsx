@@ -97,7 +97,7 @@ export function BillingClient() {
                     ? 'bg-zinc-800 text-zinc-400 cursor-default' 
                     : plan.isPopular
                       ? 'bg-indigo-500 hover:bg-indigo-600 text-white shadow-md hover:shadow-indigo-500/25'
-                      : 'bg-zinc-100 hover:bg-white text-zinc-900'
+                      : 'bg-zinc-100 hover:bg-zinc-900/40 backdrop-blur-xl text-zinc-900'
                 }`}
               >
                 {plan.buttonText}

@@ -81,8 +81,8 @@ export default function LeadStatusPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Lead Status</h1>
-          <p className="text-slate-500 text-sm">Define and manage lead status types</p>
+          <h1 className="text-2xl font-bold text-zinc-100">Lead Status</h1>
+          <p className="text-zinc-400 text-sm">Define and manage lead status types</p>
         </div>
         <div className="flex gap-3">
           <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm">
@@ -105,20 +105,20 @@ export default function LeadStatusPage() {
           <h3 className="text-3xl font-bold text-green-700">36</h3>
         </div>
         {/* Card 3 */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
-          <p className="text-sm font-medium text-slate-500 mb-1">Inactive Status</p>
-          <h3 className="text-3xl font-bold text-slate-800">0</h3>
+        <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl p-5 border border-zinc-800/60 shadow-sm">
+          <p className="text-sm font-medium text-zinc-400 mb-1">Inactive Status</p>
+          <h3 className="text-3xl font-bold text-zinc-100">0</h3>
         </div>
       </div>
 
       {/* Controls: Search and Filters */}
-      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-zinc-900/40 backdrop-blur-xl p-4 rounded-2xl border border-zinc-800/60 shadow-sm">
         <div className="relative w-full sm:max-w-md">
           <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input 
             type="text" 
             placeholder="Search lead status..." 
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-zinc-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
           />
         </div>
         
@@ -126,10 +126,10 @@ export default function LeadStatusPage() {
           <button className="flex-1 sm:flex-none px-6 py-2 bg-blue-600 text-white font-medium text-sm rounded-lg shadow-sm">
             All
           </button>
-          <button className="flex-1 sm:flex-none px-6 py-2 text-slate-600 hover:text-slate-900 font-medium text-sm rounded-lg transition-colors">
+          <button className="flex-1 sm:flex-none px-6 py-2 text-zinc-400 hover:text-zinc-100 font-medium text-sm rounded-lg transition-colors">
             Active
           </button>
-          <button className="flex-1 sm:flex-none px-6 py-2 text-slate-600 hover:text-slate-900 font-medium text-sm rounded-lg transition-colors">
+          <button className="flex-1 sm:flex-none px-6 py-2 text-zinc-400 hover:text-zinc-100 font-medium text-sm rounded-lg transition-colors">
             Inactive
           </button>
         </div>
@@ -138,7 +138,7 @@ export default function LeadStatusPage() {
       {/* Grid of Status Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {statuses.map((status) => (
-          <div key={status.id} className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-shadow relative">
+          <div key={status.id} className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl p-6 border border-zinc-800/60 shadow-sm hover:shadow-md transition-shadow relative">
             
             {/* Action Buttons */}
             <div className="absolute top-6 right-6 flex items-center gap-3">
@@ -157,7 +157,7 @@ export default function LeadStatusPage() {
               </div>
               
               <div>
-                <h3 className="font-semibold text-slate-800 text-lg leading-tight mb-1">
+                <h3 className="font-semibold text-zinc-100 text-lg leading-tight mb-1">
                   {status.name}
                 </h3>
                 <p className="text-slate-400 text-sm">-</p>

@@ -64,7 +64,7 @@ export default function PublicFormClient({ formId, isEmbed }: { formId: string, 
 
   if (loading) {
     return (
-      <div className={`min-h-screen flex items-center justify-center ${isEmbed ? 'bg-transparent' : 'bg-gray-50'}`}>
+      <div className={`min-h-screen flex items-center justify-center ${isEmbed ? 'bg-transparent' : 'bg-zinc-950/50'}`}>
         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600"></div>
       </div>
     );
@@ -72,11 +72,11 @@ export default function PublicFormClient({ formId, isEmbed }: { formId: string, 
 
   if (error) {
     return (
-      <div className={`min-h-screen flex items-center justify-center p-4 ${isEmbed ? 'bg-transparent' : 'bg-gray-50'}`}>
-        <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200 max-w-md w-full text-center">
+      <div className={`min-h-screen flex items-center justify-center p-4 ${isEmbed ? 'bg-transparent' : 'bg-zinc-950/50'}`}>
+        <div className="bg-zinc-900/40 backdrop-blur-xl p-8 rounded-2xl shadow-sm border border-zinc-700/50 max-w-md w-full text-center">
           <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Form Unavailable</h2>
-          <p className="text-gray-500">{error}</p>
+          <h2 className="text-xl font-bold text-zinc-100 mb-2">Form Unavailable</h2>
+          <p className="text-zinc-400">{error}</p>
         </div>
       </div>
     );
@@ -84,13 +84,13 @@ export default function PublicFormClient({ formId, isEmbed }: { formId: string, 
 
   if (submitted) {
     return (
-      <div className={`min-h-screen flex items-center justify-center p-4 ${isEmbed ? 'bg-transparent' : 'bg-gray-50'}`}>
-        <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 max-w-md w-full text-center animate-in zoom-in-95 duration-500">
+      <div className={`min-h-screen flex items-center justify-center p-4 ${isEmbed ? 'bg-transparent' : 'bg-zinc-950/50'}`}>
+        <div className="bg-zinc-900/40 backdrop-blur-xl p-8 rounded-2xl shadow-xl border border-zinc-800/60 max-w-md w-full text-center animate-in zoom-in-95 duration-500">
           <div className="w-20 h-20 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
             <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
           </div>
-          <h2 className="text-2xl font-extrabold text-gray-900 mb-2">Success!</h2>
-          <p className="text-gray-600">{form.successMessage || "Thank you for your submission!"}</p>
+          <h2 className="text-2xl font-extrabold text-zinc-100 mb-2">Success!</h2>
+          <p className="text-zinc-400">{form.successMessage || "Thank you for your submission!"}</p>
           
           <button 
             onClick={() => { setSubmitted(false); setFormData({}); }}
@@ -104,30 +104,30 @@ export default function PublicFormClient({ formId, isEmbed }: { formId: string, 
   }
 
   return (
-    <div className={`min-h-screen py-12 px-4 sm:px-6 fade-in ${isEmbed ? 'bg-transparent py-4' : 'bg-gray-50'}`}>
+    <div className={`min-h-screen py-12 px-4 sm:px-6 fade-in ${isEmbed ? 'bg-transparent py-4' : 'bg-zinc-950/50'}`}>
       <div className="max-w-2xl mx-auto">
         
         {!isEmbed && (
           <div className="mb-8 text-center">
-            <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">{form.title}</h1>
+            <h1 className="text-3xl font-extrabold text-zinc-100 tracking-tight">{form.title}</h1>
             {form.description && (
-              <p className="mt-2 text-gray-500 text-lg">{form.description}</p>
+              <p className="mt-2 text-zinc-400 text-lg">{form.description}</p>
             )}
           </div>
         )}
 
-        <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+        <div className="bg-zinc-900/40 backdrop-blur-xl rounded-3xl shadow-xl border border-zinc-800/60 overflow-hidden">
           {isEmbed && (
-            <div className="bg-gray-50 p-6 sm:p-8 border-b border-gray-100">
-              <h1 className="text-2xl font-extrabold text-gray-900">{form.title}</h1>
-              {form.description && <p className="mt-2 text-gray-500">{form.description}</p>}
+            <div className="bg-zinc-950/50 p-6 sm:p-8 border-b border-zinc-800/60">
+              <h1 className="text-2xl font-extrabold text-zinc-100">{form.title}</h1>
+              {form.description && <p className="mt-2 text-zinc-400">{form.description}</p>}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-8">
             {form.fields?.map((field: any) => (
               <div key={field.id} className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-900">
+                <label className="block text-sm font-semibold text-zinc-100">
                   {field.label} {field.required && <span className="text-red-500">*</span>}
                 </label>
                 
@@ -138,14 +138,14 @@ export default function PublicFormClient({ formId, isEmbed }: { formId: string, 
                     onChange={(e) => handleChange(field.id, e.target.value)}
                     placeholder={field.placeholder}
                     rows={4}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-none text-gray-900"
+                    className="w-full px-4 py-3 bg-zinc-950/50 border border-zinc-700/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-none text-zinc-100"
                   />
                 ) : field.type === 'select' ? (
                   <select
                     required={field.required}
                     value={formData[field.id] || ''}
                     onChange={(e) => handleChange(field.id, e.target.value)}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-gray-900"
+                    className="w-full px-4 py-3 bg-zinc-950/50 border border-zinc-700/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-zinc-100"
                   >
                     <option value="" disabled>Select an option</option>
                     {(field.options || []).map((opt: string) => (
@@ -157,7 +157,7 @@ export default function PublicFormClient({ formId, isEmbed }: { formId: string, 
                     required={field.required}
                     value={formData[field.id] || ''}
                     onChange={(e) => handleChange(field.id, e.target.value)}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-gray-900"
+                    className="w-full px-4 py-3 bg-zinc-950/50 border border-zinc-700/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-zinc-100"
                   >
                     <option value="" disabled>Select an option</option>
                     {(field.relationOptions || []).map((opt: any) => (
@@ -175,9 +175,9 @@ export default function PublicFormClient({ formId, isEmbed }: { formId: string, 
                           value={opt}
                           checked={formData[field.id] === opt}
                           onChange={(e) => handleChange(field.id, e.target.value)}
-                          className="w-5 h-5 text-indigo-600 bg-gray-100 border-gray-300 focus:ring-indigo-500 cursor-pointer"
+                          className="w-5 h-5 text-indigo-600 bg-gray-100 border-zinc-700/50 focus:ring-indigo-500 cursor-pointer"
                         />
-                        <span className="text-gray-700 group-hover:text-gray-900">{opt}</span>
+                        <span className="text-zinc-300 group-hover:text-zinc-100">{opt}</span>
                       </label>
                     ))}
                   </div>
@@ -188,9 +188,9 @@ export default function PublicFormClient({ formId, isEmbed }: { formId: string, 
                       required={field.required}
                       checked={!!formData[field.id]}
                       onChange={(e) => handleChange(field.id, e.target.checked)}
-                      className="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 shadow-sm"
+                      className="w-5 h-5 rounded border-zinc-700/50 text-indigo-600 focus:ring-indigo-500 shadow-sm"
                     />
-                    <span className="text-gray-700 text-sm">Yes</span>
+                    <span className="text-zinc-300 text-sm">Yes</span>
                   </div>
                 ) : field.type === 'score' ? (
                   <div className="flex flex-col gap-2">
@@ -202,7 +202,7 @@ export default function PublicFormClient({ formId, isEmbed }: { formId: string, 
                       onChange={(e) => handleChange(field.id, Number(e.target.value))}
                       className="w-full accent-indigo-600"
                     />
-                    <div className="flex justify-between text-xs text-gray-500 font-medium">
+                    <div className="flex justify-between text-xs text-zinc-400 font-medium">
                       <span>1 (Poor)</span>
                       <span className="text-indigo-600 text-base font-bold">{formData[field.id] || 5}/10</span>
                       <span>10 (Excellent)</span>
@@ -222,7 +222,7 @@ export default function PublicFormClient({ formId, isEmbed }: { formId: string, 
                       required={field.required}
                       value={formData[field.id] || ''}
                       onChange={(e) => handleChange(field.id, e.target.value)}
-                      className="w-full rounded-xl border border-gray-300 pl-11 pr-4 py-3 text-gray-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all shadow-sm bg-gray-50 focus:bg-white"
+                      className="w-full rounded-xl border border-zinc-700/50 pl-11 pr-4 py-3 text-zinc-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all shadow-sm bg-zinc-950/50 focus:bg-zinc-900/40 backdrop-blur-xl"
                       placeholder={`e.g. +1 234 567 8900`}
                     />
                   </div>
@@ -233,13 +233,13 @@ export default function PublicFormClient({ formId, isEmbed }: { formId: string, 
                     value={formData[field.id] || ''}
                     onChange={(e) => handleChange(field.id, e.target.value)}
                     placeholder={field.placeholder}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-gray-900"
+                    className="w-full px-4 py-3 bg-zinc-950/50 border border-zinc-700/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-zinc-100"
                   />
                 )}
               </div>
             ))}
 
-            <div className="pt-6 border-t border-gray-100 mt-8">
+            <div className="pt-6 border-t border-zinc-800/60 mt-8">
               <button 
                 type="submit" 
                 disabled={submitting}
@@ -250,7 +250,7 @@ export default function PublicFormClient({ formId, isEmbed }: { formId: string, 
             </div>
           </form>
           
-          <div className="bg-gray-50 p-4 text-center border-t border-gray-100">
+          <div className="bg-zinc-950/50 p-4 text-center border-t border-zinc-800/60">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
               Powered by <span className="text-indigo-400">CRM OS</span>
             </p>

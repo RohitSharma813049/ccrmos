@@ -92,16 +92,16 @@ export default function DynamicModuleClient({ moduleSchema }: { moduleSchema: an
     cell: (record: any) => {
       let val = record.data?.[field.name];
       if (field.type === 'checkbox') {
-        return <span className="text-gray-700">{val ? '✅ Yes' : '❌ No'}</span>;
+        return <span className="text-zinc-300">{val ? '✅ Yes' : '❌ No'}</span>;
       }
       if (field.type === 'score') {
-        return <span className="text-gray-700 font-medium">{val ? `${val}/10` : '-'}</span>;
+        return <span className="text-zinc-300 font-medium">{val ? `${val}/10` : '-'}</span>;
       }
       if (field.type === 'relation' && field.relationOptions) {
         const match = field.relationOptions.find((opt: any) => opt.value === val);
         val = match ? match.label : val;
       }
-      return <span className="text-gray-700">{val?.toString() || "-"}</span>;
+      return <span className="text-zinc-300">{val?.toString() || "-"}</span>;
     }
   }));
 
@@ -161,10 +161,10 @@ export default function DynamicModuleClient({ moduleSchema }: { moduleSchema: an
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
-          <div className="relative bg-white border border-gray-200 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[85vh]">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-              <h2 className="text-xl font-bold text-gray-900">{editingRecordId ? 'Edit' : 'Create'} {moduleSchema.name}</h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+          <div className="relative bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[85vh]">
+            <div className="p-6 border-b border-zinc-800/60 flex justify-between items-center">
+              <h2 className="text-xl font-bold text-zinc-100">{editingRecordId ? 'Edit' : 'Create'} {moduleSchema.name}</h2>
+              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-zinc-400">
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
@@ -172,7 +172,7 @@ export default function DynamicModuleClient({ moduleSchema }: { moduleSchema: an
             <div className="p-6 overflow-y-auto flex-1 space-y-4">
               {moduleSchema.fields.map((field: any, idx: number) => (
                 <div key={idx}>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-zinc-300 mb-1">
                     {field.name} {field.required && <span className="text-red-500">*</span>}
                   </label>
                   
@@ -180,14 +180,14 @@ export default function DynamicModuleClient({ moduleSchema }: { moduleSchema: an
                     <textarea 
                       value={formData[field.name] || ''}
                       onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                      className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                       rows={3}
                     />
                   ) : field.type === 'select' ? (
                     <select
                       value={formData[field.name] || ''}
                       onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                      className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                     >
                       <option value="">Select an option</option>
                       {(field.options || []).map((opt: string) => (
@@ -199,7 +199,7 @@ export default function DynamicModuleClient({ moduleSchema }: { moduleSchema: an
                       type="date"
                       value={formData[field.name] || ''}
                       onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                      className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                     />
                   ) : field.type === 'number' || field.type === 'score' ? (
                     <input 
@@ -208,7 +208,7 @@ export default function DynamicModuleClient({ moduleSchema }: { moduleSchema: an
                       max={field.type === 'score' ? 10 : undefined}
                       value={formData[field.name] || (field.type === 'score' ? 5 : '')}
                       onChange={(e) => setFormData({ ...formData, [field.name]: parseFloat(e.target.value) })}
-                      className={`w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all ${field.type === 'score' ? 'accent-blue-500' : ''}`}
+                      className={`w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all ${field.type === 'score' ? 'accent-blue-500' : ''}`}
                     />
                   ) : field.type === 'checkbox' ? (
                     <div className="flex items-center gap-2 mt-1">
@@ -216,15 +216,15 @@ export default function DynamicModuleClient({ moduleSchema }: { moduleSchema: an
                         type="checkbox"
                         checked={!!formData[field.name]}
                         onChange={(e) => setFormData({ ...formData, [field.name]: e.target.checked })}
-                        className="w-5 h-5 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
+                        className="w-5 h-5 rounded border-zinc-700/50 text-blue-500 focus:ring-blue-500"
                       />
-                      <span className="text-sm text-gray-700">Yes</span>
+                      <span className="text-sm text-zinc-300">Yes</span>
                     </div>
                   ) : field.type === 'relation' ? (
                     <select
                       value={formData[field.name] || ''}
                       onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                      className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                     >
                       <option value="">Select {field.relationTarget || 'an option'}</option>
                       {(field.relationOptions || []).map((opt: any) => (
@@ -236,7 +236,7 @@ export default function DynamicModuleClient({ moduleSchema }: { moduleSchema: an
                       type="tel"
                       value={formData[field.name] || ''}
                       onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                      className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                       placeholder={field.type === 'whatsapp' ? 'WhatsApp Number' : 'Phone Number'}
                     />
                   ) : (
@@ -244,15 +244,15 @@ export default function DynamicModuleClient({ moduleSchema }: { moduleSchema: an
                       type="text"
                       value={formData[field.name] || ''}
                       onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                      className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                     />
                   )}
                 </div>
               ))}
             </div>
 
-            <div className="p-4 border-t border-gray-100 flex justify-end gap-3 bg-gray-50">
-              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg">Cancel</button>
+            <div className="p-4 border-t border-zinc-800/60 flex justify-end gap-3 bg-zinc-950/50">
+              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-zinc-400 hover:bg-gray-200 rounded-lg">Cancel</button>
               <button onClick={saveRecord} className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium shadow">Save</button>
             </div>
           </div>

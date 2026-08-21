@@ -92,7 +92,7 @@ export function WhatsAppTab() {
               </div>
             ) : qrUrl ? (
               <div className="flex flex-col items-center animate-in zoom-in-95 duration-300">
-                <div className="bg-white p-4 rounded-xl shadow-lg mb-6">
+                <div className="bg-zinc-900/40 backdrop-blur-xl p-4 rounded-xl shadow-lg mb-6">
                   <img src={qrUrl} alt="WhatsApp QR Code" className="w-64 h-64 object-contain" />
                 </div>
                 <h4 className="text-lg font-semibold text-zinc-100 mb-2">Scan to Link WhatsApp</h4>

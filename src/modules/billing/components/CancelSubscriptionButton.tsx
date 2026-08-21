@@ -38,7 +38,7 @@ export default function CancelSubscriptionButton() {
     <button 
       onClick={handleCancel}
       disabled={loading}
-      className="px-4 py-2 bg-white text-red-600 hover:bg-red-50 hover:text-red-700 border border-red-200 font-semibold rounded-lg shadow-sm transition-all text-sm disabled:opacity-50"
+      className="px-4 py-2 bg-zinc-900/40 backdrop-blur-xl text-red-600 hover:bg-red-50 hover:text-red-700 border border-red-200 font-semibold rounded-lg shadow-sm transition-all text-sm disabled:opacity-50"
     >
       {loading ? "Canceling..." : "Cancel Subscription"}
     </button>

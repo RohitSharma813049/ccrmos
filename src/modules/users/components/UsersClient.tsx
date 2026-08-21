@@ -147,8 +147,8 @@ export default function UsersClient({ isOwner = false }: { isOwner?: boolean }) 
       header: "Employee",
       cell: (item) => (
         <div>
-          <p className="font-semibold text-gray-900">{item.name || "N/A"}</p>
-          <p className="text-xs text-gray-500">{item.email}</p>
+          <p className="font-semibold text-zinc-100">{item.name || "N/A"}</p>
+          <p className="text-xs text-zinc-400">{item.email}</p>
         </div>
       )
     },
@@ -172,9 +172,9 @@ export default function UsersClient({ isOwner = false }: { isOwner?: boolean }) 
       header: "Reports To",
       cell: (item) => (
         <div className="text-xs space-y-1">
-          {item.directorId && <p><span className="text-gray-500">Dir:</span> {item.directorId.name}</p>}
-          {item.managerId && <p><span className="text-gray-500">Mgr:</span> {item.managerId.name}</p>}
-          {item.teamLeaderId && <p><span className="text-gray-500">TL:</span> {item.teamLeaderId.name}</p>}
+          {item.directorId && <p><span className="text-zinc-400">Dir:</span> {item.directorId.name}</p>}
+          {item.managerId && <p><span className="text-zinc-400">Mgr:</span> {item.managerId.name}</p>}
+          {item.teamLeaderId && <p><span className="text-zinc-400">TL:</span> {item.teamLeaderId.name}</p>}
           {!item.directorId && !item.managerId && !item.teamLeaderId && <span className="text-gray-400">None</span>}
         </div>
       )
@@ -195,8 +195,8 @@ export default function UsersClient({ isOwner = false }: { isOwner?: boolean }) 
     <div className="space-y-8 fade-in">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">User Management</h2>
-          <p className="text-gray-600 mt-1">Manage employees, assign roles, and define reporting structures.</p>
+          <h2 className="text-2xl font-bold text-zinc-100">User Management</h2>
+          <p className="text-zinc-400 mt-1">Manage employees, assign roles, and define reporting structures.</p>
         </div>
         <button 
           onClick={() => openModal()}
@@ -222,44 +222,44 @@ export default function UsersClient({ isOwner = false }: { isOwner?: boolean }) 
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
-          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-            <div className="p-6 border-b border-gray-100 flex-shrink-0">
-              <h2 className="text-xl font-bold text-gray-900">{currentId ? "Edit User" : "Add New User"}</h2>
+          <div className="relative bg-zinc-900/40 backdrop-blur-xl rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div className="p-6 border-b border-zinc-800/60 flex-shrink-0">
+              <h2 className="text-xl font-bold text-zinc-100">{currentId ? "Edit User" : "Add New User"}</h2>
             </div>
             
             <div className="p-6 overflow-y-auto flex-1">
               <form id="user-form" onSubmit={handleSave} className="space-y-6">
                 <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                    <label className="block text-sm font-medium text-zinc-300 mb-1">Full Name</label>
                     <input 
                       required
                       type="text" 
                       value={formData.name}
                       onChange={e => setFormData({...formData, name: e.target.value})}
-                      className="w-full border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 border"
+                      className="w-full border-zinc-700/50 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 border"
                       placeholder="e.g. John Doe"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                    <label className="block text-sm font-medium text-zinc-300 mb-1">Email Address</label>
                     <input 
                       required
                       type="email" 
                       value={formData.email}
                       onChange={e => setFormData({...formData, email: e.target.value})}
-                      className="w-full border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 border"
+                      className="w-full border-zinc-700/50 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 border"
                       placeholder="john@example.com"
                     />
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Role (Permissions)</label>
+                    <label className="block text-sm font-medium text-zinc-300 mb-1">Role (Permissions)</label>
                     <select
                       name="role"
                       value={formData.role}
                       onChange={e => setFormData({...formData, role: e.target.value})}
-                      className="w-full border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 border"
+                      className="w-full border-zinc-700/50 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 border"
                     >
                       <option value="">-- Select Role --</option>
                       {roles.map(r => (
@@ -269,11 +269,11 @@ export default function UsersClient({ isOwner = false }: { isOwner?: boolean }) 
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Hierarchy Level</label>
+                    <label className="block text-sm font-medium text-zinc-300 mb-1">Hierarchy Level</label>
                     <select
                       value={formData.hierarchyLevel}
                       onChange={e => setFormData({...formData, hierarchyLevel: Number(e.target.value)})}
-                      className="w-full border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 border"
+                      className="w-full border-zinc-700/50 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 border"
                     >
                       {HIERARCHY_LEVELS.map(l => (
                         <option key={l.level} value={l.level}>{l.label}</option>
@@ -282,17 +282,17 @@ export default function UsersClient({ isOwner = false }: { isOwner?: boolean }) 
                   </div>
                 </div>
 
-                <div className="pt-6 border-t border-gray-100">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">Reporting Structure</h3>
+                <div className="pt-6 border-t border-zinc-800/60">
+                  <h3 className="text-lg font-bold text-zinc-100 mb-4">Reporting Structure</h3>
                   <div className="grid grid-cols-1 gap-4">
                     
                     {formData.hierarchyLevel > 3 && (
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Assign to Director</label>
+                        <label className="block text-sm font-medium text-zinc-300 mb-1">Assign to Director</label>
                         <select
                           value={formData.directorId}
                           onChange={e => setFormData({...formData, directorId: e.target.value})}
-                          className="w-full border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 border"
+                          className="w-full border-zinc-700/50 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 border"
                         >
                           <option value="">-- None --</option>
                           {getSuperiors(3).map(u => (
@@ -304,11 +304,11 @@ export default function UsersClient({ isOwner = false }: { isOwner?: boolean }) 
 
                     {formData.hierarchyLevel > 4 && (
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Assign to Manager</label>
+                        <label className="block text-sm font-medium text-zinc-300 mb-1">Assign to Manager</label>
                         <select
                           value={formData.managerId}
                           onChange={e => setFormData({...formData, managerId: e.target.value})}
-                          className="w-full border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 border"
+                          className="w-full border-zinc-700/50 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 border"
                         >
                           <option value="">-- None --</option>
                           {getSuperiors(4).map(u => (
@@ -320,11 +320,11 @@ export default function UsersClient({ isOwner = false }: { isOwner?: boolean }) 
 
                     {formData.hierarchyLevel > 5 && (
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Assign to Team Leader</label>
+                        <label className="block text-sm font-medium text-zinc-300 mb-1">Assign to Team Leader</label>
                         <select
                           value={formData.teamLeaderId}
                           onChange={e => setFormData({...formData, teamLeaderId: e.target.value})}
-                          className="w-full border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 border"
+                          className="w-full border-zinc-700/50 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 border"
                         >
                           <option value="">-- None --</option>
                           {getSuperiors(5).map(u => (
@@ -335,7 +335,7 @@ export default function UsersClient({ isOwner = false }: { isOwner?: boolean }) 
                     )}
 
                     {formData.hierarchyLevel <= 3 && (
-                      <p className="text-sm text-gray-500 italic">This level does not report to other unit leaders within the company.</p>
+                      <p className="text-sm text-zinc-400 italic">This level does not report to other unit leaders within the company.</p>
                     )}
 
                   </div>
@@ -343,11 +343,11 @@ export default function UsersClient({ isOwner = false }: { isOwner?: boolean }) 
               </form>
             </div>
             
-            <div className="p-6 border-t border-gray-100 flex justify-end gap-3 flex-shrink-0">
+            <div className="p-6 border-t border-zinc-800/60 flex justify-end gap-3 flex-shrink-0">
               <button 
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-4 py-2 border border-zinc-700/50 text-zinc-300 font-medium rounded-lg hover:bg-zinc-950/50 transition-colors"
               >
                 Cancel
               </button>

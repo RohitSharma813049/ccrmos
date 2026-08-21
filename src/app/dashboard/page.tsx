@@ -37,8 +37,8 @@ export default function DashboardPage() {
                 toast(
                   (t) => (
                     <div>
-                      <div className="font-semibold text-slate-800">{isLate ? 'Meeting in progress' : 'Upcoming Meeting'}</div>
-                      <div className="text-sm text-slate-600 mb-3">{meeting.name} is scheduled for {meeting.time}.</div>
+                      <div className="font-semibold text-zinc-100">{isLate ? 'Meeting in progress' : 'Upcoming Meeting'}</div>
+                      <div className="text-sm text-zinc-400 mb-3">{meeting.name} is scheduled for {meeting.time}.</div>
                       <div className="flex gap-2">
                         <a 
                           href={meeting.location && meeting.location.includes('http') ? meeting.location : "https://meet.google.com/new"}
@@ -49,7 +49,7 @@ export default function DashboardPage() {
                         >
                           Join Now
                         </a>
-                        <button onClick={() => toast.dismiss(t.id)} className="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-md text-xs font-semibold">
+                        <button onClick={() => toast.dismiss(t.id)} className="px-3 py-1.5 bg-slate-100 text-zinc-300 rounded-md text-xs font-semibold">
                           Dismiss
                         </button>
                       </div>

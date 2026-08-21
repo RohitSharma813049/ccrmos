@@ -267,7 +267,7 @@ export default function SubscriptionsClient() {
             <div className="relative">
               <input type="checkbox" className="sr-only" checked={showInactive} onChange={(e) => setShowInactive(e.target.checked)} />
               <div className={`block w-10 h-6 rounded-full transition-colors ${showInactive ? 'bg-primary' : 'bg-muted'}`}></div>
-              <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${showInactive ? 'translate-x-4' : ''}`}></div>
+              <div className={`absolute left-1 top-1 bg-zinc-900/40 backdrop-blur-xl w-4 h-4 rounded-full transition-transform ${showInactive ? 'translate-x-4' : ''}`}></div>
             </div>
             <span className="text-sm font-medium text-foreground">Show Inactive</span>
           </label>

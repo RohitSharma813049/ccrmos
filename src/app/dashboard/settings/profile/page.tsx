@@ -75,21 +75,21 @@ export default function ProfilePage() {
   };
 
   if (loading) {
-    return <div className="p-8 text-center text-gray-500">Loading profile...</div>;
+    return <div className="p-8 text-center text-zinc-400">Loading profile...</div>;
   }
 
   return (
     <div className="max-w-3xl mx-auto space-y-8 fade-in pb-12">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Your Profile</h1>
-        <p className="text-gray-600 mt-1">Manage your personal information, avatar, and settings.</p>
+        <h1 className="text-3xl font-bold text-zinc-100 tracking-tight">Your Profile</h1>
+        <p className="text-zinc-400 mt-1">Manage your personal information, avatar, and settings.</p>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-2xl shadow-sm overflow-hidden">
         <form onSubmit={handleSave} className="p-8 space-y-8">
           
           {/* Avatar Section */}
-          <div className="flex items-center gap-6 pb-8 border-b border-gray-100">
+          <div className="flex items-center gap-6 pb-8 border-b border-zinc-800/60">
             <div className="relative group shrink-0">
               {avatarUrl ? (
                 <img 
@@ -120,12 +120,12 @@ export default function ProfilePage() {
               />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900">Profile Picture</h3>
-              <p className="text-sm text-gray-500 mt-1">PNG, JPG or GIF. Max 2MB.</p>
+              <h3 className="font-semibold text-zinc-100">Profile Picture</h3>
+              <p className="text-sm text-zinc-400 mt-1">PNG, JPG or GIF. Max 2MB.</p>
               <button 
                 type="button" 
                 onClick={() => fileInputRef.current?.click()}
-                className="mt-3 px-4 py-1.5 bg-gray-50 border border-gray-200 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
+                className="mt-3 px-4 py-1.5 bg-zinc-950/50 border border-zinc-700/50 text-sm font-medium text-zinc-300 rounded-lg hover:bg-gray-100 transition-colors"
               >
                 Upload new image
               </button>
@@ -135,57 +135,57 @@ export default function ProfilePage() {
           {/* Form Fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+              <label className="block text-sm font-medium text-zinc-300 mb-1">Full Name</label>
               <input 
                 type="text" 
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-4 py-2 outline-none transition-all"
+                className="w-full border border-zinc-700/50 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-4 py-2 outline-none transition-all"
                 placeholder="John Doe"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+              <label className="block text-sm font-medium text-zinc-300 mb-1">Email Address</label>
               <input 
                 type="email" 
                 value={profile?.email || ""}
                 disabled
-                className="w-full border border-gray-200 bg-gray-50 rounded-xl shadow-sm text-gray-500 px-4 py-2 cursor-not-allowed"
+                className="w-full border border-zinc-700/50 bg-zinc-950/50 rounded-xl shadow-sm text-zinc-400 px-4 py-2 cursor-not-allowed"
               />
-              <p className="text-xs text-gray-500 mt-1">Email cannot be changed.</p>
+              <p className="text-xs text-zinc-400 mt-1">Email cannot be changed.</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+              <label className="block text-sm font-medium text-zinc-300 mb-1">Phone Number</label>
               <input 
                 type="tel" 
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-4 py-2 outline-none transition-all"
+                className="w-full border border-zinc-700/50 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-4 py-2 outline-none transition-all"
                 placeholder="+1 (555) 000-0000"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Role / Job Title</label>
+              <label className="block text-sm font-medium text-zinc-300 mb-1">Role / Job Title</label>
               <input 
                 type="text" 
                 value={profile?.role || "Team Member"}
                 disabled
-                className="w-full border border-gray-200 bg-gray-50 rounded-xl shadow-sm text-gray-500 px-4 py-2 cursor-not-allowed uppercase"
+                className="w-full border border-zinc-700/50 bg-zinc-950/50 rounded-xl shadow-sm text-zinc-400 px-4 py-2 cursor-not-allowed uppercase"
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+              <label className="block text-sm font-medium text-zinc-300 mb-1">Bio</label>
               <textarea 
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
                 rows={4}
-                className="w-full border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-4 py-3 outline-none transition-all resize-none"
+                className="w-full border border-zinc-700/50 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 px-4 py-3 outline-none transition-all resize-none"
                 placeholder="Write a few sentences about yourself..."
               />
             </div>
           </div>
 
-          <div className="pt-6 border-t border-gray-100 flex justify-end">
+          <div className="pt-6 border-t border-zinc-800/60 flex justify-end">
             <button
               type="submit"
               disabled={saving}

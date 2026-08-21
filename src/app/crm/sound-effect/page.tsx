@@ -70,8 +70,8 @@ export default function SoundEffectPage() {
           <AudioLines className="w-6 h-6" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Sound Effect Generator</h1>
-          <p className="text-slate-500 text-sm">Create custom sound effects using AI (ElevenLabs)</p>
+          <h1 className="text-2xl font-bold text-zinc-100">Sound Effect Generator</h1>
+          <p className="text-zinc-400 text-sm">Create custom sound effects using AI (ElevenLabs)</p>
         </div>
       </div>
 
@@ -79,23 +79,23 @@ export default function SoundEffectPage() {
         
         {/* Left Column - Main Form */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+          <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl p-6 border border-zinc-800/60 shadow-sm">
             <div className="flex items-center gap-2 mb-6">
               <Sparkles className="w-5 h-5 text-fuchsia-500" />
-              <h2 className="font-semibold text-slate-800 text-lg">Generate Sound Effect</h2>
+              <h2 className="font-semibold text-zinc-100 text-lg">Generate Sound Effect</h2>
             </div>
 
             <div className="space-y-6">
               {/* Textarea */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-zinc-300 mb-2">
                   Describe the sound effect <span className="text-red-500">*</span>
                 </label>
                 <textarea 
                   rows={4}
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
-                  className="w-full border border-slate-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/50 focus:border-fuchsia-500 resize-none"
+                  className="w-full border border-zinc-700/50 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/50 focus:border-fuchsia-500 resize-none"
                   placeholder="e.g., Thunder and lightning storm with heavy rain"
                 ></textarea>
                 <p className="text-xs text-slate-400 mt-2">
@@ -105,7 +105,7 @@ export default function SoundEffectPage() {
 
               {/* Slider */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-4">
+                <label className="block text-sm font-medium text-zinc-300 mb-4">
                   Duration: {duration} seconds
                 </label>
                 <div className="flex items-center gap-4">
@@ -160,13 +160,13 @@ export default function SoundEffectPage() {
 
           {/* Example Prompts */}
           <div className="bg-fuchsia-50/50 rounded-2xl p-6 border border-fuchsia-100">
-            <h3 className="font-semibold text-slate-800 mb-4">Example Prompts</h3>
+            <h3 className="font-semibold text-zinc-100 mb-4">Example Prompts</h3>
             <div className="space-y-2">
               {examplePrompts.map((p, idx) => (
                 <div 
                   key={idx} 
                   onClick={() => setPrompt(p)}
-                  className="bg-white px-4 py-3 rounded-lg border border-fuchsia-100/50 text-sm text-slate-600 shadow-sm cursor-pointer hover:border-fuchsia-300 transition-colors"
+                  className="bg-zinc-900/40 backdrop-blur-xl px-4 py-3 rounded-lg border border-fuchsia-100/50 text-sm text-zinc-400 shadow-sm cursor-pointer hover:border-fuchsia-300 transition-colors"
                 >
                   {p}
                 </div>
@@ -179,10 +179,10 @@ export default function SoundEffectPage() {
         <div className="space-y-6">
           
           {/* Generated Sound Empty State */}
-          <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm min-h-[300px] flex flex-col">
+          <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl p-6 border border-zinc-800/60 shadow-sm min-h-[300px] flex flex-col">
             <div className="flex items-center gap-2 mb-6">
               <AudioLines className="w-5 h-5 text-purple-500" />
-              <h2 className="font-semibold text-slate-800 text-lg">Generated Sound</h2>
+              <h2 className="font-semibold text-zinc-100 text-lg">Generated Sound</h2>
             </div>
             
             <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4">
@@ -191,7 +191,7 @@ export default function SoundEffectPage() {
                   <div className="w-16 h-16 bg-fuchsia-100 rounded-full flex items-center justify-center text-fuchsia-500 mb-2">
                     <PlayCircle className="w-8 h-8" />
                   </div>
-                  <h3 className="font-semibold text-slate-700">Sound Ready!</h3>
+                  <h3 className="font-semibold text-zinc-300">Sound Ready!</h3>
                   <audio controls src={audioUrl} className="w-full max-w-[250px]" autoPlay></audio>
                   <a href={audioUrl} download="sound-effect.mp3" className="mt-2 text-sm text-fuchsia-600 hover:underline">Download MP3</a>
                 </div>
@@ -200,15 +200,15 @@ export default function SoundEffectPage() {
                   <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center">
                     <div className="w-8 h-8 border-4 border-fuchsia-500 border-t-transparent rounded-full animate-spin"></div>
                   </div>
-                  <h3 className="font-semibold text-slate-500">Creating magic...</h3>
+                  <h3 className="font-semibold text-zinc-400">Creating magic...</h3>
                 </div>
               ) : (
                 <>
-                  <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center">
+                  <div className="w-16 h-16 bg-zinc-950/50 rounded-full flex items-center justify-center">
                     <Sparkles className="w-8 h-8 text-slate-300" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-slate-700">No sound effect yet</h3>
+                    <h3 className="font-semibold text-zinc-300">No sound effect yet</h3>
                     <p className="text-sm text-slate-400 mt-1">Enter a description and generate</p>
                   </div>
                 </>
@@ -220,7 +220,7 @@ export default function SoundEffectPage() {
           <div className="bg-blue-50/50 rounded-2xl p-6 border border-blue-100">
             <div className="flex items-center gap-2 mb-4">
               <Lightbulb className="w-5 h-5 text-blue-500" />
-              <h3 className="font-semibold text-slate-800">Best Practices</h3>
+              <h3 className="font-semibold text-zinc-100">Best Practices</h3>
             </div>
             <ul className="space-y-3 text-sm text-blue-900/80">
               <li className="flex items-start gap-2">

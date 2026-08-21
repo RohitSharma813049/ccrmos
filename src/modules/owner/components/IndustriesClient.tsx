@@ -142,8 +142,8 @@ export default function IndustriesClient() {
     <div className="p-6 max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Industries</h1>
-          <p className="text-gray-500 mt-1">Manage global industry types for the CRM.</p>
+          <h1 className="text-3xl font-extrabold text-zinc-100 tracking-tight">Industries</h1>
+          <p className="text-zinc-400 mt-1">Manage global industry types for the CRM.</p>
         </div>
         <button 
           onClick={() => openModal()} 
@@ -161,9 +161,9 @@ export default function IndustriesClient() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {industries.map((ind) => (
-            <div key={ind._id} className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-xl transition-all group relative">
-              <h3 className="text-lg font-bold text-gray-900">{ind.name}</h3>
-              <p className="text-sm text-gray-500 mt-2 line-clamp-2">{ind.description || 'No description provided.'}</p>
+            <div key={ind._id} className="bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-2xl p-6 hover:shadow-xl transition-all group relative">
+              <h3 className="text-lg font-bold text-zinc-100">{ind.name}</h3>
+              <p className="text-sm text-zinc-400 mt-2 line-clamp-2">{ind.description || 'No description provided.'}</p>
               
               <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-1">
                 <button 
@@ -188,41 +188,41 @@ export default function IndustriesClient() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-              <h2 className="text-xl font-bold text-gray-900">
+          <div className="relative bg-zinc-900/40 backdrop-blur-xl rounded-2xl shadow-2xl w-full max-w-md flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-zinc-800/60 flex justify-between items-center">
+              <h2 className="text-xl font-bold text-zinc-100">
                 {editingIndustry ? 'Edit Industry' : 'Add New Industry'}
               </h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600 p-1">
+              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-zinc-400 p-1">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-5 overflow-y-auto">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Industry Name <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-medium text-zinc-300 mb-1.5">Industry Name <span className="text-red-500">*</span></label>
                 <input
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="e.g. Healthcare, Real Estate"
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all"
+                  className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2.5 text-zinc-100 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Description</label>
+                <label className="block text-sm font-medium text-zinc-300 mb-1.5">Description</label>
                 <input
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Brief description"
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all"
+                  className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2.5 text-zinc-100 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Selected Default Modules</label>
-                <div className="flex flex-wrap gap-2 mb-4 p-3 bg-gray-50 border border-gray-200 rounded-xl min-h-[50px]">
+                <label className="block text-sm font-medium text-zinc-300 mb-2">Selected Default Modules</label>
+                <div className="flex flex-wrap gap-2 mb-4 p-3 bg-zinc-950/50 border border-zinc-700/50 rounded-xl min-h-[50px]">
                   {formData.defaultModules.length === 0 ? (
-                    <span className="text-sm text-gray-500 italic">No modules selected</span>
+                    <span className="text-sm text-zinc-400 italic">No modules selected</span>
                   ) : (
                     formData.defaultModules.map(modName => (
                       <span key={modName} className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-100 text-blue-700 text-sm font-medium rounded-full">
@@ -239,11 +239,11 @@ export default function IndustriesClient() {
                   )}
                 </div>
 
-                <label className="block text-sm font-medium text-gray-700 mb-2">Available Modules (Grouped by Scope)</label>
-                <div className="bg-gray-50 p-4 border border-gray-200 rounded-xl max-h-60 overflow-y-auto space-y-4">
+                <label className="block text-sm font-medium text-zinc-300 mb-2">Available Modules (Grouped by Scope)</label>
+                <div className="bg-zinc-950/50 p-4 border border-zinc-700/50 rounded-xl max-h-60 overflow-y-auto space-y-4">
                   {/* Basic CRM Core Modules */}
                   <div>
-                    <h4 className="text-xs font-bold text-gray-500 uppercase mb-2 tracking-wider">Base CRM Modules</h4>
+                    <h4 className="text-xs font-bold text-zinc-400 uppercase mb-2 tracking-wider">Base CRM Modules</h4>
                     <div className="grid grid-cols-2 gap-3">
                       {CORE_MODULES.map(modName => {
                         const isSelected = formData.defaultModules.includes(modName);
@@ -254,9 +254,9 @@ export default function IndustriesClient() {
                               type="checkbox" 
                               checked={false}
                               onChange={() => handleModuleToggle(modName)}
-                              className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                              className="w-4 h-4 text-blue-600 rounded border-zinc-700/50 focus:ring-blue-500"
                             />
-                            <span className="text-sm text-gray-700 font-medium truncate" title={modName}>{modName}</span>
+                            <span className="text-sm text-zinc-300 font-medium truncate" title={modName}>{modName}</span>
                           </label>
                         );
                       })}
@@ -268,8 +268,8 @@ export default function IndustriesClient() {
                     const scopedModules = availableModules.filter(m => m.tenantScope === scope);
                     if (scopedModules.length === 0) return null;
                     return (
-                      <div key={scope} className="pt-4 border-t border-gray-200">
-                        <h4 className="text-xs font-bold text-gray-500 uppercase mb-2 tracking-wider">{scope} Scope Custom Modules</h4>
+                      <div key={scope} className="pt-4 border-t border-zinc-700/50">
+                        <h4 className="text-xs font-bold text-zinc-400 uppercase mb-2 tracking-wider">{scope} Scope Custom Modules</h4>
                         <div className="grid grid-cols-2 gap-3">
                           {scopedModules.map(mod => {
                             const isSelected = formData.defaultModules.includes(mod.name);
@@ -280,9 +280,9 @@ export default function IndustriesClient() {
                                   type="checkbox" 
                                   checked={false}
                                   onChange={() => handleModuleToggle(mod.name)}
-                                  className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                                  className="w-4 h-4 text-blue-600 rounded border-zinc-700/50 focus:ring-blue-500"
                                 />
-                                <span className="text-sm text-gray-700 font-medium truncate" title={mod.name}>{mod.name}</span>
+                                <span className="text-sm text-zinc-300 font-medium truncate" title={mod.name}>{mod.name}</span>
                               </label>
                             );
                           })}

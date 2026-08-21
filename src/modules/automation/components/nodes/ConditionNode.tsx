@@ -14,7 +14,7 @@ export default function ConditionNode({ data }: { data: any }) {
   };
 
   return (
-    <div className="bg-white border-2 border-amber-500 rounded-xl p-4 shadow-sm w-64">
+    <div className="bg-zinc-900/40 backdrop-blur-xl border-2 border-amber-500 rounded-xl p-4 shadow-sm w-64">
       <Handle type="target" position={Position.Top} className="w-3 h-3 bg-amber-500" />
       <div className="font-semibold text-amber-600 mb-2 text-sm flex items-center gap-2">
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -24,7 +24,7 @@ export default function ConditionNode({ data }: { data: any }) {
       </div>
       
       <div className="space-y-2 flex flex-col">
-        <select value={data.field || ''} onChange={onChangeField} className="w-full bg-gray-50 border border-gray-200 rounded p-1.5 text-xs text-gray-700 outline-none">
+        <select value={data.field || ''} onChange={onChangeField} className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded p-1.5 text-xs text-zinc-300 outline-none">
           <option value="">Select Field</option>
           <option value="status">Status</option>
           <option value="source">Source</option>
@@ -32,7 +32,7 @@ export default function ConditionNode({ data }: { data: any }) {
           <option value="amount">Amount</option>
         </select>
         
-        <select value={data.operator || ''} onChange={onChangeOperator} className="w-full bg-gray-50 border border-gray-200 rounded p-1.5 text-xs text-gray-700 outline-none">
+        <select value={data.operator || ''} onChange={onChangeOperator} className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded p-1.5 text-xs text-zinc-300 outline-none">
           <option value="">Select Operator</option>
           <option value="equals">Equals</option>
           <option value="not_equals">Does Not Equal</option>
@@ -46,7 +46,7 @@ export default function ConditionNode({ data }: { data: any }) {
           value={data.value || ''} 
           onChange={onChangeValue} 
           placeholder="Value to compare" 
-          className="w-full bg-gray-50 border border-gray-200 rounded p-1.5 text-xs text-gray-700 outline-none"
+          className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded p-1.5 text-xs text-zinc-300 outline-none"
         />
       </div>
 

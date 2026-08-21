@@ -30,7 +30,7 @@ export default function CompanyDetailsPage() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <p className="text-gray-500">Loading company data...</p>
+        <p className="text-zinc-400">Loading company data...</p>
       </div>
     );
   }
@@ -76,8 +76,8 @@ export default function CompanyDetailsPage() {
             </svg>
             Back to Companies
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">{company.name}</h1>
-          <p className="text-gray-600 mt-1">Detailed tenant dashboard and analytics.</p>
+          <h1 className="text-3xl font-bold text-zinc-100 tracking-tight">{company.name}</h1>
+          <p className="text-zinc-400 mt-1">Detailed tenant dashboard and analytics.</p>
         </div>
         <button 
           onClick={handleImpersonate}
@@ -92,34 +92,34 @@ export default function CompanyDetailsPage() {
       </div>
 
       {/* Basic Info */}
-      <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Tenant Information</h2>
+      <div className="bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-2xl p-6 shadow-sm">
+        <h2 className="text-xl font-bold text-zinc-100 mb-4">Tenant Information</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
-            <p className="text-sm text-gray-500">Plan</p>
-            <p className="font-semibold text-gray-900">{company.plan}</p>
+            <p className="text-sm text-zinc-400">Plan</p>
+            <p className="font-semibold text-zinc-100">{company.plan}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-500">Status</p>
-            <p className="font-semibold text-gray-900">{company.status}</p>
+            <p className="text-sm text-zinc-400">Status</p>
+            <p className="font-semibold text-zinc-100">{company.status}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-500">Registered On</p>
-            <p className="font-semibold text-gray-900">{new Date(company.createdAt).toLocaleDateString()}</p>
+            <p className="text-sm text-zinc-400">Registered On</p>
+            <p className="font-semibold text-zinc-100">{new Date(company.createdAt).toLocaleDateString()}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-500">Primary Admin Email</p>
-            <p className="font-semibold text-gray-900">{company.adminEmail}</p>
+            <p className="text-sm text-zinc-400">Primary Admin Email</p>
+            <p className="font-semibold text-zinc-100">{company.adminEmail}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-500">Users Quota</p>
-            <p className="font-semibold text-gray-900">{stats.users} / {company.usersQuota}</p>
+            <p className="text-sm text-zinc-400">Users Quota</p>
+            <p className="font-semibold text-zinc-100">{stats.users} / {company.usersQuota}</p>
           </div>
         </div>
       </div>
 
       {/* Stats */}
-      <h2 className="text-xl font-bold text-gray-900">Platform Usage Overview</h2>
+      <h2 className="text-xl font-bold text-zinc-100">Platform Usage Overview</h2>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatBox label="Leads" value={stats.leads} color="text-blue-600" />
         <StatBox label="Customers" value={stats.customers} color="text-green-600" />
@@ -133,10 +133,10 @@ export default function CompanyDetailsPage() {
   );
 }
 
-function StatBox({ label, value, color = "text-gray-900" }: { label: string, value: string | number, color?: string }) {
+function StatBox({ label, value, color = "text-zinc-100" }: { label: string, value: string | number, color?: string }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
-      <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-1">{label}</p>
+    <div className="bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-xl p-4 shadow-sm">
+      <p className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-1">{label}</p>
       <p className={`text-2xl font-bold ${color}`}>{value}</p>
     </div>
   );

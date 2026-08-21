@@ -70,17 +70,17 @@ export default function TemplateBuilderClient({ template }: { template: any }) {
     }
   };
 
-  if (loading) return <div className="p-8 text-center text-gray-500">Loading modules...</div>;
+  if (loading) return <div className="p-8 text-center text-zinc-400">Loading modules...</div>;
 
   return (
     <div className="space-y-8 fade-in pb-12">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">{template.name} - Bundle Configuration</h1>
-          <p className="text-gray-600 mt-1">Select the global modules that should be cloned into this template.</p>
+          <h1 className="text-3xl font-bold text-zinc-100 tracking-tight">{template.name} - Bundle Configuration</h1>
+          <p className="text-zinc-400 mt-1">Select the global modules that should be cloned into this template.</p>
         </div>
         <div className="flex gap-3">
-          <button onClick={() => window.history.back()} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+          <button onClick={() => window.history.back()} className="px-4 py-2 bg-gray-100 text-zinc-300 rounded-lg hover:bg-gray-200 transition-colors">
             Back
           </button>
           <button 
@@ -93,12 +93,12 @@ export default function TemplateBuilderClient({ template }: { template: any }) {
         </div>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-2xl shadow-xl p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-6">Available Global Modules</h2>
+      <div className="bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-2xl shadow-xl p-6">
+        <h2 className="text-xl font-bold text-zinc-100 mb-6">Available Global Modules</h2>
         
         {globalModules.length === 0 ? (
-          <div className="p-8 text-center bg-gray-50 rounded-xl border border-dashed border-gray-200">
-            <p className="text-gray-500">No global modules exist. Go to Module Builder and create some generic modules first.</p>
+          <div className="p-8 text-center bg-zinc-950/50 rounded-xl border border-dashed border-zinc-700/50">
+            <p className="text-zinc-400">No global modules exist. Go to Module Builder and create some generic modules first.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -111,16 +111,16 @@ export default function TemplateBuilderClient({ template }: { template: any }) {
                   className={`cursor-pointer p-4 rounded-xl border-2 transition-all ${
                     isSelected 
                       ? "border-blue-500 bg-blue-50/50" 
-                      : "border-gray-200 hover:border-blue-300 hover:bg-gray-50"
+                      : "border-zinc-700/50 hover:border-blue-300 hover:bg-zinc-950/50"
                   }`}
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-semibold text-gray-900">{mod.name}</h3>
-                    <div className={`w-5 h-5 rounded flex items-center justify-center border ${isSelected ? "bg-blue-500 border-blue-500" : "border-gray-300 bg-white"}`}>
+                    <h3 className="font-semibold text-zinc-100">{mod.name}</h3>
+                    <div className={`w-5 h-5 rounded flex items-center justify-center border ${isSelected ? "bg-blue-500 border-blue-500" : "border-zinc-700/50 bg-zinc-900/40 backdrop-blur-xl"}`}>
                       {isSelected && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
                     </div>
                   </div>
-                  <p className="text-xs text-gray-500 line-clamp-2">{mod.description || "No description provided."}</p>
+                  <p className="text-xs text-zinc-400 line-clamp-2">{mod.description || "No description provided."}</p>
                   <div className="mt-3 text-xs font-medium text-blue-600">
                     {mod.fields?.length || 0} Fields
                   </div>

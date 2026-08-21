@@ -90,9 +90,9 @@ export default function AutomationsClient({ isGlobal = false }: { isGlobal?: boo
         description={isGlobal ? "Design platform-wide event triggers and execution pipelines." : "Design event triggers, execution queues, and background jobs for your company."}
       />
 
-      <div className="bg-white/50 backdrop-blur-xl border border-gray-200 rounded-2xl p-6 shadow-xl">
+      <div className="bg-zinc-900/40 backdrop-blur-xl/50 backdrop-blur-xl border border-zinc-700/50 rounded-2xl p-6 shadow-xl">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-          <h2 className="text-xl font-bold text-gray-900">Execution Pipelines</h2>
+          <h2 className="text-xl font-bold text-zinc-100">Execution Pipelines</h2>
           <button 
             onClick={() => setIsModalOpen(true)} 
             className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-sm font-semibold text-white rounded-lg transition-colors shadow"
@@ -103,14 +103,14 @@ export default function AutomationsClient({ isGlobal = false }: { isGlobal?: boo
         
         <div className="space-y-4">
           {loading ? (
-            <p className="text-gray-500 text-sm text-center py-4">Loading pipelines...</p>
+            <p className="text-zinc-400 text-sm text-center py-4">Loading pipelines...</p>
           ) : workflows.length === 0 ? (
-            <div className="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-              <p className="text-gray-500">No pipelines configured yet.</p>
+            <div className="text-center py-8 bg-zinc-950/50 rounded-xl border border-dashed border-zinc-700/50">
+              <p className="text-zinc-400">No pipelines configured yet.</p>
             </div>
           ) : (
             workflows.map((wf) => (
-              <div key={wf._id} className="border border-gray-200 rounded-xl p-4 bg-white/80 flex items-center justify-between group hover:border-blue-300 transition-colors cursor-pointer" onClick={() => window.location.href = `/dashboard/automations/${wf._id}`}>
+              <div key={wf._id} className="border border-zinc-700/50 rounded-xl p-4 bg-zinc-900/40 backdrop-blur-xl/80 flex items-center justify-between group hover:border-blue-300 transition-colors cursor-pointer" onClick={() => window.location.href = `/dashboard/automations/${wf._id}`}>
                 <div className="flex items-center gap-4">
                   <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${wf.trigger === 'EVENT' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-purple-500/10 text-purple-500'}`}>
                     {wf.trigger === 'EVENT' ? (
@@ -124,14 +124,14 @@ export default function AutomationsClient({ isGlobal = false }: { isGlobal?: boo
                     )}
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">{wf.title}</h3>
-                    <p className="text-xs text-gray-500">{wf.description || `Trigger: ${wf.trigger}`}</p>
+                    <h3 className="font-semibold text-zinc-100 group-hover:text-blue-600 transition-colors">{wf.title}</h3>
+                    <p className="text-xs text-zinc-400">{wf.description || `Trigger: ${wf.trigger}`}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
                   <button 
                     onClick={(e) => { e.stopPropagation(); toggleStatus(wf); }}
-                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium cursor-pointer transition-colors ${wf.active ? 'bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium cursor-pointer transition-colors ${wf.active ? 'bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20' : 'bg-gray-100 text-zinc-400 hover:bg-gray-200'}`}
                   >
                     {wf.active && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>}
                     {wf.active ? 'Active' : 'Idle'}
@@ -150,38 +150,38 @@ export default function AutomationsClient({ isGlobal = false }: { isGlobal?: boo
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
-          <div className="relative bg-white border border-gray-200 rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200 p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">Create New Pipeline</h2>
+          <div className="relative bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200 p-6">
+            <h2 className="text-xl font-bold text-zinc-100 mb-6">Create New Pipeline</h2>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Pipeline Name</label>
+                <label className="block text-sm font-medium text-zinc-300 mb-1">Pipeline Name</label>
                 <input 
                   type="text" 
                   placeholder="e.g., Nightly Database Sync" 
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                  className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description (Optional)</label>
+                <label className="block text-sm font-medium text-zinc-300 mb-1">Description (Optional)</label>
                 <input 
                   type="text" 
                   placeholder="e.g., Syncs core models to warehouse" 
                   value={newDesc}
                   onChange={(e) => setNewDesc(e.target.value)}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                  className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Trigger Type</label>
+                <label className="block text-sm font-medium text-zinc-300 mb-1">Trigger Type</label>
                 <select 
                   value={newTrigger}
                   onChange={(e) => setNewTrigger(e.target.value)}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none appearance-none"
+                  className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none appearance-none"
                 >
                   <option value="EVENT">Event-Driven (Webhooks / Real-time)</option>
                   <option value="CRON">CRON (Scheduled Batch)</option>
@@ -190,7 +190,7 @@ export default function AutomationsClient({ isGlobal = false }: { isGlobal?: boo
             </div>
 
             <div className="flex justify-end gap-3 mt-8">
-              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancel</button>
+              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-zinc-400 hover:bg-gray-100 rounded-lg">Cancel</button>
               <button onClick={createWorkflow} className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium shadow">Create Pipeline</button>
             </div>
           </div>

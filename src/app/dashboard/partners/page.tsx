@@ -85,8 +85,8 @@ export default function ChannelPartnersPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 leading-tight">Channel Partners</h1>
-          <p className="text-slate-500 text-sm">Manage channel partner accounts</p>
+          <h1 className="text-2xl font-bold text-zinc-100 leading-tight">Channel Partners</h1>
+          <p className="text-zinc-400 text-sm">Manage channel partner accounts</p>
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
@@ -98,20 +98,20 @@ export default function ChannelPartnersPage() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl p-5 border border-slate-100 shadow-sm flex flex-col justify-center">
-          <p className="text-sm font-medium text-slate-500 mb-1">Total Partners</p>
-          <h3 className="text-2xl font-bold text-slate-800">{partners.length}</h3>
+        <div className="bg-zinc-900/40 backdrop-blur-xl rounded-xl p-5 border border-zinc-800/60 shadow-sm flex flex-col justify-center">
+          <p className="text-sm font-medium text-zinc-400 mb-1">Total Partners</p>
+          <h3 className="text-2xl font-bold text-zinc-100">{partners.length}</h3>
         </div>
-        <div className="bg-white rounded-xl p-5 border border-slate-100 shadow-sm flex flex-col justify-center">
-          <p className="text-sm font-medium text-slate-500 mb-1">Companies</p>
+        <div className="bg-zinc-900/40 backdrop-blur-xl rounded-xl p-5 border border-zinc-800/60 shadow-sm flex flex-col justify-center">
+          <p className="text-sm font-medium text-zinc-400 mb-1">Companies</p>
           <h3 className="text-2xl font-bold text-blue-600">{companiesCount}</h3>
         </div>
-        <div className="bg-white rounded-xl p-5 border border-slate-100 shadow-sm flex flex-col justify-center">
-          <p className="text-sm font-medium text-slate-500 mb-1">Individuals</p>
+        <div className="bg-zinc-900/40 backdrop-blur-xl rounded-xl p-5 border border-zinc-800/60 shadow-sm flex flex-col justify-center">
+          <p className="text-sm font-medium text-zinc-400 mb-1">Individuals</p>
           <h3 className="text-2xl font-bold text-green-600">{individualsCount}</h3>
         </div>
-        <div className="bg-white rounded-xl p-5 border border-slate-100 shadow-sm flex flex-col justify-center">
-          <p className="text-sm font-medium text-slate-500 mb-1">Agencies</p>
+        <div className="bg-zinc-900/40 backdrop-blur-xl rounded-xl p-5 border border-zinc-800/60 shadow-sm flex flex-col justify-center">
+          <p className="text-sm font-medium text-zinc-400 mb-1">Agencies</p>
           <h3 className="text-2xl font-bold text-purple-600">{agenciesCount}</h3>
         </div>
       </div>
@@ -125,7 +125,7 @@ export default function ChannelPartnersPage() {
             placeholder="Search by name, company, email, phone, or city..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-zinc-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
           />
         </div>
         <div className="relative w-full sm:w-64 shrink-0">
@@ -133,7 +133,7 @@ export default function ChannelPartnersPage() {
           <select 
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm appearance-none bg-white font-medium text-slate-700"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-zinc-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm appearance-none bg-zinc-900/40 backdrop-blur-xl font-medium text-zinc-300"
           >
             <option>All Partner Types</option>
             <option>Company</option>
@@ -143,7 +143,7 @@ export default function ChannelPartnersPage() {
         </div>
       </div>
 
-      <div className="text-sm text-slate-500 font-medium">
+      <div className="text-sm text-zinc-400 font-medium">
         Showing {partners.length} partners
       </div>
 
@@ -153,13 +153,13 @@ export default function ChannelPartnersPage() {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
       ) : partners.length === 0 ? (
-        <div className="py-12 flex flex-col items-center justify-center text-center bg-white rounded-2xl border border-slate-200">
-           <p className="text-slate-500">No channel partners found.</p>
+        <div className="py-12 flex flex-col items-center justify-center text-center bg-zinc-900/40 backdrop-blur-xl rounded-2xl border border-zinc-700/50">
+           <p className="text-zinc-400">No channel partners found.</p>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-x-auto">
+        <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl border border-zinc-800/60 shadow-sm overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="text-xs text-slate-400 font-semibold uppercase border-b border-slate-100">
+            <thead className="text-xs text-slate-400 font-semibold uppercase border-b border-zinc-800/60">
               <tr>
                 <th className="px-6 py-5">Partner Info</th>
                 <th className="px-6 py-5">Contact</th>
@@ -180,7 +180,7 @@ export default function ChannelPartnersPage() {
                 const joined = new Date(partner.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
                 
                 return (
-                  <tr key={partner._id} className="hover:bg-slate-50/50 transition-colors">
+                  <tr key={partner._id} className="hover:bg-zinc-950/50/50 transition-colors">
                     {/* Partner Info */}
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
@@ -188,16 +188,16 @@ export default function ChannelPartnersPage() {
                           {initial}
                         </div>
                         <div>
-                          <div className="font-bold text-slate-800">{partner.name}</div>
-                          <div className="text-xs text-slate-500">{partner.company}</div>
+                          <div className="font-bold text-zinc-100">{partner.name}</div>
+                          <div className="text-xs text-zinc-400">{partner.company}</div>
                         </div>
                       </div>
                     </td>
                     
                     {/* Contact */}
                     <td className="px-6 py-4">
-                      <div className="text-slate-700 font-medium">{partner.phone}</div>
-                      <div className="text-slate-500 text-xs">{partner.email}</div>
+                      <div className="text-zinc-300 font-medium">{partner.phone}</div>
+                      <div className="text-zinc-400 text-xs">{partner.email}</div>
                       {partner.whatsapp && (
                         <div className="text-green-500 text-[11px] font-medium mt-0.5">WhatsApp: {partner.whatsapp}</div>
                       )}
@@ -205,8 +205,8 @@ export default function ChannelPartnersPage() {
                     
                     {/* Location */}
                     <td className="px-6 py-4">
-                      <div className="text-slate-700 font-medium">{partner.city}</div>
-                      <div className="text-slate-500 text-xs">{partner.state}</div>
+                      <div className="text-zinc-300 font-medium">{partner.city}</div>
+                      <div className="text-zinc-400 text-xs">{partner.state}</div>
                     </td>
                     
                     {/* Type */}
@@ -218,19 +218,19 @@ export default function ChannelPartnersPage() {
                     
                     {/* Experience */}
                     <td className="px-6 py-4">
-                      <div className="text-slate-700 font-medium">{partner.experience || 'N/A'}</div>
+                      <div className="text-zinc-300 font-medium">{partner.experience || 'N/A'}</div>
                       {partner.expDesc && (
                         <div className="text-slate-400 text-[10px] mt-0.5 truncate max-w-[120px]">{partner.expDesc}</div>
                       )}
                     </td>
                     
                     {/* Team Size */}
-                    <td className="px-6 py-4 text-center font-semibold text-slate-800">
+                    <td className="px-6 py-4 text-center font-semibold text-zinc-100">
                       {partner.teamSize || '0'}
                     </td>
                     
                     {/* Joined */}
-                    <td className="px-6 py-4 text-slate-500 text-xs font-medium whitespace-nowrap">
+                    <td className="px-6 py-4 text-zinc-400 text-xs font-medium whitespace-nowrap">
                       {joined}
                     </td>
                     
@@ -312,10 +312,10 @@ function PartnerFormModal({ onClose, onSuccess }: { onClose: () => void, onSucce
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
-        <div className="flex items-center justify-between p-6 border-b border-slate-100">
-          <h2 className="text-xl font-bold text-slate-900">Add Channel Partner</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-2">
+      <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="flex items-center justify-between p-6 border-b border-zinc-800/60">
+          <h2 className="text-xl font-bold text-zinc-100">Add Channel Partner</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-zinc-400 p-2">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -323,44 +323,44 @@ function PartnerFormModal({ onClose, onSuccess }: { onClose: () => void, onSucce
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Full Name *</label>
+              <label className="block text-sm font-medium text-zinc-300 mb-1">Full Name *</label>
               <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full px-4 py-2 border rounded-lg" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Company Name</label>
+              <label className="block text-sm font-medium text-zinc-300 mb-1">Company Name</label>
               <input type="text" value={formData.company} onChange={e => setFormData({...formData, company: e.target.value})} className="w-full px-4 py-2 border rounded-lg" />
             </div>
           </div>
           
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+              <label className="block text-sm font-medium text-zinc-300 mb-1">Email</label>
               <input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full px-4 py-2 border rounded-lg" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Phone *</label>
+              <label className="block text-sm font-medium text-zinc-300 mb-1">Phone *</label>
               <input required type="text" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="w-full px-4 py-2 border rounded-lg" />
             </div>
           </div>
 
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">WhatsApp</label>
+              <label className="block text-sm font-medium text-zinc-300 mb-1">WhatsApp</label>
               <input type="text" value={formData.whatsapp} onChange={e => setFormData({...formData, whatsapp: e.target.value})} className="w-full px-4 py-2 border rounded-lg" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">City</label>
+              <label className="block text-sm font-medium text-zinc-300 mb-1">City</label>
               <input type="text" value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} className="w-full px-4 py-2 border rounded-lg" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">State</label>
+              <label className="block text-sm font-medium text-zinc-300 mb-1">State</label>
               <input type="text" value={formData.state} onChange={e => setFormData({...formData, state: e.target.value})} className="w-full px-4 py-2 border rounded-lg" />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Type</label>
+              <label className="block text-sm font-medium text-zinc-300 mb-1">Type</label>
               <select value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})} className="w-full px-4 py-2 border rounded-lg">
                 <option value="Individual">Individual</option>
                 <option value="Company">Company</option>
@@ -368,24 +368,24 @@ function PartnerFormModal({ onClose, onSuccess }: { onClose: () => void, onSucce
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Team Size</label>
+              <label className="block text-sm font-medium text-zinc-300 mb-1">Team Size</label>
               <input type="text" value={formData.teamSize} onChange={e => setFormData({...formData, teamSize: e.target.value})} className="w-full px-4 py-2 border rounded-lg" />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Experience (e.g. 4 years)</label>
+              <label className="block text-sm font-medium text-zinc-300 mb-1">Experience (e.g. 4 years)</label>
               <input type="text" value={formData.experience} onChange={e => setFormData({...formData, experience: e.target.value})} className="w-full px-4 py-2 border rounded-lg" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Exp. Description</label>
+              <label className="block text-sm font-medium text-zinc-300 mb-1">Exp. Description</label>
               <input type="text" placeholder="e.g. Residential" value={formData.expDesc} onChange={e => setFormData({...formData, expDesc: e.target.value})} className="w-full px-4 py-2 border rounded-lg" />
             </div>
           </div>
 
           <div className="pt-4 mt-2">
-            <label className="block text-sm font-medium text-slate-700 mb-2">Documents (Agreements, KYC, etc.)</label>
+            <label className="block text-sm font-medium text-zinc-300 mb-2">Documents (Agreements, KYC, etc.)</label>
             <DocumentUpload 
               documents={formData.documents}
               onChange={(docs) => setFormData({ ...formData, documents: docs })}
@@ -394,7 +394,7 @@ function PartnerFormModal({ onClose, onSuccess }: { onClose: () => void, onSucce
           </div>
 
           <div className="flex justify-end gap-3 pt-6 border-t mt-6">
-            <button type="button" onClick={onClose} className="px-5 py-2 border rounded-lg text-slate-700 font-medium">Cancel</button>
+            <button type="button" onClick={onClose} className="px-5 py-2 border rounded-lg text-zinc-300 font-medium">Cancel</button>
             <button type="submit" disabled={saving} className="px-5 py-2 bg-blue-600 text-white rounded-lg font-medium disabled:opacity-50">
               {saving ? 'Saving...' : 'Add Partner'}
             </button>

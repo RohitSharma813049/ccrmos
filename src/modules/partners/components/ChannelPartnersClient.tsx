@@ -71,8 +71,8 @@ export default function ChannelPartnersClient() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 leading-tight">Channel Partners</h1>
-          <p className="text-slate-500 text-sm">Manage channel partner accounts (User Type: Partner)</p>
+          <h1 className="text-2xl font-bold text-zinc-100 leading-tight">Channel Partners</h1>
+          <p className="text-zinc-400 text-sm">Manage channel partner accounts (User Type: Partner)</p>
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
@@ -84,20 +84,20 @@ export default function ChannelPartnersClient() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl p-5 border border-slate-100 shadow-sm flex flex-col justify-center">
-          <p className="text-sm font-medium text-slate-500 mb-1">Total Partners</p>
-          <h3 className="text-2xl font-bold text-slate-800">{partners.length}</h3>
+        <div className="bg-zinc-900/40 backdrop-blur-xl rounded-xl p-5 border border-zinc-800/60 shadow-sm flex flex-col justify-center">
+          <p className="text-sm font-medium text-zinc-400 mb-1">Total Partners</p>
+          <h3 className="text-2xl font-bold text-zinc-100">{partners.length}</h3>
         </div>
-        <div className="bg-white rounded-xl p-5 border border-slate-100 shadow-sm flex flex-col justify-center">
-          <p className="text-sm font-medium text-slate-500 mb-1">Companies</p>
+        <div className="bg-zinc-900/40 backdrop-blur-xl rounded-xl p-5 border border-zinc-800/60 shadow-sm flex flex-col justify-center">
+          <p className="text-sm font-medium text-zinc-400 mb-1">Companies</p>
           <h3 className="text-2xl font-bold text-blue-600">{partners.filter(p => p.type === 'Company').length}</h3>
         </div>
-        <div className="bg-white rounded-xl p-5 border border-slate-100 shadow-sm flex flex-col justify-center">
-          <p className="text-sm font-medium text-slate-500 mb-1">Individuals</p>
+        <div className="bg-zinc-900/40 backdrop-blur-xl rounded-xl p-5 border border-zinc-800/60 shadow-sm flex flex-col justify-center">
+          <p className="text-sm font-medium text-zinc-400 mb-1">Individuals</p>
           <h3 className="text-2xl font-bold text-green-600">{partners.filter(p => p.type === 'Individual').length}</h3>
         </div>
-        <div className="bg-white rounded-xl p-5 border border-slate-100 shadow-sm flex flex-col justify-center">
-          <p className="text-sm font-medium text-slate-500 mb-1">Agencies & Firms</p>
+        <div className="bg-zinc-900/40 backdrop-blur-xl rounded-xl p-5 border border-zinc-800/60 shadow-sm flex flex-col justify-center">
+          <p className="text-sm font-medium text-zinc-400 mb-1">Agencies & Firms</p>
           <h3 className="text-2xl font-bold text-purple-600">{partners.filter(p => p.type === 'Agency' || p.type === 'Firm').length}</h3>
         </div>
       </div>
@@ -111,7 +111,7 @@ export default function ChannelPartnersClient() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name, company, email, phone, or city..." 
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-zinc-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
           />
         </div>
         <div className="relative w-full sm:w-64 shrink-0">
@@ -119,7 +119,7 @@ export default function ChannelPartnersClient() {
           <select 
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm appearance-none bg-white font-medium text-slate-700"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-zinc-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm appearance-none bg-zinc-900/40 backdrop-blur-xl font-medium text-zinc-300"
           >
             <option>All Partner Types</option>
             <option>Company</option>
@@ -131,14 +131,14 @@ export default function ChannelPartnersClient() {
       </div>
 
       {loading ? (
-        <div className="p-12 text-center text-slate-500 flex flex-col items-center gap-3">
+        <div className="p-12 text-center text-zinc-400 flex flex-col items-center gap-3">
           <Loader2 className="w-6 h-6 animate-spin" />
           Loading partners...
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-x-auto">
+        <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl border border-zinc-800/60 shadow-sm overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="text-xs text-slate-400 font-semibold uppercase border-b border-slate-100">
+            <thead className="text-xs text-slate-400 font-semibold uppercase border-b border-zinc-800/60">
               <tr>
                 <th className="px-6 py-5">Partner Info</th>
                 <th className="px-6 py-5">Contact</th>
@@ -152,44 +152,44 @@ export default function ChannelPartnersClient() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {partners.map((partner, i) => (
-                <tr key={i} className="hover:bg-slate-50/50 transition-colors">
+                <tr key={i} className="hover:bg-zinc-950/50/50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold shadow-sm shrink-0">
                         {getInitial(partner.name)}
                       </div>
                       <div>
-                        <div className="font-bold text-slate-800">{partner.name}</div>
-                        <div className="text-xs text-slate-500">{partner.company}</div>
+                        <div className="font-bold text-zinc-100">{partner.name}</div>
+                        <div className="text-xs text-zinc-400">{partner.company}</div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="text-slate-700 font-medium">{partner.phone}</div>
-                    <div className="text-slate-500 text-xs">{partner.email}</div>
+                    <div className="text-zinc-300 font-medium">{partner.phone}</div>
+                    <div className="text-zinc-400 text-xs">{partner.email}</div>
                     {partner.whatsapp && (
                       <div className="text-green-500 text-[11px] font-medium mt-0.5">{partner.whatsapp}</div>
                     )}
                   </td>
                   <td className="px-6 py-4">
-                    <div className="text-slate-700 font-medium">{partner.city}</div>
-                    <div className="text-slate-500 text-xs">{partner.state}</div>
+                    <div className="text-zinc-300 font-medium">{partner.city}</div>
+                    <div className="text-zinc-400 text-xs">{partner.state}</div>
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">
+                    <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-zinc-400">
                       {partner.type}
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="text-slate-700 font-medium">{partner.experience || 'N/A'}</div>
+                    <div className="text-zinc-300 font-medium">{partner.experience || 'N/A'}</div>
                     {partner.focusedProject && (
                       <div className="text-slate-400 text-[10px] mt-0.5 truncate max-w-[120px]">{partner.focusedProject}</div>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-center font-semibold text-slate-800">
+                  <td className="px-6 py-4 text-center font-semibold text-zinc-100">
                     {partner.teamSize || '0'}
                   </td>
-                  <td className="px-6 py-4 text-slate-500 text-xs font-medium whitespace-nowrap">
+                  <td className="px-6 py-4 text-zinc-400 text-xs font-medium whitespace-nowrap">
                     {new Date(partner.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4">
@@ -201,7 +201,7 @@ export default function ChannelPartnersClient() {
               ))}
               {partners.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-6 py-12 text-center text-slate-500">
+                  <td colSpan={8} className="px-6 py-12 text-center text-zinc-400">
                     No partners found.
                   </td>
                 </tr>
@@ -214,10 +214,10 @@ export default function ChannelPartnersClient() {
       {/* Add Partner Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-xl">
-            <div className="sticky top-0 bg-white border-b border-slate-100 p-6 flex justify-between items-center z-10">
-              <h2 className="text-xl font-bold text-slate-900">Add Channel Partner</h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 hover:bg-slate-100 p-2 rounded-full transition-colors">
+          <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-xl">
+            <div className="sticky top-0 bg-zinc-900/40 backdrop-blur-xl border-b border-zinc-800/60 p-6 flex justify-between items-center z-10">
+              <h2 className="text-xl font-bold text-zinc-100">Add Channel Partner</h2>
+              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-zinc-400 bg-zinc-950/50 hover:bg-slate-100 p-2 rounded-full transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -226,55 +226,55 @@ export default function ChannelPartnersClient() {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700 flex items-center">Full Name <span className="text-red-500 ml-1">*</span></label>
-                  <input type="text" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm" placeholder="Enter full name" />
+                  <label className="text-sm font-semibold text-zinc-300 flex items-center">Full Name <span className="text-red-500 ml-1">*</span></label>
+                  <input type="text" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-zinc-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm" placeholder="Enter full name" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700 flex items-center">Email <span className="text-red-500 ml-1">*</span></label>
-                  <input type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm" placeholder="email@example.com" />
+                  <label className="text-sm font-semibold text-zinc-300 flex items-center">Email <span className="text-red-500 ml-1">*</span></label>
+                  <input type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-zinc-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm" placeholder="email@example.com" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700 flex items-center">Phone Number <span className="text-red-500 ml-1">*</span></label>
-                  <input type="text" required value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm" placeholder="10 digit phone" />
+                  <label className="text-sm font-semibold text-zinc-300 flex items-center">Phone Number <span className="text-red-500 ml-1">*</span></label>
+                  <input type="text" required value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-zinc-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm" placeholder="10 digit phone" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700 flex items-center">Company Name <span className="text-red-500 ml-1">*</span></label>
-                  <input type="text" required value={formData.company} onChange={e => setFormData({...formData, company: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm" placeholder="Company name" />
+                  <label className="text-sm font-semibold text-zinc-300 flex items-center">Company Name <span className="text-red-500 ml-1">*</span></label>
+                  <input type="text" required value={formData.company} onChange={e => setFormData({...formData, company: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-zinc-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm" placeholder="Company name" />
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-slate-100">
-                <h3 className="text-lg font-bold text-slate-800 mb-4">Contact Details</h3>
+              <div className="pt-4 border-t border-zinc-800/60">
+                <h3 className="text-lg font-bold text-zinc-100 mb-4">Contact Details</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-sm font-semibold text-slate-700">Alternate Mobile</label>
-                    <input type="text" value={formData.alternateMobile} onChange={e => setFormData({...formData, alternateMobile: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm" placeholder="10 digits" />
+                    <label className="text-sm font-semibold text-zinc-300">Alternate Mobile</label>
+                    <input type="text" value={formData.alternateMobile} onChange={e => setFormData({...formData, alternateMobile: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-zinc-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm" placeholder="10 digits" />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-semibold text-slate-700">WhatsApp Number</label>
-                    <input type="text" value={formData.whatsapp} onChange={e => setFormData({...formData, whatsapp: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm" placeholder="10 digits" />
+                    <label className="text-sm font-semibold text-zinc-300">WhatsApp Number</label>
+                    <input type="text" value={formData.whatsapp} onChange={e => setFormData({...formData, whatsapp: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-zinc-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm" placeholder="10 digits" />
                   </div>
                   <div className="space-y-2 md:col-span-2">
-                    <label className="text-sm font-semibold text-slate-700">Address</label>
-                    <input type="text" value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm" placeholder="Full address" />
+                    <label className="text-sm font-semibold text-zinc-300">Address</label>
+                    <input type="text" value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-zinc-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm" placeholder="Full address" />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-semibold text-slate-700">City</label>
-                    <input type="text" value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm" placeholder="City" />
+                    <label className="text-sm font-semibold text-zinc-300">City</label>
+                    <input type="text" value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-zinc-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm" placeholder="City" />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-semibold text-slate-700">State</label>
-                    <input type="text" value={formData.state} onChange={e => setFormData({...formData, state: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm" placeholder="State" />
+                    <label className="text-sm font-semibold text-zinc-300">State</label>
+                    <input type="text" value={formData.state} onChange={e => setFormData({...formData, state: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-zinc-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm" placeholder="State" />
                   </div>
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-slate-100">
-                <h3 className="text-lg font-bold text-slate-800 mb-4">Business Profile</h3>
+              <div className="pt-4 border-t border-zinc-800/60">
+                <h3 className="text-lg font-bold text-zinc-100 mb-4">Business Profile</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-sm font-semibold text-slate-700">Partner Type</label>
-                    <select value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm appearance-none bg-white">
+                    <label className="text-sm font-semibold text-zinc-300">Partner Type</label>
+                    <select value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-zinc-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm appearance-none bg-zinc-900/40 backdrop-blur-xl">
                       <option value="Individual">Individual</option>
                       <option value="Company">Company</option>
                       <option value="Firm">Firm</option>
@@ -282,20 +282,20 @@ export default function ChannelPartnersClient() {
                     </select>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-semibold text-slate-700">Experience (years)</label>
-                    <input type="text" value={formData.experience} onChange={e => setFormData({...formData, experience: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm" placeholder="0" />
+                    <label className="text-sm font-semibold text-zinc-300">Experience (years)</label>
+                    <input type="text" value={formData.experience} onChange={e => setFormData({...formData, experience: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-zinc-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm" placeholder="0" />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-semibold text-slate-700">Focused Project</label>
-                    <input type="text" value={formData.focusedProject} onChange={e => setFormData({...formData, focusedProject: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm" placeholder="Project name" />
+                    <label className="text-sm font-semibold text-zinc-300">Focused Project</label>
+                    <input type="text" value={formData.focusedProject} onChange={e => setFormData({...formData, focusedProject: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-zinc-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm" placeholder="Project name" />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-semibold text-slate-700">Preferred Locations</label>
-                    <input type="text" value={formData.preferredLocations} onChange={e => setFormData({...formData, preferredLocations: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm" placeholder="Mumbai, Pune, Delhi" />
+                    <label className="text-sm font-semibold text-zinc-300">Preferred Locations</label>
+                    <input type="text" value={formData.preferredLocations} onChange={e => setFormData({...formData, preferredLocations: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-zinc-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm" placeholder="Mumbai, Pune, Delhi" />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-semibold text-slate-700">Team Size</label>
-                    <input type="number" value={formData.teamSize} onChange={e => setFormData({...formData, teamSize: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm" placeholder="0" />
+                    <label className="text-sm font-semibold text-zinc-300">Team Size</label>
+                    <input type="number" value={formData.teamSize} onChange={e => setFormData({...formData, teamSize: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-zinc-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm" placeholder="0" />
                   </div>
                 </div>
               </div>
@@ -312,8 +312,8 @@ export default function ChannelPartnersClient() {
                 </div>
               </div>
 
-              <div className="pt-6 border-t border-slate-100 flex justify-end gap-3">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 rounded-xl font-medium text-slate-600 bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-colors">
+              <div className="pt-6 border-t border-zinc-800/60 flex justify-end gap-3">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 rounded-xl font-medium text-zinc-400 bg-zinc-950/50 border border-zinc-700/50 hover:bg-slate-100 transition-colors">
                   Cancel
                 </button>
                 <button type="submit" disabled={submitting} className="px-6 py-2.5 rounded-xl font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors disabled:opacity-70 flex items-center gap-2">

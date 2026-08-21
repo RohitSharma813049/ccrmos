@@ -41,12 +41,12 @@ export default function DataExportPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-8 fade-in pb-12">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Data Export</h1>
-        <p className="text-gray-600 mt-1">Securely export your CRM data as a CSV file for backup or external analysis.</p>
+        <h1 className="text-3xl font-bold text-zinc-100 tracking-tight">Data Export</h1>
+        <p className="text-zinc-400 mt-1">Securely export your CRM data as a CSV file for backup or external analysis.</p>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-8">
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">Select a Module to Export</h2>
+      <div className="bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-2xl shadow-sm p-8">
+        <h2 className="text-xl font-semibold text-zinc-100 mb-6">Select a Module to Export</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
           {MODULES.map((mod) => (
@@ -56,23 +56,23 @@ export default function DataExportPage() {
               className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
                 selectedModule === mod.id 
                   ? "border-indigo-600 bg-indigo-50 shadow-md" 
-                  : "border-gray-200 hover:border-indigo-300 hover:bg-gray-50"
+                  : "border-zinc-700/50 hover:border-indigo-300 hover:bg-zinc-950/50"
               }`}
             >
               <div className="flex items-center justify-between mb-2">
-                <h3 className={`font-semibold ${selectedModule === mod.id ? 'text-indigo-900' : 'text-gray-900'}`}>
+                <h3 className={`font-semibold ${selectedModule === mod.id ? 'text-indigo-900' : 'text-zinc-100'}`}>
                   {mod.name}
                 </h3>
-                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedModule === mod.id ? 'border-indigo-600 bg-indigo-600' : 'border-gray-300'}`}>
-                  {selectedModule === mod.id && <div className="w-2 h-2 bg-white rounded-full"></div>}
+                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedModule === mod.id ? 'border-indigo-600 bg-indigo-600' : 'border-zinc-700/50'}`}>
+                  {selectedModule === mod.id && <div className="w-2 h-2 bg-zinc-900/40 backdrop-blur-xl rounded-full"></div>}
                 </div>
               </div>
-              <p className="text-sm text-gray-600">{mod.description}</p>
+              <p className="text-sm text-zinc-400">{mod.description}</p>
             </div>
           ))}
         </div>
 
-        <div className="pt-6 border-t border-gray-200 flex justify-end">
+        <div className="pt-6 border-t border-zinc-700/50 flex justify-end">
           <button
             onClick={handleExport}
             disabled={!selectedModule || isExporting}

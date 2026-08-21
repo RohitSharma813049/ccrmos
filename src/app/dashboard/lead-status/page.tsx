@@ -94,8 +94,8 @@ export default function LeadStatusPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Lead Status</h1>
-          <p className="text-slate-500 text-sm">Define and manage lead status types</p>
+          <h1 className="text-2xl font-bold text-zinc-100">Lead Status</h1>
+          <p className="text-zinc-400 text-sm">Define and manage lead status types</p>
         </div>
         <div className="flex gap-3">
           <button 
@@ -121,14 +121,14 @@ export default function LeadStatusPage() {
           <h3 className="text-3xl font-bold text-green-700">{activeCount}</h3>
         </div>
         {/* Card 3 */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
-          <p className="text-sm font-medium text-slate-500 mb-1">Inactive Status</p>
-          <h3 className="text-3xl font-bold text-slate-800">{inactiveCount}</h3>
+        <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl p-5 border border-zinc-800/60 shadow-sm">
+          <p className="text-sm font-medium text-zinc-400 mb-1">Inactive Status</p>
+          <h3 className="text-3xl font-bold text-zinc-100">{inactiveCount}</h3>
         </div>
       </div>
 
       {/* Controls: Search and Filters */}
-      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-zinc-900/40 backdrop-blur-xl p-4 rounded-2xl border border-zinc-800/60 shadow-sm">
         <div className="relative w-full sm:max-w-md">
           <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input 
@@ -136,7 +136,7 @@ export default function LeadStatusPage() {
             placeholder="Search lead status..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-zinc-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
           />
         </div>
         
@@ -146,7 +146,7 @@ export default function LeadStatusPage() {
               key={f}
               onClick={() => setFilterType(f)}
               className={`flex-1 sm:flex-none px-6 py-2 font-medium text-sm rounded-lg transition-colors ${
-                filterType === f ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                filterType === f ? 'bg-blue-600 text-white shadow-sm' : 'text-zinc-400 hover:text-zinc-100'
               }`}
             >
               {f}
@@ -161,27 +161,27 @@ export default function LeadStatusPage() {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
       ) : statuses.length === 0 ? (
-        <div className="py-12 flex flex-col items-center justify-center text-center bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+        <div className="py-12 flex flex-col items-center justify-center text-center bg-zinc-900/40 backdrop-blur-xl rounded-2xl border border-zinc-700/50 shadow-sm p-6">
           <Tag className="w-12 h-12 text-slate-300 mb-4" />
-          <p className="text-slate-500">No lead statuses found.</p>
+          <p className="text-zinc-400">No lead statuses found.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {statuses.map((status) => {
             const catColor = status.category === 'Interested' ? 'bg-green-100 text-green-600' :
                              status.category === 'Not Interested' ? 'bg-red-100 text-red-600' :
-                             'bg-slate-100 text-slate-600';
+                             'bg-slate-100 text-zinc-400';
             const CatIcon = status.category === 'Interested' ? TrendingUp : TrendingDown;
             const createdDate = new Date(status.createdAt).toLocaleDateString();
 
             return (
-              <div key={status._id} className={`bg-white rounded-2xl p-6 border ${status.active ? 'border-slate-100' : 'border-slate-200 opacity-60 grayscale'} shadow-sm hover:shadow-md transition-all relative`}>
+              <div key={status._id} className={`bg-zinc-900/40 backdrop-blur-xl rounded-2xl p-6 border ${status.active ? 'border-zinc-800/60' : 'border-zinc-700/50 opacity-60 grayscale'} shadow-sm hover:shadow-md transition-all relative`}>
                 
                 {/* Action Buttons */}
                 <div className="absolute top-6 right-6 flex items-center gap-3">
                   <button 
                     onClick={() => handleDelete(status._id)}
-                    className="text-red-400 hover:text-red-600 transition-colors bg-white rounded-full p-1 shadow-sm"
+                    className="text-red-400 hover:text-red-600 transition-colors bg-zinc-900/40 backdrop-blur-xl rounded-full p-1 shadow-sm"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -194,7 +194,7 @@ export default function LeadStatusPage() {
                   </div>
                   
                   <div>
-                    <h3 className="font-semibold text-slate-800 text-lg leading-tight mb-1">
+                    <h3 className="font-semibold text-zinc-100 text-lg leading-tight mb-1">
                       {status.name}
                     </h3>
                   </div>
@@ -217,7 +217,7 @@ export default function LeadStatusPage() {
                     className={`text-[10px] font-bold px-2 py-1 rounded-md transition-colors ${
                       status.active 
                         ? 'text-green-600 bg-green-50 hover:bg-red-50 hover:text-red-600' 
-                        : 'text-slate-500 bg-slate-100 hover:bg-green-50 hover:text-green-600'
+                        : 'text-zinc-400 bg-slate-100 hover:bg-green-50 hover:text-green-600'
                     }`}
                   >
                     {status.active ? 'Active' : 'Inactive'}
@@ -286,22 +286,22 @@ function LeadStatusFormModal({ onClose, onSuccess }: { onClose: () => void, onSu
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
-        <div className="flex items-center justify-between p-6 border-b border-slate-100">
-          <h2 className="text-xl font-bold text-slate-900">Add Lead Status</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-2">
+      <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="flex items-center justify-between p-6 border-b border-zinc-800/60">
+          <h2 className="text-xl font-bold text-zinc-100">Add Lead Status</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-zinc-400 p-2">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Status Name *</label>
+            <label className="block text-sm font-medium text-zinc-300 mb-1">Status Name *</label>
             <input required type="text" placeholder="e.g. Site Visit Scheduled" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full px-4 py-2 border rounded-lg" />
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Category</label>
+            <label className="block text-sm font-medium text-zinc-300 mb-1">Category</label>
             <select value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} className="w-full px-4 py-2 border rounded-lg">
               <option value="Fresh Lead">Fresh Lead</option>
               <option value="Interested">Interested</option>
@@ -313,7 +313,7 @@ function LeadStatusFormModal({ onClose, onSuccess }: { onClose: () => void, onSu
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-3">Color Badge</label>
+            <label className="block text-sm font-medium text-zinc-300 mb-3">Color Badge</label>
             <div className="flex flex-wrap gap-3">
               {colors.map(c => (
                 <button
@@ -328,7 +328,7 @@ function LeadStatusFormModal({ onClose, onSuccess }: { onClose: () => void, onSu
           </div>
 
           <div className="flex justify-end gap-3 pt-6 border-t mt-6">
-            <button type="button" onClick={onClose} className="px-5 py-2 border rounded-lg text-slate-700 font-medium">Cancel</button>
+            <button type="button" onClick={onClose} className="px-5 py-2 border rounded-lg text-zinc-300 font-medium">Cancel</button>
             <button type="submit" disabled={saving} className="px-5 py-2 bg-blue-600 text-white rounded-lg font-medium disabled:opacity-50">
               {saving ? 'Saving...' : 'Save Status'}
             </button>

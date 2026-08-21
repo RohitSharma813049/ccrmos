@@ -87,9 +87,9 @@ export default function RewardsClient() {
 
   const getTierColor = (tier: string) => {
     switch (tier) {
-      case 'Platinum': return 'bg-slate-200 text-slate-800 border-slate-300';
+      case 'Platinum': return 'bg-slate-200 text-zinc-100 border-zinc-700/50';
       case 'Gold': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-      case 'Silver': return 'bg-gray-100 text-gray-700 border-gray-300';
+      case 'Silver': return 'bg-gray-100 text-zinc-300 border-zinc-700/50';
       default: return 'bg-orange-50 text-orange-800 border-orange-200';
     }
   };

@@ -11,7 +11,7 @@ export const metadata = {
 export default function CrmLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
-      <div className="min-h-screen bg-slate-50 flex font-sans text-slate-900">
+      <div className="min-h-screen bg-zinc-950/50 flex font-sans text-zinc-100">
         {/* Sidebar */}
         <CrmSidebar />
         

@@ -30,7 +30,7 @@ export default function ImpersonationBanner() {
       </div>
       <button 
         onClick={handleStop}
-        className="bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-md transition-colors font-semibold shadow-sm border border-white/10"
+        className="bg-zinc-900/40 backdrop-blur-xl/20 hover:bg-zinc-900/40 backdrop-blur-xl/30 text-white px-3 py-1 rounded-md transition-colors font-semibold shadow-sm border border-white/10"
       >
         Exit Tenant View
       </button>

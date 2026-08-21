@@ -88,20 +88,20 @@ function CheckoutContent() {
   };
 
   if (loading && !data) {
-    return <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-500">Loading checkout details...</div>;
+    return <div className="min-h-screen flex items-center justify-center bg-zinc-950/50 text-zinc-400">Loading checkout details...</div>;
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
-        <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-zinc-950/50 p-4">
+        <div className="bg-zinc-900/40 backdrop-blur-xl p-8 rounded-2xl shadow-xl max-w-md w-full text-center">
           <div className="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Checkout Error</h1>
-          <p className="text-gray-600 mb-6">{error}</p>
+          <h1 className="text-2xl font-bold text-zinc-100 mb-2">Checkout Error</h1>
+          <p className="text-zinc-400 mb-6">{error}</p>
           <Link href="/" className="inline-block bg-gray-900 text-white px-6 py-2.5 rounded-xl font-medium">Return Home</Link>
         </div>
       </div>
@@ -109,45 +109,45 @@ function CheckoutContent() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4 font-sans">
-      <div className="bg-white max-w-4xl w-full rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row">
+    <div className="min-h-screen flex items-center justify-center bg-zinc-950/50 p-4 font-sans">
+      <div className="bg-zinc-900/40 backdrop-blur-xl max-w-4xl w-full rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row">
         
         {/* Left Side: Details */}
-        <div className="flex-1 p-8 md:p-12 border-b md:border-b-0 md:border-r border-gray-100">
+        <div className="flex-1 p-8 md:p-12 border-b md:border-b-0 md:border-r border-zinc-800/60">
           <div className="flex items-center gap-3 mb-8">
             <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
               <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">CRM OS</h1>
+            <h1 className="text-2xl font-bold text-zinc-100 tracking-tight">CRM OS</h1>
           </div>
           
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Complete your setup</h2>
-          <p className="text-gray-600 mb-8">Review your subscription details for <strong>{data.companyName}</strong>.</p>
+          <h2 className="text-3xl font-bold text-zinc-100 mb-2">Complete your setup</h2>
+          <p className="text-zinc-400 mb-8">Review your subscription details for <strong>{data.companyName}</strong>.</p>
           
           <div className="space-y-4">
-            <div className="flex justify-between items-center py-3 border-b border-gray-100">
-              <span className="text-gray-500 font-medium">Subscription Plan</span>
-              <span className="text-gray-900 font-bold">{data.planName}</span>
+            <div className="flex justify-between items-center py-3 border-b border-zinc-800/60">
+              <span className="text-zinc-400 font-medium">Subscription Plan</span>
+              <span className="text-zinc-100 font-bold">{data.planName}</span>
             </div>
-            <div className="flex justify-between items-center py-3 border-b border-gray-100">
-              <span className="text-gray-500 font-medium">Admin Account</span>
-              <span className="text-gray-900 font-medium">{data.adminEmail}</span>
+            <div className="flex justify-between items-center py-3 border-b border-zinc-800/60">
+              <span className="text-zinc-400 font-medium">Admin Account</span>
+              <span className="text-zinc-100 font-medium">{data.adminEmail}</span>
             </div>
-            <div className="flex justify-between items-center py-3 border-b border-gray-100">
-              <span className="text-gray-500 font-medium">Users Quota</span>
-              <span className="text-gray-900 font-medium">{data.usersQuota} Users</span>
+            <div className="flex justify-between items-center py-3 border-b border-zinc-800/60">
+              <span className="text-zinc-400 font-medium">Users Quota</span>
+              <span className="text-zinc-100 font-medium">{data.usersQuota} Users</span>
             </div>
           </div>
         </div>
 
         {/* Right Side: Payment */}
-        <div className="w-full md:w-[400px] bg-gray-50 p-8 md:p-12 flex flex-col justify-center">
-          <h3 className="text-lg font-bold text-gray-900 mb-6">Order Summary</h3>
+        <div className="w-full md:w-[400px] bg-zinc-950/50 p-8 md:p-12 flex flex-col justify-center">
+          <h3 className="text-lg font-bold text-zinc-100 mb-6">Order Summary</h3>
           
           <div className="space-y-3 mb-6">
-            <div className="flex justify-between text-gray-600">
+            <div className="flex justify-between text-zinc-400">
               <span>Subtotal</span>
               <span>₹{data.originalPrice}</span>
             </div>
@@ -159,7 +159,7 @@ function CheckoutContent() {
               </div>
             )}
             
-            <div className="flex justify-between text-xl font-bold text-gray-900 pt-4 border-t border-gray-200">
+            <div className="flex justify-between text-xl font-bold text-zinc-100 pt-4 border-t border-zinc-700/50">
               <span>Total</span>
               <span>₹{data.finalPrice}</span>
             </div>
@@ -183,9 +183,9 @@ function CheckoutContent() {
                   value={couponCode}
                   onChange={(e) => setCouponCode(e.target.value)}
                   placeholder="Discount code" 
-                  className="flex-1 border border-gray-300 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 border border-zinc-700/50 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <button type="submit" disabled={!couponCode || loading} className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 rounded-xl font-medium transition-colors disabled:opacity-50">
+                <button type="submit" disabled={!couponCode || loading} className="bg-gray-200 hover:bg-gray-300 text-zinc-100 px-4 rounded-xl font-medium transition-colors disabled:opacity-50">
                   Apply
                 </button>
               </form>
@@ -211,7 +211,7 @@ function CheckoutContent() {
             )}
           </button>
           
-          <p className="text-xs text-center text-gray-500 mt-4 flex items-center justify-center gap-1">
+          <p className="text-xs text-center text-zinc-400 mt-4 flex items-center justify-center gap-1">
             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
@@ -225,7 +225,7 @@ function CheckoutContent() {
 
 export default function CheckoutPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-50">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-zinc-950/50">Loading...</div>}>
       <CheckoutContent />
     </Suspense>
   );

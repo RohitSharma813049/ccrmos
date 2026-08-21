@@ -85,23 +85,23 @@ export function CrmSidebar() {
 
       {/* Sidebar Content */}
       <aside className={`
-        w-64 h-screen bg-white border-r border-slate-200 flex flex-col fixed left-0 top-0 overflow-hidden z-40
+        w-64 h-screen bg-zinc-900/40 backdrop-blur-xl border-r border-zinc-700/50 flex flex-col fixed left-0 top-0 overflow-hidden z-40
         transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
         {/* Logo Area */}
-        <div className="h-16 flex items-center justify-between px-6 border-b border-slate-100 shrink-0">
+        <div className="h-16 flex items-center justify-between px-6 border-b border-zinc-800/60 shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-lg">
               AI
             </div>
             <div>
-              <h1 className="font-bold text-slate-900 leading-tight">AI CRM</h1>
-              <p className="text-xs text-slate-500">Real Estate</p>
+              <h1 className="font-bold text-zinc-100 leading-tight">AI CRM</h1>
+              <p className="text-xs text-zinc-400">Real Estate</p>
             </div>
           </div>
           <button 
-            className="lg:hidden p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+            className="lg:hidden p-1.5 text-slate-400 hover:text-zinc-400 hover:bg-slate-100 rounded-lg transition-colors"
             onClick={() => setIsOpen(false)}
           >
             <X className="w-5 h-5" />
@@ -116,7 +116,7 @@ export function CrmSidebar() {
           <div className="space-y-1">
             <button 
               onClick={() => setIsAiFeaturesOpen(!isAiFeaturesOpen)}
-              className="w-full flex items-center justify-between px-3 py-2.5 text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
+              className="w-full flex items-center justify-between px-3 py-2.5 text-zinc-300 hover:bg-zinc-950/50 rounded-lg transition-colors"
             >
               <div className="flex items-center gap-3">
                 <Sparkles className="w-5 h-5 text-fuchsia-500" />
@@ -135,7 +135,7 @@ export function CrmSidebar() {
                 <Link 
                   href="/crm/ai-agents" 
                   onClick={handleLinkClick}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-sm ${pathname === '/crm/ai-agents' ? 'bg-fuchsia-50 text-fuchsia-700 font-medium' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}
+                  className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-sm ${pathname === '/crm/ai-agents' ? 'bg-fuchsia-50 text-fuchsia-700 font-medium' : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-950/50'}`}
                 >
                   <Bot className="w-4 h-4" />
                   AI Agents
@@ -143,7 +143,7 @@ export function CrmSidebar() {
                 <Link 
                   href="/crm/sound-effect" 
                   onClick={handleLinkClick}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-sm ${pathname === '/crm/sound-effect' ? 'bg-fuchsia-50 text-fuchsia-700 font-medium' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}
+                  className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-sm ${pathname === '/crm/sound-effect' ? 'bg-fuchsia-50 text-fuchsia-700 font-medium' : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-950/50'}`}
                 >
                   <AudioLines className="w-4 h-4" />
                   Sound Effect
@@ -151,7 +151,7 @@ export function CrmSidebar() {
                 <Link 
                   href="/crm/voices" 
                   onClick={handleLinkClick}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-sm ${pathname === '/crm/voices' ? 'bg-fuchsia-50 text-fuchsia-700 font-medium' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}
+                  className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-sm ${pathname === '/crm/voices' ? 'bg-fuchsia-50 text-fuchsia-700 font-medium' : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-950/50'}`}
                 >
                   <Mic className="w-4 h-4" />
                   Voices
@@ -163,7 +163,7 @@ export function CrmSidebar() {
           <div className="space-y-1">
             <button 
               onClick={() => setIsLmOpen(!isLmOpen)}
-              className="w-full flex items-center justify-between px-3 py-2.5 text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
+              className="w-full flex items-center justify-between px-3 py-2.5 text-zinc-300 hover:bg-zinc-950/50 rounded-lg transition-colors"
             >
               <div className="flex items-center gap-3">
                 <Settings2 className="w-5 h-5 text-blue-500" />
@@ -182,7 +182,7 @@ export function CrmSidebar() {
                 <Link 
                   href="/crm/lead-sources" 
                   onClick={handleLinkClick}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-sm ${pathname === '/crm/lead-sources' ? 'bg-blue-50 text-blue-700 font-medium' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}
+                  className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-sm ${pathname === '/crm/lead-sources' ? 'bg-blue-50 text-blue-700 font-medium' : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-950/50'}`}
                 >
                   <Filter className="w-4 h-4" />
                   Lead Sources
@@ -190,7 +190,7 @@ export function CrmSidebar() {
                 <Link 
                   href="/crm/lead-stages" 
                   onClick={handleLinkClick}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-sm ${pathname === '/crm/lead-stages' ? 'bg-blue-50 text-blue-700 font-medium' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}
+                  className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-sm ${pathname === '/crm/lead-stages' ? 'bg-blue-50 text-blue-700 font-medium' : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-950/50'}`}
                 >
                   <GitBranch className="w-4 h-4" />
                   Lead Stages
@@ -198,7 +198,7 @@ export function CrmSidebar() {
                 <Link 
                   href="/crm/lead-status" 
                   onClick={handleLinkClick}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-sm ${pathname === '/crm/lead-status' ? 'bg-blue-50 text-blue-700 font-medium' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}
+                  className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-sm ${pathname === '/crm/lead-status' ? 'bg-blue-50 text-blue-700 font-medium' : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-950/50'}`}
                 >
                   <Tag className="w-4 h-4" />
                   Lead Status
@@ -220,10 +220,10 @@ export function CrmSidebar() {
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
                   isActive 
                     ? 'bg-blue-50 text-blue-600 font-medium' 
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                    : 'text-zinc-400 hover:bg-zinc-950/50 hover:text-zinc-100'
                 }`}
               >
-                <item.icon className={`w-5 h-5 ${isActive ? 'text-blue-600' : 'text-slate-500'}`} />
+                <item.icon className={`w-5 h-5 ${isActive ? 'text-blue-600' : 'text-zinc-400'}`} />
                 <span className="text-sm">{item.name}</span>
               </Link>
             )
@@ -232,8 +232,8 @@ export function CrmSidebar() {
       </div>
 
       {/* User Profile Footer */}
-      <div className="p-4 border-t border-slate-100 shrink-0 bg-slate-50/50">
-        <div className="flex items-center justify-between bg-white border border-slate-100 p-2 rounded-xl shadow-sm">
+      <div className="p-4 border-t border-zinc-800/60 shrink-0 bg-zinc-950/50/50">
+        <div className="flex items-center justify-between bg-zinc-900/40 backdrop-blur-xl border border-zinc-800/60 p-2 rounded-xl shadow-sm">
           <div className="flex items-center gap-3 overflow-hidden">
             {session?.user?.image ? (
               <img src={session.user.image} alt={userName} className="w-9 h-9 rounded-full object-cover shrink-0" />
@@ -243,17 +243,17 @@ export function CrmSidebar() {
               </div>
             )}
             <div className="flex flex-col truncate">
-              <span className="text-sm font-semibold text-slate-900 leading-tight truncate">{userName}</span>
-              <span className="text-xs text-slate-500 capitalize">{userRole}</span>
+              <span className="text-sm font-semibold text-zinc-100 leading-tight truncate">{userName}</span>
+              <span className="text-xs text-zinc-400 capitalize">{userRole}</span>
             </div>
           </div>
           <div className="flex items-center gap-1 text-slate-400 shrink-0">
-            <button className="p-1.5 hover:bg-slate-100 rounded-md transition-colors text-slate-500">
+            <button className="p-1.5 hover:bg-slate-100 rounded-md transition-colors text-zinc-400">
               <UserIcon className="w-4 h-4" />
             </button>
             <button 
               onClick={() => signOut({ callbackUrl: '/signin' })}
-              className="p-1.5 hover:bg-red-50 hover:text-red-600 rounded-md transition-colors text-slate-500"
+              className="p-1.5 hover:bg-red-50 hover:text-red-600 rounded-md transition-colors text-zinc-400"
               title="Logout"
             >
               <LogOut className="w-4 h-4" />

@@ -49,8 +49,8 @@ export default function WhatsAppTemplatesPage() {
       
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 leading-tight mb-2">WhatsApp Templates</h1>
-        <p className="text-slate-500 text-sm">Create templates with dynamic variables and multiple media files (up to 100MB total)</p>
+        <h1 className="text-2xl font-bold text-zinc-100 leading-tight mb-2">WhatsApp Templates</h1>
+        <p className="text-zinc-400 text-sm">Create templates with dynamic variables and multiple media files (up to 100MB total)</p>
       </div>
 
       {/* Controls */}
@@ -60,13 +60,13 @@ export default function WhatsAppTemplatesPage() {
           <input 
             type="text" 
             placeholder="Search templates..." 
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all text-sm"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-zinc-700/50 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all text-sm"
           />
         </div>
         <div className="flex items-center gap-4 shrink-0">
           <div className="relative">
             <Filter className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <select className="pl-10 pr-8 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all text-sm appearance-none bg-white font-medium text-slate-700 min-w-[160px]">
+            <select className="pl-10 pr-8 py-2.5 rounded-xl border border-zinc-700/50 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all text-sm appearance-none bg-zinc-900/40 backdrop-blur-xl font-medium text-zinc-300 min-w-[160px]">
               <option>All Categories</option>
             </select>
           </div>
@@ -79,9 +79,9 @@ export default function WhatsAppTemplatesPage() {
       {/* Templates Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {templates.map((tpl) => (
-          <div key={tpl.id} className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 hover:shadow-md transition-shadow flex flex-col h-[420px]">
+          <div key={tpl.id} className="bg-zinc-900/40 backdrop-blur-xl rounded-3xl border border-zinc-700/50 shadow-sm p-6 hover:shadow-md transition-shadow flex flex-col h-[420px]">
             
-            <h3 className="font-bold text-lg text-slate-800 mb-3 line-clamp-1">{tpl.title}</h3>
+            <h3 className="font-bold text-lg text-zinc-100 mb-3 line-clamp-1">{tpl.title}</h3>
             
             {/* Badges */}
             <div className="flex items-center gap-3 mb-6">
@@ -96,11 +96,11 @@ export default function WhatsAppTemplatesPage() {
 
             {/* Media Grid Placeholder */}
             <div className="grid grid-cols-3 gap-2 mb-6">
-              <div className="aspect-square bg-slate-50 rounded-xl border border-slate-100 flex flex-col items-center justify-center p-2 text-center">
+              <div className="aspect-square bg-zinc-950/50 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-center p-2 text-center">
                 <ImageIcon className="w-6 h-6 text-slate-300 mb-1" />
                 <span className="text-[9px] text-slate-400 line-clamp-2">WhatsApp Image...</span>
               </div>
-              <div className="aspect-square bg-slate-50 rounded-xl border border-slate-100 flex flex-col items-center justify-center p-2 text-center">
+              <div className="aspect-square bg-zinc-950/50 rounded-xl border border-zinc-800/60 flex flex-col items-center justify-center p-2 text-center">
                 <ImageIcon className="w-6 h-6 text-slate-300 mb-1" />
                 <span className="text-[9px] text-slate-400 line-clamp-2">WhatsApp Image...</span>
               </div>
@@ -108,18 +108,18 @@ export default function WhatsAppTemplatesPage() {
                 <FileText className="w-6 h-6 mb-1" />
                 <span className="text-[9px] line-clamp-2">PDF Document</span>
               </div>
-              <div className="aspect-square bg-slate-100 rounded-xl flex flex-col items-center justify-center text-slate-600 font-bold text-lg">
+              <div className="aspect-square bg-slate-100 rounded-xl flex flex-col items-center justify-center text-zinc-400 font-bold text-lg">
                 +{tpl.filesCount > 3 ? tpl.filesCount - 3 : 0}
               </div>
             </div>
 
             {/* Description */}
-            <p className="text-sm text-slate-600 line-clamp-3 mb-6 flex-1">
+            <p className="text-sm text-zinc-400 line-clamp-3 mb-6 flex-1">
               {tpl.desc}
             </p>
 
             {/* Footer */}
-            <div className="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400 font-medium">
+            <div className="mt-auto pt-4 border-t border-zinc-800/60 flex items-center justify-between text-xs text-slate-400 font-medium">
               <div>Variables: <span className="text-slate-300">none</span></div>
               <div className="flex gap-4">
                 {tpl.used > 0 && <span>Used {tpl.used} times</span>}

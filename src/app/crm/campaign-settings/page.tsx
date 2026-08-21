@@ -49,8 +49,8 @@ export default function CampaignSettingsPage() {
             <Settings2 className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 leading-tight">Campaign Configuration</h1>
-            <p className="text-slate-500 text-sm">Configure automatic lead assignment for Meta campaigns</p>
+            <h1 className="text-2xl font-bold text-zinc-100 leading-tight">Campaign Configuration</h1>
+            <p className="text-zinc-400 text-sm">Configure automatic lead assignment for Meta campaigns</p>
           </div>
         </div>
         <div>
@@ -64,37 +64,37 @@ export default function CampaignSettingsPage() {
       {/* Configuration Cards */}
       <div className="space-y-4">
         {configurations.map((config) => (
-          <div key={config.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 relative group">
+          <div key={config.id} className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl border border-zinc-700/50 shadow-sm p-6 relative group">
             
             {/* Delete Button */}
             <button className="absolute right-6 top-1/2 -translate-y-1/2 text-red-400 hover:text-red-600 opacity-50 hover:opacity-100 transition-opacity">
               <Trash2 className="w-5 h-5" />
             </button>
 
-            <h3 className="text-lg font-bold text-slate-800 mb-4">{config.name}</h3>
+            <h3 className="text-lg font-bold text-zinc-100 mb-4">{config.name}</h3>
             
             <div className="grid grid-cols-2 gap-y-3 gap-x-8 max-w-2xl mb-6">
               <div className="text-sm">
-                <span className="text-slate-500 mr-2">Assigned To:</span>
-                <span className="font-semibold text-slate-800">{config.assignedTo}</span>
+                <span className="text-zinc-400 mr-2">Assigned To:</span>
+                <span className="font-semibold text-zinc-100">{config.assignedTo}</span>
               </div>
               <div className="text-sm">
-                <span className="text-slate-500 mr-2">Category:</span>
-                <span className="font-semibold text-slate-800">{config.category}</span>
+                <span className="text-zinc-400 mr-2">Category:</span>
+                <span className="font-semibold text-zinc-100">{config.category}</span>
               </div>
               
               <div className="text-sm">
-                <span className="text-slate-500 mr-2">Type:</span>
-                <span className="font-semibold text-slate-800">{config.type}</span>
+                <span className="text-zinc-400 mr-2">Type:</span>
+                <span className="font-semibold text-zinc-100">{config.type}</span>
               </div>
               <div className="text-sm">
-                <span className="text-slate-500 mr-2">Processed:</span>
+                <span className="text-zinc-400 mr-2">Processed:</span>
                 <span className="font-bold text-green-600">{config.processed}</span>
               </div>
               
               <div className="text-sm col-span-2">
-                <span className="text-slate-500 mr-2">Last Synced:</span>
-                <span className="font-medium text-slate-700">{config.lastSynced}</span>
+                <span className="text-zinc-400 mr-2">Last Synced:</span>
+                <span className="font-medium text-zinc-300">{config.lastSynced}</span>
               </div>
             </div>
 

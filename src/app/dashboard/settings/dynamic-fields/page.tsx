@@ -176,8 +176,8 @@ export default function TenantDynamicFieldsPage() {
     <div className="space-y-8 fade-in pb-12">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Custom Fields</h1>
-          <p className="text-gray-600 mt-1">Configure custom fields specific to your company.</p>
+          <h1 className="text-3xl font-bold text-zinc-100 tracking-tight">Custom Fields</h1>
+          <p className="text-zinc-400 mt-1">Configure custom fields specific to your company.</p>
         </div>
         
         <button 
@@ -192,7 +192,7 @@ export default function TenantDynamicFieldsPage() {
       </div>
 
       {/* Toolbar: Search */}
-      <div className="flex flex-col md:flex-row gap-4 items-center bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+      <div className="flex flex-col md:flex-row gap-4 items-center bg-zinc-900/40 backdrop-blur-xl p-4 rounded-xl border border-zinc-700/50 shadow-sm">
         <div className="relative w-full">
           <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -205,13 +205,13 @@ export default function TenantDynamicFieldsPage() {
               setSearchTerm(e.target.value);
               setCurrentPage(1); // Reset to page 1 on search
             }}
-            className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-gray-800"
+            className="w-full pl-10 pr-4 py-2 bg-zinc-950/50 border border-zinc-700/50 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-zinc-100"
           />
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-200 overflow-x-auto hide-scrollbar">
+      <div className="flex border-b border-zinc-700/50 overflow-x-auto hide-scrollbar">
         {tabs.map((tab) => (
           <button 
             key={tab.id}
@@ -220,7 +220,7 @@ export default function TenantDynamicFieldsPage() {
               setCurrentPage(1);
             }}
             className={`whitespace-nowrap px-6 py-4 text-sm font-medium transition-colors relative ${
-              activeTab === tab.id ? "text-indigo-600" : "text-gray-600 hover:text-gray-900"
+              activeTab === tab.id ? "text-indigo-600" : "text-zinc-400 hover:text-zinc-100"
             }`}
           >
             {tab.label}
@@ -234,31 +234,31 @@ export default function TenantDynamicFieldsPage() {
       {/* Field List */}
       <div className="grid gap-4">
         {loading ? (
-          <div className="text-center py-12 border-2 border-dashed border-gray-200 rounded-2xl">
-            <p className="text-gray-500 animate-pulse">Loading fields...</p>
+          <div className="text-center py-12 border-2 border-dashed border-zinc-700/50 rounded-2xl">
+            <p className="text-zinc-400 animate-pulse">Loading fields...</p>
           </div>
         ) : fields.length > 0 ? (
           fields.map(field => {
             const isCompanyField = field.tenantScope === "Company";
             
             return (
-              <div key={field._id} className={`bg-white border border-gray-200 rounded-xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm transition-all ${isCompanyField ? 'hover:border-gray-300 hover:shadow-md' : 'opacity-80'}`}>
+              <div key={field._id} className={`bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm transition-all ${isCompanyField ? 'hover:border-zinc-700/50 hover:shadow-md' : 'opacity-80'}`}>
                 <div className="flex items-start sm:items-center gap-4 w-full sm:w-auto min-w-0">
-                  <div className={`w-12 h-12 rounded-xl border flex items-center justify-center shadow-inner ${isCompanyField ? 'bg-gradient-to-br from-indigo-50 to-white border-indigo-100 text-indigo-500' : 'bg-gray-50 border-gray-200 text-gray-400'}`}>
+                  <div className={`w-12 h-12 rounded-xl border flex items-center justify-center shadow-inner ${isCompanyField ? 'bg-gradient-to-br from-indigo-50 to-white border-indigo-100 text-indigo-500' : 'bg-zinc-950/50 border-zinc-700/50 text-gray-400'}`}>
                     <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16m-7 6h7" />
                     </svg>
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-gray-900 font-bold text-lg flex flex-wrap items-center gap-2">
+                    <h3 className="text-zinc-100 font-bold text-lg flex flex-wrap items-center gap-2">
                       {field.name}
                       {!isCompanyField && (
-                        <span className="px-2 py-0.5 rounded text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-200">
+                        <span className="px-2 py-0.5 rounded text-xs font-semibold bg-gray-100 text-zinc-400 border border-zinc-700/50">
                           {field.tenantScope} {field.tenantScope === "Industry" && field.industryId ? `(${field.industryId.name})` : ''}
                         </span>
                       )}
                     </h3>
-                    <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-500 font-medium">
+                    <div className="flex items-center gap-3 mt-1.5 text-xs text-zinc-400 font-medium">
                       <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-blue-500 block shadow-sm shadow-blue-500/50"></span> Type: {field.type}</span>
                       <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-purple-500 block shadow-sm shadow-purple-500/50"></span> Required: {field.required ? "Yes" : "No"}</span>
                     </div>
@@ -267,7 +267,7 @@ export default function TenantDynamicFieldsPage() {
                 <div className="flex gap-2">
                   {isCompanyField ? (
                     <>
-                      <button onClick={() => openEditModal(field)} className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 bg-gray-50 hover:bg-indigo-50 rounded-lg transition-colors border border-gray-200 hover:border-indigo-200">Edit</button>
+                      <button onClick={() => openEditModal(field)} className="px-4 py-2 text-sm font-medium text-zinc-300 hover:text-indigo-600 bg-zinc-950/50 hover:bg-indigo-50 rounded-lg transition-colors border border-zinc-700/50 hover:border-indigo-200">Edit</button>
                       <button onClick={() => handleDelete(field._id, field.name)} className="px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-colors border border-red-100">Remove</button>
                     </>
                   ) : (
@@ -283,36 +283,36 @@ export default function TenantDynamicFieldsPage() {
             );
           })
         ) : (
-          <div className="text-center py-16 border-2 border-dashed border-gray-200 rounded-2xl bg-white/50">
+          <div className="text-center py-16 border-2 border-dashed border-zinc-700/50 rounded-2xl bg-zinc-900/40 backdrop-blur-xl/50">
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
               </svg>
             </div>
-            <h3 className="text-lg font-bold text-gray-900">No fields found</h3>
-            <p className="text-gray-500 font-medium mt-1">Try adjusting your search term or add a new field.</p>
+            <h3 className="text-lg font-bold text-zinc-100">No fields found</h3>
+            <p className="text-zinc-400 font-medium mt-1">Try adjusting your search term or add a new field.</p>
           </div>
         )}
       </div>
 
       {/* Pagination Controls */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between border-t border-gray-200 pt-6">
-          <p className="text-sm text-gray-600">
-            Showing page <span className="font-semibold text-gray-900">{currentPage}</span> of <span className="font-semibold text-gray-900">{totalPages}</span>
+        <div className="flex items-center justify-between border-t border-zinc-700/50 pt-6">
+          <p className="text-sm text-zinc-400">
+            Showing page <span className="font-semibold text-zinc-100">{currentPage}</span> of <span className="font-semibold text-zinc-100">{totalPages}</span>
           </p>
           <div className="flex gap-2">
             <button 
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-4 py-2 border border-zinc-700/50 rounded-lg text-sm font-medium text-zinc-300 bg-zinc-900/40 backdrop-blur-xl hover:bg-zinc-950/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Previous
             </button>
             <button 
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-4 py-2 border border-zinc-700/50 rounded-lg text-sm font-medium text-zinc-300 bg-zinc-900/40 backdrop-blur-xl hover:bg-zinc-950/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Next
             </button>
@@ -324,64 +324,64 @@ export default function TenantDynamicFieldsPage() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
-          <div className="relative bg-white border border-gray-200 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-gray-100">
-              <h2 className="text-xl font-bold text-gray-900">{isEditMode ? "Edit Custom Field" : "Create Custom Field"}</h2>
-              <p className="text-sm text-gray-600 mt-1">{isEditMode ? "Modify this field configuration." : "This field will be available specifically for your company."}</p>
+          <div className="relative bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-zinc-800/60">
+              <h2 className="text-xl font-bold text-zinc-100">{isEditMode ? "Edit Custom Field" : "Create Custom Field"}</h2>
+              <p className="text-sm text-zinc-400 mt-1">{isEditMode ? "Modify this field configuration." : "This field will be available specifically for your company."}</p>
             </div>
             
             <form className="p-6 space-y-5" onSubmit={handleFormSubmit}>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Field Name</label>
+                <label className="block text-sm font-medium text-zinc-300 mb-1.5">Field Name</label>
                 <input 
                   type="text" 
                   required 
                   value={formData.name}
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none transition-all" 
+                  className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2.5 text-zinc-100 focus:ring-2 focus:ring-indigo-500 outline-none transition-all" 
                   placeholder="e.g. Internal Project ID" 
                 />
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Section Name</label>
+                  <label className="block text-sm font-medium text-zinc-300 mb-1.5">Section Name</label>
                   <input 
                     type="text" 
                     value={formData.section}
                     onChange={(e) => setFormData({...formData, section: e.target.value})}
                     placeholder="e.g. Financials, General"
-                    className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                    className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2.5 text-zinc-100 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Order/Sequence</label>
+                  <label className="block text-sm font-medium text-zinc-300 mb-1.5">Order/Sequence</label>
                   <input 
                     type="number" 
                     value={formData.order}
                     onChange={(e) => setFormData({...formData, order: parseInt(e.target.value) || 0})}
-                    className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                    className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2.5 text-zinc-100 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Target Entity</label>
+                  <label className="block text-sm font-medium text-zinc-300 mb-1.5">Target Entity</label>
                   <select 
                     value={formData.target}
                     onChange={(e) => setFormData({...formData, target: e.target.value})}
-                    className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none transition-all capitalize"
+                    className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2.5 text-zinc-100 focus:ring-2 focus:ring-indigo-500 outline-none transition-all capitalize"
                   >
                     {tabs.filter(t => t.id !== "all").map(t => <option key={t.id} value={t.id}>{t.label.replace(" Fields", "")}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Data Type</label>
+                  <label className="block text-sm font-medium text-zinc-300 mb-1.5">Data Type</label>
                   <select 
                     value={formData.type}
                     onChange={(e) => setFormData({...formData, type: e.target.value})}
-                    className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                    className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2.5 text-zinc-100 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                   >
                     <option value="Text String">Text String</option>
                     <option value="Number">Number</option>
@@ -393,29 +393,29 @@ export default function TenantDynamicFieldsPage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 p-4 bg-gray-50 border border-gray-200 rounded-xl">
+              <div className="flex items-center gap-3 p-4 bg-zinc-950/50 border border-zinc-700/50 rounded-xl">
                 <input 
                   type="checkbox" 
                   id="req" 
                   checked={formData.required}
                   onChange={(e) => setFormData({...formData, required: e.target.checked})}
-                  className="w-4 h-4 rounded border-gray-300 bg-white text-indigo-600 focus:ring-indigo-500" 
+                  className="w-4 h-4 rounded border-zinc-700/50 bg-zinc-900/40 backdrop-blur-xl text-indigo-600 focus:ring-indigo-500" 
                 />
-                <label htmlFor="req" className="text-sm text-gray-700 font-medium cursor-pointer">Make this field mandatory</label>
+                <label htmlFor="req" className="text-sm text-zinc-300 font-medium cursor-pointer">Make this field mandatory</label>
               </div>
 
               {formData.type === "Dropdown (Select)" && (
-                <div className="border border-gray-200 rounded-xl p-4 space-y-4">
-                  <h3 className="text-sm font-semibold text-gray-900">Dropdown Options</h3>
+                <div className="border border-zinc-700/50 rounded-xl p-4 space-y-4">
+                  <h3 className="text-sm font-semibold text-zinc-100">Dropdown Options</h3>
                   
                   {/* List existing options */}
                   {formData.options.length > 0 && (
                     <div className="space-y-2 mb-4">
                       {formData.options.map(opt => (
-                        <div key={opt} className="flex items-center justify-between bg-gray-50 p-2 rounded-lg border border-gray-100">
+                        <div key={opt} className="flex items-center justify-between bg-zinc-950/50 p-2 rounded-lg border border-zinc-800/60">
                           <div className="flex items-center gap-3">
                             <div className={`w-4 h-4 rounded-full ${formData.optionColors[opt] || 'bg-gray-400'}`}></div>
-                            <span className="text-sm font-medium text-gray-700">{opt}</span>
+                            <span className="text-sm font-medium text-zinc-300">{opt}</span>
                           </div>
                           <button 
                             type="button" 
@@ -435,14 +435,14 @@ export default function TenantDynamicFieldsPage() {
                   )}
 
                   {/* Add new option */}
-                  <div className="flex flex-col gap-3 pt-2 border-t border-gray-100">
+                  <div className="flex flex-col gap-3 pt-2 border-t border-zinc-800/60">
                     <div className="flex gap-2">
                       <input 
                         type="text" 
                         value={newOption}
                         onChange={e => setNewOption(e.target.value)}
                         placeholder="Option label (e.g. In Progress)"
-                        className="flex-1 bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                        className="flex-1 bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
                       />
                       <button 
                         type="button"
@@ -462,7 +462,7 @@ export default function TenantDynamicFieldsPage() {
                       </button>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs text-gray-500 font-medium mr-2">Color:</span>
+                      <span className="text-xs text-zinc-400 font-medium mr-2">Color:</span>
                       {colors.map(c => (
                         <button
                           key={c.value}
@@ -478,7 +478,7 @@ export default function TenantDynamicFieldsPage() {
               )}
 
               <div className="pt-4 flex items-center justify-end gap-3">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 text-sm font-medium text-gray-700 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 text-sm font-medium text-zinc-300 hover:text-zinc-100 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">
                   Cancel
                 </button>
                 <button type="submit" className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl shadow-lg shadow-indigo-500/20 transition-all">

@@ -14,12 +14,12 @@ export function CrmHeader() {
   const userInitial = userName.charAt(0).toUpperCase()
 
   return (
-    <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 sticky top-0 z-10">
+    <header className="h-16 bg-zinc-900/40 backdrop-blur-xl border-b border-zinc-700/50 flex items-center justify-between px-4 sm:px-6 sticky top-0 z-10">
       {/* Left side actions (Mobile Menu) */}
       <div className="flex items-center gap-3 lg:hidden mr-3">
         <button 
           onClick={() => setIsOpen(!isOpen)}
-          className="p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+          className="p-2 -ml-2 text-zinc-400 hover:bg-slate-100 rounded-lg transition-colors"
         >
           <Menu className="h-6 w-6" />
         </button>
@@ -33,7 +33,7 @@ export function CrmHeader() {
           </div>
           <input
             type="text"
-            className="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-lg leading-5 bg-slate-50 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors"
+            className="block w-full pl-10 pr-3 py-2 border border-zinc-700/50 rounded-lg leading-5 bg-zinc-950/50 placeholder-slate-400 focus:outline-none focus:bg-zinc-900/40 backdrop-blur-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors"
             placeholder="Search leads, clients, properties..."
           />
         </div>
@@ -42,13 +42,13 @@ export function CrmHeader() {
       {/* Right Actions */}
       <div className="flex items-center gap-6">
         {/* Notifications */}
-        <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors">
+        <button className="relative p-2 text-zinc-400 hover:bg-slate-100 rounded-full transition-colors">
           <Bell className="h-5 w-5" />
           <span className="absolute top-1.5 right-1.5 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
         </button>
 
         {/* User Profile */}
-        <div className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-1.5 rounded-lg transition-colors">
+        <div className="flex items-center gap-3 cursor-pointer hover:bg-zinc-950/50 p-1.5 rounded-lg transition-colors">
           {session?.user?.image ? (
             <img src={session.user.image} alt={userName} className="w-9 h-9 rounded-full object-cover" />
           ) : (
@@ -57,8 +57,8 @@ export function CrmHeader() {
             </div>
           )}
           <div className="hidden md:flex flex-col">
-            <span className="text-sm font-semibold text-slate-900 leading-tight truncate max-w-[120px]">{userName}</span>
-            <span className="text-xs text-slate-500 capitalize">{userRole}</span>
+            <span className="text-sm font-semibold text-zinc-100 leading-tight truncate max-w-[120px]">{userName}</span>
+            <span className="text-xs text-zinc-400 capitalize">{userRole}</span>
           </div>
         </div>
       </div>

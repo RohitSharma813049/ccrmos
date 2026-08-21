@@ -70,7 +70,7 @@ export function AppIntegrationCard({ app, onConnect, onDisconnect }: AppIntegrat
             <span className="text-xs font-medium text-zinc-500">Free integration</span>
             <button 
               onClick={() => onConnect(app.id)}
-              className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium text-zinc-900 bg-zinc-100 hover:bg-white rounded-lg transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-zinc-100 focus:ring-offset-2 focus:ring-offset-zinc-900"
+              className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium text-zinc-900 bg-zinc-100 hover:bg-zinc-900/40 backdrop-blur-xl rounded-lg transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-zinc-100 focus:ring-offset-2 focus:ring-offset-zinc-900"
             >
               <LinkIcon className="w-3.5 h-3.5" />
               Connect

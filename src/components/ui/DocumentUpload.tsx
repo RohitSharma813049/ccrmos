@@ -77,13 +77,13 @@ export default function DocumentUpload({ documents = [], onChange, maxFiles = 10
     if (format.includes("image")) return <ImageIcon className="w-5 h-5 text-blue-500" />;
     if (format.includes("pdf")) return <FileText className="w-5 h-5 text-red-500" />;
     if (format.includes("zip") || format.includes("tar") || format.includes("rar")) return <FileArchive className="w-5 h-5 text-yellow-500" />;
-    return <File className="w-5 h-5 text-slate-500" />;
+    return <File className="w-5 h-5 text-zinc-400" />;
   };
 
   return (
     <div className="space-y-4">
       <div 
-        className="border-2 border-dashed border-border rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-slate-50 transition-colors"
+        className="border-2 border-dashed border-border rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-zinc-950/50 transition-colors"
         onClick={() => fileInputRef.current?.click()}
       >
         <div className="w-12 h-12 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-3">
@@ -107,10 +107,10 @@ export default function DocumentUpload({ documents = [], onChange, maxFiles = 10
       {documents.length > 0 && (
         <div className="space-y-2">
           {documents.map((doc, index) => (
-            <div key={index} className="flex items-center justify-between p-3 bg-slate-50 border border-slate-100 rounded-lg">
+            <div key={index} className="flex items-center justify-between p-3 bg-zinc-950/50 border border-zinc-800/60 rounded-lg">
               <div className="flex items-center gap-3 overflow-hidden">
                 {getFileIcon(doc.format)}
-                <span className="text-sm font-medium text-slate-700 truncate">{doc.name}</span>
+                <span className="text-sm font-medium text-zinc-300 truncate">{doc.name}</span>
               </div>
               <div className="flex items-center gap-2">
                 <a href={doc.url} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline font-medium">View</a>

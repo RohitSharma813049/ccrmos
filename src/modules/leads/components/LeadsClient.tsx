@@ -218,7 +218,7 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
   };
 
   const getStageColorClass = (stageId: any, allStages: any[]) => {
-    if (!stageId) return 'bg-gray-500/10 text-gray-600 border-gray-500/20';
+    if (!stageId) return 'bg-gray-500/10 text-zinc-400 border-gray-500/20';
     const id = typeof stageId === 'object' ? stageId._id : stageId;
     const stage = allStages.find(s => s._id === id);
     if (!stage || !stage.color) return 'bg-primary/10 text-primary border-primary/20';

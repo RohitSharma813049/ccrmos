@@ -161,17 +161,17 @@ export default function WorkflowBuilderClient({ workflow, isGlobal = false }: { 
       <div className="flex items-center justify-between mb-4">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-gray-900">{workflow.title} Builder</h1>
+            <h1 className="text-2xl font-bold text-zinc-100">{workflow.title} Builder</h1>
             {isGlobal && (
               <span className="px-2.5 py-0.5 text-xs font-bold bg-fuchsia-100 text-fuchsia-700 rounded-full border border-fuchsia-200">
                 Global Workflow
               </span>
             )}
           </div>
-          <p className="text-gray-500 text-sm mt-1">{workflow.description}</p>
+          <p className="text-zinc-400 text-sm mt-1">{workflow.description}</p>
         </div>
         <div className="flex gap-3">
-          <button onClick={() => window.history.back()} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+          <button onClick={() => window.history.back()} className="px-4 py-2 bg-gray-100 text-zinc-300 rounded-lg hover:bg-gray-200 transition-colors">
             Back
           </button>
           <button onClick={addConditionNode} className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors">
@@ -186,7 +186,7 @@ export default function WorkflowBuilderClient({ workflow, isGlobal = false }: { 
         </div>
       </div>
       
-      <div className="flex-1 bg-white border border-gray-200 rounded-2xl shadow-inner overflow-hidden">
+      <div className="flex-1 bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-2xl shadow-inner overflow-hidden">
         <ReactFlow
           nodes={nodes.map(n => ({...n, data: { ...n.data, onChange: updateNodeData }}))} // re-inject function
           edges={edges}

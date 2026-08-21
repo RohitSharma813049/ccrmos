@@ -96,8 +96,8 @@ export default function RolesClient() {
     <div className="p-6 max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Custom Roles & Permissions</h1>
-          <p className="text-gray-500 mt-1">Define granular access control for your team globally.</p>
+          <h1 className="text-3xl font-extrabold text-zinc-100 tracking-tight">Custom Roles & Permissions</h1>
+          <p className="text-zinc-400 mt-1">Define granular access control for your team globally.</p>
         </div>
         <button 
           onClick={() => openModal()} 
@@ -115,11 +115,11 @@ export default function RolesClient() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {roles.map((role) => (
-            <div key={role._id} className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-xl transition-all relative flex flex-col h-full">
+            <div key={role._id} className="bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-2xl p-6 hover:shadow-xl transition-all relative flex flex-col h-full">
               <div className="flex justify-between items-start mb-2">
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900">{role.name}</h3>
-                  <span className="inline-block mt-1 text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 bg-gray-100 text-gray-500 rounded">{role.tenantScope || 'Global'} Scope</span>
+                  <h3 className="text-lg font-bold text-zinc-100">{role.name}</h3>
+                  <span className="inline-block mt-1 text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 bg-gray-100 text-zinc-400 rounded">{role.tenantScope || 'Global'} Scope</span>
                 </div>
                 <button 
                   onClick={() => openModal(role)}
@@ -128,12 +128,12 @@ export default function RolesClient() {
                   <Edit className="w-4 h-4" />
                 </button>
               </div>
-              <p className="text-sm text-gray-500 mb-6 flex-grow">{role.description || 'No description provided.'}</p>
+              <p className="text-sm text-zinc-400 mb-6 flex-grow">{role.description || 'No description provided.'}</p>
               
-              <div className="flex items-center justify-between pt-4 border-t border-gray-100 mt-auto">
+              <div className="flex items-center justify-between pt-4 border-t border-zinc-800/60 mt-auto">
                 <button 
                   onClick={() => openMatrix(role)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-zinc-300 bg-zinc-950/50 border border-zinc-700/50 rounded-lg hover:bg-gray-100 transition-colors"
                 >
                   Edit Matrix
                 </button>
@@ -153,41 +153,41 @@ export default function RolesClient() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-              <h2 className="text-xl font-bold text-gray-900">
+          <div className="relative bg-zinc-900/40 backdrop-blur-xl rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-zinc-800/60 flex justify-between items-center">
+              <h2 className="text-xl font-bold text-zinc-100">
                 {editingRole ? 'Edit Role Details' : 'Create New Role'}
               </h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600 p-1">
+              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-zinc-400 p-1">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Role Name <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-medium text-zinc-300 mb-1.5">Role Name <span className="text-red-500">*</span></label>
                 <input
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="e.g. Sales & Revenue"
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all"
+                  className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2.5 text-zinc-100 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Description</label>
+                <label className="block text-sm font-medium text-zinc-300 mb-1.5">Description</label>
                 <input
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Brief description"
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all"
+                  className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2.5 text-zinc-100 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Scope Target</label>
+                <label className="block text-sm font-medium text-zinc-300 mb-1.5">Scope Target</label>
                 <select
                   value={formData.tenantScope}
                   onChange={(e) => setFormData({ ...formData, tenantScope: e.target.value })}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all appearance-none"
+                  className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2.5 text-zinc-100 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all appearance-none"
                 >
                   <option value="Global">Global Scope</option>
                   <option value="Industry">Industry Scope</option>

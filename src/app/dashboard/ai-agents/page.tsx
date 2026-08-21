@@ -65,21 +65,21 @@ export default function AiAgentsPage() {
       <div className="flex gap-2 mb-8 p-1 bg-[var(--border)]/50 rounded-xl max-w-fit">
         <button 
           onClick={() => setActiveTab('agents')}
-          className={`flex items-center gap-2 px-8 py-2.5 rounded-lg text-sm font-semibold transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] ${activeTab === 'agents' ? 'bg-white shadow-sm text-[var(--primary)]' : 'text-[var(--muted-foreground)] hover:text-[var(--foreground)]'}`}
+          className={`flex items-center gap-2 px-8 py-2.5 rounded-lg text-sm font-semibold transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] ${activeTab === 'agents' ? 'bg-zinc-900/40 backdrop-blur-xl shadow-sm text-[var(--primary)]' : 'text-[var(--muted-foreground)] hover:text-[var(--foreground)]'}`}
         >
           <Users className="w-4 h-4" />
           Agents
         </button>
         <button 
           onClick={() => setActiveTab('call-list')}
-          className={`flex items-center gap-2 px-8 py-2.5 rounded-lg text-sm font-semibold transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] ${activeTab === 'call-list' ? 'bg-white shadow-sm text-[var(--primary)]' : 'text-[var(--muted-foreground)] hover:text-[var(--foreground)]'}`}
+          className={`flex items-center gap-2 px-8 py-2.5 rounded-lg text-sm font-semibold transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] ${activeTab === 'call-list' ? 'bg-zinc-900/40 backdrop-blur-xl shadow-sm text-[var(--primary)]' : 'text-[var(--muted-foreground)] hover:text-[var(--foreground)]'}`}
         >
           <Phone className="w-4 h-4" />
           Call List
         </button>
         <button 
           onClick={() => setActiveTab('call-history')}
-          className={`flex items-center gap-2 px-8 py-2.5 rounded-lg text-sm font-semibold transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] ${activeTab === 'call-history' ? 'bg-white shadow-sm text-[var(--primary)]' : 'text-[var(--muted-foreground)] hover:text-[var(--foreground)]'}`}
+          className={`flex items-center gap-2 px-8 py-2.5 rounded-lg text-sm font-semibold transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] ${activeTab === 'call-history' ? 'bg-zinc-900/40 backdrop-blur-xl shadow-sm text-[var(--primary)]' : 'text-[var(--muted-foreground)] hover:text-[var(--foreground)]'}`}
         >
           <Clock className="w-4 h-4" />
           Call History
@@ -95,7 +95,7 @@ export default function AiAgentsPage() {
         <div className="flex gap-3">
           <a 
             href="/dashboard/settings/integrations"
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-[var(--border)] hover:border-[var(--primary)] hover:text-[var(--primary)] rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] shadow-sm"
+            className="flex items-center gap-2 px-4 py-2 bg-zinc-900/40 backdrop-blur-xl border border-[var(--border)] hover:border-[var(--primary)] hover:text-[var(--primary)] rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] shadow-sm"
           >
             <LinkIcon className="w-4 h-4" />
             Connect API
@@ -118,7 +118,7 @@ export default function AiAgentsPage() {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--primary)]"></div>
         </div>
       ) : agents.length === 0 ? (
-        <div className="py-12 flex flex-col items-center justify-center text-center bg-white rounded-[12px] border border-[var(--border)] shadow-sm p-6">
+        <div className="py-12 flex flex-col items-center justify-center text-center bg-zinc-900/40 backdrop-blur-xl rounded-[12px] border border-[var(--border)] shadow-sm p-6">
           <Bot className="w-12 h-12 text-[var(--muted-foreground)] mb-4" />
           <h3 className="text-lg font-bold text-[var(--foreground)] mb-2">No AI Agents</h3>
           <p className="text-[var(--muted-foreground)]">You have not created any AI Agents yet.</p>
@@ -126,7 +126,7 @@ export default function AiAgentsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {agents.map((agent) => (
-            <div key={agent._id} className="bg-white border border-[var(--border)] rounded-[12px] p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+            <div key={agent._id} className="bg-zinc-900/40 backdrop-blur-xl border border-[var(--border)] rounded-[12px] p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
               {/* Status Badge */}
               <div className="absolute top-6 right-6">
                 <span className={`text-[10px] font-bold px-2.5 py-1 rounded-md tracking-wider uppercase ${
@@ -182,14 +182,14 @@ export default function AiAgentsPage() {
               <div className="flex gap-3">
                 <button 
                   onClick={() => { setEditingAgent(agent); setIsModalOpen(true); }}
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white border border-[var(--border)] hover:border-[var(--primary)] hover:text-[var(--primary)] rounded-lg text-sm font-medium transition-colors text-[var(--foreground)] shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-zinc-900/40 backdrop-blur-xl border border-[var(--border)] hover:border-[var(--primary)] hover:text-[var(--primary)] rounded-lg text-sm font-medium transition-colors text-[var(--foreground)] shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
                 >
                   <Edit2 className="w-3.5 h-3.5" />
                   Edit
                 </button>
                 <button 
                   onClick={() => handleDelete(agent._id)}
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white border border-[var(--border)] hover:bg-[#DC2626]/5 hover:border-[#DC2626]/20 text-[#DC2626] rounded-lg text-sm font-medium transition-colors shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#DC2626]"
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-zinc-900/40 backdrop-blur-xl border border-[var(--border)] hover:bg-[#DC2626]/5 hover:border-[#DC2626]/20 text-[#DC2626] rounded-lg text-sm font-medium transition-colors shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#DC2626]"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   Delete
@@ -203,7 +203,7 @@ export default function AiAgentsPage() {
       )}
 
       {activeTab === 'call-list' && (
-        <div className="py-12 flex flex-col items-center justify-center text-center bg-white rounded-[12px] border border-[var(--border)] shadow-sm p-6">
+        <div className="py-12 flex flex-col items-center justify-center text-center bg-zinc-900/40 backdrop-blur-xl rounded-[12px] border border-[var(--border)] shadow-sm p-6">
           <Phone className="w-12 h-12 text-[var(--muted-foreground)] mb-4" />
           <h3 className="text-lg font-bold text-[var(--foreground)] mb-2">Call List</h3>
           <p className="text-[var(--muted-foreground)]">Your active calls and queues will appear here.</p>
@@ -211,7 +211,7 @@ export default function AiAgentsPage() {
       )}
 
       {activeTab === 'call-history' && (
-        <div className="py-12 flex flex-col items-center justify-center text-center bg-white rounded-[12px] border border-[var(--border)] shadow-sm p-6">
+        <div className="py-12 flex flex-col items-center justify-center text-center bg-zinc-900/40 backdrop-blur-xl rounded-[12px] border border-[var(--border)] shadow-sm p-6">
           <Clock className="w-12 h-12 text-[var(--muted-foreground)] mb-4" />
           <h3 className="text-lg font-bold text-[var(--foreground)] mb-2">Call History</h3>
           <p className="text-[var(--muted-foreground)]">Past call logs and recordings will appear here.</p>
@@ -325,17 +325,17 @@ function AgentFormModal({ onClose, onSuccess, agentToEdit }: { onClose: () => vo
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
-        <div className="flex items-center justify-between p-6 border-b border-slate-100">
+      <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+        <div className="flex items-center justify-between p-6 border-b border-zinc-800/60">
           <h2 className="text-xl font-bold text-[var(--foreground)]">{agentToEdit ? 'Edit AI Agent' : 'Create AI Agent'}</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-2">
+          <button onClick={onClose} className="text-slate-400 hover:text-zinc-400 p-2">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto custom-scrollbar">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0">
+            <div className="w-16 h-16 rounded-full bg-slate-100 border border-zinc-700/50 overflow-hidden flex items-center justify-center shrink-0">
               {formData.avatarUrl ? (
                 <img src={formData.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
               ) : (
@@ -344,17 +344,17 @@ function AgentFormModal({ onClose, onSuccess, agentToEdit }: { onClose: () => vo
             </div>
             <div>
               <label className="block text-sm font-medium text-[var(--foreground)] mb-1">Avatar Image (Optional)</label>
-              <input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploadingImage} className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[var(--primary)] file:text-white hover:file:opacity-90 transition-opacity" />
+              <input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploadingImage} className="block w-full text-sm text-zinc-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[var(--primary)] file:text-white hover:file:opacity-90 transition-opacity" />
               {uploadingImage && <p className="text-xs text-[var(--primary)] mt-1 animate-pulse">Uploading...</p>}
             </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-[var(--foreground)] mb-1">Agent Name *</label>
-            <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] text-slate-900 bg-white" placeholder="e.g. Sales Agent" />
+            <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] text-zinc-100 bg-zinc-900/40 backdrop-blur-xl" placeholder="e.g. Sales Agent" />
           </div>
           <div>
             <label className="block text-sm font-medium text-[var(--foreground)] mb-1">Role *</label>
-            <select required value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] text-slate-900 bg-white appearance-none">
+            <select required value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] text-zinc-100 bg-zinc-900/40 backdrop-blur-xl appearance-none">
               {AI_ROLES.map(role => (
                 <option key={role.value} value={role.value}>{role.label}</option>
               ))}
@@ -365,7 +365,7 @@ function AgentFormModal({ onClose, onSuccess, agentToEdit }: { onClose: () => vo
           </div>
           <div>
             <label className="block text-sm font-medium text-[var(--foreground)] mb-1">Languages</label>
-            <select value={formData.languages} onChange={e => setFormData({...formData, languages: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] text-slate-900 bg-white appearance-none">
+            <select value={formData.languages} onChange={e => setFormData({...formData, languages: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] text-zinc-100 bg-zinc-900/40 backdrop-blur-xl appearance-none">
               {LANGUAGES.map(lang => (
                 <option key={lang} value={lang}>{lang}</option>
               ))}
@@ -373,11 +373,11 @@ function AgentFormModal({ onClose, onSuccess, agentToEdit }: { onClose: () => vo
           </div>
           <div>
             <label className="block text-sm font-medium text-[var(--foreground)] mb-1">Phone Number (Optional)</label>
-            <input type="text" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] text-slate-900 bg-white" placeholder="+1234567890" />
+            <input type="text" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] text-zinc-100 bg-zinc-900/40 backdrop-blur-xl" placeholder="+1234567890" />
           </div>
           <div>
             <label className="block text-sm font-medium text-[var(--foreground)] mb-1">Greeting Audio</label>
-            <select value={formData.greetingAudioUrl} onChange={e => setFormData({...formData, greetingAudioUrl: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] text-slate-900 bg-white appearance-none">
+            <select value={formData.greetingAudioUrl} onChange={e => setFormData({...formData, greetingAudioUrl: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] text-zinc-100 bg-zinc-900/40 backdrop-blur-xl appearance-none">
               <option value="">Default AI Greeting</option>
               {mediaOptions.map(m => (
                 <option key={m.url} value={m.url}>{m.name}</option>
@@ -386,7 +386,7 @@ function AgentFormModal({ onClose, onSuccess, agentToEdit }: { onClose: () => vo
           </div>
           
           <div className="flex justify-end gap-3 pt-4 border-t mt-6">
-            <button type="button" onClick={onClose} className="px-5 py-2 border rounded-lg text-[var(--foreground)] font-medium hover:bg-slate-50">Cancel</button>
+            <button type="button" onClick={onClose} className="px-5 py-2 border rounded-lg text-[var(--foreground)] font-medium hover:bg-zinc-950/50">Cancel</button>
             {hasPermission && (
               <button type="submit" disabled={saving || !formData.role} className="px-5 py-2 bg-[var(--primary)] text-white rounded-lg font-medium hover:bg-[var(--primary)] disabled:opacity-50">
                 {saving ? (agentToEdit ? 'Updating...' : 'Creating...') : (agentToEdit ? 'Update Agent' : 'Create Agent')}

@@ -12,7 +12,7 @@ export default function ActionNode({ data }: { data: any }) {
   };
 
   return (
-    <div className="bg-white border-2 border-emerald-500 rounded-xl p-4 shadow-sm w-64">
+    <div className="bg-zinc-900/40 backdrop-blur-xl border-2 border-emerald-500 rounded-xl p-4 shadow-sm w-64">
       <Handle type="target" position={Position.Top} className="w-3 h-3 bg-emerald-500" />
       <div className="font-semibold text-emerald-600 mb-2 text-sm flex items-center gap-2">
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -22,7 +22,7 @@ export default function ActionNode({ data }: { data: any }) {
       </div>
       
       <div className="space-y-2 flex flex-col">
-        <select value={data.actionType || ''} onChange={onChangeActionType} className="w-full bg-gray-50 border border-gray-200 rounded p-1.5 text-xs text-gray-700 outline-none">
+        <select value={data.actionType || ''} onChange={onChangeActionType} className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded p-1.5 text-xs text-zinc-300 outline-none">
           <option value="">Select Action</option>
           <option value="Create Task">Create Task</option>
           <option value="Send Email">Send Email</option>
@@ -33,42 +33,42 @@ export default function ActionNode({ data }: { data: any }) {
 
         {data.actionType === 'Create Task' && (
           <>
-            <input type="text" placeholder="Task Title" value={data.payload?.title || ''} onChange={(e) => onChangePayload('title', e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded p-1.5 text-xs text-gray-700 outline-none" />
-            <input type="text" placeholder="Task Description" value={data.payload?.description || ''} onChange={(e) => onChangePayload('description', e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded p-1.5 text-xs text-gray-700 outline-none" />
+            <input type="text" placeholder="Task Title" value={data.payload?.title || ''} onChange={(e) => onChangePayload('title', e.target.value)} className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded p-1.5 text-xs text-zinc-300 outline-none" />
+            <input type="text" placeholder="Task Description" value={data.payload?.description || ''} onChange={(e) => onChangePayload('description', e.target.value)} className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded p-1.5 text-xs text-zinc-300 outline-none" />
           </>
         )}
 
         {data.actionType === 'Send Email' && (
           <>
-            <input type="text" placeholder="To (Email)" value={data.payload?.to || ''} onChange={(e) => onChangePayload('to', e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded p-1.5 text-xs text-gray-700 outline-none" />
-            <input type="text" placeholder="Subject" value={data.payload?.subject || ''} onChange={(e) => onChangePayload('subject', e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded p-1.5 text-xs text-gray-700 outline-none" />
+            <input type="text" placeholder="To (Email)" value={data.payload?.to || ''} onChange={(e) => onChangePayload('to', e.target.value)} className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded p-1.5 text-xs text-zinc-300 outline-none" />
+            <input type="text" placeholder="Subject" value={data.payload?.subject || ''} onChange={(e) => onChangePayload('subject', e.target.value)} className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded p-1.5 text-xs text-zinc-300 outline-none" />
           </>
         )}
 
         {data.actionType === 'Assign User' && (
           <>
-            <input type="text" placeholder="Target User ID" value={data.payload?.userId || ''} onChange={(e) => onChangePayload('userId', e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded p-1.5 text-xs text-gray-700 outline-none" />
-            <p className="text-[10px] text-gray-500 mt-1 leading-tight">Enter the 24-character Object ID of the user to assign.</p>
+            <input type="text" placeholder="Target User ID" value={data.payload?.userId || ''} onChange={(e) => onChangePayload('userId', e.target.value)} className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded p-1.5 text-xs text-zinc-300 outline-none" />
+            <p className="text-[10px] text-zinc-400 mt-1 leading-tight">Enter the 24-character Object ID of the user to assign.</p>
           </>
         )}
 
         {data.actionType === 'Trigger Webhook' && (
           <>
-            <input type="text" placeholder="Webhook URL (https://...)" value={data.payload?.url || ''} onChange={(e) => onChangePayload('url', e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded p-1.5 text-xs text-gray-700 outline-none" />
-            <select value={data.payload?.method || 'POST'} onChange={(e) => onChangePayload('method', e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded p-1.5 text-xs text-gray-700 outline-none">
+            <input type="text" placeholder="Webhook URL (https://...)" value={data.payload?.url || ''} onChange={(e) => onChangePayload('url', e.target.value)} className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded p-1.5 text-xs text-zinc-300 outline-none" />
+            <select value={data.payload?.method || 'POST'} onChange={(e) => onChangePayload('method', e.target.value)} className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded p-1.5 text-xs text-zinc-300 outline-none">
               <option value="POST">POST</option>
               <option value="GET">GET</option>
               <option value="PUT">PUT</option>
             </select>
-            <input type="text" placeholder="Authorization Header (Optional)" value={data.payload?.authHeader || ''} onChange={(e) => onChangePayload('authHeader', e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded p-1.5 text-xs text-gray-700 outline-none" />
-            <p className="text-[10px] text-gray-500 mt-1 leading-tight">The event payload will be sent automatically as JSON.</p>
+            <input type="text" placeholder="Authorization Header (Optional)" value={data.payload?.authHeader || ''} onChange={(e) => onChangePayload('authHeader', e.target.value)} className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded p-1.5 text-xs text-zinc-300 outline-none" />
+            <p className="text-[10px] text-zinc-400 mt-1 leading-tight">The event payload will be sent automatically as JSON.</p>
           </>
         )}
 
         {data.actionType === 'Send SMS / WhatsApp' && (
           <>
-            <input type="text" placeholder="To Phone (+1234567890)" value={data.payload?.to || ''} onChange={(e) => onChangePayload('to', e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded p-1.5 text-xs text-gray-700 outline-none" />
-            <textarea placeholder="Message Body" value={data.payload?.body || ''} onChange={(e) => onChangePayload('body', e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded p-1.5 text-xs text-gray-700 outline-none h-16 resize-none" />
+            <input type="text" placeholder="To Phone (+1234567890)" value={data.payload?.to || ''} onChange={(e) => onChangePayload('to', e.target.value)} className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded p-1.5 text-xs text-zinc-300 outline-none" />
+            <textarea placeholder="Message Body" value={data.payload?.body || ''} onChange={(e) => onChangePayload('body', e.target.value)} className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded p-1.5 text-xs text-zinc-300 outline-none h-16 resize-none" />
           </>
         )}
       </div>

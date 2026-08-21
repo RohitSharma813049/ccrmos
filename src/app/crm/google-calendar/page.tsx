@@ -11,7 +11,7 @@ export default function GoogleCalendarPage() {
       <div className="max-w-2xl mx-auto">
         
         {/* Card */}
-        <div className="bg-white rounded-[16px] border border-[var(--rule)] shadow-[var(--card-shadow)] overflow-hidden">
+        <div className="bg-zinc-900/40 backdrop-blur-xl rounded-[16px] border border-[var(--rule)] shadow-[var(--card-shadow)] overflow-hidden">
           
           {/* Header */}
           <div className="p-8 border-b border-[var(--rule)] flex items-start justify-between">

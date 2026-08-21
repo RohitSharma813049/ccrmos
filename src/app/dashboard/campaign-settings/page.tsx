@@ -98,8 +98,8 @@ export default function CampaignSettingsPage() {
             <Settings2 className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 leading-tight">Campaign Configuration</h1>
-            <p className="text-slate-500 text-sm">Configure automatic lead assignment for Meta campaigns</p>
+            <h1 className="text-2xl font-bold text-zinc-100 leading-tight">Campaign Configuration</h1>
+            <p className="text-zinc-400 text-sm">Configure automatic lead assignment for Meta campaigns</p>
           </div>
         </div>
         <div>
@@ -119,14 +119,14 @@ export default function CampaignSettingsPage() {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
       ) : settings.length === 0 ? (
-        <div className="py-12 flex flex-col items-center justify-center text-center bg-white rounded-2xl border border-slate-200">
+        <div className="py-12 flex flex-col items-center justify-center text-center bg-zinc-900/40 backdrop-blur-xl rounded-2xl border border-zinc-700/50">
            <Settings2 className="w-12 h-12 text-slate-300 mb-4" />
-           <p className="text-slate-500">No campaign configurations found. Add one to start automatically assigning leads.</p>
+           <p className="text-zinc-400">No campaign configurations found. Add one to start automatically assigning leads.</p>
         </div>
       ) : (
         <div className="space-y-4">
           {settings.map((config) => (
-            <div key={config._id} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 relative group">
+            <div key={config._id} className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl border border-zinc-700/50 shadow-sm p-6 relative group">
               
               {/* Delete Button */}
               <button 
@@ -136,32 +136,32 @@ export default function CampaignSettingsPage() {
                 <Trash2 className="w-5 h-5" />
               </button>
 
-              <h3 className="text-lg font-bold text-slate-800 mb-4">{config.name}</h3>
+              <h3 className="text-lg font-bold text-zinc-100 mb-4">{config.name}</h3>
               
               <div className="grid grid-cols-2 gap-y-3 gap-x-8 max-w-2xl mb-6">
                 <div className="text-sm">
-                  <span className="text-slate-500 mr-2">Assigned To:</span>
-                  <span className="font-semibold text-slate-800">
+                  <span className="text-zinc-400 mr-2">Assigned To:</span>
+                  <span className="font-semibold text-zinc-100">
                     {config.assignedTo ? `${config.assignedTo.firstName || ''} ${config.assignedTo.lastName || ''}`.trim() || config.assignedTo.email : 'Unassigned'}
                   </span>
                 </div>
                 <div className="text-sm">
-                  <span className="text-slate-500 mr-2">Category:</span>
-                  <span className="font-semibold text-slate-800">{config.category}</span>
+                  <span className="text-zinc-400 mr-2">Category:</span>
+                  <span className="font-semibold text-zinc-100">{config.category}</span>
                 </div>
                 
                 <div className="text-sm">
-                  <span className="text-slate-500 mr-2">Type:</span>
-                  <span className="font-semibold text-slate-800">{config.type}</span>
+                  <span className="text-zinc-400 mr-2">Type:</span>
+                  <span className="font-semibold text-zinc-100">{config.type}</span>
                 </div>
                 <div className="text-sm">
-                  <span className="text-slate-500 mr-2">Processed:</span>
+                  <span className="text-zinc-400 mr-2">Processed:</span>
                   <span className="font-bold text-green-600">{config.processed}</span>
                 </div>
                 
                 <div className="text-sm col-span-2">
-                  <span className="text-slate-500 mr-2">Last Synced:</span>
-                  <span className="font-medium text-slate-700">
+                  <span className="text-zinc-400 mr-2">Last Synced:</span>
+                  <span className="font-medium text-zinc-300">
                     {config.lastSynced ? new Date(config.lastSynced).toLocaleString() : 'Never'}
                   </span>
                 </div>
@@ -231,22 +231,22 @@ function CampaignSettingFormModal({ onClose, onSuccess, users }: { onClose: () =
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col">
-        <div className="flex items-center justify-between p-6 border-b border-slate-100">
-          <h2 className="text-xl font-bold text-slate-900">Add Configuration</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-2">
+      <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col">
+        <div className="flex items-center justify-between p-6 border-b border-zinc-800/60">
+          <h2 className="text-xl font-bold text-zinc-100">Add Configuration</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-zinc-400 p-2">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Campaign Name (Form ID) *</label>
+            <label className="block text-sm font-medium text-zinc-300 mb-1">Campaign Name (Form ID) *</label>
             <input required type="text" placeholder="e.g., RASA Estate - Form 5" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full px-4 py-2 border rounded-lg" />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Auto-Assign To</label>
+            <label className="block text-sm font-medium text-zinc-300 mb-1">Auto-Assign To</label>
             <select value={formData.assignedTo} onChange={e => setFormData({...formData, assignedTo: e.target.value})} className="w-full px-4 py-2 border rounded-lg">
               <option value="">Unassigned</option>
               {users.map(u => (
@@ -256,7 +256,7 @@ function CampaignSettingFormModal({ onClose, onSuccess, users }: { onClose: () =
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Lead Type</label>
+            <label className="block text-sm font-medium text-zinc-300 mb-1">Lead Type</label>
             <select value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})} className="w-full px-4 py-2 border rounded-lg">
               <option value="Buyer">Buyer</option>
               <option value="Seller">Seller</option>
@@ -266,7 +266,7 @@ function CampaignSettingFormModal({ onClose, onSuccess, users }: { onClose: () =
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Lead Category</label>
+            <label className="block text-sm font-medium text-zinc-300 mb-1">Lead Category</label>
             <select value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} className="w-full px-4 py-2 border rounded-lg">
               <option value="Hot">Hot</option>
               <option value="Warm">Warm</option>
@@ -275,7 +275,7 @@ function CampaignSettingFormModal({ onClose, onSuccess, users }: { onClose: () =
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t mt-6">
-            <button type="button" onClick={onClose} className="px-5 py-2 border rounded-lg text-slate-700 font-medium">Cancel</button>
+            <button type="button" onClick={onClose} className="px-5 py-2 border rounded-lg text-zinc-300 font-medium">Cancel</button>
             <button type="submit" disabled={saving} className="px-5 py-2 bg-blue-600 text-white rounded-lg font-medium disabled:opacity-50">
               {saving ? 'Saving...' : 'Save Config'}
             </button>

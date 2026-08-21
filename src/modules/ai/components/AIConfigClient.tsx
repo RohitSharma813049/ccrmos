@@ -93,14 +93,14 @@ export default function AIConfigClient() {
     }
   };
 
-  if (loading) return <div className="p-8 text-center text-gray-500">Loading AI Configurations...</div>;
+  if (loading) return <div className="p-8 text-center text-zinc-400">Loading AI Configurations...</div>;
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Dynamic AI Providers</h1>
-          <p className="text-sm text-gray-500 mt-1">Create custom AI providers and manage tenant access.</p>
+          <h1 className="text-3xl font-bold text-zinc-100 tracking-tight">Dynamic AI Providers</h1>
+          <p className="text-sm text-zinc-400 mt-1">Create custom AI providers and manage tenant access.</p>
         </div>
         <button 
           onClick={() => {
@@ -116,7 +116,7 @@ export default function AIConfigClient() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {providers.map(provider => (
-          <div key={provider._id} className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col">
+          <div key={provider._id} className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl shadow-sm border border-zinc-700/50 p-6 flex flex-col">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center bg-${provider.color}-50 text-${provider.color}-600`}>
@@ -125,8 +125,8 @@ export default function AIConfigClient() {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900">{provider.name}</h3>
-                  <p className="text-xs text-gray-500">{provider.defaultModel}</p>
+                  <h3 className="text-lg font-bold text-zinc-100">{provider.name}</h3>
+                  <p className="text-xs text-zinc-400">{provider.defaultModel}</p>
                 </div>
               </div>
               <span className={`px-2 py-1 text-xs font-semibold rounded-full ${provider.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
@@ -134,15 +134,15 @@ export default function AIConfigClient() {
               </span>
             </div>
             
-            <p className="text-sm text-gray-600 mb-4 flex-grow">{provider.description}</p>
+            <p className="text-sm text-zinc-400 mb-4 flex-grow">{provider.description}</p>
             
-            <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-xl mb-4 truncate">
-              <span className="font-semibold text-gray-700">Endpoint: </span>
+            <div className="text-xs text-zinc-400 bg-zinc-950/50 p-3 rounded-xl mb-4 truncate">
+              <span className="font-semibold text-zinc-300">Endpoint: </span>
               {provider.endpointUrl || "N/A"}
             </div>
 
-            <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
-              <p className="text-xs text-gray-500">
+            <div className="flex items-center justify-between mt-auto pt-4 border-t border-zinc-800/60">
+              <p className="text-xs text-zinc-400">
                 {provider.allowTenantOverride ? "Tenants can BYOK" : "Global Billing (Owner Key)"}
               </p>
               <div className="flex gap-2">
@@ -169,31 +169,31 @@ export default function AIConfigClient() {
       </div>
 
       {providers.length > 0 && (
-        <div className="mt-12 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="p-6 border-b border-gray-200 bg-gray-50">
-            <h2 className="text-lg font-bold text-gray-900">Tenant Permissions</h2>
-            <p className="text-sm text-gray-500">Grant or revoke access to AI Providers for specific companies.</p>
+        <div className="mt-12 bg-zinc-900/40 backdrop-blur-xl rounded-2xl shadow-sm border border-zinc-700/50 overflow-hidden">
+          <div className="p-6 border-b border-zinc-700/50 bg-zinc-950/50">
+            <h2 className="text-lg font-bold text-zinc-100">Tenant Permissions</h2>
+            <p className="text-sm text-zinc-400">Grant or revoke access to AI Providers for specific companies.</p>
           </div>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+              <thead className="bg-zinc-950/50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Company</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Plan</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-zinc-400 uppercase tracking-wider">Company</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-zinc-400 uppercase tracking-wider">Plan</th>
                   {providers.map(p => (
-                    <th key={p._id} className="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    <th key={p._id} className="px-6 py-3 text-center text-xs font-semibold text-zinc-400 uppercase tracking-wider">
                       {p.name}
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-zinc-900/40 backdrop-blur-xl divide-y divide-gray-200">
                 {companies.map(company => (
                   <tr key={company._id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-100">
                       {company.name}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-400">
                       <span className="px-2 py-1 bg-gray-100 rounded-md">{company.plan || "Basic"}</span>
                     </td>
                     {providers.map(provider => {
@@ -204,7 +204,7 @@ export default function AIConfigClient() {
                             onClick={() => handleTogglePermission(company._id, provider._id, hasAccess)}
                             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${hasAccess ? 'bg-emerald-500' : 'bg-gray-200'}`}
                           >
-                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${hasAccess ? 'translate-x-6' : 'translate-x-1'}`} />
+                            <span className={`inline-block h-4 w-4 transform rounded-full bg-zinc-900/40 backdrop-blur-xl transition-transform ${hasAccess ? 'translate-x-6' : 'translate-x-1'}`} />
                           </button>
                         </td>
                       );
@@ -220,58 +220,58 @@ export default function AIConfigClient() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
-          <div className="relative bg-white border border-gray-300 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900">{editingProvider ? 'Edit' : 'Create'} AI Provider</h2>
+          <div className="relative bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-zinc-700/50">
+              <h2 className="text-xl font-bold text-zinc-100">{editingProvider ? 'Edit' : 'Create'} AI Provider</h2>
             </div>
             <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Provider Name</label>
+                <label className="block text-sm font-medium text-zinc-300 mb-1">Provider Name</label>
                 <input 
                   type="text" 
                   value={formData.name}
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
                   placeholder="e.g. OpenAI"
-                  className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none" 
+                  className="w-full bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-indigo-500 outline-none" 
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <label className="block text-sm font-medium text-zinc-300 mb-1">Description</label>
                 <input 
                   type="text" 
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none" 
+                  className="w-full bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-indigo-500 outline-none" 
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Endpoint URL</label>
+                <label className="block text-sm font-medium text-zinc-300 mb-1">Endpoint URL</label>
                 <input 
                   type="text" 
                   value={formData.endpointUrl}
                   onChange={(e) => setFormData({...formData, endpointUrl: e.target.value})}
                   placeholder="https://api.openai.com/v1"
-                  className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none" 
+                  className="w-full bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-indigo-500 outline-none" 
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Global API Key</label>
+                <label className="block text-sm font-medium text-zinc-300 mb-1">Global API Key</label>
                 <input 
                   type="password" 
                   value={formData.apiKey}
                   onChange={(e) => setFormData({...formData, apiKey: e.target.value})}
                   placeholder="sk-..."
-                  className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none" 
+                  className="w-full bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-indigo-500 outline-none" 
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Default Model Name</label>
+                <label className="block text-sm font-medium text-zinc-300 mb-1">Default Model Name</label>
                 <input 
                   type="text" 
                   value={formData.defaultModel}
                   onChange={(e) => setFormData({...formData, defaultModel: e.target.value})}
                   placeholder="gpt-4o"
-                  className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2 text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none" 
+                  className="w-full bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-indigo-500 outline-none" 
                 />
               </div>
               
@@ -280,15 +280,15 @@ export default function AIConfigClient() {
                   type="checkbox" 
                   checked={formData.allowTenantOverride}
                   onChange={(e) => setFormData({...formData, allowTenantOverride: e.target.checked})}
-                  className="h-4 w-4 text-indigo-600 rounded border-gray-300" 
+                  className="h-4 w-4 text-indigo-600 rounded border-zinc-700/50" 
                 />
-                <label className="text-sm font-medium text-gray-700">Allow Tenants to override with their own API Keys (BYOK)</label>
+                <label className="text-sm font-medium text-zinc-300">Allow Tenants to override with their own API Keys (BYOK)</label>
               </div>
             </div>
-            <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
+            <div className="p-4 bg-zinc-950/50 border-t border-zinc-700/50 flex justify-end gap-3">
               <button 
                 onClick={() => setIsModalOpen(false)}
-                className="px-5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-5 py-2 text-sm font-medium text-zinc-300 bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-lg hover:bg-zinc-950/50 transition-colors"
               >
                 Cancel
               </button>

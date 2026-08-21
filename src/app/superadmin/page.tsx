@@ -63,41 +63,41 @@ export default function SuperadminPage() {
   return (
     <div className="max-w-5xl mx-auto space-y-8 fade-in pb-12">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Role Management</h1>
-        <p className="text-gray-600 mt-1">Create custom roles (like Founder, Manager) and assign explicit permissions.</p>
+        <h1 className="text-3xl font-bold text-zinc-100 tracking-tight">Role Management</h1>
+        <p className="text-zinc-400 mt-1">Create custom roles (like Founder, Manager) and assign explicit permissions.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Create Role Form */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm h-fit">
+        <div className="bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-2xl p-6 shadow-sm h-fit">
           <h2 className="text-xl font-semibold mb-6">Create New Role</h2>
           <form onSubmit={createRole} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Role Name</label>
+              <label className="block text-sm font-medium text-zinc-300 mb-1.5">Role Name</label>
               <input
                 type="text"
                 value={newRole}
                 onChange={(e) => setNewRole(e.target.value)}
                 placeholder="e.g. Founder"
-                className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                className="w-full px-4 py-2 bg-zinc-950/50 border border-zinc-700/50 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                 required
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">Assign Permissions</label>
+              <label className="block text-sm font-medium text-zinc-300 mb-3">Assign Permissions</label>
               <div className="space-y-3">
                 {AVAILABLE_PERMISSIONS.map(perm => (
                   <label key={perm.id} className="flex items-start gap-3 cursor-pointer">
                     <input 
                       type="checkbox" 
-                      className="mt-1 w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                      className="mt-1 w-4 h-4 text-blue-600 rounded border-zinc-700/50 focus:ring-blue-500"
                       checked={selectedPermissions.includes(perm.id)}
                       onChange={() => togglePermission(perm.id)}
                     />
                     <div>
-                      <p className="text-sm font-medium text-gray-900">{perm.label}</p>
-                      <p className="text-xs text-gray-500">{perm.id}</p>
+                      <p className="text-sm font-medium text-zinc-100">{perm.label}</p>
+                      <p className="text-xs text-zinc-400">{perm.id}</p>
                     </div>
                   </label>
                 ))}
@@ -115,13 +115,13 @@ export default function SuperadminPage() {
         </div>
 
         {/* Roles List */}
-        <div className="md:col-span-2 bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+        <div className="md:col-span-2 bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-2xl p-6 shadow-sm">
           <h2 className="text-xl font-semibold mb-6">Active Roles</h2>
           <div className="space-y-4">
             {roles.map((role) => (
-              <div key={role._id} className="flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-gray-50 border border-gray-100 rounded-xl gap-4">
+              <div key={role._id} className="flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-zinc-950/50 border border-zinc-800/60 rounded-xl gap-4">
                 <div>
-                  <span className="text-lg font-bold text-gray-900 capitalize block mb-1">{role.name}</span>
+                  <span className="text-lg font-bold text-zinc-100 capitalize block mb-1">{role.name}</span>
                   <div className="flex flex-wrap gap-2 mt-2">
                     {role.permissions && role.permissions.length > 0 ? (
                       role.permissions.map((p: string) => (
@@ -130,7 +130,7 @@ export default function SuperadminPage() {
                         </span>
                       ))
                     ) : (
-                      <span className="text-xs text-gray-500 italic">No special permissions</span>
+                      <span className="text-xs text-zinc-400 italic">No special permissions</span>
                     )}
                   </div>
                 </div>
@@ -143,7 +143,7 @@ export default function SuperadminPage() {
               </div>
             ))}
             {roles.length === 0 && (
-              <p className="text-gray-500 text-center py-8">No roles defined in the system.</p>
+              <p className="text-zinc-400 text-center py-8">No roles defined in the system.</p>
             )}
           </div>
         </div>

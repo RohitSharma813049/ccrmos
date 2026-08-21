@@ -219,28 +219,28 @@ export default function CalendarClient() {
     <div className="max-w-7xl mx-auto space-y-6">
       
       {/* Header */}
-      <div className="flex items-center justify-between bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+      <div className="flex items-center justify-between bg-zinc-900/40 backdrop-blur-xl p-6 rounded-2xl border border-zinc-700/50 shadow-sm">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center border border-purple-100">
             <CalendarIcon className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-serif font-bold text-slate-900">
+            <h1 className="text-2xl font-serif font-bold text-zinc-100">
               {currentDate.toLocaleString("default", { month: "long" })} {year}
             </h1>
-            <p className="text-slate-500 text-sm font-medium">Manage your schedule and meetings</p>
+            <p className="text-zinc-400 text-sm font-medium">Manage your schedule and meetings</p>
           </div>
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg p-1">
-            <button onClick={prevMonth} className="p-1.5 hover:bg-white rounded hover:shadow-sm text-slate-600">
+          <div className="flex items-center gap-1 bg-zinc-950/50 border border-zinc-700/50 rounded-lg p-1">
+            <button onClick={prevMonth} className="p-1.5 hover:bg-zinc-900/40 backdrop-blur-xl rounded hover:shadow-sm text-zinc-400">
               <ChevronLeft className="w-5 h-5" />
             </button>
-            <button onClick={() => setCurrentDate(new Date())} className="px-3 py-1.5 text-sm font-medium hover:bg-white rounded hover:shadow-sm text-slate-700">
+            <button onClick={() => setCurrentDate(new Date())} className="px-3 py-1.5 text-sm font-medium hover:bg-zinc-900/40 backdrop-blur-xl rounded hover:shadow-sm text-zinc-300">
               Today
             </button>
-            <button onClick={nextMonth} className="p-1.5 hover:bg-white rounded hover:shadow-sm text-slate-600">
+            <button onClick={nextMonth} className="p-1.5 hover:bg-zinc-900/40 backdrop-blur-xl rounded hover:shadow-sm text-zinc-400">
               <ChevronRight className="w-5 h-5" />
             </button>
           </div>
@@ -254,11 +254,11 @@ export default function CalendarClient() {
       </div>
 
       {/* Calendar Grid */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl border border-zinc-700/50 shadow-sm overflow-hidden">
         {/* Days of week header */}
-        <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50/50">
+        <div className="grid grid-cols-7 border-b border-zinc-700/50 bg-zinc-950/50/50">
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-            <div key={d} className="py-3 text-center text-xs font-bold text-slate-500 uppercase tracking-wider border-r border-slate-100 last:border-r-0">
+            <div key={d} className="py-3 text-center text-xs font-bold text-zinc-400 uppercase tracking-wider border-r border-zinc-800/60 last:border-r-0">
               {d}
             </div>
           ))}
@@ -273,14 +273,14 @@ export default function CalendarClient() {
             return (
               <div 
                 key={idx} 
-                className={`min-h-[120px] bg-white p-2 ${!day ? 'bg-slate-50' : 'hover:bg-slate-50 cursor-pointer transition-colors'} ${isToday ? 'ring-2 ring-inset ring-purple-600' : ''}`}
+                className={`min-h-[120px] bg-zinc-900/40 backdrop-blur-xl p-2 ${!day ? 'bg-zinc-950/50' : 'hover:bg-zinc-950/50 cursor-pointer transition-colors'} ${isToday ? 'ring-2 ring-inset ring-purple-600' : ''}`}
                 onClick={() => {
                   if (day) openNewEventModal(day);
                 }}
               >
                 {day && (
                   <div className="flex flex-col h-full">
-                    <span className={`text-sm font-semibold mb-1 w-7 h-7 flex items-center justify-center rounded-full ${isToday ? 'bg-purple-600 text-white' : 'text-slate-700'}`}>
+                    <span className={`text-sm font-semibold mb-1 w-7 h-7 flex items-center justify-center rounded-full ${isToday ? 'bg-purple-600 text-white' : 'text-zinc-300'}`}>
                       {day}
                     </span>
                     <div className="space-y-1 overflow-y-auto max-h-[80px] custom-scrollbar pr-1">
@@ -320,10 +320,10 @@ export default function CalendarClient() {
       {isSidePanelOpen && selectedEvent && (
         <>
           <div className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-[9998]" onClick={() => setIsSidePanelOpen(false)} />
-          <div className="fixed right-0 top-0 bottom-0 w-[400px] bg-white shadow-2xl z-[9999] border-l border-slate-200 flex flex-col transform transition-transform duration-300">
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-              <h3 className="font-serif font-bold text-xl text-slate-900">Event Details</h3>
-              <button onClick={() => setIsSidePanelOpen(false)} className="text-slate-400 hover:text-slate-600 text-2xl font-light">&times;</button>
+          <div className="fixed right-0 top-0 bottom-0 w-[400px] bg-zinc-900/40 backdrop-blur-xl shadow-2xl z-[9999] border-l border-zinc-700/50 flex flex-col transform transition-transform duration-300">
+            <div className="p-6 border-b border-zinc-800/60 flex items-center justify-between">
+              <h3 className="font-serif font-bold text-xl text-zinc-100">Event Details</h3>
+              <button onClick={() => setIsSidePanelOpen(false)} className="text-slate-400 hover:text-zinc-400 text-2xl font-light">&times;</button>
             </div>
             
             <div className="p-6 flex-1 overflow-y-auto space-y-6">
@@ -331,15 +331,15 @@ export default function CalendarClient() {
                 <span className={`inline-block px-2.5 py-1 text-xs font-bold rounded-full mb-3 ${selectedEvent.type === 'Meeting' ? 'bg-blue-100 text-blue-700' : selectedEvent.type === 'Site Visit' ? 'bg-orange-100 text-orange-700' : 'bg-purple-100 text-purple-700'}`}>
                   {selectedEvent.type}
                 </span>
-                <h4 className="text-2xl font-bold text-slate-900">{selectedEvent.title}</h4>
+                <h4 className="text-2xl font-bold text-zinc-100">{selectedEvent.title}</h4>
               </div>
 
-              <div className="space-y-4 bg-slate-50 p-5 rounded-xl border border-slate-100">
+              <div className="space-y-4 bg-zinc-950/50 p-5 rounded-xl border border-zinc-800/60">
                 <div className="flex items-start gap-3">
                   <Clock className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-sm font-semibold text-slate-900">Date & Time</p>
-                    <p className="text-sm text-slate-600">{new Date(selectedEvent.startTime).toLocaleDateString()} • {new Date(selectedEvent.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(selectedEvent.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                    <p className="text-sm font-semibold text-zinc-100">Date & Time</p>
+                    <p className="text-sm text-zinc-400">{new Date(selectedEvent.startTime).toLocaleDateString()} • {new Date(selectedEvent.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(selectedEvent.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                   </div>
                 </div>
 
@@ -347,8 +347,8 @@ export default function CalendarClient() {
                   <div className="flex items-start gap-3">
                     <MapPin className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-sm font-semibold text-slate-900">Location</p>
-                      <p className="text-sm text-slate-600">{selectedEvent.location}</p>
+                      <p className="text-sm font-semibold text-zinc-100">Location</p>
+                      <p className="text-sm text-zinc-400">{selectedEvent.location}</p>
                     </div>
                   </div>
                 )}
@@ -357,10 +357,10 @@ export default function CalendarClient() {
                   <div className="flex items-start gap-3">
                     <Users className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-sm font-semibold text-slate-900">Attendees</p>
+                      <p className="text-sm font-semibold text-zinc-100">Attendees</p>
                       <div className="flex flex-wrap gap-1 mt-1">
                         {selectedEvent.attendees.map((email, i) => (
-                          <span key={i} className="px-2 py-1 bg-white border border-slate-200 rounded text-xs text-slate-600">{email}</span>
+                          <span key={i} className="px-2 py-1 bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded text-xs text-zinc-400">{email}</span>
                         ))}
                       </div>
                     </div>
@@ -369,8 +369,8 @@ export default function CalendarClient() {
               </div>
             </div>
 
-            <div className="p-6 border-t border-slate-100 bg-slate-50 flex gap-3">
-              <button onClick={openEditModal} className="flex-1 py-2.5 bg-white border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors">
+            <div className="p-6 border-t border-zinc-800/60 bg-zinc-950/50 flex gap-3">
+              <button onClick={openEditModal} className="flex-1 py-2.5 bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-lg text-sm font-semibold text-zinc-300 hover:bg-zinc-950/50 transition-colors">
                 Edit Event
               </button>
               <button onClick={handleDeleteEvent} className="flex-1 py-2.5 bg-red-50 border border-red-200 rounded-lg text-sm font-semibold text-red-600 hover:bg-red-100 transition-colors">
@@ -384,42 +384,42 @@ export default function CalendarClient() {
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-              <h3 className="font-bold text-lg text-slate-900">{selectedEvent ? 'Edit Event' : 'Schedule Event'}</h3>
-              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+          <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+            <div className="px-6 py-4 border-b border-zinc-800/60 flex items-center justify-between">
+              <h3 className="font-bold text-lg text-zinc-100">{selectedEvent ? 'Edit Event' : 'Schedule Event'}</h3>
+              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-zinc-400 text-xl font-bold">&times;</button>
             </div>
             <form onSubmit={handleSaveEvent} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Title *</label>
+                <label className="block text-sm font-medium text-zinc-300 mb-1">Title *</label>
                 <input required type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="e.g. Discuss Q3 targets" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Type *</label>
-                  <select value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white">
+                  <label className="block text-sm font-medium text-zinc-300 mb-1">Type *</label>
+                  <select value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-zinc-900/40 backdrop-blur-xl">
                     <option value="Task">Task</option>
                     <option value="Meeting">Meeting</option>
                     <option value="Site Visit">Site Visit</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Date *</label>
+                  <label className="block text-sm font-medium text-zinc-300 mb-1">Date *</label>
                   <input required type="date" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Start Time *</label>
+                  <label className="block text-sm font-medium text-zinc-300 mb-1">Start Time *</label>
                   <input required type="time" value={formData.startTime} onChange={e => setFormData({...formData, startTime: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">End Time *</label>
+                  <label className="block text-sm font-medium text-zinc-300 mb-1">End Time *</label>
                   <input required type="time" value={formData.endTime} onChange={e => setFormData({...formData, endTime: e.target.value})} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Location (Optional)</label>
+                <label className="block text-sm font-medium text-zinc-300 mb-1">Location (Optional)</label>
                 <div className="flex gap-2">
                   <div className="relative flex-1">
                     <MapPin className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
@@ -440,7 +440,7 @@ export default function CalendarClient() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Attendees (Emails, comma separated)</label>
+                <label className="block text-sm font-medium text-zinc-300 mb-1">Attendees (Emails, comma separated)</label>
                 <div className="relative">
                   <Users className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                   <input type="text" value={formData.attendees} onChange={e => setFormData({...formData, attendees: e.target.value})} className="w-full pl-9 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="john@example.com, sarah@..." />
@@ -449,7 +449,7 @@ export default function CalendarClient() {
                 {/* Team Selection */}
                 {teams.length > 0 && (
                   <div className="mt-3">
-                    <span className="text-xs font-semibold text-slate-500 mb-1 block">Add Entire Team:</span>
+                    <span className="text-xs font-semibold text-zinc-400 mb-1 block">Add Entire Team:</span>
                     <div className="flex flex-wrap gap-2">
                       {teams.map((team, i) => (
                         <button 
@@ -461,7 +461,7 @@ export default function CalendarClient() {
                             const newEmails = Array.from(new Set([...current, ...teamEmails]));
                             setFormData({...formData, attendees: newEmails.join(', ')});
                           }}
-                          className="text-xs px-2.5 py-1 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-full text-slate-700 font-medium transition-colors"
+                          className="text-xs px-2.5 py-1 bg-slate-100 hover:bg-slate-200 border border-zinc-700/50 rounded-full text-zinc-300 font-medium transition-colors"
                         >
                           + {team}
                         </button>
@@ -473,7 +473,7 @@ export default function CalendarClient() {
                 {/* Individual User Selection */}
                 {systemUsers.length > 0 && (
                   <div className="mt-3">
-                    <span className="text-xs font-semibold text-slate-500 mb-1 block">Quick Add Users:</span>
+                    <span className="text-xs font-semibold text-zinc-400 mb-1 block">Quick Add Users:</span>
                     <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto custom-scrollbar">
                       {systemUsers.map((u, i) => (
                         <button 
@@ -496,7 +496,7 @@ export default function CalendarClient() {
               </div>
 
               <div className="flex justify-end gap-3 pt-4 border-t mt-6">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2 border rounded-lg text-slate-700 font-medium hover:bg-slate-50">Cancel</button>
+                <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2 border rounded-lg text-zinc-300 font-medium hover:bg-zinc-950/50">Cancel</button>
                 <button type="submit" disabled={saving} className="px-5 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 disabled:opacity-50">
                   {saving ? (selectedEvent ? 'Saving...' : 'Scheduling...') : (selectedEvent ? 'Save Changes' : 'Schedule')}
                 </button>

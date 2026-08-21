@@ -87,25 +87,25 @@ export default function PermissionMatrix({ role, isOpen, onClose }: PermissionMa
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
+      <div className="relative bg-zinc-900/40 backdrop-blur-xl rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
         
-        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-white z-10 shrink-0">
-          <h2 className="text-xl font-bold text-gray-900">
+        <div className="p-6 border-b border-zinc-800/60 flex justify-between items-center bg-zinc-900/40 backdrop-blur-xl z-10 shrink-0">
+          <h2 className="text-xl font-bold text-zinc-100">
             Permission Matrix: <span className="text-blue-600">{role.name}</span>
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 p-1">
+          <button onClick={onClose} className="text-gray-400 hover:text-zinc-400 p-1">
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="overflow-y-auto p-6 bg-gray-50 flex-grow">
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+        <div className="overflow-y-auto p-6 bg-zinc-950/50 flex-grow">
+          <div className="bg-zinc-900/40 backdrop-blur-xl rounded-xl border border-zinc-700/50 overflow-hidden shadow-sm">
             <table className="w-full border-collapse">
               <thead>
-                <tr className="border-b border-gray-200 bg-gray-50/50">
-                  <th className="text-left py-4 px-6 font-semibold text-gray-700 text-sm">Module</th>
+                <tr className="border-b border-zinc-700/50 bg-zinc-950/50/50">
+                  <th className="text-left py-4 px-6 font-semibold text-zinc-300 text-sm">Module</th>
                   {ACTIONS.map((action) => (
-                    <th key={action} className="text-center py-4 px-6 font-semibold text-gray-700 text-sm capitalize">
+                    <th key={action} className="text-center py-4 px-6 font-semibold text-zinc-300 text-sm capitalize">
                       {action}
                     </th>
                   ))}
@@ -113,13 +113,13 @@ export default function PermissionMatrix({ role, isOpen, onClose }: PermissionMa
               </thead>
               <tbody>
                 {dynamicModules.map((module) => (
-                  <tr key={module} className="border-b border-gray-100 hover:bg-blue-50/30 transition-colors">
-                    <td className="py-4 px-6 font-medium text-gray-900 text-sm">{module}</td>
+                  <tr key={module} className="border-b border-zinc-800/60 hover:bg-blue-50/30 transition-colors">
+                    <td className="py-4 px-6 font-medium text-zinc-100 text-sm">{module}</td>
                     {ACTIONS.map((action) => (
                       <td key={`${module}-${action}`} className="text-center py-4 px-6">
                         <input
                           type="checkbox"
-                          className="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 transition-all cursor-pointer accent-blue-600"
+                          className="w-5 h-5 text-blue-600 rounded border-zinc-700/50 focus:ring-blue-500 transition-all cursor-pointer accent-blue-600"
                           checked={permissions[module]?.[action] || false}
                           onChange={() => handleToggle(module, action)}
                         />
@@ -132,11 +132,11 @@ export default function PermissionMatrix({ role, isOpen, onClose }: PermissionMa
           </div>
         </div>
 
-        <div className="p-6 border-t border-gray-100 bg-white flex justify-end space-x-3 shrink-0">
+        <div className="p-6 border-t border-zinc-800/60 bg-zinc-900/40 backdrop-blur-xl flex justify-end space-x-3 shrink-0">
           <button 
             onClick={onClose} 
             disabled={loading}
-            className="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors"
+            className="px-5 py-2.5 text-sm font-medium text-zinc-300 bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-xl hover:bg-zinc-950/50 transition-colors"
           >
             Cancel
           </button>

@@ -11,7 +11,7 @@ export default function Home() {
 
       {/* Navbar Placeholder */}
       <header className="w-full flex justify-between items-center px-8 py-6 z-10 glass-panel border-x-0 border-t-0">
-        <div className="text-2xl font-bold tracking-tighter text-gray-900">
+        <div className="text-2xl font-bold tracking-tighter text-zinc-100">
           CRM<span className="text-primary">OS</span>
         </div>
         <nav className="flex gap-4 items-center">
@@ -30,7 +30,7 @@ export default function Home() {
           </div>
           <h1 className="text-6xl sm:text-7xl font-bold tracking-tight mb-8">
             Manage your business with <br className="hidden sm:block" />
-            <span className="text-gray-900 animate-[slide-up_1.2s_ease-out_forwards]">
+            <span className="text-zinc-100 animate-[slide-up_1.2s_ease-out_forwards]">
               ultimate clarity.
             </span>
           </h1>

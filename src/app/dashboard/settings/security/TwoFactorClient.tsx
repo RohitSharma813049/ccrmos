@@ -144,7 +144,7 @@ export default function TwoFactorClient() {
             <h3 className="font-semibold text-foreground mb-2">1. Scan the QR Code</h3>
             <p className="text-sm text-muted-foreground mb-4">Open your authenticator app (e.g. Google Authenticator, Authy) and scan this QR code.</p>
             {qrCodeUrl && (
-              <div className="bg-white p-4 inline-block rounded-xl border border-border shadow-sm">
+              <div className="bg-zinc-900/40 backdrop-blur-xl p-4 inline-block rounded-xl border border-border shadow-sm">
                 <img src={qrCodeUrl} alt="2FA QR Code" className="w-40 h-40" />
               </div>
             )}
