@@ -9,6 +9,7 @@ import { logActivity } from "@/modules/audit/services/audit.service";
 import { getRecordScopeFilter, filterFields } from "@/lib/permissions";
 import { parseFiltersToMongo } from "@/utils/parseFilters";
 import { sendPushNotification } from "@/modules/notifications/services/notifications.service";
+import { createGoogleCalendarEvent } from "@/lib/googleClient";
 
 function errorResponse(error: any) {
   const message = error?.message || "Internal server error";
@@ -182,6 +183,24 @@ export async function PUT(req: Request) {
         status,
         stageId
       }).catch(console.error);
+    }
+
+    if (updateData.nextFollowUpDate && updateData.nextFollowUpDate !== lead.nextFollowUpDate?.toISOString()) {
+      try {
+        const companyIdStr = user.companyId ? user.companyId.toString() : (user.impersonatedFounderId ? user.impersonatedFounderId.toString() : undefined);
+        const startTime = updateData.nextFollowUpDate;
+        const endDate = new Date(new Date(startTime).getTime() + 30 * 60000).toISOString(); // 30 min duration
+        
+        await createGoogleCalendarEvent(user._id.toString(), companyIdStr || '', {
+          summary: `Follow up with ${lead.firstName} ${lead.lastName || ''}`,
+          description: updateData.lastRemark || 'CRM Scheduled Follow-up',
+          startTime,
+          endTime: endDate
+        });
+        console.log(`[Google Calendar] Follow up created for lead ${lead._id}`);
+      } catch (err: any) {
+        console.warn(`[Google Calendar Error] Could not create event: ${err.message}`);
+      }
     }
 
     Object.assign(lead, updateData);

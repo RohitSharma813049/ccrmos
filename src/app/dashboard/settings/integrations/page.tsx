@@ -558,6 +558,33 @@ export default function IntegrationsPage() {
 
   // Google Workspace
   const [isGoogleModalOpen, setIsGoogleModalOpen] = useState(false);
+  const [googleConfig, setGoogleConfig] = useState({ clientId: "", clientSecret: "" });
+  const [googleSaving, setGoogleSaving] = useState(false);
+
+  const fetchGoogleConfig = async () => {
+    try {
+      const res = await fetch("/api/settings/google_config");
+      const data = await res.json();
+      if (data.value) setGoogleConfig(data.value);
+    } catch (e) {}
+  };
+  useEffect(() => {
+    if (isGoogleModalOpen) fetchGoogleConfig();
+  }, [isGoogleModalOpen]);
+
+  const handleGoogleSave = async () => {
+    setGoogleSaving(true);
+    try {
+      await fetch("/api/settings/google_config", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ value: googleConfig })
+      });
+      setIsGoogleModalOpen(false);
+    } catch (e) {} finally {
+      setGoogleSaving(false);
+    }
+  };
 
   const fetchWaStatus = async () => {
     try {
@@ -1165,16 +1192,48 @@ export default function IntegrationsPage() {
                 <p className="text-sm text-zinc-400 mt-0.5">Connect your Google Account</p>
               </div>
             </div>
-            <div className="p-8 text-center space-y-4">
-              <p className="text-zinc-300 text-sm">
-                OAuth 2.0 Integration coming soon. This will allow you to sync your Google Calendar and send emails directly from your Gmail account.
-              </p>
-              <button 
-                onClick={() => setIsGoogleModalOpen(false)}
-                className="px-5 py-2 text-sm font-medium text-zinc-300 bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-lg hover:bg-zinc-950/50 transition-colors mt-4"
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-zinc-300 mb-1">Google Client ID</label>
+                <input 
+                  type="text" 
+                  value={googleConfig.clientId}
+                  onChange={(e) => setGoogleConfig({...googleConfig, clientId: e.target.value})}
+                  className="w-full bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-emerald-500 outline-none" 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-zinc-300 mb-1">Google Client Secret</label>
+                <input 
+                  type="password" 
+                  value={googleConfig.clientSecret}
+                  onChange={(e) => setGoogleConfig({...googleConfig, clientSecret: e.target.value})}
+                  className="w-full bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-emerald-500 outline-none" 
+                />
+              </div>
+            </div>
+            <div className="p-4 bg-zinc-950/50 border-t border-zinc-700/50 flex justify-between items-center gap-3">
+              <a 
+                href="/api/auth/google"
+                className="px-5 py-2 text-sm font-medium text-emerald-600 bg-emerald-500/10 border border-emerald-500/20 rounded-lg hover:bg-emerald-500/20 transition-colors"
               >
-                Close
-              </button>
+                Sign in with Google
+              </a>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => setIsGoogleModalOpen(false)}
+                  className="px-5 py-2 text-sm font-medium text-zinc-300 bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/50 rounded-lg hover:bg-zinc-950/50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleGoogleSave}
+                  disabled={googleSaving}
+                  className="px-5 py-2 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50"
+                >
+                  {googleSaving ? "Saving..." : "Save API Keys"}
+                </button>
+              </div>
             </div>
           </div>
         </div>

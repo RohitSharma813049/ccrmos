@@ -5,6 +5,7 @@ import { requireAuthenticatedUser, requirePermission } from '@/lib/auth-utils';
 import { buildTenantQuery } from '@/lib/access-control';
 import { sendWhatsAppMessage } from '@/lib/whatsappClient';
 import { sendTwilioSMS } from '@/lib/twilioClient';
+import { sendGmail } from '@/lib/googleClient';
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   await dbConnect();
@@ -29,8 +30,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     if (channel === "Email") {
       activityType = 'Email Sent';
       activityDescription = subject ? `Subject: ${subject}\n\n${message}` : message;
-      // TODO: Simulated Email send logic
-      console.log(`[SMTP SIMULATION] Sending email to ${lead.email} with subject: ${subject}`);
+      try {
+        if (!lead.email) {
+          return NextResponse.json({ error: 'Lead does not have an email address' }, { status: 400 });
+        }
+        const companyIdStr = user.companyId ? user.companyId.toString() : (user.impersonatedFounderId ? user.impersonatedFounderId.toString() : undefined);
+        await sendGmail(user._id.toString(), companyIdStr || '', lead.email, subject || 'Message from CRM', message);
+      } catch (gmailError: any) {
+        // Fallback to simulated SMTP if Google isn't connected
+        console.warn(`[SMTP SIMULATION] Gmail failed (${gmailError.message}). Falling back to simulation for ${lead.email}`);
+      }
     } else if (channel === "WhatsApp") {
       activityType = 'WhatsApp Sent';
       try {
