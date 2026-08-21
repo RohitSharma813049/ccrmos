@@ -6,6 +6,7 @@ declare global {
   var whatsappClient: Client | undefined;
   var whatsappQrCodeUrl: string | undefined;
   var isWhatsAppReady: boolean;
+  var isWhatsAppInitializing: boolean;
 }
 
 let client: Client;
@@ -66,14 +67,16 @@ if (!client.listenerCount('qr')) {
   });
 
   // Prevent Puppeteer from crashing the Vercel build process
-  // Vercel sets CI=1 during the build phase, but not at runtime
-  if (process.env.CI || process.env.VERCEL_ENV === 'production' && !process.env.NEXT_PUBLIC_SITE_URL) {
+  if (process.env.CI || (process.env.VERCEL_ENV === 'production' && !process.env.NEXT_PUBLIC_SITE_URL)) {
     console.log('Skipping WhatsApp initialization during build phase');
   } else {
-    try {
-      client.initialize();
-    } catch (e) {
-      console.log('WhatsApp client already initializing', e);
+    if (!global.isWhatsAppInitializing) {
+      global.isWhatsAppInitializing = true;
+      console.log('Initializing WhatsApp client...');
+      client.initialize().catch(e => {
+        console.error('WhatsApp client initialization error:', e);
+        global.isWhatsAppInitializing = false;
+      });
     }
   }
 }
