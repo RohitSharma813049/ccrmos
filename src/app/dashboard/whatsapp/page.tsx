@@ -47,7 +47,7 @@ export default function WhatsAppPage() {
               <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
               <p className="text-sm font-medium text-red-700">WhatsApp not connected</p>
             </div>
-            <Link href="/dashboard/whatsapp/connect" className="text-xs bg-red-100 hover:bg-red-200 text-red-700 font-bold px-3 py-1 rounded-md transition-colors ml-8">
+            <Link href="/settings?tab=whatsapp" className="text-xs bg-red-100 hover:bg-red-200 text-red-700 font-bold px-3 py-1 rounded-md transition-colors ml-8">
               Connect Now
             </Link>
           </div>

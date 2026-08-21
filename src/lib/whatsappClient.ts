@@ -1,183 +1,109 @@
-import { Client, LocalAuth } from 'whatsapp-web.js';
-import chromium from '@sparticuz/chromium-min';
-import qrcode from 'qrcode';
+import SystemSetting from '@/modules/settings/schemas/SystemSetting';
 import dbConnect from './db';
 import Lead from '@/modules/leads/schemas/Lead';
 
-type WhatsAppStatus = 'DISCONNECTED' | 'INITIALIZING' | 'QR_READY' | 'CONNECTED';
-
-interface WhatsAppSession {
-  client: Client | null;
-  qr: string | null;
-  status: WhatsAppStatus;
-  timeoutId?: NodeJS.Timeout;
+interface WhatsAppMetaConfig {
+  accessToken: string;
+  phoneNumberId: string;
+  businessAccountId: string;
+  webhookVerifyToken: string;
 }
 
-// Use a global variable to persist multiple clients across hot reloads
-declare global {
-  var _whatsappSessions: Map<string, WhatsAppSession>;
-}
+export const getWhatsAppConfig = async (companyId: string | null): Promise<WhatsAppMetaConfig | null> => {
+  await dbConnect();
+  const setting = await SystemSetting.findOne({ key: 'whatsapp_meta', companyId });
+  if (!setting || !setting.value) return null;
+  return setting.value as WhatsAppMetaConfig;
+};
 
-if (!global._whatsappSessions) {
-  global._whatsappSessions = new Map<string, WhatsAppSession>();
-}
-
-export const getWhatsAppStatus = (scopeId: string) => {
-  const session = global._whatsappSessions.get(scopeId) || { status: 'DISCONNECTED', qr: null, client: null };
+export const getWhatsAppStatus = async (companyId: string) => {
+  const config = await getWhatsAppConfig(companyId);
   return {
-    status: session.status,
-    qr: session.qr,
+    isConfigured: !!(config?.accessToken && config?.phoneNumberId),
+    status: config?.accessToken ? 'CONFIGURED' : 'NOT_CONFIGURED'
   };
 };
 
-export const initializeWhatsAppClient = async (companyId: string, scopeId: string = companyId) => {
-  let session = global._whatsappSessions.get(scopeId);
+export const sendWhatsAppMessage = async (companyId: string, to: string, message: string) => {
+  const config = await getWhatsAppConfig(companyId);
   
-  if (session && (session.status === 'INITIALIZING' || session.status === 'CONNECTED')) {
-    return;
+  if (!config || !config.accessToken || !config.phoneNumberId) {
+    throw new Error('WhatsApp Meta API is not configured for this company.');
   }
 
-  session = {
-    client: null,
-    qr: null,
-    status: 'INITIALIZING'
-  };
-  global._whatsappSessions.set(scopeId, session);
+  // Clean phone number: remove non-digits
+  let cleanedNumber = to.replace(/\D/g, '');
   
-  const initTimeout = setTimeout(() => {
-    const s = global._whatsappSessions.get(scopeId);
-    if (s && s.status === 'INITIALIZING') {
-      console.error(`WhatsApp initialization timed out for scope: ${scopeId}`);
-      global._whatsappSessions.set(scopeId, { ...s, status: 'DISCONNECTED', client: null, qr: null });
+  // Meta Cloud API requires standard E.164 format without the '+'
+  const url = `https://graph.facebook.com/v17.0/${config.phoneNumberId}/messages`;
+  
+  const payload = {
+    messaging_product: 'whatsapp',
+    recipient_type: 'individual',
+    to: cleanedNumber,
+    type: 'text',
+    text: {
+      preview_url: false,
+      body: message
     }
-  }, 45000); // 45 seconds safety timeout
+  };
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${config.accessToken}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+
+  const result = await response.json();
   
-  session.timeoutId = initTimeout;
-  
+  if (!response.ok) {
+    console.error('Meta API Error:', result);
+    throw new Error(result.error?.message || 'Failed to send WhatsApp message via Meta API');
+  }
+
+  return result;
+};
+
+// Function to handle incoming webhook messages and create/update leads
+export const processIncomingWhatsAppMessage = async (companyId: string, fromNumber: string, messageBody: string, pushname?: string) => {
   try {
-    const isProd = process.env.NODE_ENV === 'production';
-    const isServerless = process.env.NODE_ENV === 'production' && process.platform !== 'win32';
-    let puppeteerConfig: any = { headless: true };
+    await dbConnect();
     
-    // Add Browserless WebSocket support for Vercel
-    if (process.env.BROWSERLESS_TOKEN) {
-      puppeteerConfig.browserWSEndpoint = `wss://chrome.browserless.io?token=${process.env.BROWSERLESS_TOKEN}`;
+    // Meta sends numbers without the '+' usually
+    let lead = await Lead.findOne({ companyId, phone: fromNumber });
+
+    if (!lead) {
+      console.log('Creating new WhatsApp lead from Meta:', pushname || fromNumber);
+      lead = await Lead.create({
+        companyId,
+        firstName: pushname || 'WhatsApp',
+        lastName: 'Lead',
+        email: `${fromNumber}@whatsapp.local`, // placeholder
+        phone: fromNumber,
+        status: "New",
+        source: "WhatsApp",
+        customData: {
+          lastMessage: messageBody,
+          whatsappOptIn: true,
+          _importDate: new Date().toISOString()
+        }
+      });
     } else {
-      const executablePath = isServerless
-        ? await chromium.executablePath('https://github.com/Sparticuz/chromium/releases/download/v131.0.1/chromium-v131.0.1-pack.tar')
-        : 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
-      
-      puppeteerConfig.executablePath = executablePath;
-      puppeteerConfig.args = isServerless ? chromium.args : ['--no-sandbox', '--disable-setuid-sandbox'];
+      console.log('Updating existing WhatsApp lead from Meta:', lead?.firstName);
+      lead.customData = { 
+        ...lead.customData, 
+        lastMessage: messageBody, 
+        whatsappOptIn: true
+      };
+      await lead.save();
     }
-
-    const client = new Client({
-      authStrategy: new LocalAuth({ 
-        clientId: scopeId,
-        dataPath: isServerless ? '/tmp/.wwebjs_auth' : './.wwebjs_auth'
-      }),
-      puppeteer: puppeteerConfig
-    });
-
-    let qrCount = 0;
-    const MAX_QR_RETRIES = 5; // Usually generated every ~20 seconds
-
-    client.on('qr', async (qr) => {
-      qrCount++;
-      if (qrCount > MAX_QR_RETRIES) {
-        console.log(`WhatsApp QR limit reached for ${scopeId}. Destroying client to save resources.`);
-        client.destroy();
-        global._whatsappSessions.delete(scopeId);
-        return;
-      }
-
-      console.log(`WhatsApp QR RECEIVED for ${scopeId} (Attempt ${qrCount}/${MAX_QR_RETRIES})`);
-      try {
-        const qrUrl = await qrcode.toDataURL(qr);
-        const s = global._whatsappSessions.get(scopeId);
-        if (s) {
-          global._whatsappSessions.set(scopeId, { ...s, qr: qrUrl, status: 'QR_READY' });
-        }
-      } catch (err) {
-        console.error(`Failed to generate QR code for ${scopeId}`, err);
-      }
-    });
-
-    client.on('ready', () => {
-      console.log(`WhatsApp Client is READY for ${scopeId}!`);
-      const s = global._whatsappSessions.get(scopeId);
-      if (s) {
-        global._whatsappSessions.set(scopeId, { ...s, status: 'CONNECTED', qr: null });
-      }
-    });
-
-    client.on('message', async (msg) => {
-      console.log(`WhatsApp MESSAGE RECEIVED for ${scopeId}`, msg.body);
-      
-      if (msg.from === 'status@broadcast' || msg.from.includes('@g.us')) return;
-
-      try {
-        await dbConnect();
-        
-        const contact = await msg.getContact();
-        const phoneNumber = contact.number;
-        const name = contact.pushname || contact.name || "WhatsApp Lead";
-
-        let lead = await Lead.findOne({ companyId, phone: phoneNumber });
-
-        if (!lead) {
-          console.log('Creating new WhatsApp lead:', name);
-          lead = await Lead.create({
-            companyId,
-            firstName: name,
-            lastName: "WhatsApp",
-            email: `${phoneNumber}@whatsapp.local`,
-            phone: phoneNumber,
-            status: "New",
-            source: "WhatsApp Web",
-            customData: {
-              lastMessage: msg.body,
-              whatsappOptIn: true,
-              integrationScopeId: scopeId,
-              _importDate: new Date().toISOString()
-            }
-          });
-        } else {
-          console.log('Updating existing WhatsApp lead:', name);
-          lead.customData = { 
-            ...lead.customData, 
-            lastMessage: msg.body, 
-            whatsappOptIn: true
-          };
-          await lead.save();
-        }
-      } catch (error) {
-        console.error('Error processing WhatsApp message:', error);
-      }
-    });
-
-    client.on('disconnected', (reason) => {
-      console.log(`WhatsApp Client was DISCONNECTED for ${scopeId}`, reason);
-      global._whatsappSessions.delete(scopeId);
-    });
-
-    session.client = client;
-    global._whatsappSessions.set(scopeId, session);
     
-    await client.initialize();
-    clearTimeout(initTimeout);
-  } catch (err: any) {
-    clearTimeout(initTimeout);
-    console.error(`Failed to initialize WhatsApp client for ${scopeId}:`, err);
-    global._whatsappSessions.delete(scopeId);
-    throw new Error(err.message || 'Failed to initialize Chrome in serverless environment.');
-  }
-};
-
-export const disconnectWhatsAppClient = async (scopeId: string) => {
-  const session = global._whatsappSessions.get(scopeId);
-  if (session && session.client) {
-    await session.client.destroy();
-    global._whatsappSessions.delete(scopeId);
+    return lead;
+  } catch (error) {
+    console.error('Error processing incoming WhatsApp message:', error);
+    throw error;
   }
 };
