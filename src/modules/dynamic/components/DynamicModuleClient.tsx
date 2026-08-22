@@ -22,7 +22,7 @@ export default function DynamicModuleClient({ moduleSchema }: { moduleSchema: an
   async function fetchRecords() {
     setLoading(true);
     try {
-      const res = await fetch(`/api/dynamic-records/?page=${page}&limit=10`);
+      const res = await fetch(`/api/dynamic-records/${moduleSchema._id}?page=${page}&limit=10`);
       if (res.ok) {
         const data = await res.json();
         setRecords(data.records || []);
@@ -50,8 +50,8 @@ export default function DynamicModuleClient({ moduleSchema }: { moduleSchema: an
   async function saveRecord() {
     try {
       const url = editingRecordId 
-        ? `/api/dynamic-records//${editingRecordId}`
-        : `/api/dynamic-records/`;
+        ? `/api/dynamic-records/${moduleSchema._id}/${editingRecordId}`
+        : `/api/dynamic-records/${moduleSchema._id}`;
         
       const method = editingRecordId ? "PUT" : "POST";
       
@@ -77,7 +77,7 @@ export default function DynamicModuleClient({ moduleSchema }: { moduleSchema: an
     const confirmation = window.prompt("Are you sure you want to delete this record?\n\nType DELETE to confirm:");
     if (confirmation !== "DELETE") return;
     try {
-      await fetch(`/api/dynamic-records//${recordId}`, {
+      await fetch(`/api/dynamic-records/${moduleSchema._id}/${recordId}`, {
         method: "DELETE"
       });
       fetchRecords();
