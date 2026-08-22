@@ -16,8 +16,13 @@ export default async function WorkflowBuilderPage({ params }: { params: Promise<
   const user = session?.user as any;
   if (!user) return redirect("/login");
 
-  const workflow = await Workflow.findOne({ _id: id, companyId: user.companyId }).lean();
+  let workflow = await Workflow.findOne({ _id: id, companyId: user.companyId }).lean();
   
+  // If not found, and user is platform owner, check if it's a global workflow
+  if (!workflow && user.hierarchyLevel === 1) {
+    workflow = await Workflow.findOne({ _id: id, companyId: null }).lean();
+  }
+
   if (!workflow) {
     return redirect("/owner/workflow");
   }

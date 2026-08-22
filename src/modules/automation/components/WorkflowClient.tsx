@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 
 export default function WorkflowClient() {
   const [workflows, setWorkflows] = useState<any[]>([]);
@@ -144,6 +145,13 @@ export default function WorkflowClient() {
                     {wf.active && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>}
                     {wf.active ? 'Active' : 'Idle'}
                   </button>
+                  <Link
+                    href={`/owner/workflow/${wf._id}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded-lg text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  >
+                    Canvas
+                  </Link>
                   <button 
                     onClick={(e) => { e.stopPropagation(); deleteWorkflow(wf._id); }} 
                     className="text-destructive/70 hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive rounded"
