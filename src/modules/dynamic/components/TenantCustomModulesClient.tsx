@@ -24,7 +24,12 @@ export default function TenantCustomModulesClient() {
   const isEditable = (mod: any) => {
     if (!session?.user) return false;
     const userCompanyId = (session.user as any).companyId || (session.user as any).impersonatedFounderId;
-    return mod.tenantScope === "Company" && mod.companyId?._id === userCompanyId;
+    
+    // Allow if tenantScope is Company/Tenant OR if the module is explicitly bound to this user's company
+    const isCompanyScope = mod.tenantScope === "Company" || mod.tenantScope === "Tenant" || !mod.tenantScope;
+    const matchesCompany = mod.companyId === userCompanyId || mod.companyId?._id === userCompanyId;
+    
+    return isCompanyScope && matchesCompany;
   };
 
   useEffect(() => {

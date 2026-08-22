@@ -15,13 +15,28 @@ export default function CustomModuleClient({ moduleSchema }: { moduleSchema: any
   const [editingRecordId, setEditingRecordId] = useState<string | null>(null);
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [currentStep, setCurrentStep] = useState(0);
+  const [formStyle, setFormStyle] = useState<string>(moduleSchema.formStyle || "single");
 
   const sections = Array.from(new Set(moduleSchema.fields.map((f: any) => f.section || "General")));
-  const formStyle = moduleSchema.formStyle || "single";
 
   useEffect(() => {
+    fetchFormStyle();
     fetchRecords();
   }, [page]);
+
+  async function fetchFormStyle() {
+    try {
+      const res = await fetch(`/api/settings/form_style_${moduleSchema.name}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.value && (data.value === "single" || data.value === "steps")) {
+          setFormStyle(data.value);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to fetch form style", e);
+    }
+  }
 
   async function fetchRecords() {
     setLoading(true);
