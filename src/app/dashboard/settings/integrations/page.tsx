@@ -1,19 +1,29 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import PageHeader from "@/components/ui/PageHeader";
 import Button from "@/components/ui/Button";
-import { Key, Webhook, CheckCircle2, Copy, Plus, Trash2 } from "lucide-react";
+import { Key, Webhook, CheckCircle2, Copy, Plus, Trash2, ShieldAlert } from "lucide-react";
 import toast from "react-hot-toast";
 
 export default function IntegrationsHub() {
-  const [activeTab, setActiveTab] = useState<"apikeys" | "webhooks">("apikeys");
+  const { data: session } = useSession();
+  const isPlatformOwner = (session?.user as any)?.hierarchyLevel === 1;
+
+  const [activeTab, setActiveTab] = useState<"apikeys" | "webhooks" | "platform">("apikeys");
 
   // API Keys state
   const [apiKeys, setApiKeys] = useState<any[]>([]);
   const [loadingKeys, setLoadingKeys] = useState(true);
+
+  // Platform Config state
+  const [platformLoading, setPlatformLoading] = useState(false);
+  const [platformSaving, setPlatformSaving] = useState(false);
+  const [twilioConfig, setTwilioConfig] = useState({ accountSid: "", authToken: "", twimlAppSid: "", apiKeySid: "", apiKeySecret: "" });
+  const [stripeConfig, setStripeConfig] = useState({ publishableKey: "", secretKey: "", webhookSecret: "" });
+  const [metaConfig, setMetaConfig] = useState({ accessToken: "", phoneNumberId: "", businessAccountId: "", webhookVerifyToken: "" });
   
-  // Fake data for demonstration since creating full logic would be lengthy for this final polish.
   useEffect(() => {
     // Simulate fetching API keys
     setTimeout(() => {
@@ -23,7 +33,56 @@ export default function IntegrationsHub() {
       ]);
       setLoadingKeys(false);
     }, 500);
-  }, []);
+
+    if (isPlatformOwner) {
+      fetchPlatformConfig();
+    }
+  }, [isPlatformOwner]);
+
+  const fetchPlatformConfig = async () => {
+    setPlatformLoading(true);
+    try {
+      const res = await fetch("/api/settings/platform");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.config) {
+          setTwilioConfig(data.config.twilio_config || { accountSid: "", authToken: "", twimlAppSid: "", apiKeySid: "", apiKeySecret: "" });
+          setStripeConfig(data.config.stripe_config || { publishableKey: "", secretKey: "", webhookSecret: "" });
+          setMetaConfig(data.config.meta_config || { accessToken: "", phoneNumberId: "", businessAccountId: "", webhookVerifyToken: "" });
+        }
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to load platform configuration");
+    } finally {
+      setPlatformLoading(false);
+    }
+  };
+
+  const savePlatformConfig = async () => {
+    setPlatformSaving(true);
+    try {
+      const res = await fetch("/api/settings/platform", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          twilio_config: twilioConfig,
+          stripe_config: stripeConfig,
+          meta_config: metaConfig
+        })
+      });
+      if (res.ok) {
+        toast.success("Platform credentials securely saved!");
+      } else {
+        const err = await res.json();
+        throw new Error(err.error || "Save failed");
+      }
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setPlatformSaving(false);
+    }
+  };
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -59,19 +118,28 @@ export default function IntegrationsHub() {
         description="Manage API Keys and Webhooks to connect CRM OS with external applications like Zapier, Make, and Slack."
       />
 
-      <div className="flex border-b border-zinc-200 dark:border-zinc-800 mb-6">
+      <div className="flex border-b border-zinc-200 dark:border-zinc-800 mb-6 overflow-x-auto">
         <button 
-          className={`px-4 py-3 text-sm font-medium border-b-2 flex items-center gap-2 transition-colors ${activeTab === 'apikeys' ? 'border-primary text-primary' : 'border-transparent text-zinc-500 hover:text-zinc-700'}`}
+          className={`shrink-0 px-4 py-3 text-sm font-medium border-b-2 flex items-center gap-2 transition-colors ${activeTab === 'apikeys' ? 'border-primary text-primary' : 'border-transparent text-zinc-500 hover:text-zinc-700'}`}
           onClick={() => setActiveTab('apikeys')}
         >
           <Key size={16} /> API Keys
         </button>
         <button 
-          className={`px-4 py-3 text-sm font-medium border-b-2 flex items-center gap-2 transition-colors ${activeTab === 'webhooks' ? 'border-primary text-primary' : 'border-transparent text-zinc-500 hover:text-zinc-700'}`}
+          className={`shrink-0 px-4 py-3 text-sm font-medium border-b-2 flex items-center gap-2 transition-colors ${activeTab === 'webhooks' ? 'border-primary text-primary' : 'border-transparent text-zinc-500 hover:text-zinc-700'}`}
           onClick={() => setActiveTab('webhooks')}
         >
           <Webhook size={16} /> Webhooks
         </button>
+        
+        {isPlatformOwner && (
+          <button 
+            className={`shrink-0 px-4 py-3 text-sm font-medium border-b-2 flex items-center gap-2 transition-colors ${activeTab === 'platform' ? 'border-red-500 text-red-500' : 'border-transparent text-red-400/70 hover:text-red-500'}`}
+            onClick={() => setActiveTab('platform')}
+          >
+            <ShieldAlert size={16} /> Platform Config (Owner Only)
+          </button>
+        )}
       </div>
 
       {activeTab === 'apikeys' && (
@@ -146,6 +214,105 @@ export default function IntegrationsHub() {
             </p>
             <Button variant="secondary" className="gap-2 mx-auto"><CheckCircle2 size={16}/> Join Waitlist</Button>
           </div>
+        </div>
+      )}
+
+      {isPlatformOwner && activeTab === 'platform' && (
+        <div className="space-y-6 animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6 text-red-600 dark:text-red-400">
+            <h3 className="text-lg font-bold flex items-center gap-2 mb-2">
+              <ShieldAlert size={20} /> Danger Zone: Core Platform Credentials
+            </h3>
+            <p className="text-sm opacity-90">
+              These credentials power the entire platform (Twilio WebRTC, Stripe Payments, Meta WhatsApp). Only the Platform Owner can view or modify these values. Proceed with extreme caution.
+            </p>
+          </div>
+
+          {platformLoading ? (
+            <div className="p-12 text-center text-zinc-500">Loading secure credentials...</div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              
+              {/* Twilio Section */}
+              <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6 shadow-sm">
+                <h4 className="text-md font-bold mb-4">Twilio Configuration</h4>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-500 mb-1">Account SID</label>
+                    <input type="password" value={twilioConfig.accountSid || ""} onChange={(e) => setTwilioConfig({...twilioConfig, accountSid: e.target.value})} className="w-full border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm bg-transparent" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-500 mb-1">Auth Token</label>
+                    <input type="password" value={twilioConfig.authToken || ""} onChange={(e) => setTwilioConfig({...twilioConfig, authToken: e.target.value})} className="w-full border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm bg-transparent" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-500 mb-1">TwiML App SID (Voice)</label>
+                    <input type="password" value={twilioConfig.twimlAppSid || ""} onChange={(e) => setTwilioConfig({...twilioConfig, twimlAppSid: e.target.value})} className="w-full border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm bg-transparent" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-zinc-500 mb-1">API Key SID (Optional)</label>
+                      <input type="password" value={twilioConfig.apiKeySid || ""} onChange={(e) => setTwilioConfig({...twilioConfig, apiKeySid: e.target.value})} className="w-full border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm bg-transparent" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-zinc-500 mb-1">API Key Secret (Optional)</label>
+                      <input type="password" value={twilioConfig.apiKeySecret || ""} onChange={(e) => setTwilioConfig({...twilioConfig, apiKeySecret: e.target.value})} className="w-full border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm bg-transparent" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Stripe Section */}
+              <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6 shadow-sm">
+                <h4 className="text-md font-bold mb-4">Stripe Configuration</h4>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-500 mb-1">Publishable Key</label>
+                    <input type="password" value={stripeConfig.publishableKey || ""} onChange={(e) => setStripeConfig({...stripeConfig, publishableKey: e.target.value})} className="w-full border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm bg-transparent" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-500 mb-1">Secret Key</label>
+                    <input type="password" value={stripeConfig.secretKey || ""} onChange={(e) => setStripeConfig({...stripeConfig, secretKey: e.target.value})} className="w-full border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm bg-transparent" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-500 mb-1">Webhook Secret</label>
+                    <input type="password" value={stripeConfig.webhookSecret || ""} onChange={(e) => setStripeConfig({...stripeConfig, webhookSecret: e.target.value})} className="w-full border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm bg-transparent" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Meta (WhatsApp) Section */}
+              <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6 shadow-sm lg:col-span-2">
+                <h4 className="text-md font-bold mb-4">Meta (WhatsApp) Configuration</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-500 mb-1">System User Access Token</label>
+                    <input type="password" value={metaConfig.accessToken || ""} onChange={(e) => setMetaConfig({...metaConfig, accessToken: e.target.value})} className="w-full border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm bg-transparent" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-500 mb-1">Phone Number ID</label>
+                    <input type="password" value={metaConfig.phoneNumberId || ""} onChange={(e) => setMetaConfig({...metaConfig, phoneNumberId: e.target.value})} className="w-full border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm bg-transparent" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-500 mb-1">Business Account ID</label>
+                    <input type="password" value={metaConfig.businessAccountId || ""} onChange={(e) => setMetaConfig({...metaConfig, businessAccountId: e.target.value})} className="w-full border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm bg-transparent" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-500 mb-1">Webhook Verify Token</label>
+                    <input type="password" value={metaConfig.webhookVerifyToken || ""} onChange={(e) => setMetaConfig({...metaConfig, webhookVerifyToken: e.target.value})} className="w-full border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm bg-transparent" />
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          )}
+
+          <div className="flex justify-end pt-4 border-t border-zinc-200 dark:border-zinc-800">
+            <Button onClick={savePlatformConfig} disabled={platformSaving || platformLoading} className="gap-2">
+              <CheckCircle2 size={16} /> {platformSaving ? "Saving..." : "Save Platform Credentials"}
+            </Button>
+          </div>
+
         </div>
       )}
     </div>
