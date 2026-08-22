@@ -59,7 +59,7 @@ export async function POST(req: Request) {
       status: "completed",
       notes: message,
       fromNumber: from,
-      externalId: twilioMessage.sid
+      twilioCallSid: twilioMessage.sid
     });
 
     return NextResponse.json({ success: true, messageId: twilioMessage.sid }, { status: 200 });
