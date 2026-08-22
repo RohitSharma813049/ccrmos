@@ -13,7 +13,17 @@ export async function PUT(req: Request, props: { params: Promise<{ id: string }>
     }
 
     const body = await req.json();
-    const updatedRole = await GlobalRole.findByIdAndUpdate(params.id, body, { new: true });
+    let updateOps: any = { $set: { ...body } };
+    if (!body.industryId) {
+      delete updateOps.$set.industryId;
+      updateOps.$unset = { ...updateOps.$unset, industryId: 1 };
+    }
+    if (!body.planId) {
+      delete updateOps.$set.planId;
+      updateOps.$unset = { ...updateOps.$unset, planId: 1 };
+    }
+    
+    const updatedRole = await GlobalRole.findByIdAndUpdate(params.id, updateOps, { new: true });
     if (!updatedRole) return NextResponse.json({ error: 'Role not found' }, { status: 404 });
     
     return NextResponse.json({ data: updatedRole });

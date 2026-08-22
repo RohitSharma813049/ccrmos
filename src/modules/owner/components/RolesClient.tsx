@@ -7,6 +7,8 @@ import PermissionMatrix from './PermissionMatrix';
 
 export default function RolesClient() {
   const [roles, setRoles] = useState<any[]>([]);
+  const [industries, setIndustries] = useState<any[]>([]);
+  const [plans, setPlans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMatrixOpen, setIsMatrixOpen] = useState(false);
@@ -16,6 +18,8 @@ export default function RolesClient() {
     name: '',
     description: '',
     tenantScope: 'Global',
+    industryId: '',
+    planId: '',
   });
 
   const fetchRoles = async () => {
@@ -32,8 +36,28 @@ export default function RolesClient() {
     }
   };
 
+  const fetchDependencies = async () => {
+    try {
+      const [indRes, planRes] = await Promise.all([
+        fetch('/api/industries'),
+        fetch('/api/subscriptions')
+      ]);
+      if (indRes.ok) {
+        const indData = await indRes.json();
+        setIndustries(indData || []);
+      }
+      if (planRes.ok) {
+        const planData = await planRes.json();
+        setPlans(planData.plans || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch dependencies', err);
+    }
+  };
+
   useEffect(() => {
     fetchRoles();
+    fetchDependencies();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -80,9 +104,11 @@ export default function RolesClient() {
         name: role.name || '',
         description: role.description || '',
         tenantScope: role.tenantScope || 'Global',
+        industryId: role.industryId || '',
+        planId: role.planId || '',
       });
     } else {
-      setFormData({ name: '', description: '', tenantScope: 'Global' });
+      setFormData({ name: '', description: '', tenantScope: 'Global', industryId: '', planId: '' });
     }
     setIsModalOpen(true);
   };
@@ -192,6 +218,36 @@ export default function RolesClient() {
                   <option value="Global">Global Scope</option>
                   <option value="Industry">Industry Scope</option>
                   <option value="Company">Company Scope</option>
+                </select>
+              </div>
+
+              {formData.tenantScope === 'Industry' && (
+                <div>
+                  <label className="block text-sm font-medium text-zinc-300 mb-1.5">Target Industry</label>
+                  <select
+                    value={formData.industryId}
+                    onChange={(e) => setFormData({ ...formData, industryId: e.target.value })}
+                    className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2.5 text-zinc-100 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all appearance-none"
+                  >
+                    <option value="">Select Industry</option>
+                    {industries.map((ind) => (
+                      <option key={ind._id} value={ind._id}>{ind.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-zinc-300 mb-1.5">Target Plan</label>
+                <select
+                  value={formData.planId}
+                  onChange={(e) => setFormData({ ...formData, planId: e.target.value })}
+                  className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2.5 text-zinc-100 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all appearance-none"
+                >
+                  <option value="">None (All Plans)</option>
+                  {plans.map((plan) => (
+                    <option key={plan._id} value={plan._id}>{plan.name}</option>
+                  ))}
                 </select>
               </div>
               <button 

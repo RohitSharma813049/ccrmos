@@ -27,6 +27,9 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
+    if (!body.industryId) delete body.industryId;
+    if (!body.planId) delete body.planId;
+    
     const newRole = await GlobalRole.create(body);
     return NextResponse.json({ data: newRole }, { status: 201 });
   } catch (error: any) {
