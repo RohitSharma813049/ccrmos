@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import { requireAuthenticatedUser } from '@/lib/auth-utils';
+import { buildTenantQuery } from '@/lib/access-control';
 import Lead from '@/modules/leads/schemas/Lead';
 import Invoice from '@/modules/invoices/schemas/Invoice';
 
@@ -8,17 +9,11 @@ export async function GET(req: Request) {
   try {
     await dbConnect();
     const user = await requireAuthenticatedUser();
-    const companyId = user.companyId || user.impersonatedFounderId;
-    
-    if (!companyId) {
-      return NextResponse.json({ error: 'Company ID required' }, { status: 400 });
-    }
-
     const url = new URL(req.url);
     const startDateStr = url.searchParams.get('startDate');
     const endDateStr = url.searchParams.get('endDate');
 
-    const matchQuery: any = { companyId };
+    const matchQuery: any = buildTenantQuery(user);
     
     if (startDateStr && endDateStr) {
       matchQuery.createdAt = {

@@ -13,12 +13,15 @@ export const metadata: Metadata = {
   title: "CRM OS",
   description: "Next Generation Real Estate CRM",
   manifest: "/manifest.json",
-  themeColor: "#000000",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "CRM OS",
   },
+};
+
+export const viewport = {
+  themeColor: "#000000",
 };
 
 export default function RootLayout({
