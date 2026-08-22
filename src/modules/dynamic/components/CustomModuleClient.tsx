@@ -47,7 +47,8 @@ export default function CustomModuleClient({ moduleSchema }: { moduleSchema: any
     setIsModalOpen(true);
   }
 
-  async function saveRecord() {
+  async function saveRecord(e?: React.MouseEvent) {
+    if (e) e.preventDefault();
     try {
       const url = editingRecordId 
         ? `/api/custom-modules/${moduleSchema._id}/records/${editingRecordId}`
@@ -65,11 +66,18 @@ export default function CustomModuleClient({ moduleSchema }: { moduleSchema: any
         setIsModalOpen(false);
         fetchRecords();
       } else {
-        const err = await res.json();
-        alert(err.error || "Failed to save record");
+        let errorMsg = "Failed to save record";
+        try {
+          const err = await res.json();
+          errorMsg = err.error || errorMsg;
+        } catch (jsonErr) {
+          errorMsg = `Server returned status ${res.status}. Response could not be parsed as JSON.`;
+        }
+        alert(errorMsg);
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
+      alert("Network or client error: " + (e.message || String(e)));
     }
   }
 
