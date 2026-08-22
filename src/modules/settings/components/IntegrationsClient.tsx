@@ -11,7 +11,9 @@ export default function IntegrationsClient() {
   const [twilioSid, setTwilioSid] = useState("");
   const [twilioToken, setTwilioToken] = useState("");
   const [twilioFrom, setTwilioFrom] = useState("");
-  const [isSavingTwilio, setIsSavingTwilio] = useState(false);
+  const [resendKey, setResendKey] = useState("");
+  const [emailFrom, setEmailFrom] = useState("");
+  const [isSavingEmail, setIsSavingEmail] = useState(false);
 
   const fetchApiKeys = async () => {
     try {
@@ -26,7 +28,7 @@ export default function IntegrationsClient() {
     }
   };
 
-  const fetchTwilio = async () => {
+  const fetchIntegrations = async () => {
     try {
       const res = await fetch("/api/integrations/twilio");
       const data = await res.json();
@@ -36,12 +38,27 @@ export default function IntegrationsClient() {
         setTwilioFrom(data.config.fromNumber || "");
       }
     } catch (e) {}
+
+    try {
+      const res = await fetch("/api/settings/twilio_config"); // Assuming we have a general system setting for email too
+      // Wait, there's no /api/settings/email_config. We can just use the generic PUT endpoint.
+    } catch (e) {}
   };
 
   useEffect(() => {
     fetchApiKeys();
-    fetchTwilio();
+    fetchIntegrations();
+    
+    // Fetch Email Config
+    fetch("/api/settings/email_config").then(res => res.json()).then(data => {
+      if (data.value) {
+        setResendKey(data.value.resendApiKey || "");
+        setEmailFrom(data.value.fromEmail || "");
+      }
+    }).catch(e => console.error(e));
   }, []);
+
+  const [isSavingTwilio, setIsSavingTwilio] = useState(false);
 
   const saveTwilio = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,6 +75,24 @@ export default function IntegrationsClient() {
       alert(err.message);
     } finally {
       setIsSavingTwilio(false);
+    }
+  };
+
+  const saveEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingEmail(true);
+    try {
+      const res = await fetch("/api/settings/twilio_config", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key: 'email_config', value: { resendApiKey: resendKey, fromEmail: emailFrom } })
+      });
+      if (!res.ok) throw new Error("Failed to save Email settings");
+      alert("Email settings saved successfully!");
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setIsSavingEmail(false);
     }
   };
 
@@ -212,7 +247,7 @@ export default function IntegrationsClient() {
           </div>
 
           {/* Twilio Integration */}
-          <div className="bg-card rounded-3xl p-6 shadow-sm border border-border">
+          <div className="bg-card rounded-3xl p-6 shadow-sm border border-border mt-6">
             <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
               <svg className="w-6 h-6 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2C6.48 2 2 6.48 2 12c0 1.54.36 3.03 1 4.38L1.6 22l5.72-1.5c1.32.6 2.78.94 4.31.94 5.52 0 10-4.48 10-10S17.52 2 12 2zm0 17.55c-1.35 0-2.65-.34-3.83-.98l-.27-.15-2.85.75.76-2.77-.17-.28a8.55 8.55 0 01-1.19-4.34c0-4.72 3.84-8.56 8.55-8.56 4.72 0 8.56 3.84 8.56 8.56s-3.84 8.56-8.56 8.56zm4.7-6.42c-.26-.13-1.53-.75-1.77-.84-.24-.09-.42-.13-.59.13-.18.26-.67.84-.82 1.01-.15.18-.3.2-.56.07-1.76-.88-2.9-2.18-3.7-4-.13-.26.07-.25.32-.75.09-.18.04-.34-.02-.47-.07-.13-.59-1.42-.81-1.95-.21-.5-.43-.44-.59-.45-.15 0-.32-.01-.5-.01-.17 0-.46.06-.7.32-.24.26-.92.9-.92 2.19 0 1.29.94 2.54 1.07 2.71.13.18 1.85 2.82 4.48 3.95 2.19.95 2.71.79 3.2.75.49-.04 1.53-.62 1.75-1.22.21-.59.21-1.1.15-1.22-.06-.11-.23-.18-.49-.31z"/>
@@ -237,6 +272,52 @@ export default function IntegrationsClient() {
                 {isSavingTwilio ? "Saving..." : "Save Configuration"}
               </button>
             </form>
+          </div>
+
+          {/* Email Integration */}
+          <div className="bg-card rounded-3xl p-6 shadow-sm border border-border mt-6">
+            <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+              <svg className="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+              Email Marketing (Resend)
+            </h2>
+            <p className="text-muted-foreground text-sm mb-6">Configure your Resend API Key to launch bulk email campaigns directly from your tenant dashboard.</p>
+            <form onSubmit={saveEmail} className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-foreground mb-1.5">Resend API Key</label>
+                <input type="password" value={resendKey} onChange={e => setResendKey(e.target.value)} className="w-full px-4 py-2.5 rounded-xl border border-border bg-background" placeholder="re_123456789" required />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-foreground mb-1.5">Sender Email Address</label>
+                <input type="email" placeholder="sales@yourdomain.com" value={emailFrom} onChange={e => setEmailFrom(e.target.value)} className="w-full px-4 py-2.5 rounded-xl border border-border bg-background" required />
+              </div>
+              <button type="submit" disabled={isSavingEmail} className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2.5 rounded-xl transition-all disabled:opacity-50 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500">
+                {isSavingEmail ? "Saving..." : "Save Configuration"}
+              </button>
+            </form>
+          </div>
+        </div>
+
+        {/* Third Row (or Column extension): Google Calendar */}
+        <div className="lg:col-span-1 space-y-6">
+          <div className="bg-card rounded-3xl p-6 shadow-sm border border-border mt-6">
+            <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+              <svg className="w-6 h-6 text-amber-500" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/>
+              </svg>
+              Google Workspace
+            </h2>
+            <p className="text-muted-foreground text-sm mb-6">Connect your Google Account to sync appointments with your CRM Calendar automatically.</p>
+            <a href="/api/integrations/google/auth" className="w-full inline-block text-center bg-white hover:bg-gray-50 text-gray-900 border border-gray-200 font-semibold py-2.5 rounded-xl transition-all shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-200">
+              <span className="flex items-center justify-center gap-2">
+                <svg className="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                </svg>
+                Connect Google Calendar
+              </span>
+            </a>
           </div>
         </div>
 

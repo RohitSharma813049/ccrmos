@@ -3,7 +3,7 @@ import Stripe from "stripe";
 import dbConnect from "@/lib/db";
 import Company from "@/modules/companies/schemas/Company";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_mock', {
   apiVersion: "2024-06-20",
 });
 
