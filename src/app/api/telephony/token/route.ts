@@ -3,8 +3,7 @@ import { requireAuthenticatedUser } from '@/lib/auth-utils';
 import crypto from 'crypto';
 
 export async function GET(req: Request) {
-  try {
-    const user = await requireAuthenticatedUser();
+  return NextResponse.json({ error: "Use /api/twilio/token instead" }, { status: 400 });
     
     // In a real implementation, you would use twilio library:
     // const AccessToken = require('twilio').jwt.AccessToken;

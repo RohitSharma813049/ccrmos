@@ -24,6 +24,10 @@ export default function DialerWidget() {
           throw new Error(errData.error || "Failed to get token");
         }
         const { token } = await res.json();
+        
+        if (!token) {
+          throw new Error("No token received from the server");
+        }
 
         const newDevice = new Device(token, {
           logLevel: 1
