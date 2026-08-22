@@ -55,7 +55,7 @@ export async function GET(req: Request) {
     } else {
       // Platform Owner managing their own internal platform employees
       query.companyId = user.companyId || null;
-      query.founderId = null; // Ensure we only get platform-level users, not tenant users
+      query.founderId = user.id; // Ensure we only get platform-level users created by this owner
       // Hide other platform owners if they exist, or just hide founders
       query.hierarchyLevel = { $gt: 2 }; 
     }
@@ -116,7 +116,7 @@ export async function POST(req: Request) {
       }
     } else {
       body.companyId = authUser.companyId || null;
-      body.founderId = null;
+      body.founderId = authUser.id; // Assign Platform Owner as the founder of internal users
       if (body.role) {
         body.roleModel = "GlobalRole"; // Platform owners assign global roles
       }
