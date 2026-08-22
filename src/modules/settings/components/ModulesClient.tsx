@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { DataTable, ColumnDef } from "@/components/ui/DataTable";
 
 export default function ModulesClient() {
@@ -164,7 +165,13 @@ export default function ModulesClient() {
       header: "Actions",
       className: "text-right",
       cell: (mod) => (
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-2">
+          <Link
+            href={`/owner/modules/${mod._id}`}
+            className="text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          >
+            Builder
+          </Link>
           <button 
             onClick={() => {
               if (confirm("Are you sure you want to delete this module?")) {
