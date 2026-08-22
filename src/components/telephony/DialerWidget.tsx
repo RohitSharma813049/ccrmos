@@ -18,8 +18,11 @@ export default function DialerWidget() {
   useEffect(() => {
     async function initDevice() {
       try {
-        const res = await fetch("/api/telephony/token");
-        if (!res.ok) throw new Error("Failed to get token");
+        const res = await fetch("/api/twilio/token");
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || "Failed to get token");
+        }
         const { token } = await res.json();
 
         const newDevice = new Device(token, {
