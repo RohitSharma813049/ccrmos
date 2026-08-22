@@ -40,7 +40,7 @@ export default function DialerWidget() {
 
         newDevice.on("error", (error) => {
           console.error("Twilio Device Error:", error);
-          toast.error(`Dialer Error: ${error.message}`);
+          toast.error(`Dialer Error: ${error?.message || "Unknown error"}`);
         });
 
         newDevice.on("disconnect", () => {

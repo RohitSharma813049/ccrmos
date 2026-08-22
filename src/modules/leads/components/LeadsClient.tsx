@@ -373,7 +373,7 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
             device.on('ready', () => setCallStatus("Ready to Call"));
             device.on('error', (err) => {
               console.error(err);
-              setCallStatus(`Error: ${err.message}`);
+              setCallStatus(`Error: ${err?.message || "Unknown error"}`);
             });
             device.register();
             setTwilioDevice(device);
