@@ -55,6 +55,18 @@ export function LoginForm() {
         setIsLoading(false);
       } else {
         toast.success("Successfully logged in!");
+        try {
+          const sessionRes = await fetch('/api/auth/session');
+          if (sessionRes.ok) {
+            const sessionData = await sessionRes.json();
+            if (sessionData?.user?.hierarchyLevel === 1) {
+              window.location.href = '/owner';
+              return;
+            }
+          }
+        } catch (e) {
+          console.error(e);
+        }
         window.location.href = '/dashboard';
       }
     } catch (error: any) {
