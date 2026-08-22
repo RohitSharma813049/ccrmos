@@ -74,8 +74,8 @@ export default function DialerWidget() {
 
         newDevice.register();
         setDevice(newDevice);
-      } catch (e) {
-        console.error("Dialer init failed", e);
+      } catch (e: any) {
+        console.warn("Dialer not initialized (expected if Twilio is not configured):", e.message);
       }
     }
     
