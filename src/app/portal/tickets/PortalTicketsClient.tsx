@@ -78,7 +78,7 @@ export default function PortalTicketsClient() {
              <div className="w-16 h-16 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-4 text-zinc-400"><LifeBuoy className="w-8 h-8"/></div>
              <p className="text-lg font-medium text-zinc-900 dark:text-zinc-100">No support tickets found</p>
              <p className="text-sm text-zinc-500 mt-1 mb-4">You have not submitted any tickets yet.</p>
-             <Button onClick={() => setIsModalOpen(true)} variant="outline">Open a Ticket</Button>
+             <Button onClick={() => setIsModalOpen(true)} variant="secondary">Open a Ticket</Button>
           </div>
         ) : (
           <table className="w-full text-sm text-left">
@@ -134,7 +134,7 @@ export default function PortalTicketsClient() {
                 <textarea required rows={4} value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:bg-zinc-950 dark:text-white" />
               </div>
               <div className="pt-2 flex justify-end gap-2">
-                <Button type="button" onClick={() => setIsModalOpen(false)} variant="outline">Cancel</Button>
+                <Button type="button" onClick={() => setIsModalOpen(false)} variant="secondary">Cancel</Button>
                 <Button type="submit" disabled={submitting}>{submitting ? "Submitting..." : "Submit Ticket"}</Button>
               </div>
             </form>
