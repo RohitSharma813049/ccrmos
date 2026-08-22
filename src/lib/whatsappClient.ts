@@ -108,7 +108,7 @@ export const processIncomingWhatsAppMessage = async (companyId: string, fromNumb
       leadId: lead._id,
       channel: "WhatsApp",
       direction: "inbound",
-      status: "received",
+      status: "completed",
       notes: messageBody,
       fromNumber: fromNumber
     });
