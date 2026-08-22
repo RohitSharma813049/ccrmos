@@ -11,7 +11,7 @@ export default function IntegrationsHub() {
   const { data: session } = useSession();
   const isPlatformOwner = (session?.user as any)?.hierarchyLevel === 1;
 
-  const [activeTab, setActiveTab] = useState<"apikeys" | "webhooks" | "platform">("apikeys");
+  const [activeTab, setActiveTab] = useState<"apikeys" | "webhooks" | "app" | "platform">("apikeys");
 
   // API Keys state
   const [apiKeys, setApiKeys] = useState<any[]>([]);
@@ -24,6 +24,12 @@ export default function IntegrationsHub() {
   const [stripeConfig, setStripeConfig] = useState({ publishableKey: "", secretKey: "", webhookSecret: "" });
   const [metaConfig, setMetaConfig] = useState({ accessToken: "", phoneNumberId: "", businessAccountId: "", webhookVerifyToken: "" });
   
+  // Tenant App Config state
+  const [tenantTwilio, setTenantTwilio] = useState({ accountSid: "", authToken: "", fromNumber: "" });
+  const [tenantEmail, setTenantEmail] = useState({ resendApiKey: "", fromEmail: "" });
+  const [isSavingTwilio, setIsSavingTwilio] = useState(false);
+  const [isSavingEmail, setIsSavingEmail] = useState(false);
+  
   useEffect(() => {
     // Simulate fetching API keys
     setTimeout(() => {
@@ -34,10 +40,30 @@ export default function IntegrationsHub() {
       setLoadingKeys(false);
     }, 500);
 
+    fetchTenantConfig();
+
     if (isPlatformOwner) {
       fetchPlatformConfig();
     }
   }, [isPlatformOwner]);
+
+  const fetchTenantConfig = async () => {
+    try {
+      const resTwilio = await fetch("/api/settings/twilio_config");
+      if (resTwilio.ok) {
+        const data = await resTwilio.json();
+        if (data.value) setTenantTwilio({ accountSid: data.value.accountSid || "", authToken: data.value.authToken || "", fromNumber: data.value.fromNumber || "" });
+      }
+      
+      const resEmail = await fetch("/api/settings/email_config");
+      if (resEmail.ok) {
+        const data = await resEmail.json();
+        if (data.value) setTenantEmail({ resendApiKey: data.value.resendApiKey || "", fromEmail: data.value.fromEmail || "" });
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const fetchPlatformConfig = async () => {
     setPlatformLoading(true);
@@ -81,6 +107,42 @@ export default function IntegrationsHub() {
       toast.error(e.message);
     } finally {
       setPlatformSaving(false);
+    }
+  };
+
+  const saveTenantTwilio = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingTwilio(true);
+    try {
+      const res = await fetch("/api/settings/twilio_config", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ value: tenantTwilio })
+      });
+      if (!res.ok) throw new Error("Failed to save Twilio settings");
+      toast.success("Twilio settings saved successfully!");
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setIsSavingTwilio(false);
+    }
+  };
+
+  const saveTenantEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingEmail(true);
+    try {
+      const res = await fetch("/api/settings/email_config", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ value: tenantEmail })
+      });
+      if (!res.ok) throw new Error("Failed to save Email settings");
+      toast.success("Email settings saved successfully!");
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setIsSavingEmail(false);
     }
   };
 
@@ -130,6 +192,13 @@ export default function IntegrationsHub() {
           onClick={() => setActiveTab('webhooks')}
         >
           <Webhook size={16} /> Webhooks
+        </button>
+        <button 
+          className={`shrink-0 px-4 py-3 text-sm font-medium border-b-2 flex items-center gap-2 transition-colors ${activeTab === 'app' ? 'border-primary text-primary' : 'border-transparent text-zinc-500 hover:text-zinc-700'}`}
+          onClick={() => setActiveTab('app')}
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+          App Integrations
         </button>
         
         {isPlatformOwner && (
@@ -213,6 +282,60 @@ export default function IntegrationsHub() {
               You will soon be able to subscribe to real-time events (like `lead.created` or `invoice.paid`) and send JSON payloads directly to your external servers.
             </p>
             <Button variant="secondary" className="gap-2 mx-auto"><CheckCircle2 size={16}/> Join Waitlist</Button>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'app' && (
+        <div className="space-y-6 animate-in fade-in zoom-in-95 duration-200 grid lg:grid-cols-2 gap-6">
+          {/* Twilio Integration */}
+          <div className="bg-white dark:bg-zinc-900 rounded-xl p-6 shadow-sm border border-zinc-200 dark:border-zinc-800">
+            <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+              <svg className="w-6 h-6 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12c0 1.54.36 3.03 1 4.38L1.6 22l5.72-1.5c1.32.6 2.78.94 4.31.94 5.52 0 10-4.48 10-10S17.52 2 12 2zm0 17.55c-1.35 0-2.65-.34-3.83-.98l-.27-.15-2.85.75.76-2.77-.17-.28a8.55 8.55 0 01-1.19-4.34c0-4.72 3.84-8.56 8.55-8.56 4.72 0 8.56 3.84 8.56 8.56s-3.84 8.56-8.56 8.56zm4.7-6.42c-.26-.13-1.53-.75-1.77-.84-.24-.09-.42-.13-.59.13-.18.26-.67.84-.82 1.01-.15.18-.3.2-.56.07-1.76-.88-2.9-2.18-3.7-4-.13-.26.07-.25.32-.75.09-.18.04-.34-.02-.47-.07-.13-.59-1.42-.81-1.95-.21-.5-.43-.44-.59-.45-.15 0-.32-.01-.5-.01-.17 0-.46.06-.7.32-.24.26-.92.9-.92 2.19 0 1.29.94 2.54 1.07 2.71.13.18 1.85 2.82 4.48 3.95 2.19.95 2.71.79 3.2.75.49-.04 1.53-.62 1.75-1.22.21-.59.21-1.1.15-1.22-.06-.11-.23-.18-.49-.31z"/>
+              </svg>
+              Twilio SMS & WhatsApp
+            </h2>
+            <p className="text-muted-foreground text-sm mb-6">Configure Twilio to send automated SMS and WhatsApp messages.</p>
+            <form onSubmit={saveTenantTwilio} className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-foreground mb-1.5">Account SID</label>
+                <input type="text" value={tenantTwilio.accountSid} onChange={e => setTenantTwilio({...tenantTwilio, accountSid: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-foreground" required />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-foreground mb-1.5">Auth Token</label>
+                <input type="password" value={tenantTwilio.authToken} onChange={e => setTenantTwilio({...tenantTwilio, authToken: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-foreground" required />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-foreground mb-1.5">Sender Phone Number</label>
+                <input type="text" placeholder="+1234567890 (or whatsapp:+1234567890)" value={tenantTwilio.fromNumber} onChange={e => setTenantTwilio({...tenantTwilio, fromNumber: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-foreground" required />
+              </div>
+              <Button type="submit" disabled={isSavingTwilio} className="w-full">
+                {isSavingTwilio ? "Saving..." : "Save Configuration"}
+              </Button>
+            </form>
+          </div>
+
+          {/* Email Integration */}
+          <div className="bg-white dark:bg-zinc-900 rounded-xl p-6 shadow-sm border border-zinc-200 dark:border-zinc-800">
+            <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+              <svg className="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+              Email Marketing (Resend)
+            </h2>
+            <p className="text-muted-foreground text-sm mb-6">Configure your Resend API Key to launch bulk email campaigns.</p>
+            <form onSubmit={saveTenantEmail} className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-foreground mb-1.5">Resend API Key</label>
+                <input type="password" value={tenantEmail.resendApiKey} onChange={e => setTenantEmail({...tenantEmail, resendApiKey: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-foreground" placeholder="re_123456789" required />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-foreground mb-1.5">Sender Email Address</label>
+                <input type="email" placeholder="sales@yourdomain.com" value={tenantEmail.fromEmail} onChange={e => setTenantEmail({...tenantEmail, fromEmail: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-foreground" required />
+              </div>
+              <Button type="submit" disabled={isSavingEmail} className="w-full bg-emerald-500 hover:bg-emerald-600 text-white">
+                {isSavingEmail ? "Saving..." : "Save Configuration"}
+              </Button>
+            </form>
           </div>
         </div>
       )}
