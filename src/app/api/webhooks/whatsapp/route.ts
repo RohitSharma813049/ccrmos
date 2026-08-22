@@ -68,7 +68,7 @@ export async function POST(req: Request) {
       leadId: lead._id,
       channel: "WhatsApp",
       direction: "inbound",
-      status: "received",
+      status: "completed",
       notes: message,
       fromNumber: phoneNumber
     });
