@@ -12,7 +12,6 @@ import PageHeader from "@/components/ui/PageHeader";
 import Button from "@/components/ui/Button";
 import { usePermissions } from "@/hooks/usePermissions";
 import { DataTable, ColumnDef } from "@/components/ui/DataTable";
-import DateRangePicker from "@/components/ui/DateRangePicker";
 import NotesPanel from "@/components/ui/NotesPanel";
 import KanbanBoard, { KanbanCard } from "@/components/ui/KanbanBoard";
 import { Device, Call } from "@twilio/voice-sdk";

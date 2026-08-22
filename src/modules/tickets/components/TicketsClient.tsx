@@ -7,10 +7,10 @@ import toast from "react-hot-toast";
 import KanbanBoard, { KanbanCard } from "@/components/ui/KanbanBoard";
 
 const ticketCols = [
-  { id: "Open", title: "Open" },
-  { id: "Pending", title: "Pending" },
-  { id: "Resolved", title: "Resolved" },
-  { id: "Closed", title: "Closed" },
+  "Open",
+  "Pending",
+  "Resolved",
+  "Closed",
 ];
 
 export default function TicketsClient() {
@@ -67,7 +67,7 @@ export default function TicketsClient() {
 
   const kanbanCards: KanbanCard[] = tickets.map(t => ({
     id: t._id,
-    columnId: t.status || "Open",
+    status: t.status || "Open",
     title: t.subject,
     subtitle: t.customerId?.companyName || t.customerId?.contactName || "Unknown Customer",
     description: t.displayId,

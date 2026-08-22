@@ -32,20 +32,15 @@ const TicketSchema: Schema<ITicket> = new Schema(
   { timestamps: true }
 );
 
-TicketSchema.pre<ITicket>("save", async function (next) {
+TicketSchema.pre<ITicket>("save", async function () {
   if (this.isNew && !this.displayId) {
-    try {
-      const counter = await Counter.findOneAndUpdate(
-        { companyId: this.companyId, modelName: "Ticket" },
-        { $inc: { seq: 1 } },
-        { new: true, upsert: true }
-      );
-      this.displayId = `TKT-${counter.seq.toString().padStart(4, "0")}`;
-    } catch (error: any) {
-      return next(error);
-    }
+    const counter = await Counter.findOneAndUpdate(
+      { companyId: this.companyId, modelName: "Ticket" },
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true }
+    );
+    this.displayId = `TKT-${counter.seq.toString().padStart(4, "0")}`;
   }
-  next();
 });
 
 const Ticket: Model<ITicket> = mongoose.models.Ticket || mongoose.model<ITicket>("Ticket", TicketSchema);
