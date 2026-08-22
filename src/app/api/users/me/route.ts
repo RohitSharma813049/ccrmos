@@ -8,12 +8,24 @@ export async function GET(req: Request) {
     await dbConnect();
     const sessionUser = await requireAuthenticatedUser();
     
-    const user = await User.findById(sessionUser.id).select("-password").lean();
+    const user = await User.findById(sessionUser.id).populate("role").select("-password").lean();
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ user });
+    let roleName = null;
+    if (user.hierarchyLevel === 1) {
+      roleName = "Platform Owner";
+    } else if (user.role) {
+      roleName = (user.role as any).name;
+    }
+
+    const userData = {
+      ...user,
+      role: roleName
+    };
+
+    return NextResponse.json({ user: userData });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

@@ -69,7 +69,7 @@ export const authOptions: NextAuthOptions = {
         return {
           id: user._id.toString(),
           email: user.email,
-          role: user.role ? (user.role as any).name : null,
+          role: user.hierarchyLevel === 1 ? "Platform Owner" : (user.role ? (user.role as any).name : null),
           permissions: user.role ? (user.role as any).permissions : {},
           companyId: user.companyId ? user.companyId.toString() : null,
           founderId: user.founderId ? user.founderId.toString() : null,
