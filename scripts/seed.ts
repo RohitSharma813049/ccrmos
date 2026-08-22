@@ -86,7 +86,7 @@ async function seed() {
         phone: `+1-555-02${getRandomInt(10, 99)}`,
         status: statuses[getRandomInt(0, statuses.length - 1)],
         source: ["Website", "Referral", "LinkedIn", "Cold Call"][getRandomInt(0, 3)],
-        assignedTo: userId,
+        assignedUserId: userId,
         createdBy: userId,
       });
     }
@@ -127,9 +127,7 @@ async function seed() {
         description: "Discuss the new proposal.",
         type: Math.random() > 0.5 ? "Meeting" : "Task",
         status: "Pending",
-        priority: "High",
-        dueDate: date,
-        assignedTo: userId,
+        endTime: date,
         createdBy: userId,
       });
     }
