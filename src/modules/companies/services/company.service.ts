@@ -2,6 +2,7 @@ import crypto from "crypto";
 import Company from "@/modules/companies/schemas/Company";
 import User from "@/modules/users/schemas/User";
 import GlobalRole from "@/modules/owner/schemas/GlobalRole";
+import Role from "@/modules/users/schemas/Role";
 import LeadStatus from "@/modules/leads/schemas/LeadStatus";
 import SubscriptionPlan from "@/modules/settings/schemas/SubscriptionPlan";
 import IndustryTemplate from "@/modules/settings/schemas/IndustryTemplate";
@@ -122,6 +123,59 @@ export class CompanyService {
     }));
     await LeadStatus.insertMany(statusesToInsert);
     
+    // --- DYNAMIC TENANT PROVISIONING ---
+    // 1. Provision Global Roles
+    const roleQuery: any = {
+      isActive: true,
+      $or: [
+        { tenantScope: "Global" },
+        { tenantScope: "Industry", industryId }
+      ]
+    };
+    if (subscriptionPlanId) {
+      roleQuery.$or.forEach((cond: any) => {
+        cond.$and = [
+          { $or: [{ planId: subscriptionPlanId }, { planId: null }, { planId: { $exists: false } }] }
+        ];
+      });
+    }
+    
+    const globalRoles = await GlobalRole.find(roleQuery).lean();
+    if (globalRoles.length > 0) {
+      const clonedRoles = globalRoles.map((gr: any) => ({
+        companyId: newCompany._id,
+        name: gr.name,
+        description: gr.description,
+        permissions: gr.permissions,
+      }));
+      // Filter out duplicate "Founder" role if it came from templates
+      const uniqueClonedRoles = clonedRoles.filter(r => r.name !== "Founder");
+      if (uniqueClonedRoles.length > 0) {
+        await Role.insertMany(uniqueClonedRoles).catch(e => console.error("Error provisioning roles:", e));
+      }
+    }
+
+    // 2. Provision Custom Modules
+    const customModuleQuery: any = {
+      active: true,
+      $or: [
+        { tenantScope: "Global" },
+        { tenantScope: "Industry", industryId }
+      ]
+    };
+    const customModules = await CustomModule.find(customModuleQuery).lean();
+    if (customModules.length > 0) {
+      const companyCustomModulesData = customModules.map((mod: any, index: number) => ({
+        company_id: newCompany._id,
+        module_id: mod._id.toString(), // using CustomModule ID as module_id for dynamic modules
+        visible: true,
+        display_name: mod.name,
+        sort_order: 100 + index, // sort after standard modules
+        is_customized: false,
+      }));
+      await CompanyModule.insertMany(companyCustomModulesData).catch(e => console.error("Error provisioning custom modules:", e));
+    }
+    // -----------------------------------
     // Provision Modules & Fields from Template
     if (templateId) {
       // 1. Provision Company Modules
