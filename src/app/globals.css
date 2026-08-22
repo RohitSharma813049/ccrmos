@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 :root {
+  color-scheme: dark;
   /* Colors - Premium Dark Glassmorphic Theme (Default) */
   --background: #09090b; /* zinc-950 */
   --foreground: #fafafa;

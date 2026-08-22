@@ -59,7 +59,7 @@ export default function AnalyticsCharts() {
         <div className="flex items-center gap-2">
           <label className="text-sm font-medium text-muted-foreground">From:</label>
           <input 
-            type="date" 
+            type="datetime-local" 
             value={dateRange.startDate} 
             onChange={(e) => setDateRange({...dateRange, startDate: e.target.value})}
             className="px-3 py-1.5 text-sm bg-background border border-border rounded-lg outline-none focus:ring-2 focus:ring-primary"
@@ -68,7 +68,7 @@ export default function AnalyticsCharts() {
         <div className="flex items-center gap-2">
           <label className="text-sm font-medium text-muted-foreground">To:</label>
           <input 
-            type="date" 
+            type="datetime-local" 
             value={dateRange.endDate} 
             onChange={(e) => setDateRange({...dateRange, endDate: e.target.value})}
             className="px-3 py-1.5 text-sm bg-background border border-border rounded-lg outline-none focus:ring-2 focus:ring-primary"

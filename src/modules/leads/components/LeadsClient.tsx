@@ -822,7 +822,7 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
       <div className="flex items-center gap-2 text-sm text-muted-foreground bg-card border border-border rounded-xl px-3 py-1.5 focus-within:ring-2 focus-within:ring-primary">
         <label>From:</label>
         <input 
-          type="date" 
+          type="datetime-local" 
           value={dateFrom}
           onChange={(e) => { setDateFrom(e.target.value); setPage(1); }}
           className="bg-transparent border-none p-0 focus:ring-0 text-sm outline-none cursor-pointer"
@@ -832,7 +832,7 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
       <div className="flex items-center gap-2 text-sm text-muted-foreground bg-card border border-border rounded-xl px-3 py-1.5 focus-within:ring-2 focus-within:ring-primary">
         <label>To:</label>
         <input 
-          type="date" 
+          type="datetime-local" 
           value={dateTo}
           onChange={(e) => { setDateTo(e.target.value); setPage(1); }}
           className="bg-transparent border-none p-0 focus:ring-0 text-sm outline-none cursor-pointer"

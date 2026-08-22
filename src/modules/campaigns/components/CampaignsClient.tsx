@@ -97,7 +97,7 @@ export default function CampaignsClient() {
               <div>
                 <div className="flex justify-between items-start mb-3">
                   <h3 className="font-bold text-lg text-foreground line-clamp-1">{c.name}</h3>
-                  <span className={\`text-xs px-2.5 py-1 rounded-full font-medium \${c.status === 'Completed' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}\`}>
+                  <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${c.status === 'Completed' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`}>
                     {c.status}
                   </span>
                 </div>
