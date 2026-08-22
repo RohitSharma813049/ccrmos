@@ -9,12 +9,13 @@ export async function POST(req: Request) {
     const bodyText = await req.text();
     const params = new URLSearchParams(bodyText);
     const to = params.get("To");
+    const companyId = params.get("companyId");
     
     // You could pass custom parameters like From, LeadId, etc.
     // e.g. using a customized prefix in `To` if you were dialing from the browser
     
     // Fetch global twilio config to retrieve the phone number
-    const twilioConfig = await getTwilioConfig();
+    const twilioConfig = await getTwilioConfig(companyId);
     const defaultCallerId = twilioConfig.phoneNumber || "+1234567890";
     
     const response = new VoiceResponse();

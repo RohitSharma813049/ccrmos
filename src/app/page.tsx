@@ -15,6 +15,9 @@ export default function Home() {
           CRM<span className="text-primary">OS</span>
         </div>
         <nav className="flex gap-4 items-center">
+          <Link href="/pricing" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
+            Pricing
+          </Link>
           <Link href="/login">
             <Button variant="primary" size="sm">Login</Button>
           </Link>

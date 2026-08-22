@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Company from "@/modules/companies/schemas/Company";
 import Coupon from "@/modules/coupons/schemas/Coupon";
+import Stripe from "stripe";
 
 // Validate Token & Calculate Price
 export async function GET(req: Request) {
@@ -70,7 +71,7 @@ export async function GET(req: Request) {
   }
 }
 
-// Process Payment (Mock)
+// Process Payment via Stripe Checkout (or Mock if no keys)
 export async function POST(req: Request) {
   try {
     await dbConnect();
@@ -79,7 +80,7 @@ export async function POST(req: Request) {
 
     if (!token) return NextResponse.json({ error: "No token provided" }, { status: 400 });
 
-    const company = await Company.findOne({ checkoutToken: token });
+    const company = await Company.findOne({ checkoutToken: token }).populate("subscriptionPlanId");
     if (!company) {
       return NextResponse.json({ error: "Invalid checkout token" }, { status: 404 });
     }
@@ -88,20 +89,60 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Already active." }, { status: 400 });
     }
 
-    // Mark as active
-    company.status = "Active";
-    company.subscriptionStatus = "active";
-    // Usually you'd clear the token or leave it, we'll clear it
-    company.checkoutToken = undefined;
-    await company.save();
+    // Check if Stripe is configured
+    if (process.env.STRIPE_SECRET_KEY) {
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+        apiVersion: "2024-06-20", // or whatever the current TS bindings expect
+      });
 
-    // Increment coupon usage
-    if (couponId) {
-      await Coupon.findByIdAndUpdate(couponId, { $inc: { currentUses: 1 } });
+      const plan = company.subscriptionPlanId as any;
+      const priceAmount = (plan?.price || 0) * 100; // Stripe expects cents
+
+      // We'll create a simple one-time payment session for this boilerplate, 
+      // but in a full SaaS this would be mode: 'subscription' with Stripe Prices
+      const sessionData: any = {
+        payment_method_types: ["card"],
+        mode: "payment", 
+        client_reference_id: company._id.toString(), // Important for webhook matching
+        customer_email: company.adminEmail,
+        line_items: [
+          {
+            price_data: {
+              currency: "usd",
+              product_data: {
+                name: plan?.name ? `CRM OS - ${plan.name} Plan` : "CRM OS Subscription",
+                description: "Full access to your tenant workspace",
+              },
+              unit_amount: priceAmount,
+            },
+            quantity: 1,
+          },
+        ],
+        success_url: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/login?success=true`,
+        cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/checkout?token=${token}&canceled=true`,
+      };
+
+      // Add Stripe Coupon logic if you wanted to generate a coupon on the fly here
+      // (For now, we just pass the raw price)
+
+      const session = await stripe.checkout.sessions.create(sessionData);
+
+      return NextResponse.json({ checkout_url: session.url });
+    } else {
+      // Mock Fallback
+      company.status = "Active";
+      company.subscriptionStatus = "active";
+      company.checkoutToken = undefined;
+      await company.save();
+
+      if (couponId) {
+        await Coupon.findByIdAndUpdate(couponId, { $inc: { currentUses: 1 } });
+      }
+
+      return NextResponse.json({ success: true, mock: true });
     }
-
-    return NextResponse.json({ success: true });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+

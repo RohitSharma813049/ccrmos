@@ -51,6 +51,16 @@ export async function proxy(req: NextRequest) {
     }
   }
 
+  // Subdomain routing if deployed with wildcard DNS
+  // This allows tenant.crmos.com to load tenant-specific data if needed later
+  const host = req.headers.get('host') || '';
+  const isRootDomain = host === process.env.NEXT_PUBLIC_APP_DOMAIN || host.startsWith('localhost:');
+  if (!isRootDomain && pathname === '/') {
+    // A future enhancement could rewrite based on the subdomain
+    // const tenantDomain = host.split('.')[0];
+    // return NextResponse.rewrite(new URL(`/${tenantDomain}`, req.url));
+  }
+
   return NextResponse.next();
 }
 
