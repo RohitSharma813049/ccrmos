@@ -167,6 +167,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
                 
                 const href = stdRoute ? `/dashboard/${stdRoute}` : `/dashboard/${mod.module_id.toLowerCase()}`;
                 const icon = stdIconMap[mod.display_name?.toLowerCase()] || stdIconMap[stdRoute] || "M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10";
+                
+                // Skip modules that are already hardcoded in other sections (Configuration, System Settings)
+                if (['user management', 'users', 'settings', 'roles & permissions', 'api configuration', 'billing & plan', 'audit logs', 'recycle bin'].includes(normalized)) {
+                  return null;
+                }
+
                 return (
                   <NavItem key={mod._id.toString()} href={href} label={mod.display_name} icon={icon} />
                 );
@@ -309,6 +315,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
                 
                 const href = stdRoute ? `/dashboard/${stdRoute}` : `/dashboard/${mod.module_id.toLowerCase()}`;
                 const icon = stdIconMap[mod.display_name?.toLowerCase()] || stdIconMap[stdRoute] || "M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10";
+                
+                // Skip modules that are already hardcoded in other sections (Configuration, System Settings)
+                if (['user management', 'users', 'settings', 'roles & permissions', 'api configuration', 'billing & plan', 'audit logs', 'recycle bin'].includes(normalized)) {
+                  return null;
+                }
+
                 return (
                   <NavItem key={mod._id.toString()} href={href} label={mod.display_name} icon={icon} />
                 );

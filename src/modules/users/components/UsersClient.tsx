@@ -237,7 +237,7 @@ export default function UsersClient({ isOwner = false }: { isOwner?: boolean }) 
                       type="text" 
                       value={formData.name}
                       onChange={e => setFormData({...formData, name: e.target.value})}
-                      className="w-full border-zinc-700/50 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 border"
+                      className="w-full bg-zinc-950/50 text-zinc-100 border-zinc-700/50 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 border"
                       placeholder="e.g. John Doe"
                     />
                   </div>
@@ -248,7 +248,7 @@ export default function UsersClient({ isOwner = false }: { isOwner?: boolean }) 
                       type="email" 
                       value={formData.email}
                       onChange={e => setFormData({...formData, email: e.target.value})}
-                      className="w-full border-zinc-700/50 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 border"
+                      className="w-full bg-zinc-950/50 text-zinc-100 border-zinc-700/50 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 border"
                       placeholder="john@example.com"
                     />
                   </div>
@@ -259,7 +259,7 @@ export default function UsersClient({ isOwner = false }: { isOwner?: boolean }) 
                       name="role"
                       value={formData.role}
                       onChange={e => setFormData({...formData, role: e.target.value})}
-                      className="w-full border-zinc-700/50 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 border"
+                      className="w-full bg-zinc-950/50 text-zinc-100 border-zinc-700/50 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 border"
                     >
                       <option value="">-- Select Role --</option>
                       {roles.map(r => (
@@ -273,7 +273,7 @@ export default function UsersClient({ isOwner = false }: { isOwner?: boolean }) 
                     <select
                       value={formData.hierarchyLevel}
                       onChange={e => setFormData({...formData, hierarchyLevel: Number(e.target.value)})}
-                      className="w-full border-zinc-700/50 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 border"
+                      className="w-full bg-zinc-950/50 text-zinc-100 border-zinc-700/50 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 border"
                     >
                       {HIERARCHY_LEVELS.map(l => (
                         <option key={l.level} value={l.level}>{l.label}</option>
@@ -292,7 +292,7 @@ export default function UsersClient({ isOwner = false }: { isOwner?: boolean }) 
                         <select
                           value={formData.directorId}
                           onChange={e => setFormData({...formData, directorId: e.target.value})}
-                          className="w-full border-zinc-700/50 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 border"
+                          className="w-full bg-zinc-950/50 text-zinc-100 border-zinc-700/50 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 border"
                         >
                           <option value="">-- None --</option>
                           {getSuperiors(3).map(u => (
@@ -308,7 +308,7 @@ export default function UsersClient({ isOwner = false }: { isOwner?: boolean }) 
                         <select
                           value={formData.managerId}
                           onChange={e => setFormData({...formData, managerId: e.target.value})}
-                          className="w-full border-zinc-700/50 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 border"
+                          className="w-full bg-zinc-950/50 text-zinc-100 border-zinc-700/50 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 border"
                         >
                           <option value="">-- None --</option>
                           {getSuperiors(4).map(u => (
@@ -324,7 +324,7 @@ export default function UsersClient({ isOwner = false }: { isOwner?: boolean }) 
                         <select
                           value={formData.teamLeaderId}
                           onChange={e => setFormData({...formData, teamLeaderId: e.target.value})}
-                          className="w-full border-zinc-700/50 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 border"
+                          className="w-full bg-zinc-950/50 text-zinc-100 border-zinc-700/50 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 border"
                         >
                           <option value="">-- None --</option>
                           {getSuperiors(5).map(u => (
