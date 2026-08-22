@@ -14,6 +14,10 @@ export default function CustomModuleClient({ moduleSchema }: { moduleSchema: any
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRecordId, setEditingRecordId] = useState<string | null>(null);
   const [formData, setFormData] = useState<Record<string, any>>({});
+  const [currentStep, setCurrentStep] = useState(0);
+
+  const sections = Array.from(new Set(moduleSchema.fields.map((f: any) => f.section || "General")));
+  const formStyle = moduleSchema.formStyle || "single";
 
   useEffect(() => {
     fetchRecords();
@@ -38,12 +42,14 @@ export default function CustomModuleClient({ moduleSchema }: { moduleSchema: any
   function openCreateModal() {
     setEditingRecordId(null);
     setFormData({});
+    setCurrentStep(0);
     setIsModalOpen(true);
   }
 
   function openEditModal(record: any) {
     setEditingRecordId(record._id);
     setFormData(record.data || {});
+    setCurrentStep(0);
     setIsModalOpen(true);
   }
 
@@ -178,90 +184,204 @@ export default function CustomModuleClient({ moduleSchema }: { moduleSchema: any
             </div>
             
             <div className="p-6 overflow-y-auto flex-1 space-y-4">
-              {moduleSchema.fields.map((field: any, idx: number) => (
-                <div key={idx}>
-                  <label className="block text-sm font-medium text-zinc-300 mb-1">
-                    {field.name} {field.required && <span className="text-red-500">*</span>}
-                  </label>
-                  
-                  {field.type === 'textarea' ? (
-                    <textarea 
-                      value={formData[field.name] || ''}
-                      onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
-                      className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                      rows={3}
-                    />
-                  ) : field.type === 'select' ? (
-                    <select
-                      value={formData[field.name] || ''}
-                      onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
-                      className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                    >
-                      <option value="">Select an option</option>
-                      {(field.options || []).map((opt: string) => (
-                        <option key={opt} value={opt}>{opt}</option>
-                      ))}
-                    </select>
-                  ) : field.type === 'date' ? (
-                    <input 
-                      type="date"
-                      value={formData[field.name] || ''}
-                      onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
-                      className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                    />
-                  ) : field.type === 'number' || field.type === 'score' ? (
-                    <input 
-                      type={field.type === 'score' ? 'range' : 'number'}
-                      min={field.type === 'score' ? 1 : undefined}
-                      max={field.type === 'score' ? 10 : undefined}
-                      value={formData[field.name] || (field.type === 'score' ? 5 : '')}
-                      onChange={(e) => setFormData({ ...formData, [field.name]: parseFloat(e.target.value) })}
-                      className={`w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all ${field.type === 'score' ? 'accent-blue-500' : ''}`}
-                    />
-                  ) : field.type === 'checkbox' ? (
-                    <div className="flex items-center gap-2 mt-1">
-                      <input 
-                        type="checkbox"
-                        checked={!!formData[field.name]}
-                        onChange={(e) => setFormData({ ...formData, [field.name]: e.target.checked })}
-                        className="w-5 h-5 rounded border-zinc-700/50 text-blue-500 focus:ring-blue-500"
-                      />
-                      <span className="text-sm text-zinc-300">Yes</span>
-                    </div>
-                  ) : field.type === 'relation' ? (
-                    <select
-                      value={formData[field.name] || ''}
-                      onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
-                      className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                    >
-                      <option value="">Select {field.relationTarget || 'an option'}</option>
-                      {(field.relationOptions || []).map((opt: any) => (
-                        <option key={opt.value} value={opt.value}>{opt.label}</option>
-                      ))}
-                    </select>
-                  ) : field.type === 'phone' || field.type === 'whatsapp' ? (
-                    <input 
-                      type="tel"
-                      value={formData[field.name] || ''}
-                      onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
-                      className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                      placeholder={field.type === 'whatsapp' ? 'WhatsApp Number' : 'Phone Number'}
-                    />
-                  ) : (
-                    <input 
-                      type="text"
-                      value={formData[field.name] || ''}
-                      onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
-                      className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                    />
-                  )}
+              {formStyle === "steps" && sections.length > 1 && (
+                <div className="mb-6">
+                  <div className="flex justify-between items-center mb-2">
+                    {sections.map((sec: unknown, i: number) => (
+                      <div key={i} className={`text-xs font-semibold uppercase tracking-wider ${i === currentStep ? 'text-blue-500' : i < currentStep ? 'text-emerald-500' : 'text-zinc-500'}`}>
+                        {sec as string}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden flex">
+                    {sections.map((_, i) => (
+                      <div key={i} className={`h-full flex-1 border-r border-zinc-900 transition-colors duration-300 ${i <= currentStep ? 'bg-blue-500' : 'bg-transparent'}`} />
+                    ))}
+                  </div>
                 </div>
-              ))}
+              )}
+
+              {formStyle === "steps" ? (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-zinc-100 mb-4">{sections[currentStep] as string}</h3>
+                  {moduleSchema.fields.filter((f: any) => (f.section || "General") === sections[currentStep]).map((field: any, idx: number) => (
+                    <div key={idx}>
+                      <label className="block text-sm font-medium text-zinc-300 mb-1">
+                        {field.name} {field.required && <span className="text-red-500">*</span>}
+                      </label>
+                      
+                      {field.type === 'textarea' ? (
+                        <textarea 
+                          value={formData[field.name] || ''}
+                          onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
+                          className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                          rows={3}
+                        />
+                      ) : field.type === 'select' ? (
+                        <select
+                          value={formData[field.name] || ''}
+                          onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
+                          className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                        >
+                          <option value="">Select an option</option>
+                          {(field.options || []).map((opt: string) => (
+                            <option key={opt} value={opt}>{opt}</option>
+                          ))}
+                        </select>
+                      ) : field.type === 'date' ? (
+                        <input 
+                          type="date"
+                          value={formData[field.name] || ''}
+                          onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
+                          className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                        />
+                      ) : field.type === 'number' || field.type === 'score' ? (
+                        <input 
+                          type={field.type === 'score' ? 'range' : 'number'}
+                          min={field.type === 'score' ? 1 : undefined}
+                          max={field.type === 'score' ? 10 : undefined}
+                          value={formData[field.name] || (field.type === 'score' ? 5 : '')}
+                          onChange={(e) => setFormData({ ...formData, [field.name]: parseFloat(e.target.value) })}
+                          className={`w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all ${field.type === 'score' ? 'accent-blue-500' : ''}`}
+                        />
+                      ) : field.type === 'checkbox' ? (
+                        <div className="flex items-center gap-2 mt-1">
+                          <input 
+                            type="checkbox"
+                            checked={!!formData[field.name]}
+                            onChange={(e) => setFormData({ ...formData, [field.name]: e.target.checked })}
+                            className="w-5 h-5 rounded border-zinc-700/50 text-blue-500 focus:ring-blue-500"
+                          />
+                          <span className="text-sm text-zinc-300">Yes</span>
+                        </div>
+                      ) : field.type === 'relation' ? (
+                        <select
+                          value={formData[field.name] || ''}
+                          onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
+                          className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                        >
+                          <option value="">Select {field.relationTarget || 'an option'}</option>
+                          {(field.relationOptions || []).map((opt: any) => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          ))}
+                        </select>
+                      ) : field.type === 'phone' || field.type === 'whatsapp' ? (
+                        <input 
+                          type="tel"
+                          value={formData[field.name] || ''}
+                          onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
+                          className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                          placeholder={field.type === 'whatsapp' ? 'WhatsApp Number' : 'Phone Number'}
+                        />
+                      ) : (
+                        <input 
+                          type="text"
+                          value={formData[field.name] || ''}
+                          onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
+                          className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                sections.map((sec: unknown, sIdx: number) => (
+                  <div key={sIdx} className="space-y-4 mb-6">
+                    <h3 className="text-lg font-semibold text-zinc-100 border-b border-zinc-800 pb-2">{sec as string}</h3>
+                    {moduleSchema.fields.filter((f: any) => (f.section || "General") === sec).map((field: any, idx: number) => (
+                      <div key={idx}>
+                        <label className="block text-sm font-medium text-zinc-300 mb-1">
+                          {field.name} {field.required && <span className="text-red-500">*</span>}
+                        </label>
+                        
+                        {field.type === 'textarea' ? (
+                          <textarea 
+                            value={formData[field.name] || ''}
+                            onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
+                            className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                            rows={3}
+                          />
+                        ) : field.type === 'select' ? (
+                          <select
+                            value={formData[field.name] || ''}
+                            onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
+                            className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                          >
+                            <option value="">Select an option</option>
+                            {(field.options || []).map((opt: string) => (
+                              <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                          </select>
+                        ) : field.type === 'date' ? (
+                          <input 
+                            type="date"
+                            value={formData[field.name] || ''}
+                            onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
+                            className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                          />
+                        ) : field.type === 'number' || field.type === 'score' ? (
+                          <input 
+                            type={field.type === 'score' ? 'range' : 'number'}
+                            min={field.type === 'score' ? 1 : undefined}
+                            max={field.type === 'score' ? 10 : undefined}
+                            value={formData[field.name] || (field.type === 'score' ? 5 : '')}
+                            onChange={(e) => setFormData({ ...formData, [field.name]: parseFloat(e.target.value) })}
+                            className={`w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all ${field.type === 'score' ? 'accent-blue-500' : ''}`}
+                          />
+                        ) : field.type === 'checkbox' ? (
+                          <div className="flex items-center gap-2 mt-1">
+                            <input 
+                              type="checkbox"
+                              checked={!!formData[field.name]}
+                              onChange={(e) => setFormData({ ...formData, [field.name]: e.target.checked })}
+                              className="w-5 h-5 rounded border-zinc-700/50 text-blue-500 focus:ring-blue-500"
+                            />
+                            <span className="text-sm text-zinc-300">Yes</span>
+                          </div>
+                        ) : field.type === 'relation' ? (
+                          <select
+                            value={formData[field.name] || ''}
+                            onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
+                            className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                          >
+                            <option value="">Select {field.relationTarget || 'an option'}</option>
+                            {(field.relationOptions || []).map((opt: any) => (
+                              <option key={opt.value} value={opt.value}>{opt.label}</option>
+                            ))}
+                          </select>
+                        ) : field.type === 'phone' || field.type === 'whatsapp' ? (
+                          <input 
+                            type="tel"
+                            value={formData[field.name] || ''}
+                            onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
+                            className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                            placeholder={field.type === 'whatsapp' ? 'WhatsApp Number' : 'Phone Number'}
+                          />
+                        ) : (
+                          <input 
+                            type="text"
+                            value={formData[field.name] || ''}
+                            onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
+                            className="w-full bg-zinc-950/50 border border-zinc-700/50 rounded-xl px-4 py-2 text-zinc-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ))
+              )}
             </div>
 
             <div className="p-4 border-t border-zinc-800/60 flex justify-end gap-3 bg-zinc-950/50">
               <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-zinc-400 hover:bg-zinc-700/50 rounded-lg">Cancel</button>
-              <button onClick={saveRecord} className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium shadow">Save</button>
+              {formStyle === "steps" && currentStep > 0 && (
+                <button onClick={() => setCurrentStep(prev => prev - 1)} className="px-4 py-2 text-zinc-300 bg-zinc-800 hover:bg-zinc-700 rounded-lg">Previous</button>
+              )}
+              {formStyle === "steps" && currentStep < sections.length - 1 ? (
+                <button onClick={() => setCurrentStep(prev => prev + 1)} className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium shadow">Next Step</button>
+              ) : (
+                <button onClick={saveRecord} className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium shadow">Save</button>
+              )}
             </div>
           </div>
         </div>

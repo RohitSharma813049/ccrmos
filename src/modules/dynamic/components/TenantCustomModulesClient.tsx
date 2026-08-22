@@ -123,7 +123,7 @@ export default function TenantCustomModulesClient() {
   const addField = () => {
     setActiveModule({
       ...activeModule,
-      fields: [...activeModule.fields, { name: "", type: "text", required: false, options: [] }]
+      fields: [...activeModule.fields, { name: "", type: "text", required: false, options: [], section: "General" }]
     });
   };
 
@@ -144,7 +144,7 @@ export default function TenantCustomModulesClient() {
       const res = await fetch(`/api/settings/modules/${activeModule._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fields: activeModule.fields })
+        body: JSON.stringify({ fields: activeModule.fields, formStyle: activeModule.formStyle })
       });
       if (res.ok) {
         setIsSchemaModalOpen(false);
@@ -291,14 +291,39 @@ export default function TenantCustomModulesClient() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
           <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setIsSchemaModalOpen(false)} />
           <div className="relative bg-card border border-border rounded-2xl shadow-xl w-full max-w-3xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[85vh]">
-            <div className="p-6 border-b border-border flex justify-between items-center">
-              <div>
-                <h2 className="text-xl font-bold text-foreground">Schema Editor</h2>
-                <p className="text-sm text-muted-foreground">Configure custom fields for {activeModule.name}</p>
+            <div className="p-6 border-b border-border">
+              <div className="flex justify-between items-center mb-4">
+                <div>
+                  <h2 className="text-xl font-bold text-foreground">Schema Editor</h2>
+                  <p className="text-sm text-muted-foreground">Configure custom fields for {activeModule.name}</p>
+                </div>
+                <button onClick={() => setIsSchemaModalOpen(false)} className="text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded">
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
               </div>
-              <button onClick={() => setIsSchemaModalOpen(false)} className="text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-              </button>
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 pt-4 border-t border-border/50">
+                <span className="text-sm font-semibold text-foreground">Form Configuration:</span>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input 
+                    type="radio" 
+                    name="formStyle" 
+                    checked={!activeModule.formStyle || activeModule.formStyle === "single"} 
+                    onChange={() => setActiveModule({...activeModule, formStyle: "single"})} 
+                    className="w-4 h-4 text-primary focus:ring-primary border-border bg-background"
+                  />
+                  <span className="text-sm text-foreground font-medium">Single Page Form</span>
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input 
+                    type="radio" 
+                    name="formStyle" 
+                    checked={activeModule.formStyle === "steps"} 
+                    onChange={() => setActiveModule({...activeModule, formStyle: "steps"})} 
+                    className="w-4 h-4 text-primary focus:ring-primary border-border bg-background"
+                  />
+                  <span className="text-sm text-foreground font-medium">Step-by-step Wizard (Group by Section)</span>
+                </label>
+              </div>
             </div>
             
             <div className="p-6 overflow-y-auto flex-1 bg-muted/30">
@@ -374,6 +399,23 @@ export default function TenantCustomModulesClient() {
                             </select>
                           </div>
                         )}
+
+                        <div>
+                          <label className="block text-xs font-medium text-muted-foreground mb-1">Section (Used for Grouping/Wizard)</label>
+                          <input 
+                            type="text" 
+                            list="custom-sections-list"
+                            value={field.section || "General"}
+                            onChange={(e) => updateField(idx, "section", e.target.value)}
+                            placeholder="e.g. General, Details"
+                            className="w-full bg-background border-border text-foreground rounded-lg shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-3 py-2 border transition-colors"
+                          />
+                          <datalist id="custom-sections-list">
+                            {Array.from(new Set((activeModule.fields || []).map((f: any) => f.section || "General"))).map((sec: any) => (
+                              <option key={sec} value={sec} />
+                            ))}
+                          </datalist>
+                        </div>
 
 
                         <div className="flex items-center gap-2 mt-2">
