@@ -41,7 +41,8 @@ export async function POST(req: Request) {
       if (!customer) {
         customer = await Customer.create({
           companyId,
-          name: body.customerName || 'Unknown Customer',
+          companyName: body.customerName || 'Unknown Company',
+          contactName: body.customerName || 'Unknown Customer',
           email: body.customerEmail,
         });
       }
