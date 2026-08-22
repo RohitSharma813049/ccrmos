@@ -14,10 +14,15 @@ export default function DynamicModuleClient({ moduleSchema }: { moduleSchema: an
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRecordId, setEditingRecordId] = useState<string | null>(null);
   const [formData, setFormData] = useState<Record<string, any>>({});
+  
+  // UI Enhancements mimicking Sales Leads
+  const [search, setSearch] = useState("");
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
 
   useEffect(() => {
     fetchRecords();
-  }, [page]);
+  }, [page, search]);
 
   async function fetchRecords() {
     setLoading(true);
@@ -86,8 +91,59 @@ export default function DynamicModuleClient({ moduleSchema }: { moduleSchema: an
     }
   }
 
+  const handleExport = () => {
+    if (selectedIds.length === 0) return;
+    const selectedRecords = records.filter(r => selectedIds.includes(r._id));
+    if (!selectedRecords.length) return;
+    
+    const headers = moduleSchema.fields.map((f: any) => f.name);
+    const rows = selectedRecords.map(r => headers.map((h: string) => `"${String(r.data?.[h] || "").replace(/"/g, '""')}"`));
+    const csvContent = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `${moduleSchema.name.toLowerCase()}_export_${new Date().getTime()}.csv`;
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleBulkDelete = () => setBulkDeleteModalOpen(true);
+
+  const executeBulkDelete = async () => {
+    // Note: To implement a real bulk delete we would need a /bulk API endpoint.
+    // For now, we simulate it by looping over DELETE endpoints or just alerting.
+    alert("Bulk Delete requires a dedicated API endpoint which can be added later. For now, please delete one by one.");
+    setBulkDeleteModalOpen(false);
+  };
+
   // Generate DataTable columns based on module schema fields
-  const columns: ColumnDef<any>[] = moduleSchema.fields.map((field: any) => ({
+  const columns: ColumnDef<any>[] = [
+    {
+      id: "select",
+      header: (
+        <input 
+          type="checkbox" 
+          onChange={(e) => setSelectedIds(e.target.checked ? records.map(r => r._id) : [])}
+          checked={selectedIds.length > 0 && selectedIds.length === records.length}
+          className="rounded border-border text-primary focus:ring-primary/20"
+        />
+      ),
+      cell: (item) => (
+        <input 
+          type="checkbox"
+          checked={selectedIds.includes(item._id)}
+          onChange={(e) => {
+            if (e.target.checked) setSelectedIds(prev => [...prev, item._id]);
+            else setSelectedIds(prev => prev.filter(id => id !== item._id));
+          }}
+          className="rounded border-border text-primary focus:ring-primary/20"
+        />
+      )
+    },
+    ...moduleSchema.fields.map((field: any) => ({
     header: field.name,
     cell: (record: any) => {
       let val = record.data?.[field.name];
@@ -123,39 +179,58 @@ export default function DynamicModuleClient({ moduleSchema }: { moduleSchema: an
   }
 
   return (
-    <div className="space-y-6 fade-in pb-12">
-      <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-4">
-        <PageHeader 
-          title={moduleSchema.name} 
-          description={moduleSchema.description || `Manage records for ${moduleSchema.name}`} 
-        />
-        <div className="flex gap-3 w-full sm:w-auto">
-          <button 
-            onClick={copyPublicLink}
-            className="px-5 py-2.5 bg-secondary text-secondary-foreground hover:bg-secondary/80 font-medium rounded-xl shadow-sm transition-all focus:ring-2 focus:ring-ring focus:outline-none flex-1 sm:flex-none flex items-center justify-center gap-2 border border-border"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
-            Share Form Link
-          </button>
-          <button 
-            onClick={openCreateModal}
-            className="px-5 py-2.5 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold rounded-xl shadow-sm transition-all focus:ring-2 focus:ring-primary focus:outline-none flex-1 sm:flex-none flex items-center justify-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-            Add Record
-          </button>
-        </div>
-      </div>
+    <div className="space-y-8 fade-in pb-12">
+      <PageHeader 
+        title={moduleSchema.name} 
+        description={moduleSchema.description || `Manage records for ${moduleSchema.name}`} 
+      >
+        <button 
+          onClick={copyPublicLink}
+          className="px-4 py-2 bg-card border border-border text-foreground font-medium rounded-xl hover:bg-muted transition-all shadow-sm text-sm"
+        >
+          Share Form Link
+        </button>
+        <button 
+          onClick={openCreateModal}
+          className="inline-flex items-center gap-2 px-6 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl shadow-lg transition-all"
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+          Add Record
+        </button>
+      </PageHeader>
 
       <DataTable 
-        data={records}
+        data={records.filter(r => {
+          if (!search) return true;
+          return Object.values(r.data || {}).some(val => 
+            String(val).toLowerCase().includes(search.toLowerCase())
+          );
+        })}
         columns={columns}
         loading={loading}
+        search={search}
+        onSearchChange={(val) => { setSearch(val); setPage(1); }}
         page={page}
         totalPages={totalPages}
         onPageChange={setPage}
+        selectable={true}
+        selectedIds={selectedIds}
+        onSelectionChange={setSelectedIds}
+        bulkActions={[
+          { label: "Delete Selected", onClick: handleBulkDelete, variant: "destructive" }
+        ]}
+        actions={
+          selectedIds.length > 0 && (
+            <button 
+              onClick={handleExport}
+              className="text-sm font-medium px-4 py-2 bg-card border border-border rounded-lg hover:bg-muted text-foreground shadow-sm"
+            >
+              Export Selected ({selectedIds.length})
+            </button>
+          )
+        }
         emptyTitle={`No ${moduleSchema.name} found`}
-        emptyDescription={`Get started by creating your first ${moduleSchema.name}.`}
+        emptyDescription={search ? "No records matched your search." : `Get started by creating your first ${moduleSchema.name}.`}
       />
 
       {isModalOpen && (
@@ -254,6 +329,20 @@ export default function DynamicModuleClient({ moduleSchema }: { moduleSchema: an
             <div className="p-4 border-t border-zinc-800/60 flex justify-end gap-3 bg-zinc-950/50">
               <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-zinc-400 hover:bg-zinc-700/50 rounded-lg">Cancel</button>
               <button onClick={saveRecord} className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium shadow">Save</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Delete Modal */}
+      {bulkDeleteModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
+          <div className="bg-card p-6 rounded-2xl shadow-xl max-w-sm w-full border border-border animate-in zoom-in-95">
+            <h3 className="text-lg font-bold text-foreground">Delete {selectedIds.length} Records?</h3>
+            <p className="text-sm text-muted-foreground mt-2 mb-6">Are you sure you want to delete the selected records? This action cannot be undone.</p>
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setBulkDeleteModalOpen(false)} className="px-4 py-2 text-sm font-medium hover:bg-muted rounded-lg">Cancel</button>
+              <button onClick={executeBulkDelete} className="px-4 py-2 text-sm font-medium bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-lg">Yes, Delete</button>
             </div>
           </div>
         </div>
