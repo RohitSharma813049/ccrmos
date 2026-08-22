@@ -157,6 +157,25 @@ export default function TenantCustomModulesClient() {
     }
   };
 
+  const deleteModule = async (mod: any) => {
+    const confirmation = window.prompt(`Are you sure you want to delete the module "${mod.name}"?\nThis cannot be undone easily.\n\nType DELETE to confirm:`);
+    if (confirmation !== "DELETE") return;
+    try {
+      const res = await fetch(`/api/settings/modules/${mod._id}`, {
+        method: "DELETE"
+      });
+      if (res.ok) {
+        fetchModules();
+      } else {
+        const errorData = await res.json();
+        alert(errorData.error || "Failed to delete module");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Network error while deleting module.");
+    }
+  };
+
   const columns: ColumnDef<any>[] = [
     {
       header: "Module Name",
@@ -195,12 +214,21 @@ export default function TenantCustomModulesClient() {
         return (
           <div className="flex justify-end gap-2 items-center">
             {isEditable(mod) ? (
-              <button 
-                onClick={() => openSchemaEditor(mod)} 
-                className="text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-              >
-                Edit Schema
-              </button>
+              <>
+                <button 
+                  onClick={() => openSchemaEditor(mod)} 
+                  className="text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                >
+                  Edit Schema
+                </button>
+                <button 
+                  onClick={() => deleteModule(mod)} 
+                  className="text-destructive/70 hover:text-destructive bg-destructive/10 hover:bg-destructive/20 px-3 py-1.5 rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive"
+                  title="Delete Module"
+                >
+                  Delete
+                </button>
+              </>
             ) : (
               <button 
                 onClick={() => toggleEnable(mod)} 
