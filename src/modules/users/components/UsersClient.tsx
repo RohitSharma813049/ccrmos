@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { DataTable, ColumnDef } from "@/components/ui/DataTable";
 
 const HIERARCHY_LEVELS = [
+  { level: 1, label: "Platform Owner" },
   { level: 2, label: "Founder" },
   { level: 3, label: "Director" },
   { level: 4, label: "Manager" },
@@ -14,6 +15,7 @@ const HIERARCHY_LEVELS = [
 export default function UsersClient({ isOwner = false }: { isOwner?: boolean }) {
   const [users, setUsers] = useState<any[]>([]);
   const [roles, setRoles] = useState<any[]>([]);
+  const [founders, setFounders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
   const [page, setPage] = useState(1);
@@ -26,6 +28,7 @@ export default function UsersClient({ isOwner = false }: { isOwner?: boolean }) 
     email: "",
     role: "",
     hierarchyLevel: 6,
+    founderId: "",
     directorId: "",
     managerId: "",
     teamLeaderId: ""
@@ -38,7 +41,21 @@ export default function UsersClient({ isOwner = false }: { isOwner?: boolean }) 
 
   useEffect(() => {
     fetchRoles();
-  }, []);
+    if (isOwner) {
+      fetchFounders();
+    }
+  }, [isOwner]);
+
+  async function fetchFounders() {
+    try {
+      const res = await fetch("/api/users?limit=100"); // Getting a larger list of users
+      const data = await res.json();
+      const founderUsers = (data.users || []).filter((u: any) => u.hierarchyLevel === 2);
+      setFounders(founderUsers);
+    } catch (e) {
+      console.error(e);
+    }
+  }
 
   async function fetchUsers() {
     setLoading(true);
@@ -275,11 +292,27 @@ export default function UsersClient({ isOwner = false }: { isOwner?: boolean }) 
                       onChange={e => setFormData({...formData, hierarchyLevel: Number(e.target.value)})}
                       className="w-full bg-zinc-950/50 text-zinc-100 border-zinc-700/50 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 border"
                     >
-                      {HIERARCHY_LEVELS.map(l => (
+                      {HIERARCHY_LEVELS.filter(l => isOwner ? true : l.level > 1).map(l => (
                         <option key={l.level} value={l.level}>{l.label}</option>
                       ))}
                     </select>
                   </div>
+
+                  {isOwner && formData.hierarchyLevel > 1 && (
+                    <div>
+                      <label className="block text-sm font-medium text-zinc-300 mb-1">Assign to Founder / Company</label>
+                      <select
+                        value={formData.founderId || ''}
+                        onChange={e => setFormData({...formData, founderId: e.target.value})}
+                        className="w-full bg-zinc-950/50 text-zinc-100 border-zinc-700/50 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 border"
+                      >
+                        <option value="">-- Internal Platform User --</option>
+                        {founders.map(f => (
+                          <option key={f._id} value={f._id}>{f.name} ({f.email})</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                 </div>
 
                 <div className="pt-6 border-t border-zinc-800/60">

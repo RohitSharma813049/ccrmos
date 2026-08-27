@@ -200,6 +200,9 @@ export async function GET(req: Request) {
     });
   } catch (error: any) {
     console.error("Dashboard Stats Error:", error);
+    if (error.message === "Unauthorized") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

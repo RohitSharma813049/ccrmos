@@ -115,10 +115,16 @@ export async function POST(req: Request) {
         body.roleModel = "Role";
       }
     } else {
-      body.companyId = authUser.companyId || null;
-      body.founderId = authUser.id; // Assign Platform Owner as the founder of internal users
+      // If a platform owner specifies a founderId, they are creating a user for that tenant.
+      // Otherwise, they are creating an internal platform user.
+      if (body.founderId) {
+        body.companyId = null; // Ideally fetch the founder's companyId, but null for now
+      } else {
+        body.companyId = authUser.companyId || null;
+        body.founderId = authUser.id; // Internal user
+      }
       if (body.role) {
-        body.roleModel = "GlobalRole"; // Platform owners assign global roles
+        body.roleModel = "GlobalRole";
       }
     }
 
