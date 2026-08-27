@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import ProcessStage from "@/modules/companies/schemas/ProcessStage";
-import { getSession } from "@/lib/auth";
+import { requireAuthenticatedUser } from "@/lib/auth-utils";
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   await dbConnect();
   try {
-    const session = await getSession();
-    if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const user = await requireAuthenticatedUser();
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     
     const { id } = await params;
     const stages = await ProcessStage.find({ processId: id }).sort({ sequenceOrder: 1 });
@@ -20,8 +20,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   await dbConnect();
   try {
-    const session = await getSession();
-    if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const user = await requireAuthenticatedUser();
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     
     const { id } = await params;
     const body = await req.json();

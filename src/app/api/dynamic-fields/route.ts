@@ -180,7 +180,7 @@ export async function POST(req: Request) {
       
       const addedField = customModule.fields[customModule.fields.length - 1];
       const mappedField = {
-        _id: `custom_${customModule._id}_${addedField._id || addedField.name}`,
+        _id: `custom_${customModule._id}_${(addedField as any)._id || addedField.name}`,
         name: addedField.name,
         target: customModule.name,
         type: addedField.type,

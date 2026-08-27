@@ -2,6 +2,7 @@ import dbConnect from "@/lib/db";
 import CustomModule from "@/modules/settings/schemas/CustomModule";
 import CustomModuleClient from "@/modules/dynamic/components/CustomModuleClient";
 import { notFound } from "next/navigation";
+import { requireAuthenticatedUser } from "@/lib/auth-utils";
 
 export default async function DynamicModulePage({ params }: { params: Promise<{ moduleId: string }> }) {
   await dbConnect();
@@ -12,8 +13,7 @@ export default async function DynamicModulePage({ params }: { params: Promise<{ 
     notFound();
   }
 
-  const session = await getSession();
-  const user = session?.user as any;
+  const user = await requireAuthenticatedUser();
   const userCompanyId = user?.companyId || user?.impersonatedFounderId;
 
   // Pass the module schema to the client component so it knows what columns to render
