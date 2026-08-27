@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Search, Bell, Menu } from 'lucide-react';
+import NotificationBell from '@/components/ui/NotificationBell';
 
 export function Header() {
   return (
@@ -32,10 +33,7 @@ export function Header() {
 
       {/* Right: Notifications & Profile */}
       <div className="flex items-center gap-4">
-        <button className="relative p-2 text-zinc-400 hover:text-zinc-100 transition-colors rounded-lg hover:bg-zinc-800/50">
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-1.5 right-1.5 block h-2 w-2 rounded-full bg-rose-500 ring-2 ring-zinc-950"></span>
-        </button>
+        <NotificationBell />
 
         <div className="h-8 w-px bg-zinc-800"></div>
 

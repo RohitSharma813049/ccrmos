@@ -82,7 +82,7 @@ const leadSchema = new Schema<ILead>({
   phone: { type: String },
   company: { type: String },
   status: { type: String, default: 'new' },
-  stageId: { type: Schema.Types.ObjectId, ref: 'LeadStage' },
+  stageId: { type: Schema.Types.ObjectId, ref: 'ModuleStatus' },
   leadScore: { type: Number, min: 1, max: 10, default: 5 },
   customData: { type: Schema.Types.Mixed, default: {} },
   createdBy: { type: Schema.Types.ObjectId, ref: 'User' },

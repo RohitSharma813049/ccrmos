@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
-import LeadStatus from '@/modules/leads/schemas/LeadStatus';
+import ModuleStatus from '@/modules/settings/schemas/ModuleStatus';
 import { requireAuthenticatedUser } from '@/lib/auth-utils';
 import { buildTenantQuery } from "@/lib/access-control";
 
@@ -8,24 +8,27 @@ export async function GET(req: Request) {
   await dbConnect();
   try {
     const user = await requireAuthenticatedUser();
-    const queryObj = { ...buildTenantQuery(user) };
+    const queryObj = buildTenantQuery(user);
+    queryObj.moduleName = 'Leads';
 
-    const { searchParams } = new URL(req.url);
-    const search = searchParams.get("search") || "";
-    const filter = searchParams.get("filter") || "All";
+    const moduleStatuses = await ModuleStatus.find(queryObj).sort({ order: 1 });
     
-    if (filter === "Active") {
-      queryObj.active = true;
-    } else if (filter === "Inactive") {
-      queryObj.active = false;
-    }
+    // Map the subStatuses strings into objects mimicking LeadStatus
+    let statuses: any[] = [];
+    moduleStatuses.forEach((ms: any) => {
+      if (ms.subStatuses && ms.subStatuses.length > 0) {
+        ms.subStatuses.forEach((subName: string, index: number) => {
+          statuses.push({
+            _id: `${ms._id}_${index}`,
+            name: subName,
+            stageId: ms._id,
+            active: true,
+            iconColor: 'bg-primary'
+          });
+        });
+      }
+    });
 
-    if (search) {
-      queryObj.name = { $regex: search, $options: "i" };
-    }
-
-    const statuses = await LeadStatus.find(queryObj).populate('stageId').sort({ createdAt: -1 });
-    
     return NextResponse.json({ statuses });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -33,19 +36,5 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  await dbConnect();
-  try {
-    const user = await requireAuthenticatedUser();
-    const body = await req.json();
-
-    if (user) {
-      if (user.companyId) body.companyId = user.companyId;
-      body.founderId = user.founderId || user.id;
-    }
-
-    const newStatus = await LeadStatus.create(body);
-    return NextResponse.json({ status: newStatus }, { status: 201 });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
+  return NextResponse.json({ error: "Deprecated endpoint. Use ModuleStatus." }, { status: 400 });
 }
