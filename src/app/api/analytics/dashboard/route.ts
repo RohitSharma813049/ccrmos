@@ -16,9 +16,11 @@ export async function GET(req: Request) {
     const matchQuery: any = buildTenantQuery(user);
     
     if (startDateStr && endDateStr) {
+      const end = new Date(endDateStr);
+      end.setHours(23, 59, 59, 999);
       matchQuery.createdAt = {
         $gte: new Date(startDateStr),
-        $lte: new Date(endDateStr)
+        $lte: end
       };
     }
 

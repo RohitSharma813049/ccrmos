@@ -104,7 +104,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ moduleI
     const newRecord = await CustomRecord.create({
       moduleId: moduleDoc._id as any,
       companyId: moduleDoc.companyId as any,
-      data: body.data || {}
+      data: body.data || {},
+      source: 'Public Form'
     });
 
     // Notify the founder

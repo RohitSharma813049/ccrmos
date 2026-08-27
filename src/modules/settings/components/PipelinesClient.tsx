@@ -15,6 +15,9 @@ export default function PipelinesClient() {
     type: "status",
     color: "#3b82f6",
     order: 0,
+    slaHours: 24,
+    autoNotifyBeforeHours: 2,
+    subStatuses: ""
   });
 
   useEffect(() => {
@@ -61,14 +64,20 @@ export default function PipelinesClient() {
   async function saveStatus(e: React.FormEvent) {
     e.preventDefault();
     try {
+      const payload = {
+        ...formData,
+        moduleName: selectedModule,
+        subStatuses: formData.subStatuses ? formData.subStatuses.split(',').map(s => s.trim()).filter(Boolean) : []
+      };
+      
       const res = await fetch("/api/settings/module-statuses", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, moduleName: selectedModule })
+        body: JSON.stringify(payload)
       });
       if (res.ok) {
         setIsModalOpen(false);
-        setFormData({ name: "", type: "status", color: "#3b82f6", order: statuses.length });
+    setFormData({ name: "", type: "status", color: "#3b82f6", order: statuses.length, slaHours: 24, autoNotifyBeforeHours: 2, subStatuses: "" });
         fetchStatuses();
       }
     } catch (error) {
@@ -94,7 +103,7 @@ export default function PipelinesClient() {
       >
         <button 
           onClick={() => {
-            setFormData({ name: "", type: "status", color: "#3b82f6", order: statuses.length });
+        setFormData({ name: "", type: "status", color: "#3b82f6", order: statuses.length, slaHours: 24, autoNotifyBeforeHours: 2, subStatuses: "" });
             setIsModalOpen(true);
           }}
           className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl shadow-lg transition-all"
@@ -103,12 +112,12 @@ export default function PipelinesClient() {
         </button>
       </PageHeader>
 
-      <div className="flex gap-4 mb-6">
+      <div className="flex gap-3 mb-6 overflow-x-auto pb-2 custom-scrollbar">
         {modules.map(mod => (
           <button
             key={mod}
             onClick={() => setSelectedModule(mod)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${selectedModule === mod ? 'bg-primary text-primary-foreground shadow-md' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-700/50'}`}
+            className={`whitespace-nowrap shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all ${selectedModule === mod ? 'bg-primary text-primary-foreground shadow-md' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-700/50'}`}
           >
             {mod}
           </button>
@@ -142,7 +151,14 @@ export default function PipelinesClient() {
                 {statuses.map((status) => (
                   <tr key={status._id} className="hover:bg-zinc-800/20 transition-colors">
                     <td className="px-6 py-4 text-zinc-400">{status.order}</td>
-                    <td className="px-6 py-4 font-medium text-zinc-100">{status.name}</td>
+                    <td className="px-6 py-4">
+                      <div className="font-medium text-zinc-100">{status.name}</div>
+                      {status.subStatuses && status.subStatuses.length > 0 && (
+                        <div className="text-xs text-zinc-500 mt-1 max-w-[200px] truncate" title={status.subStatuses.join(', ')}>
+                          {status.subStatuses.join(', ')}
+                        </div>
+                      )}
+                    </td>
                     <td className="px-6 py-4 capitalize text-zinc-400">{status.type}</td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
@@ -191,6 +207,28 @@ export default function PipelinesClient() {
                   </div>
                 </div>
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-zinc-400 mb-1">Sub-Statuses (Comma Separated)</label>
+                <input type="text" placeholder="e.g. Call back, Busy, Invalid Number" value={formData.subStatuses} onChange={e => setFormData({...formData, subStatuses: e.target.value})} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2 text-zinc-100" />
+                <p className="text-xs text-zinc-500 mt-1">Leave blank if this stage doesn't have sub-stages.</p>
+              </div>
+
+              {formData.type === 'stage' && (
+                <div className="pt-4 border-t border-zinc-800">
+                  <h3 className="text-sm font-semibold text-zinc-200 mb-3">Conversation & Workflow Rules (Optional)</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-zinc-400 mb-1">SLA Limit (Hours)</label>
+                      <input type="number" placeholder="e.g. 24" value={formData.slaHours || ''} onChange={e => setFormData({...formData, slaHours: Number(e.target.value)})} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2 text-zinc-100" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-zinc-400 mb-1">Auto-Notify Before (Hours)</label>
+                      <input type="number" placeholder="e.g. 2" value={formData.autoNotifyBeforeHours || ''} onChange={e => setFormData({...formData, autoNotifyBeforeHours: Number(e.target.value)})} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2 text-zinc-100" />
+                    </div>
+                  </div>
+                </div>
+              )}
               <div className="pt-4 flex justify-end gap-3">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-zinc-400 hover:text-zinc-200">Cancel</button>
                 <button type="submit" className="px-6 py-2 bg-primary text-primary-foreground rounded-xl">Save</button>

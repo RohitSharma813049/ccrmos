@@ -21,6 +21,41 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     }
     
     const { id } = await params;
+
+    // Handle Custom Module pseudo-fields
+    if (id.startsWith('custom_')) {
+      const parts = id.split('_');
+      const moduleId = parts[1];
+      const fieldIdOrName = parts.slice(2).join('_');
+      
+      const { name, target, type, required, section, order, options, optionColors, customCss } = await req.json();
+
+      const CustomModule = (await import("@/modules/settings/schemas/CustomModule")).default;
+      const customModule = await CustomModule.findById(moduleId);
+      if (!customModule) return NextResponse.json({ error: "Module not found" }, { status: 404 });
+
+      // Find the field
+      const fieldIndex = customModule.fields.findIndex((f: any) => 
+        (f._id && f._id.toString() === fieldIdOrName) || f.name === fieldIdOrName
+      );
+
+      if (fieldIndex === -1) return NextResponse.json({ error: "Field not found in module" }, { status: 404 });
+
+      if (customModule.tenantScope === "Global" && user.hierarchyLevel > 1) {
+        return NextResponse.json({ error: "Forbidden: Cannot edit Global fields." }, { status: 403 });
+      }
+
+      if (section !== undefined) customModule.fields[fieldIndex].section = section;
+      if (name !== undefined) customModule.fields[fieldIndex].name = name;
+      if (type !== undefined) customModule.fields[fieldIndex].type = type;
+      if (required !== undefined) customModule.fields[fieldIndex].required = required;
+      if (options !== undefined) customModule.fields[fieldIndex].options = options;
+
+      customModule.markModified(`fields.${fieldIndex}`);
+      await customModule.save();
+      return NextResponse.json({ message: "Field updated successfully.", field: customModule.fields[fieldIndex] }, { status: 200 });
+    }
+
     const { name, target, type, required, section, order, options, optionColors, customCss } = await req.json();
     
     const field = await DynamicField.findById(id);
@@ -65,10 +100,57 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     }
     
     const { id } = await params;
+
+    // Handle Custom Module pseudo-fields
+    if (id.startsWith('custom_')) {
+      const parts = id.split('_');
+      const moduleId = parts[1];
+      const fieldIdOrName = parts.slice(2).join('_'); // Handle field names with underscores
+
+      const CustomModule = (await import("@/modules/settings/schemas/CustomModule")).default;
+      const customModule = await CustomModule.findById(moduleId);
+      if (!customModule) return NextResponse.json({ error: "Module not found" }, { status: 404 });
+
+      // Find the field
+      const fieldIndex = customModule.fields.findIndex((f: any) => 
+        (f._id && f._id.toString() === fieldIdOrName) || f.name === fieldIdOrName
+      );
+
+      if (fieldIndex === -1) return NextResponse.json({ error: "Field not found in module" }, { status: 404 });
+
+      const field = customModule.fields[fieldIndex];
+
+      if (customModule.tenantScope === "Global" && user.hierarchyLevel > 1) {
+        if (user.companyId) {
+          // Founder disables it for their tenant
+          if (!field.disabledBy) field.disabledBy = [];
+          if (!field.disabledBy.includes(user.companyId)) {
+            field.disabledBy.push(user.companyId);
+            customModule.markModified(`fields.${fieldIndex}.disabledBy`);
+            await customModule.save();
+          }
+          return NextResponse.json({ message: "Field disabled for your company." }, { status: 200 });
+        }
+        return NextResponse.json({ error: "Forbidden: Cannot delete Global fields." }, { status: 403 });
+      }
+
+      // If Owner, actually delete the field from the custom module
+      customModule.fields.splice(fieldIndex, 1);
+      await customModule.save();
+      return NextResponse.json({ message: "Field removed from custom module." }, { status: 200 });
+    }
+
     const field = await DynamicField.findById(id);
     if (!field) return NextResponse.json({ error: "Field not found" }, { status: 404 });
     
     if (field.tenantScope === "Global" && user.hierarchyLevel > 1) {
+      if (user.companyId) {
+        // Founders can't delete global fields, but they can disable them for their tenant
+        await DynamicField.findByIdAndUpdate(id, {
+          $addToSet: { disabledBy: user.companyId }
+        });
+        return NextResponse.json({ message: "Field disabled for your company." }, { status: 200 });
+      }
       return NextResponse.json({ error: "Forbidden: Cannot delete Global fields." }, { status: 403 });
     }
     

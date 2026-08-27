@@ -36,13 +36,18 @@ export async function PUT(req: Request, { params }: { params: Promise<{ moduleId
     }
 
     // Basic required field validation
-    for (const field of moduleDoc.fields) {
-      if (field.required && !body.data?.[field.name]) {
-        return NextResponse.json({ error: `Field ${field.name} is required` }, { status: 400 });
+    if (body.data) {
+      for (const field of moduleDoc.fields) {
+        if (field.required && !body.data[field.name]) {
+          return NextResponse.json({ error: `Field ${field.name} is required` }, { status: 400 });
+        }
       }
+      record.data = body.data;
     }
 
-    record.data = body.data;
+    if (body.status !== undefined) record.status = body.status;
+    if (body.subStatus !== undefined) record.subStatus = body.subStatus;
+
     await record.save();
 
     return NextResponse.json({ record });

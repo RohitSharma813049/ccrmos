@@ -19,10 +19,25 @@ export default function DynamicModuleClient({ moduleSchema }: { moduleSchema: an
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
+  
+  const [availableStatuses, setAvailableStatuses] = useState<any[]>([]);
 
   useEffect(() => {
     fetchRecords();
+    fetchStatuses();
   }, [page, search]);
+
+  async function fetchStatuses() {
+    try {
+      const res = await fetch(`/api/settings/module-statuses?moduleName=${moduleSchema.name}`);
+      if (res.ok) {
+        const data = await res.json();
+        setAvailableStatuses(data.statuses || []);
+      }
+    } catch (e) {
+      console.error("Failed to fetch statuses", e);
+    }
+  }
 
   async function fetchRecords() {
     setLoading(true);
@@ -159,7 +174,90 @@ export default function DynamicModuleClient({ moduleSchema }: { moduleSchema: an
       }
       return <span className="text-zinc-300">{val?.toString() || "-"}</span>;
     }
-  }));
+  })),
+  {
+    header: "Status / Stage",
+    cell: (record: any) => {
+      if (availableStatuses.length > 0) {
+        const currentStatusConfig = availableStatuses.find(s => s.name === (record.status || 'New'));
+        const hasSubStatuses = currentStatusConfig && currentStatusConfig.subStatuses && currentStatusConfig.subStatuses.length > 0;
+        
+        return (
+          <div className="flex flex-col gap-1">
+            <select 
+              value={record.status || ''} 
+              onChange={async (e) => {
+                const newStatus = e.target.value;
+                try {
+                  const res = await fetch(`/api/dynamic-records/${moduleSchema._id}/${record._id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus, subStatus: '' }) // Reset substatus on status change
+                  });
+                  if (res.ok) fetchRecords();
+                } catch (err) {
+                  console.error("Failed to update status", err);
+                }
+              }}
+              className="px-2 py-1 rounded-md text-xs font-medium bg-zinc-900 border border-zinc-700 text-zinc-200 outline-none focus:ring-1 focus:ring-primary appearance-none pr-6 custom-select-arrow"
+            >
+              <option value="New">New</option>
+              {availableStatuses.map(status => (
+                <option key={status._id} value={status.name}>{status.name}</option>
+              ))}
+            </select>
+            
+            {hasSubStatuses && (
+              <select 
+                value={record.subStatus || ''} 
+                onChange={async (e) => {
+                  const newSubStatus = e.target.value;
+                  try {
+                    const res = await fetch(`/api/dynamic-records/${moduleSchema._id}/${record._id}`, {
+                      method: 'PUT',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ subStatus: newSubStatus })
+                    });
+                    if (res.ok) fetchRecords();
+                  } catch (err) {
+                    console.error("Failed to update subStatus", err);
+                  }
+                }}
+                className="px-2 py-1 rounded-md text-xs font-medium bg-zinc-800/50 border border-zinc-700/50 text-zinc-300 outline-none focus:ring-1 focus:ring-primary appearance-none pr-6 custom-select-arrow"
+              >
+                <option value="">Select Sub-Status...</option>
+                {currentStatusConfig.subStatuses.map((sub: string) => (
+                  <option key={sub} value={sub}>{sub}</option>
+                ))}
+              </select>
+            )}
+          </div>
+        );
+      }
+      return (
+        <span className="px-2 py-1 rounded-md text-xs font-medium bg-zinc-800 text-zinc-300 border border-zinc-700">
+          {record.status || 'New'}
+        </span>
+      );
+    }
+  },
+  {
+    header: "Source",
+    cell: (record: any) => (
+      <span className="text-zinc-400 text-sm">
+        {record.source || 'Manual'}
+      </span>
+    )
+  },
+  {
+    header: "Date",
+    cell: (record: any) => (
+      <span className="text-zinc-400 text-sm">
+        {new Date(record.createdAt).toLocaleDateString()}
+      </span>
+    )
+  }
+  ];
 
   columns.push({
     header: "Actions",
@@ -173,6 +271,14 @@ export default function DynamicModuleClient({ moduleSchema }: { moduleSchema: an
   });
 
   function copyPublicLink() {
+    if (!moduleSchema.active) {
+      alert("This module is currently in Draft status.\nPlease go to Settings > Modules and set it to Published before sharing the link.");
+      return;
+    }
+    if (!moduleSchema.companyId) {
+      alert("Public forms are only available for Company-scoped modules.\nThis module is Global or Industry-scoped, so the public link will not work.");
+      return;
+    }
     const url = `${window.location.origin}/m/${moduleSchema._id}`;
     navigator.clipboard.writeText(url);
     alert("Public Form Link copied to clipboard!\n\n" + url);
@@ -245,7 +351,11 @@ export default function DynamicModuleClient({ moduleSchema }: { moduleSchema: an
             </div>
             
             <div className="p-6 overflow-y-auto flex-1 space-y-4">
-              {moduleSchema.fields.map((field: any, idx: number) => (
+              {moduleSchema.fields
+                // HIDE fields that are disabled by the current tenant (handled roughly or via backend)
+                // Note: To be perfectly secure, the backend should filter `moduleSchema` before sending it to the client.
+                // Assuming `moduleSchema` already has fields filtered by the backend if they are disabled.
+                .map((field: any, idx: number) => (
                 <div key={idx}>
                   <label className="block text-sm font-medium text-zinc-300 mb-1">
                     {field.name} {field.required && <span className="text-red-500">*</span>}

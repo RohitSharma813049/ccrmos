@@ -11,7 +11,8 @@ export async function GET(req: Request) {
     // In a real production system, this would aggregate from multiple collections 
     // or a specialized UnifiedMessage schema. For CRM OS, we are using CallLog 
     // to track all omni-channel outbound/inbound comms.
-    const logs = await CallLog.find({ companyId: user.companyId })
+    const companyId = user.companyId || user.impersonatedFounderId;
+    const logs = await CallLog.find({ companyId })
       .sort({ createdAt: -1 })
       .limit(100)
       .populate("leadId", "firstName lastName email")

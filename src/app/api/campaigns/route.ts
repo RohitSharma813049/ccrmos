@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     const campaign = await Campaign.create({
       ...body,
       companyId,
-      createdBy: user._id,
+      createdBy: user.id, // Fixed: use user.id from session
       status: 'Draft',
       stats: { totalTargeted: 0, successful: 0, failed: 0 }
     });

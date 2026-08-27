@@ -13,6 +13,7 @@ export interface IDynamicField extends Document {
   options?: string[]; // For dropdown types
   optionColors?: Record<string, string>; // Maps option label to color
   customCss?: string; // For field-level CSS overrides
+  disabledBy?: mongoose.Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -34,6 +35,7 @@ const dynamicFieldSchema = new Schema<IDynamicField>(
     options: [{ type: String }],
     optionColors: { type: Map, of: String },
     customCss: { type: String, default: "" },
+    disabledBy: [{ type: Schema.Types.ObjectId, ref: 'Company' }],
   },
   { timestamps: true }
 );

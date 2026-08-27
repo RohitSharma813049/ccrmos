@@ -95,7 +95,7 @@ export default function CalendarClient() {
     fetch('/api/users?limit=100').then(r => r.json()).then(data => {
       if (data.users) {
         const users = data.users.map((u: any) => ({ 
-          name: `${u.firstName} ${u.lastName}`, 
+          name: u.name || u.email, 
           email: u.email,
           role: u.role?.name || 'User'
         }));
@@ -131,7 +131,7 @@ export default function CalendarClient() {
     };
 
     try {
-      const url = selectedEvent ? `/api/tasks?id=${selectedEvent._id}` : "/api/tasks";
+      const url = selectedEvent ? `/api/tasks/${selectedEvent._id}` : "/api/tasks";
       const method = selectedEvent ? "PUT" : "POST";
       const res = await fetch(url, {
         method,
@@ -160,7 +160,7 @@ export default function CalendarClient() {
     if (!confirm("Are you sure you want to delete this event?")) return;
 
     try {
-      const res = await fetch(`/api/tasks?id=${selectedEvent._id}`, {
+      const res = await fetch(`/api/tasks/${selectedEvent._id}`, {
         method: "DELETE"
       });
       if (res.ok) {

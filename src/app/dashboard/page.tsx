@@ -135,6 +135,7 @@ export default function DashboardPage() {
               iconBgColor={item.iconBgColor}
               subtitle={item.subtitle}
               badges={item.badges}
+              href={item.href}
             />
           );
         })}

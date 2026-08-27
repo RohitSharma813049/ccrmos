@@ -14,11 +14,16 @@ export async function PUT(req: Request, { params }: { params: Promise<{ moduleId
 
     const { id, moduleId } = await params;
     const body = await req.json();
-    const { data } = body;
+    const { data, status, subStatus } = body;
+
+    const updatePayload: any = { updatedAt: new Date() };
+    if (data !== undefined) updatePayload.data = data;
+    if (status !== undefined) updatePayload.status = status;
+    if (subStatus !== undefined) updatePayload.subStatus = subStatus;
 
     const record = await DynamicRecord.findOneAndUpdate(
       { _id: id, moduleId, companyId: userCompanyId },
-      { data, updatedAt: new Date() },
+      updatePayload,
       { new: true }
     );
 

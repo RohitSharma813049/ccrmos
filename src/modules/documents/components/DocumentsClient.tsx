@@ -68,45 +68,6 @@ export default function DocumentsClient() {
     }
   };
 
-  const handleSimulateUpload = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!uploadFileName.trim()) return;
-
-    setIsUploading(true);
-    // Simulate network delay for upload
-    await new Promise(r => setTimeout(r, 1000));
-
-    try {
-      const ext = uploadFileName.split('.').pop()?.toLowerCase() || 'txt';
-      const mimeType = ext === 'pdf' ? 'application/pdf' : ext === 'jpg' ? 'image/jpeg' : 'text/plain';
-
-      const res = await fetch('/api/documents', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: uploadFileName,
-          type: 'file',
-          size: Math.floor(Math.random() * 5000000) + 100000, // Random size between 100KB and 5MB
-          mimeType,
-          fileUrl: `https://dummy-bucket.s3.amazonaws.com/${uploadFileName}`, // Simulated
-          parentId: currentFolderId
-        })
-      });
-
-      if (res.ok) {
-        toast.success("File uploaded successfully!");
-        setIsUploadModalOpen(false);
-        setUploadFileName('');
-        fetchDocuments(currentFolderId);
-      } else {
-        toast.error("Failed to upload file");
-      }
-    } catch (err) {
-      toast.error("Upload error");
-    } finally {
-      setIsUploading(false);
-    }
-  };
 
   const handleDelete = async (id: string, name: string, type: string) => {
     if (!confirm(`Are you sure you want to delete ${type === 'folder' ? 'this folder and all its contents' : name}?`)) return;
@@ -190,12 +151,13 @@ export default function DocumentsClient() {
           ))}
         </div>
       ) : documents.length === 0 ? (
-        <div className="bg-card/50 border border-dashed border-border rounded-3xl p-16 text-center">
-          <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+        <div className="bg-zinc-950/40 border border-white/5 rounded-3xl p-16 text-center shadow-inner relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none"></div>
+          <div className="w-20 h-20 bg-zinc-900 rounded-full flex items-center justify-center mx-auto mb-5 shadow-[0_0_30px_rgba(225,29,72,0.15)] border border-white/5 relative z-10">
+            <svg className="w-10 h-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
           </div>
-          <h3 className="text-lg font-bold text-foreground mb-1">This folder is empty</h3>
-          <p className="text-muted-foreground text-sm">Upload files or create folders to organize your documents.</p>
+          <h3 className="text-xl font-bold text-zinc-100 mb-2 relative z-10">This folder is empty</h3>
+          <p className="text-zinc-500 text-sm relative z-10 max-w-sm mx-auto">Upload files or create folders to organize your documents cleanly.</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
@@ -240,56 +202,89 @@ export default function DocumentsClient() {
       {/* New Folder Modal */}
       {isNewFolderModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsNewFolderModalOpen(false)} />
-          <form onSubmit={handleCreateFolder} className="relative bg-card w-full max-w-sm rounded-3xl shadow-2xl border border-border p-6 animate-in fade-in zoom-in-95 duration-200">
-            <h3 className="text-xl font-bold text-foreground mb-4">New Folder</h3>
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-md" onClick={() => setIsNewFolderModalOpen(false)} />
+          <form onSubmit={handleCreateFolder} className="relative bg-zinc-950/90 backdrop-blur-xl w-full max-w-sm rounded-2xl shadow-2xl border border-white/10 p-6 animate-in fade-in zoom-in-95 duration-200">
+            <h3 className="text-xl font-bold text-zinc-100 mb-4">New Folder</h3>
             <input 
               autoFocus
               required 
               type="text" 
               value={newFolderName} 
               onChange={e => setNewFolderName(e.target.value)} 
-              className="w-full px-4 py-3 rounded-xl border border-border bg-background focus:ring-2 focus:ring-primary outline-none mb-6" 
+              className="w-full px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-100 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-inner mb-6" 
               placeholder="Folder Name" 
             />
             <div className="flex gap-3 justify-end">
-              <button type="button" onClick={() => setIsNewFolderModalOpen(false)} className="px-5 py-2.5 rounded-xl font-medium text-muted-foreground hover:bg-muted transition-colors">Cancel</button>
-              <button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6 py-2.5 rounded-xl transition-colors shadow-sm">Create</button>
+              <button type="button" onClick={() => setIsNewFolderModalOpen(false)} className="px-5 py-2.5 rounded-xl font-medium text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors">Cancel</button>
+              <button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6 py-2.5 rounded-xl shadow-lg transition-colors">Create</button>
             </div>
           </form>
         </div>
       )}
 
-      {/* Simulated Upload Modal */}
+      {/* Upload Modal */}
       {isUploadModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsUploadModalOpen(false)} />
-          <form onSubmit={handleSimulateUpload} className="relative bg-card w-full max-w-md rounded-3xl shadow-2xl border border-border p-6 animate-in fade-in zoom-in-95 duration-200">
-            <h3 className="text-xl font-bold text-foreground mb-2">Upload File</h3>
-            <p className="text-sm text-muted-foreground mb-6">Enter a file name to simulate an upload to the cloud.</p>
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-md" onClick={() => setIsUploadModalOpen(false)} />
+          <div className="relative bg-zinc-950/90 backdrop-blur-xl w-full max-w-md rounded-2xl shadow-2xl border border-white/10 p-6 animate-in fade-in zoom-in-95 duration-200">
+            <h3 className="text-xl font-bold text-zinc-100 mb-2">Upload File</h3>
+            <p className="text-sm text-zinc-500 mb-6">Select a file to upload into the current folder.</p>
             
             <input 
-              autoFocus
-              required 
-              type="text" 
-              value={uploadFileName} 
-              onChange={e => setUploadFileName(e.target.value)} 
-              className="w-full px-4 py-3 rounded-xl border border-border bg-background focus:ring-2 focus:ring-primary outline-none mb-6" 
-              placeholder="e.g. signed_contract.pdf" 
+              type="file" 
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                setIsUploading(true);
+                try {
+                  const formData = new FormData();
+                  formData.append("file", file);
+                  
+                  const uploadRes = await fetch("/api/upload", {
+                    method: "POST",
+                    body: formData,
+                  });
+
+                  if (uploadRes.ok) {
+                    const uploadData = await uploadRes.json();
+                    
+                    const res = await fetch('/api/documents', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        name: file.name,
+                        type: 'file',
+                        size: file.size,
+                        mimeType: file.type || 'application/octet-stream',
+                        fileUrl: uploadData.url,
+                        parentId: currentFolderId
+                      })
+                    });
+
+                    if (res.ok) {
+                      toast.success("File uploaded successfully!");
+                      setIsUploadModalOpen(false);
+                      fetchDocuments(currentFolderId);
+                    } else {
+                      toast.error("Failed to save document metadata");
+                    }
+                  } else {
+                     toast.error("Failed to upload file");
+                  }
+                } catch (err) {
+                  toast.error("Upload error");
+                } finally {
+                  setIsUploading(false);
+                }
+              }} 
+              disabled={isUploading}
+              className="w-full text-sm text-zinc-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 mb-6" 
             />
             
             <div className="flex gap-3 justify-end">
-              <button type="button" onClick={() => setIsUploadModalOpen(false)} disabled={isUploading} className="px-5 py-2.5 rounded-xl font-medium text-muted-foreground hover:bg-muted transition-colors disabled:opacity-50">Cancel</button>
-              <button type="submit" disabled={isUploading} className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6 py-2.5 rounded-xl transition-colors shadow-sm flex items-center gap-2">
-                {isUploading ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Uploading...
-                  </>
-                ) : 'Upload'}
-              </button>
+              <button type="button" onClick={() => setIsUploadModalOpen(false)} disabled={isUploading} className="px-5 py-2.5 rounded-xl font-medium text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors disabled:opacity-50">Cancel</button>
             </div>
-          </form>
+          </div>
         </div>
       )}
     </div>

@@ -31,6 +31,17 @@ export default function CampaignsPage() {
     }
   };
 
+  const toggleTargetStatus = (status: string) => {
+    setFormData(prev => {
+      const currentStatus = prev.targetAudience.status;
+      if (currentStatus.includes(status)) {
+        return { ...prev, targetAudience: { status: currentStatus.filter(s => s !== status) } };
+      } else {
+        return { ...prev, targetAudience: { status: [...currentStatus, status] } };
+      }
+    });
+  };
+
   useEffect(() => {
     fetchCampaigns();
   }, []);
@@ -139,63 +150,68 @@ export default function CampaignsPage() {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-card w-full max-w-xl rounded-2xl shadow-xl border border-border flex flex-col max-h-[90vh]">
-            <div className="p-6 border-b border-border flex justify-between items-center bg-muted/20">
-              <h2 className="text-xl font-bold">New Campaign</h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-muted-foreground hover:text-foreground">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-md" onClick={() => setIsModalOpen(false)}></div>
+          <div className="relative bg-zinc-950/80 backdrop-blur-xl w-full max-w-xl rounded-2xl shadow-2xl border border-white/10 flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-white/10 flex justify-between items-center">
+              <h2 className="text-xl font-bold text-zinc-100">New Campaign</h2>
+              <button onClick={() => setIsModalOpen(false)} className="text-zinc-400 hover:text-zinc-100 transition-colors">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
-            <div className="p-6 overflow-y-auto space-y-4">
+            <div className="p-6 overflow-y-auto space-y-5">
               <div>
-                <label className="block text-sm font-medium mb-1">Campaign Name</label>
-                <input type="text" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full px-3 py-2 border rounded-lg" placeholder="e.g. Summer Promo" />
+                <label className="block text-sm font-semibold text-zinc-300 mb-1.5">Campaign Name</label>
+                <input type="text" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-100 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-inner" placeholder="e.g. Summer Promo" />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Type</label>
-                <select value={formData.type} onChange={(e) => setFormData({...formData, type: e.target.value})} className="w-full px-3 py-2 border rounded-lg">
+                <label className="block text-sm font-semibold text-zinc-300 mb-1.5">Type</label>
+                <select value={formData.type} onChange={(e) => setFormData({...formData, type: e.target.value})} className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-100 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-inner">
                   <option value="Email">Email Blast</option>
                   <option value="SMS">SMS Blast</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Target Lead Status</label>
-                <select 
-                  multiple 
-                  value={formData.targetAudience.status} 
-                  onChange={(e) => setFormData({...formData, targetAudience: { status: Array.from(e.target.selectedOptions, option => option.value) }})} 
-                  className="w-full px-3 py-2 border rounded-lg h-24"
-                >
-                  <option value="New">New</option>
-                  <option value="Contacted">Contacted</option>
-                  <option value="Qualified">Qualified</option>
-                  <option value="Proposal Sent">Proposal Sent</option>
-                  <option value="Negotiation">Negotiation</option>
-                </select>
-                <p className="text-xs text-muted-foreground mt-1">Hold Ctrl/Cmd to select multiple. Leave unselected to target all.</p>
+                <label className="block text-sm font-semibold text-zinc-300 mb-1.5">Target Lead Status</label>
+                <div className="flex flex-wrap gap-2">
+                  {['New', 'Contacted', 'Qualified', 'Proposal Sent', 'Negotiation'].map(status => (
+                    <button
+                      key={status}
+                      type="button"
+                      onClick={() => toggleTargetStatus(status)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all border ${
+                        formData.targetAudience.status.includes(status) 
+                        ? 'bg-primary/20 text-primary border-primary/50' 
+                        : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:border-zinc-600'
+                      }`}
+                    >
+                      {status}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-zinc-500 mt-2">Click to select multiple. Leave unselected to target all.</p>
               </div>
               
               {formData.type === 'Email' && (
                 <div>
-                  <label className="block text-sm font-medium mb-1">Email Subject</label>
-                  <input type="text" value={formData.subject} onChange={(e) => setFormData({...formData, subject: e.target.value})} className="w-full px-3 py-2 border rounded-lg" />
+                  <label className="block text-sm font-semibold text-zinc-300 mb-1.5">Email Subject</label>
+                  <input type="text" value={formData.subject} onChange={(e) => setFormData({...formData, subject: e.target.value})} className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-100 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-inner" />
                 </div>
               )}
 
               <div>
-                <label className="block text-sm font-medium mb-1">Message Content</label>
+                <label className="block text-sm font-semibold text-zinc-300 mb-1.5">Message Content</label>
                 <textarea 
                   value={formData.content} 
                   onChange={(e) => setFormData({...formData, content: e.target.value})} 
-                  className="w-full px-3 py-2 border rounded-lg h-32"
+                  className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-100 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-inner h-32"
                   placeholder={formData.type === 'Email' ? "Supports HTML..." : "Keep it under 160 characters..."}
                 ></textarea>
               </div>
             </div>
-            <div className="p-6 border-t border-border flex justify-end gap-2 bg-muted/20">
-              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-sm font-medium hover:bg-muted rounded-lg">Cancel</button>
-              <button onClick={handleCreate} className="px-4 py-2 text-sm font-semibold bg-primary text-primary-foreground rounded-lg">
+            <div className="p-6 border-t border-white/10 flex justify-end gap-3">
+              <button onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 text-sm font-medium text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-xl transition-colors">Cancel</button>
+              <button onClick={handleCreate} className="px-6 py-2.5 text-sm font-bold bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl shadow-lg transition-colors">
                 Create Campaign
               </button>
             </div>

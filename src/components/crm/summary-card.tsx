@@ -1,5 +1,6 @@
 import React from 'react'
 import { LucideIcon } from 'lucide-react'
+import Link from 'next/link'
 
 export interface BadgeProps {
   label: string
@@ -15,6 +16,7 @@ interface SummaryCardProps {
   iconTextColor?: string
   subtitle?: string
   badges?: BadgeProps[]
+  href?: string
 }
 
 const badgeColorMap = {
@@ -33,7 +35,8 @@ export function SummaryCard({
   iconBgColor,
   iconTextColor = 'text-white',
   subtitle,
-  badges
+  badges,
+  href
 }: SummaryCardProps) {
   // Adjust legacy bright tailwind colors to dark mode friendly versions
   const bgAdjusted = iconBgColor
@@ -44,8 +47,8 @@ export function SummaryCard({
     .replace('bg-orange-500', 'bg-amber-500/20 text-amber-400')
     .replace('bg-rose-500', 'bg-rose-500/20 text-rose-400');
 
-  return (
-    <div className="bg-zinc-900/40 rounded-2xl p-5 border border-zinc-800/60 shadow-sm flex flex-col justify-between backdrop-blur-xl transition-all duration-300 hover:bg-zinc-900/60 hover:border-zinc-700/60">
+  const content = (
+    <div className="bg-zinc-900/40 rounded-2xl p-5 border border-zinc-800/60 shadow-sm flex flex-col h-full justify-between backdrop-blur-xl transition-all duration-300 hover:bg-zinc-900/60 hover:border-zinc-700/60">
       <div className="flex justify-between items-start mb-4">
         <div>
           <h3 className="text-zinc-400 font-medium text-sm mb-1">{title}</h3>
@@ -69,6 +72,16 @@ export function SummaryCard({
           </span>
         ))}
       </div>
+    </div>
+  );
+
+  return href ? (
+    <Link href={href} className="block h-full cursor-pointer">
+      {content}
+    </Link>
+  ) : (
+    <div className="h-full">
+      {content}
     </div>
   )
 }

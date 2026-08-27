@@ -186,7 +186,9 @@ export default function FormBuilderClient() {
     }
   }
 
-  const sections = Array.from(new Set(fields.map(f => f.section || "General")));
+  const sections = fields.length > 0 
+    ? Array.from(new Set(fields.map(f => f.section || "General"))) 
+    : ["General"];
   
   const onDragEnd = async (result: DropResult) => {
     if (!result.destination) return;
@@ -339,6 +341,17 @@ export default function FormBuilderClient() {
                             )}
                           </Draggable>
                         ))}
+                        {fields.filter(f => f.section === sectionName).length === 0 && (
+                          <div className="p-8 border-2 border-dashed border-border/60 rounded-xl flex flex-col items-center justify-center text-center bg-background/50">
+                            <div className="w-12 h-12 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-3">
+                              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                              </svg>
+                            </div>
+                            <h4 className="text-sm font-semibold text-foreground">No fields in this section</h4>
+                            <p className="text-xs text-muted-foreground mt-1 max-w-[250px]">Click "+ Add Custom Field" above to start building this section of your form.</p>
+                          </div>
+                        )}
                         {provided.placeholder}
                       </div>
                     )}

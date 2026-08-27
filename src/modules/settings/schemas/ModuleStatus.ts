@@ -7,6 +7,9 @@ export interface IModuleStatus extends Document {
   name: string;
   color: string;
   order: number;
+  slaHours?: number; // Workflow: How many hours before this stage expires
+  autoNotifyBeforeHours?: number; // Workflow: How many hours before expiry to send a notification
+  subStatuses?: string[];
   isDefault: boolean;
   isActive: boolean;
 }
@@ -18,6 +21,9 @@ const moduleStatusSchema = new Schema<IModuleStatus>({
   name: { type: String, required: true },
   color: { type: String, default: '#6b7280' },
   order: { type: Number, default: 0 },
+  slaHours: { type: Number },
+  autoNotifyBeforeHours: { type: Number },
+  subStatuses: [{ type: String }],
   isDefault: { type: Boolean, default: false },
   isActive: { type: Boolean, default: true },
 }, { timestamps: true });

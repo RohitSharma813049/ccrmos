@@ -37,98 +37,83 @@ export async function GET(req: Request) {
     const next7Days = new Date();
     next7Days.setDate(now.getDate() + 7);
 
-    // Aggregation pipeline to gather all activities from leads
-    // and correctly count and return the recent ones.
-    const leadActivitiesAggregation = await Lead.aggregate([
-      { $match: tenantQuery },
-      { $unwind: "$activities" },
-      { 
-        $project: {
-          _id: "$activities._id",
-          leadId: "$_id",
-          name: { $concat: ["$firstName", " ", "$lastName"] },
-          type: { $toLower: "$activities.type" },
-          timestamp: "$activities.timestamp",
-          comment: "$activities.description",
-          attachmentUrl: "$activities.attachmentUrl"
-        } 
-      },
-      {
-        $facet: {
-          stats: [
-            {
-              $group: {
-                _id: null,
-                doneMeetings: { $sum: { $cond: [{ $and: [{ $regexMatch: { input: "$type", regex: "meeting" } }, { $lt: ["$timestamp", now] }] }, 1, 0] } },
-                pendingMeetings: { $sum: { $cond: [{ $and: [{ $regexMatch: { input: "$type", regex: "meeting" } }, { $gte: ["$timestamp", now] }] }, 1, 0] } },
-                doneFollowUps: { $sum: { $cond: [{ $and: [{ $regexMatch: { input: "$type", regex: "follow" } }, { $lt: ["$timestamp", now] }] }, 1, 0] } },
-                pendingFollowUps: { $sum: { $cond: [{ $and: [{ $regexMatch: { input: "$type", regex: "follow" } }, { $gte: ["$timestamp", now] }] }, 1, 0] } },
-                doneSiteVisits: { $sum: { $cond: [{ $and: [{ $regexMatch: { input: "$type", regex: "visit" } }, { $lt: ["$timestamp", now] }] }, 1, 0] } },
-                pendingSiteVisits: { $sum: { $cond: [{ $and: [{ $regexMatch: { input: "$type", regex: "visit" } }, { $gte: ["$timestamp", now] }] }, 1, 0] } }
-              }
-            }
-          ],
-          completedMeetingsList: [
-            { $match: { type: { $regex: "meeting" }, timestamp: { $lt: now } } },
-            { $sort: { timestamp: -1 } },
-            { $limit: 5 }
-          ],
-          next7DaysMeetingsList: [
-            { $match: { type: { $regex: "meeting" }, timestamp: { $gte: now, $lte: next7Days } } },
-            { $sort: { timestamp: 1 } },
-            { $limit: 5 }
-          ],
-          pendingFollowUpsList: [
-            { $match: { type: { $regex: "follow" }, timestamp: { $lt: now } } },
-            { $sort: { timestamp: -1 } },
-            { $limit: 5 }
-          ],
-          next7DaysFollowUpsList: [
-            { $match: { type: { $regex: "follow" }, timestamp: { $gte: now, $lte: next7Days } } },
-            { $sort: { timestamp: 1 } },
-            { $limit: 5 }
-          ],
-          completedSiteVisitsList: [
-            { $match: { type: { $regex: "visit" }, timestamp: { $lt: now } } },
-            { $sort: { timestamp: -1 } },
-            { $limit: 5 }
-          ]
-        }
-      }
-    ]);
+    const tasks = await Task.find(tenantQuery).lean();
 
-    const leadData = leadActivitiesAggregation[0] || { stats: [] };
-    const leadStats = leadData.stats[0] || {
-      doneMeetings: 0, pendingMeetings: 0, doneFollowUps: 0, pendingFollowUps: 0, doneSiteVisits: 0, pendingSiteVisits: 0
-    };
+    let doneMeetings = 0;
+    let pendingMeetings = 0;
+    let doneFollowUps = 0;
+    let pendingFollowUps = 0;
+    let doneSiteVisits = 0;
+    let pendingSiteVisits = 0;
+
+    const rawCompletedMeetingsList: any[] = [];
+    const rawNext7DaysMeetingsList: any[] = [];
+    const rawPendingFollowUpsList: any[] = [];
+    const rawNext7DaysFollowUpsList: any[] = [];
+    const rawCompletedSiteVisitsList: any[] = [];
 
     const formatActivity = (act: any, status: string) => {
-      const actDate = new Date(act.timestamp);
+      const actDate = act.startTime ? new Date(act.startTime) : new Date(act.createdAt);
       return {
         id: act._id?.toString() || Math.random().toString(),
-        name: act.name,
-        comment: act.comment || '',
+        name: act.title,
+        comment: act.description || '',
         date: actDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }),
         time: actDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
         status,
-        timestamp: act.timestamp,
-        imagesCount: act.attachmentUrl ? 1 : 0,
-        images: act.attachmentUrl ? [act.attachmentUrl] : []
+        timestamp: act.startTime || act.createdAt,
+        imagesCount: 0,
+        images: [],
+        location: act.location
       };
     };
 
-    let doneMeetings = leadStats.doneMeetings;
-    let pendingMeetings = leadStats.pendingMeetings;
-    let doneFollowUps = leadStats.doneFollowUps;
-    let pendingFollowUps = leadStats.pendingFollowUps;
-    let doneSiteVisits = leadStats.doneSiteVisits;
-    let pendingSiteVisits = leadStats.pendingSiteVisits;
+    for (const task of tasks) {
+      const t = task.startTime ? new Date(task.startTime) : new Date(task.createdAt);
+      const isPast = t < now;
+      const isNext7Days = t >= now && t <= next7Days;
+      const isDone = task.status === 'Completed';
 
-    const completedMeetingsList = (leadData.completedMeetingsList || []).map((a: any) => formatActivity(a, 'done'));
-    const next7DaysMeetingsList = (leadData.next7DaysMeetingsList || []).map((a: any) => formatActivity(a, 'pending'));
-    const pendingFollowUpsList = (leadData.pendingFollowUpsList || []).map((a: any) => formatActivity(a, 'overdue'));
-    const next7DaysFollowUpsList = (leadData.next7DaysFollowUpsList || []).map((a: any) => formatActivity(a, 'pending'));
-    const completedSiteVisitsList = (leadData.completedSiteVisitsList || []).map((a: any) => formatActivity(a, 'done'));
+      if (task.type === 'Meeting') {
+        if (isDone) {
+          doneMeetings++;
+          rawCompletedMeetingsList.push(task);
+        } else {
+          pendingMeetings++;
+          if (isNext7Days) rawNext7DaysMeetingsList.push(task);
+        }
+      } else if (task.type === 'Task') { // Follow-up
+        if (isDone) {
+          doneFollowUps++;
+        } else {
+          pendingFollowUps++;
+          if (isPast) rawPendingFollowUpsList.push(task);
+          else if (isNext7Days) rawNext7DaysFollowUpsList.push(task);
+        }
+      } else if (task.type === 'Site Visit') {
+        if (isDone) {
+          doneSiteVisits++;
+          rawCompletedSiteVisitsList.push(task);
+        } else {
+          pendingSiteVisits++;
+        }
+      }
+    }
+
+    const sortByTimeDesc = (a: any, b: any) => (new Date(b.startTime || b.createdAt).getTime()) - (new Date(a.startTime || a.createdAt).getTime());
+    const sortByTimeAsc = (a: any, b: any) => (new Date(a.startTime || a.createdAt).getTime()) - (new Date(b.startTime || b.createdAt).getTime());
+
+    rawCompletedMeetingsList.sort(sortByTimeDesc).splice(5);
+    rawNext7DaysMeetingsList.sort(sortByTimeAsc).splice(5);
+    rawPendingFollowUpsList.sort(sortByTimeDesc).splice(5);
+    rawNext7DaysFollowUpsList.sort(sortByTimeAsc).splice(5);
+    rawCompletedSiteVisitsList.sort(sortByTimeDesc).splice(5);
+
+    const completedMeetingsList = rawCompletedMeetingsList.map((a: any) => formatActivity(a, 'done'));
+    const next7DaysMeetingsList = rawNext7DaysMeetingsList.map((a: any) => formatActivity(a, 'pending'));
+    const pendingFollowUpsList = rawPendingFollowUpsList.map((a: any) => formatActivity(a, 'overdue'));
+    const next7DaysFollowUpsList = rawNext7DaysFollowUpsList.map((a: any) => formatActivity(a, 'pending'));
+    const completedSiteVisitsList = rawCompletedSiteVisitsList.map((a: any) => formatActivity(a, 'done'));
 
     const summaryData = [
       {
@@ -136,6 +121,7 @@ export async function GET(req: Request) {
         value: totalOpenLeads.toString(),
         iconName: 'Users',
         iconBgColor: 'bg-blue-600',
+        href: '/dashboard/leads',
         badges: [
           { label: 'Open', value: totalOpenLeads.toString(), color: 'blue' },
           { label: 'Closed', value: totalClosedLeads.toString(), color: 'green' },
@@ -146,20 +132,23 @@ export async function GET(req: Request) {
         value: activeUsers.toString(),
         iconName: 'Users',
         iconBgColor: 'bg-green-500',
-        subtitle: 'Team members'
+        subtitle: 'Team members',
+        href: '/settings/roles'
       },
       {
         title: 'Total Properties',
         value: totalProperties.toString(),
         iconName: 'Building',
         iconBgColor: 'bg-purple-500',
-        subtitle: 'Listed properties'
+        subtitle: 'Listed properties',
+        href: '/dashboard/properties'
       },
       {
         title: 'Meetings',
         value: (pendingMeetings + doneMeetings).toString(),
         iconName: 'Calendar',
         iconBgColor: 'bg-teal-500',
+        href: '/dashboard/calendar',
         badges: [
           { label: 'Pending', value: pendingMeetings.toString(), color: 'yellow' },
           { label: 'Done', value: doneMeetings.toString(), color: 'green' },
@@ -170,6 +159,7 @@ export async function GET(req: Request) {
         value: (pendingFollowUps + doneFollowUps).toString(),
         iconName: 'Phone',
         iconBgColor: 'bg-amber-500',
+        href: '/dashboard/tasks',
         badges: [
           { label: 'Pending', value: pendingFollowUps.toString(), color: 'yellow' },
           { label: 'Done', value: doneFollowUps.toString(), color: 'green' },
@@ -180,6 +170,7 @@ export async function GET(req: Request) {
         value: (pendingSiteVisits + doneSiteVisits).toString(),
         iconName: 'MapPin',
         iconBgColor: 'bg-cyan-500',
+        href: '/dashboard/tasks',
         badges: [
           { label: 'Pending', value: pendingSiteVisits.toString(), color: 'yellow' },
           { label: 'Done', value: doneSiteVisits.toString(), color: 'green' },
@@ -190,6 +181,7 @@ export async function GET(req: Request) {
         value: (totalBookings + pendingBookings).toString(),
         iconName: 'CheckCircle',
         iconBgColor: 'bg-pink-500',
+        href: '/dashboard/bookings',
         badges: [
           { label: 'Confirmed', value: totalBookings.toString(), color: 'green' },
           { label: 'Pending', value: pendingBookings.toString(), color: 'yellow' },

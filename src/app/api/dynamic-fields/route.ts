@@ -70,16 +70,54 @@ export async function GET(req: Request) {
       }
 
       query.$or = orConditions;
+      // Filter out fields that this company has disabled
+      query.disabledBy = { $ne: new mongoose.Types.ObjectId(companyId) };
     } else {
       query.tenantScope = { $in: ["Global", "Industry"] };
     }
 
+    // Check if the target corresponds to a CustomModule
+    const CustomModule = (await import("@/modules/settings/schemas/CustomModule")).default;
+    let customModuleFields: any[] = [];
+    if (target && target !== "all") {
+      const customModule = await CustomModule.findOne({ name: target }).lean();
+      if (customModule) {
+        // Map embedded fields to DynamicField format
+        customModuleFields = customModule.fields
+          .filter((f: any) => {
+            // Filter disabledBy for the current user
+            if (hierarchyLevel > 1 && companyId && f.disabledBy) {
+              return !f.disabledBy.map((id: any) => id.toString()).includes(companyId.toString());
+            }
+            return true;
+          })
+          .map((f: any) => ({
+            _id: `custom_${customModule._id}_${f._id || f.name}`, // special ID prefix
+            name: f.name,
+            target: customModule.name,
+            type: f.type,
+            required: f.required,
+            tenantScope: customModule.tenantScope,
+            companyId: customModule.companyId,
+            section: f.section || "General",
+            order: 0,
+            options: f.options || [],
+            isCustomModuleField: true,
+            moduleId: customModule._id.toString()
+          }));
+      }
+    }
+
     // Sort by order
-    const fields = await DynamicField.find(query, null, { strictQuery: false })
+    let fields = await DynamicField.find(query, null, { strictQuery: false })
       .sort({ section: 1, order: 1, createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean();
+      
+    if (customModuleFields.length > 0) {
+      fields = [...customModuleFields, ...fields];
+    }
       
     // Manually populate industries to completely bypass Mongoose schema cache issues
     const industryIds = fields.map(f => f.industryId).filter((id): id is mongoose.Types.ObjectId => !!id);
@@ -118,6 +156,40 @@ export async function POST(req: Request) {
     
     if (!name || !target || !type) {
       return NextResponse.json({ error: "Name, target, and type are required." }, { status: 400 });
+    }
+
+    // Check if target is a Custom Module
+    const CustomModule = (await import("@/modules/settings/schemas/CustomModule")).default;
+    const customModule = await CustomModule.findOne({ name: target });
+    if (customModule) {
+      // It's a Custom Module pseudo-field
+      if (customModule.tenantScope === "Global" && (session?.user as any)?.hierarchyLevel > 1) {
+        return NextResponse.json({ error: "Forbidden: Cannot add fields to Global Custom Modules." }, { status: 403 });
+      }
+
+      const newField = {
+        name,
+        type,
+        required: required || false,
+        section: section || "General",
+        options: options || [],
+      };
+      
+      customModule.fields.push(newField);
+      await customModule.save();
+      
+      const addedField = customModule.fields[customModule.fields.length - 1];
+      const mappedField = {
+        _id: `custom_${customModule._id}_${addedField._id || addedField.name}`,
+        name: addedField.name,
+        target: customModule.name,
+        type: addedField.type,
+        required: addedField.required,
+        section: addedField.section || "General",
+        options: addedField.options || [],
+        isCustomModuleField: true
+      };
+      return NextResponse.json({ message: "Field deployed to Custom Module successfully.", field: mappedField }, { status: 201 });
     }
 
     // If attempting to create a Global or Industry field, require MANAGE_COMPANIES (Platform Owner)

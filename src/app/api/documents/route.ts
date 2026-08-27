@@ -44,7 +44,7 @@ export async function POST(req: Request) {
       mimeType: body.mimeType,
       fileUrl: body.fileUrl, // Simulated URL for MVP
       parentId: body.parentId || null,
-      createdBy: user._id,
+      createdBy: user.id, // Fixed: use user.id from session
     });
 
     return NextResponse.json({ success: true, document: newDoc }, { status: 201 });

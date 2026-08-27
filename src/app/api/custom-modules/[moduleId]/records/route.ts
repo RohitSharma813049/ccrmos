@@ -84,7 +84,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ moduleI
     const newRecord = await CustomRecord.create({
       moduleId,
       companyId: effectiveCompanyId,
-      data: body.data || {}
+      data: body.data || {},
+      source: 'Manual',
+      createdBy: user.id || user._id
     });
 
     return NextResponse.json({ record: newRecord }, { status: 201 });

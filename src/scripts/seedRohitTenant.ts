@@ -4,6 +4,8 @@ import * as dotenv from "dotenv";
 dotenv.config({ path: ".env.local" });
 
 import Company from "../modules/companies/schemas/Company";
+import Department from "../modules/companies/schemas/Department";
+import Process from "../modules/companies/schemas/Process";
 import User from "../modules/users/schemas/User";
 import Role from "../modules/roles/schemas/Role";
 import Form from "../modules/forms/schemas/Form";
@@ -88,13 +90,51 @@ async function seedRohitTenant() {
       roleDocs[r.name] = roleDoc;
     }
 
-    // 3. User Hierarchy Setup for rohitsharma813049@gmail.com
+    // 3. Departments and Processes Setup
+    const salesDept = await Department.findOneAndUpdate(
+      { name: "Sales", companyId },
+      { name: "Sales", companyId, isActive: true },
+      { upsert: true, new: true }
+    );
+    console.log(`✅ Created Department: ${salesDept.name}`);
+
+    const operationsDept = await Department.findOneAndUpdate(
+      { name: "Operations", companyId },
+      { name: "Operations", companyId, isActive: true },
+      { upsert: true, new: true }
+    );
+    console.log(`✅ Created Department: ${operationsDept.name}`);
+
+    const domesticSalesProcess = await Process.findOneAndUpdate(
+      { name: "Domestic Sales", companyId, departmentId: salesDept._id },
+      { name: "Domestic Sales", companyId, departmentId: salesDept._id, isActive: true },
+      { upsert: true, new: true }
+    );
+    console.log(`✅ Created Process: ${domesticSalesProcess.name}`);
+
+    const intlSalesProcess = await Process.findOneAndUpdate(
+      { name: "International Sales", companyId, departmentId: salesDept._id },
+      { name: "International Sales", companyId, departmentId: salesDept._id, isActive: true },
+      { upsert: true, new: true }
+    );
+    console.log(`✅ Created Process: ${intlSalesProcess.name}`);
+
+    const fulfillmentProcess = await Process.findOneAndUpdate(
+      { name: "Order Fulfillment", companyId, departmentId: operationsDept._id },
+      { name: "Order Fulfillment", companyId, departmentId: operationsDept._id, isActive: true },
+      { upsert: true, new: true }
+    );
+    console.log(`✅ Created Process: ${fulfillmentProcess.name}`);
+
+    // 4. User Hierarchy Setup for rohitsharma813049@gmail.com
     let founder = await User.findOne({ email: targetEmail });
     if (!founder) {
       founder = await User.create({
         email: targetEmail,
         name: "Rohit Sharma",
         companyId,
+        departmentId: salesDept._id,
+        processId: domesticSalesProcess._id,
         hierarchyLevel: 2, // Founder Level
         role: roleDocs.founder._id,
         isActive: true,
@@ -104,6 +144,8 @@ async function seedRohitTenant() {
       console.log(`✅ Created Founder User: ${targetEmail}`);
     } else {
       founder.companyId = companyId;
+      founder.departmentId = salesDept._id;
+      founder.processId = domesticSalesProcess._id;
       founder.hierarchyLevel = 2;
       founder.role = roleDocs.founder._id;
       founder.name = founder.name || "Rohit Sharma";
@@ -116,11 +158,11 @@ async function seedRohitTenant() {
 
     // Seed Hierarchical Users under Rohit Sharma
     const subUsers = [
-      { email: "director.rohit@example.com", name: "Ananya Sharma", role: roleDocs.director._id, level: 3, phone: "+1-555-0101", directorId: founderId },
-      { email: "manager.rohit@example.com", name: "Vikram Malhotra", role: roleDocs.manager._id, level: 4, phone: "+1-555-0102", directorId: founderId },
-      { email: "tl.rohit@example.com", name: "Priya Patel", role: roleDocs.team_leader._id, level: 5, phone: "+1-555-0103", directorId: founderId },
-      { email: "emp1.rohit@example.com", name: "Rahul Verma", role: roleDocs.employee._id, level: 6, phone: "+1-555-0104", directorId: founderId },
-      { email: "emp2.rohit@example.com", name: "Neha Singh", role: roleDocs.employee._id, level: 6, phone: "+1-555-0105", directorId: founderId }
+      { email: "director.rohit@example.com", name: "Ananya Sharma", role: roleDocs.director._id, level: 3, phone: "+1-555-0101", directorId: founderId, dept: salesDept._id, proc: domesticSalesProcess._id },
+      { email: "manager.rohit@example.com", name: "Vikram Malhotra", role: roleDocs.manager._id, level: 4, phone: "+1-555-0102", directorId: founderId, dept: salesDept._id, proc: domesticSalesProcess._id },
+      { email: "tl.rohit@example.com", name: "Priya Patel", role: roleDocs.team_leader._id, level: 5, phone: "+1-555-0103", directorId: founderId, dept: salesDept._id, proc: domesticSalesProcess._id },
+      { email: "emp1.rohit@example.com", name: "Rahul Verma", role: roleDocs.employee._id, level: 6, phone: "+1-555-0104", directorId: founderId, dept: salesDept._id, proc: intlSalesProcess._id },
+      { email: "emp2.rohit@example.com", name: "Neha Singh", role: roleDocs.employee._id, level: 6, phone: "+1-555-0105", directorId: founderId, dept: operationsDept._id, proc: fulfillmentProcess._id }
     ];
 
     const createdUsers: any[] = [founder];
@@ -132,6 +174,8 @@ async function seedRohitTenant() {
           name: u.name,
           companyId,
           founderId,
+          departmentId: u.dept,
+          processId: u.proc,
           hierarchyLevel: u.level,
           role: u.role,
           directorId: u.directorId,
@@ -139,8 +183,13 @@ async function seedRohitTenant() {
           phone: u.phone
         });
         console.log(`✅ Created User: ${u.email} (${u.name})`);
+      } else {
+        userDoc.departmentId = u.dept;
+        userDoc.processId = u.proc;
+        await userDoc.save();
       }
       createdUsers.push(userDoc);
+
     }
 
     // 4. Seed Forms & Form Submissions

@@ -2,15 +2,13 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import DynamicRecord from "@/modules/dynamic/schemas/DynamicRecord";
 import { getSession } from "@/lib/auth-utils";
+import { getScopedQuery } from "@/lib/rbac-utils";
 
 export async function GET(req: Request, { params }: { params: Promise<{ moduleId: string }> }) {
   try {
     await dbConnect();
     const session = await getSession();
     if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    const userCompanyId = (session.user as any).companyId || (session.user as any).impersonatedFounderId;
-    if (!userCompanyId) return NextResponse.json({ error: "No company context" }, { status: 403 });
 
     const { moduleId } = await params;
     const { searchParams } = new URL(req.url);
@@ -19,7 +17,12 @@ export async function GET(req: Request, { params }: { params: Promise<{ moduleId
     const limit = parseInt(searchParams.get("limit") || "10", 10);
     const skip = (page - 1) * limit;
 
-    const query: any = { moduleId, companyId: userCompanyId };
+    let query: any;
+    try {
+      query = getScopedQuery(session.user, { moduleId });
+    } catch (err: any) {
+      return NextResponse.json({ error: err.message }, { status: 403 });
+    }
     
     // Attempt to search inside the 'data' JSON if a search term is provided
     if (search) {
@@ -71,6 +74,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ moduleI
     const record = await DynamicRecord.create({
       moduleId,
       companyId: userCompanyId,
+      departmentId: (session.user as any).departmentId,
+      processId: (session.user as any).processId,
       createdBy: (session.user as any).id,
       data: data || {}
     });

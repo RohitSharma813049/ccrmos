@@ -15,6 +15,12 @@ export default function IntegrationsClient() {
   const [emailFrom, setEmailFrom] = useState("");
   const [isSavingEmail, setIsSavingEmail] = useState(false);
 
+  const [metaAccessToken, setMetaAccessToken] = useState("");
+  const [metaPhoneNumberId, setMetaPhoneNumberId] = useState("");
+  const [metaBusinessAccountId, setMetaBusinessAccountId] = useState("");
+  const [metaWebhookToken, setMetaWebhookToken] = useState("");
+  const [isSavingMeta, setIsSavingMeta] = useState(false);
+
   const fetchApiKeys = async () => {
     try {
       const res = await fetch("/api/settings/api-keys");
@@ -40,8 +46,14 @@ export default function IntegrationsClient() {
     } catch (e) {}
 
     try {
-      const res = await fetch("/api/settings/twilio_config"); // Assuming we have a general system setting for email too
-      // Wait, there's no /api/settings/email_config. We can just use the generic PUT endpoint.
+      const res = await fetch("/api/whatsapp/config");
+      const data = await res.json();
+      if (res.ok && data.config) {
+        setMetaAccessToken(data.config.accessToken || "");
+        setMetaPhoneNumberId(data.config.phoneNumberId || "");
+        setMetaBusinessAccountId(data.config.businessAccountId || "");
+        setMetaWebhookToken(data.config.webhookVerifyToken || "");
+      }
     } catch (e) {}
   };
 
@@ -75,6 +87,29 @@ export default function IntegrationsClient() {
       alert(err.message);
     } finally {
       setIsSavingTwilio(false);
+    }
+  };
+
+  const saveMetaWhatsApp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingMeta(true);
+    try {
+      const res = await fetch("/api/whatsapp/config", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          accessToken: metaAccessToken,
+          phoneNumberId: metaPhoneNumberId,
+          businessAccountId: metaBusinessAccountId,
+          webhookVerifyToken: metaWebhookToken
+        })
+      });
+      if (!res.ok) throw new Error("Failed to save Meta WhatsApp settings");
+      alert("Meta WhatsApp settings saved successfully!");
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setIsSavingMeta(false);
     }
   };
 
@@ -270,6 +305,38 @@ export default function IntegrationsClient() {
               </div>
               <button type="submit" disabled={isSavingTwilio} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-2.5 rounded-xl transition-all disabled:opacity-50 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
                 {isSavingTwilio ? "Saving..." : "Save Configuration"}
+              </button>
+            </form>
+          </div>
+
+          <div className="bg-card rounded-3xl p-6 shadow-sm border border-border mt-6">
+            <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+              <svg className="w-6 h-6 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12.01 2.01c-5.51 0-9.98 4.47-9.98 9.98 0 1.77.46 3.44 1.28 4.9L2 22l5.24-1.28c1.42.78 3.03 1.22 4.77 1.22 5.51 0 9.98-4.47 9.98-9.98s-4.47-9.98-9.98-9.98zm5.55 14.28c-.24.68-1.39 1.27-1.92 1.33-.53.07-1.21.13-3.64-1.28-2.9-1.68-4.75-4.66-4.9-4.86-.14-.2-.17-.23-1.18-1.57-.14-.19-.48-.65-.48-1.24s.31-1.16.43-1.29c.12-.13.26-.17.34-.17s.17 0 .25.01c.08.01.2 0 .31.27.12.28.41 1.01.45 1.09.04.09.06.19.01.31-.05.11-.08.19-.16.28-.08.09-.17.21-.24.28-.08.09-.18.17-.08.35.1.18.45.74.95 1.19.65.58 1.2 1.76 1.39 2.08.18.32.2.45.1.66-.09.2-.42.49-.57.66-.14.17-.3.37-.11.69.19.32.85 1.39 1.83 2.25 1.26 1.11 2.3 1.44 2.63 1.58.33.15.53.12.72-.09.2-.21.84-1 .11 1z"/>
+              </svg>
+              Meta WhatsApp API
+            </h2>
+            <p className="text-muted-foreground text-sm mb-6">Configure the official Meta Cloud API to power your WhatsApp CRM and automated messaging.</p>
+            <form onSubmit={saveMetaWhatsApp} className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-foreground mb-1.5">Access Token</label>
+                <input type="password" value={metaAccessToken} onChange={e => setMetaAccessToken(e.target.value)} className="w-full px-4 py-2.5 rounded-xl border border-border bg-background" placeholder="EA..." required />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-foreground mb-1.5">Phone Number ID</label>
+                <input type="text" value={metaPhoneNumberId} onChange={e => setMetaPhoneNumberId(e.target.value)} className="w-full px-4 py-2.5 rounded-xl border border-border bg-background" required />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-foreground mb-1.5">Business Account ID (Optional)</label>
+                <input type="text" value={metaBusinessAccountId} onChange={e => setMetaBusinessAccountId(e.target.value)} className="w-full px-4 py-2.5 rounded-xl border border-border bg-background" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-foreground mb-1.5">Webhook Verify Token</label>
+                <input type="text" value={metaWebhookToken} onChange={e => setMetaWebhookToken(e.target.value)} className="w-full px-4 py-2.5 rounded-xl border border-border bg-background" placeholder="my_secure_token_123" />
+                <p className="text-xs text-muted-foreground mt-1.5">Use this exact token when setting up Webhooks in your Meta App Dashboard.</p>
+              </div>
+              <button type="submit" disabled={isSavingMeta} className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2.5 rounded-xl transition-all disabled:opacity-50 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500">
+                {isSavingMeta ? "Saving..." : "Save Meta Configuration"}
               </button>
             </form>
           </div>

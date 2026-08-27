@@ -173,10 +173,16 @@ export default function ProcessesClient() {
       header: "Actions",
       className: "text-right",
       cell: (proc) => (
-        <div className="flex justify-end gap-3">
+        <div className="flex justify-end gap-3 items-center">
+          <a
+            href={`/dashboard/processes/${proc._id}`}
+            className="text-blue-400 hover:text-blue-500 font-medium transition-colors text-sm"
+          >
+            Workflow Builder
+          </a>
           <button 
             onClick={() => toggleStatus(proc)}
-            className={`${proc.isActive ? 'text-red-400 hover:text-red-600' : 'text-emerald-500 hover:text-emerald-600'} font-medium transition-colors`}
+            className={`${proc.isActive ? 'text-red-400 hover:text-red-600' : 'text-emerald-500 hover:text-emerald-600'} font-medium transition-colors text-sm`}
           >
             {proc.isActive ? 'Suspend' : 'Restore'}
           </button>

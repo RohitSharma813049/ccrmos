@@ -12,8 +12,16 @@ export default async function DynamicModulePage({ params }: { params: Promise<{ 
     notFound();
   }
 
+  const session = await getSession();
+  const user = session?.user as any;
+  const userCompanyId = user?.companyId || user?.impersonatedFounderId;
+
   // Pass the module schema to the client component so it knows what columns to render
-  let processedFields = [...moduleDoc.fields] as any[];
+  // Filter out fields that are disabled by the current company
+  let processedFields = [...moduleDoc.fields]
+    .filter(f => !f.disabledBy || !f.disabledBy.map(id => id.toString()).includes(userCompanyId?.toString()))
+    .map(f => f) as any[];
+
   for (const field of processedFields) {
     if (field.type === 'relation' && field.relationTarget === 'Project') {
       const { default: Project } = await import('@/modules/projects/schemas/Project');

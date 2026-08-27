@@ -7,6 +7,7 @@ export interface ICustomField {
   options?: string[]; // for select types
   relationTarget?: string; // e.g., 'Project', 'Lead', etc., used for 'relation' type
   section?: string;
+  disabledBy?: mongoose.Types.ObjectId[];
 }
 
 export interface ICustomModule extends Document {
@@ -26,7 +27,8 @@ const customFieldSchema = new Schema<ICustomField>({
   required: { type: Boolean, default: false },
   options: { type: [String], default: [] },
   relationTarget: { type: String, default: null },
-  section: { type: String, default: 'General' }
+  section: { type: String, default: 'General' },
+  disabledBy: [{ type: Schema.Types.ObjectId, ref: 'Company' }]
 });
 
 const customModuleSchema = new Schema<ICustomModule>({
