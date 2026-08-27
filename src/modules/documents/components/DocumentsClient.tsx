@@ -16,9 +16,12 @@ export default function DocumentsClient() {
   const [isNewFolderModalOpen, setIsNewFolderModalOpen] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
   
+  // Upload State
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [uploadFileName, setUploadFileName] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [allFolders, setAllFolders] = useState<any[]>([]);
+  const [uploadFolderId, setUploadFolderId] = useState<string | null>(null);
 
   const fetchDocuments = async (parentId: string | null = null) => {
     setLoading(true);
@@ -33,6 +36,20 @@ export default function DocumentsClient() {
       toast.error("Failed to load documents");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const openUploadModal = async () => {
+    setIsUploadModalOpen(true);
+    setUploadFolderId(currentFolderId);
+    try {
+      const res = await fetch('/api/documents?foldersOnly=true');
+      if (res.ok) {
+        const data = await res.json();
+        setAllFolders(data.documents || []);
+      }
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -119,7 +136,7 @@ export default function DocumentsClient() {
             New Folder
           </button>
           <button 
-            onClick={() => setIsUploadModalOpen(true)}
+            onClick={openUploadModal}
             className="px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl text-sm font-semibold shadow-sm transition-colors flex items-center gap-2"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
@@ -228,7 +245,21 @@ export default function DocumentsClient() {
           <div className="absolute inset-0 bg-black/70 backdrop-blur-md" onClick={() => setIsUploadModalOpen(false)} />
           <div className="relative bg-zinc-950/90 backdrop-blur-xl w-full max-w-md rounded-2xl shadow-2xl border border-white/10 p-6 animate-in fade-in zoom-in-95 duration-200">
             <h3 className="text-xl font-bold text-zinc-100 mb-2">Upload File</h3>
-            <p className="text-sm text-zinc-500 mb-6">Select a file to upload into the current folder.</p>
+            <p className="text-sm text-zinc-500 mb-4">Select a file to upload.</p>
+            
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-zinc-300 mb-2">Upload to Folder</label>
+              <select 
+                value={uploadFolderId || ''} 
+                onChange={(e) => setUploadFolderId(e.target.value || null)}
+                className="w-full px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-100 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-inner"
+              >
+                <option value="">Home (Root)</option>
+                {allFolders.map(f => (
+                  <option key={f._id} value={f._id}>{f.name}</option>
+                ))}
+              </select>
+            </div>
             
             <input 
               type="file" 
@@ -257,14 +288,16 @@ export default function DocumentsClient() {
                         size: file.size,
                         mimeType: file.type || 'application/octet-stream',
                         fileUrl: uploadData.url,
-                        parentId: currentFolderId
+                        parentId: uploadFolderId
                       })
                     });
 
                     if (res.ok) {
                       toast.success("File uploaded successfully!");
                       setIsUploadModalOpen(false);
-                      fetchDocuments(currentFolderId);
+                      if (currentFolderId === uploadFolderId) {
+                        fetchDocuments(currentFolderId);
+                      }
                     } else {
                       toast.error("Failed to save document metadata");
                     }

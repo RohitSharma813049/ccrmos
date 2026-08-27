@@ -10,13 +10,19 @@ export async function GET(req: Request) {
     await dbConnect();
 
     const url = new URL(req.url);
-    const parentId = url.searchParams.get('parentId') || null;
+    const parentId = url.searchParams.get('parentId');
+    const foldersOnly = url.searchParams.get('foldersOnly') === 'true';
 
     const query: any = { companyId };
-    if (parentId && parentId !== 'null') {
-      query.parentId = parentId;
+    
+    if (foldersOnly) {
+      query.type = 'folder';
     } else {
-      query.parentId = null; // Root level
+      if (parentId && parentId !== 'null') {
+        query.parentId = parentId;
+      } else {
+        query.parentId = null; // Root level
+      }
     }
 
     const documents = await Doc.find(query).sort({ type: -1, name: 1 });
