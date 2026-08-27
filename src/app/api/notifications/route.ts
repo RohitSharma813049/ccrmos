@@ -15,6 +15,9 @@ export async function GET(req: Request) {
       
     return NextResponse.json({ notifications });
   } catch (error: any) {
+    if (error.message === "Unauthorized") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -46,6 +49,9 @@ export async function PUT(req: Request) {
       return NextResponse.json({ success: true });
     }
   } catch (error: any) {
+    if (error.message === "Unauthorized") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

@@ -6,6 +6,9 @@ import { requireAuthenticatedUser, requirePermission } from '@/lib/auth-utils';
 import { buildTenantQuery } from '@/lib/access-control';
 import { getRecordScopeFilter } from "@/lib/permissions";
 import { parseFiltersToMongo } from "@/utils/parseFilters";
+import { emailQueue } from "@/lib/queue";
+import { sendPushNotification } from "@/modules/notifications/services/notifications.service";
+import User from "@/modules/users/schemas/User";
 
 export async function GET(req: Request) {
   try {
@@ -85,6 +88,25 @@ export async function POST(req: Request) {
     }
 
     const item = await Task.create(body);
+
+    if (item.type === 'Meeting' && item.attendees && item.attendees.length > 0) {
+      for (const email of item.attendees) {
+        const attendeeUser = await User.findOne({ email });
+        if (attendeeUser) {
+          await sendPushNotification(
+            attendeeUser._id.toString(),
+            "New Meeting Scheduled",
+            `You have been invited to a meeting: ${item.title}`
+          );
+        }
+        await emailQueue.add("sendEmail", {
+          to: email,
+          subject: `Meeting Invitation: ${item.title}`,
+          body: `You have been invited to a meeting: ${item.title} at ${item.startTime}`
+        });
+      }
+    }
+
     return NextResponse.json({ message: 'Created successfully', task: item }, { status: 201 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

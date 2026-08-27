@@ -67,6 +67,47 @@ async function processCompanyCronJobs(companyId: any) {
     // 3. Daily Metrics & Reporting (Stub for future reporting module)
     // generateDailyMetrics(companyId);
 
+    // 4. SLA Firewall Notifications
+    const { sendPushNotification } = require("@/modules/notifications/services/notifications.service");
+    const ModuleStatus = require("@/modules/settings/schemas/ModuleStatus").default;
+    
+    // Find all module statuses with an SLA defined for this company
+    const slaStatuses = await ModuleStatus.find({
+      companyId,
+      slaHours: { $gt: 0 }
+    });
+
+    for (const status of slaStatuses) {
+      if (!status.autoNotifyBeforeHours) continue;
+
+      const breachThresholdHours = status.slaHours;
+      const notifyThresholdHours = status.slaHours - status.autoNotifyBeforeHours;
+      
+      const notifyDate = new Date();
+      notifyDate.setHours(notifyDate.getHours() - notifyThresholdHours);
+
+      const breachDate = new Date();
+      breachDate.setHours(breachDate.getHours() - breachThresholdHours);
+
+      // Find leads in this status that haven't been updated recently enough
+      const atRiskLeads = await Lead.find({
+        companyId,
+        status: status.name,
+        updatedAt: { $lt: notifyDate, $gte: breachDate } // In the "warning" window
+      });
+
+      for (const lead of atRiskLeads) {
+        // Send a notification to the assigned user
+        if (lead.assignedUserId) {
+          await sendPushNotification(
+            lead.assignedUserId.toString(),
+            "SLA Warning: Action Required",
+            `Lead ${lead.firstName} ${lead.lastName} is approaching SLA breach in status "${status.name}".`
+          );
+        }
+      }
+    }
+
   } catch (error) {
     console.error(`[CRON] Failed processing company ${companyId}:`, error);
   }
