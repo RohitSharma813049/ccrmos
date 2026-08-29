@@ -6,7 +6,7 @@ import NotificationBell from '@/components/ui/NotificationBell';
 
 export function Header() {
   return (
-    <header className="h-16 w-full bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800/60 flex items-center justify-between px-6 sticky top-0 z-10">
+    <header className="h-16 w-full bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800/60 flex items-center justify-between px-6 sticky top-0 z-40">
       
       {/* Left: Mobile Menu Toggle & Search */}
       <div className="flex items-center gap-4 flex-1">

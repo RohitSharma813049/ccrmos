@@ -605,34 +605,6 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
   };
 
   const columns: ColumnDef<any>[] = [
-    {
-      id: "select",
-      header: (
-        <input 
-          type="checkbox" 
-          onChange={(e) => {
-            if (e.target.checked) {
-              setSelectedIds(leads.map(l => l._id));
-            } else {
-              setSelectedIds([]);
-            }
-          }}
-          checked={selectedIds.length > 0 && selectedIds.length === leads.length}
-          className="rounded border-border text-primary focus:ring-primary/20"
-        />
-      ),
-      cell: (item) => (
-        <input 
-          type="checkbox"
-          checked={selectedIds.includes(item._id)}
-          onChange={(e) => {
-            if (e.target.checked) setSelectedIds(prev => [...prev, item._id]);
-            else setSelectedIds(prev => prev.filter(id => id !== item._id));
-          }}
-          className="rounded border-border text-primary focus:ring-primary/20"
-        />
-      )
-    },
     { header: "Lead Info", cell: (item) => (
       <div>
         <div className="font-medium text-primary hover:underline cursor-pointer" onClick={() => setSelectedLeadForDetails(item)}>
@@ -858,7 +830,7 @@ export default function LeadsClient({ initialShowRecycleBin = false }: { initial
   return (
     <div className="space-y-8 fade-in pb-12">
       <PageHeader 
-        title="Sales Leads"
+        title="Leads"
         description="Manage your pipeline and dynamic lead data."
       >
           <div className="flex bg-muted p-1 rounded-xl">

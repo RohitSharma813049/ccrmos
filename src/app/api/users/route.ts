@@ -116,9 +116,14 @@ export async function POST(req: Request) {
       }
     } else {
       // If a platform owner specifies a founderId, they are creating a user for that tenant.
-      // Otherwise, they are creating an internal platform user.
       if (body.founderId) {
-        body.companyId = null; // Ideally fetch the founder's companyId, but null for now
+        // fetch the founder's companyId
+        const founder = await User.findById(body.founderId);
+        body.companyId = founder?.companyId || null;
+      } else if (body.hierarchyLevel === 2) {
+        // Creating a Founder! Keep the passed body.companyId
+        // The founderId can be themselves (set after creation) or null
+        body.founderId = null; 
       } else {
         body.companyId = authUser.companyId || null;
         body.founderId = authUser.id; // Internal user
@@ -128,9 +133,13 @@ export async function POST(req: Request) {
       }
     }
 
-    // In a real system, you would send an invite email and they would set their password.
-    // For this MVP, we create a dummy user record that can login via our mock auth or standard auth
     const newUser = await User.create(body);
+    
+    // If we just created a Founder, self-reference their founderId to themselves for easier querying later
+    if (newUser.hierarchyLevel === 2 && !newUser.founderId) {
+      newUser.founderId = newUser._id;
+      await newUser.save();
+    }
 
     return NextResponse.json({ user: newUser }, { status: 201 });
   } catch (error: any) {

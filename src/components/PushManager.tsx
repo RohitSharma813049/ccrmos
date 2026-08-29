@@ -37,23 +37,44 @@ export default function PushManager() {
 
   const subscribeToPush = async () => {
     try {
-      const registration = await navigator.serviceWorker.ready;
+      // First ensure the browser supports notifications
+      if (!('Notification' in window)) {
+        toast.error("This browser does not support desktop notifications.");
+        return;
+      }
+
+      // Request permission
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        toast.error("Notification permission denied.");
+        return;
+      }
+
+      const { initializeFirebaseMessaging } = await import('@/lib/firebase');
+      const { getToken } = await import('firebase/messaging');
       
-      // In production, fetch your VAPID public key from the server
+      const messaging = await initializeFirebaseMessaging();
+      if (!messaging) {
+        toast.error("Firebase messaging is not supported in this browser.");
+        return;
+      }
+
       const publicVapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuBkr3qBUYIHBQFLXYp5Nksh8U";
+      
+      const currentToken = await getToken(messaging, { vapidKey: publicVapidKey });
+      
+      if (!currentToken) {
+        toast.error("No registration token available. Request permission to generate one.");
+        return;
+      }
 
-      const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
-      });
-
-      // Send subscription to backend
+      // Send the token to the backend
       const res = await fetch('/api/notifications/subscribe', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ subscription }),
+        body: JSON.stringify({ token: currentToken }),
       });
 
       if (res.ok) {

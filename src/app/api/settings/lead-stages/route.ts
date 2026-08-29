@@ -8,8 +8,12 @@ export async function GET(req: Request) {
   await dbConnect();
   try {
     const user = await requireAuthenticatedUser();
-    const queryObj = buildTenantQuery(user);
-    queryObj.moduleName = 'Leads';
+    
+    // ModuleStatus schema only contains companyId, not founderId
+    const companyId = user.impersonatedCompanyId || user.companyId;
+    if (!companyId) return NextResponse.json([]);
+    
+    const queryObj: any = { companyId, moduleName: 'Leads' };
     const stages = await ModuleStatus.find(queryObj).sort({ order: 1 });
     return NextResponse.json(stages);
   } catch (error: any) {

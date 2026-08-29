@@ -2,15 +2,16 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import ModuleStatus from '@/modules/settings/schemas/ModuleStatus';
 import { requireAuthenticatedUser } from '@/lib/auth-utils';
-import { buildTenantQuery } from "@/lib/access-control";
 
 export async function GET(req: Request) {
   await dbConnect();
   try {
     const user = await requireAuthenticatedUser();
-    const queryObj = buildTenantQuery(user);
-    queryObj.moduleName = 'Leads';
+    
+    const companyId = user.impersonatedCompanyId || user.companyId;
+    if (!companyId) return NextResponse.json({ statuses: [] });
 
+    const queryObj: any = { companyId, moduleName: 'Leads' };
     const moduleStatuses = await ModuleStatus.find(queryObj).sort({ order: 1 });
     
     // Map the subStatuses strings into objects mimicking LeadStatus

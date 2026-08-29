@@ -8,10 +8,10 @@ export async function POST(req: Request) {
     const user = await requireAuthenticatedUser();
     await dbConnect();
     
-    const { subscription } = await req.json();
+    const { token } = await req.json();
 
-    if (!subscription || !subscription.endpoint) {
-      return NextResponse.json({ error: "Invalid subscription object" }, { status: 400 });
+    if (!token) {
+      return NextResponse.json({ error: "Invalid token" }, { status: 400 });
     }
 
     // Add subscription to user profile if it doesn't already exist
@@ -20,14 +20,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const subscriptions = dbUser.webPushSubscriptions || [];
+    const tokens = dbUser.fcmTokens || [];
     
-    // Check if we already have this endpoint
-    const exists = subscriptions.some(s => s.endpoint === subscription.endpoint);
+    // Check if we already have this token
+    const exists = tokens.includes(token);
     
     if (!exists) {
-      subscriptions.push(subscription);
-      dbUser.webPushSubscriptions = subscriptions;
+      tokens.push(token);
+      dbUser.fcmTokens = tokens;
       await dbUser.save();
     }
 

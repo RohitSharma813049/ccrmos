@@ -419,7 +419,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         {(session?.user as any)?.impersonatedFounderId && <ImpersonationBanner />}
 
         {/* Top Navbar */}
-        <header className="h-16 border-b border-border bg-card/40 backdrop-blur-xl flex items-center justify-between px-4 md:px-8 shrink-0 z-10 gap-3">
+        <header className="h-16 border-b border-border bg-card/40 backdrop-blur-xl flex items-center justify-between px-4 md:px-8 shrink-0 z-0 gap-3">
           {/* Mobile Logo */}
           <div className="md:hidden flex shrink-0 items-center">
             {logoUrl ? (

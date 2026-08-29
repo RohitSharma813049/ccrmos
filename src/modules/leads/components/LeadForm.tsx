@@ -105,7 +105,13 @@ export default function LeadForm({ initialData, onSubmit, onCancel }: LeadFormPr
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1.5">Phone</label>
                 <div className="phone-input-wrapper">
-                  <PhoneInput international defaultCountry="US" value={formData.phone || ""} onChange={val => handleChange("phone", val)} className="w-full bg-background border border-border rounded-xl px-4 py-2.5 outline-none focus-within:ring-2 focus-within:ring-primary" />
+                  <PhoneInput 
+                    international 
+                    defaultCountry="US" 
+                    value={formData.phone ? (formData.phone.startsWith('+') ? formData.phone : `+1${formData.phone.replace(/\D/g, '')}`) : ""} 
+                    onChange={val => handleChange("phone", val)} 
+                    className="w-full bg-background border border-border rounded-xl px-4 py-2.5 outline-none focus-within:ring-2 focus-within:ring-primary" 
+                  />
                 </div>
               </div>
               <div>

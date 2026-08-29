@@ -298,9 +298,9 @@ export default function UsersClient({ isOwner = false }: { isOwner?: boolean }) 
                     </select>
                   </div>
 
-                  {isOwner && formData.hierarchyLevel > 1 && (
+                  {isOwner && formData.hierarchyLevel > 2 && (
                     <div>
-                      <label className="block text-sm font-medium text-zinc-300 mb-1">Assign to Founder / Company</label>
+                      <label className="block text-sm font-medium text-zinc-300 mb-1">Assign to Founder</label>
                       <select
                         value={formData.founderId || ''}
                         onChange={e => setFormData({...formData, founderId: e.target.value})}
@@ -311,6 +311,19 @@ export default function UsersClient({ isOwner = false }: { isOwner?: boolean }) 
                           <option key={f._id} value={f._id}>{f.name} ({f.email})</option>
                         ))}
                       </select>
+                    </div>
+                  )}
+
+                  {isOwner && formData.hierarchyLevel === 2 && (
+                    <div>
+                      <label className="block text-sm font-medium text-zinc-300 mb-1">Company ID (Tenant)</label>
+                      <input 
+                        type="text" 
+                        value={formData.companyId || ''}
+                        onChange={e => setFormData({...formData, companyId: e.target.value})}
+                        className="w-full bg-zinc-950/50 text-zinc-100 border-zinc-700/50 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 border"
+                        placeholder="Paste existing Company Object ID"
+                      />
                     </div>
                   )}
                 </div>
