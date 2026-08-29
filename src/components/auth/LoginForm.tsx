@@ -78,7 +78,7 @@ export function LoginForm() {
   return (
     <div className="w-full max-w-sm mx-auto">
       <div className="mb-8 text-center sm:text-left">
-        <h1 className="text-3xl font-bold tracking-tight text-zinc-100 mb-2">Welcome back</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-zinc-100 mb-2">Welcome back</h1>
         <p className="text-sm text-zinc-400">Enter your credentials to access your workspace.</p>
       </div>
 

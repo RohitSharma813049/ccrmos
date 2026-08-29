@@ -9,7 +9,7 @@ export default async function OwnerDashboardPage() {
   return (
     <div className="space-y-8 fade-in">
       <div>
-        <h1 className="text-3xl font-bold text-foreground mb-2">
+        <h1 className="text-2xl font-bold text-foreground mb-2">
           Platform Overview
         </h1>
         <p className="text-muted-foreground">
@@ -62,7 +62,7 @@ function StatCard({ title, value, trend, icon, trendColor = "text-emerald-500" }
         </span>
       </div>
       <h3 className="text-muted-foreground text-sm font-medium mb-1">{title}</h3>
-      <p className="text-3xl font-bold text-foreground tracking-tight">{value}</p>
+      <p className="text-2xl font-bold text-foreground tracking-tight">{value}</p>
     </div>
   );
 }

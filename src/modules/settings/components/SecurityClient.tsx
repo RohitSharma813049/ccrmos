@@ -190,7 +190,7 @@ export default function SecurityClient() {
   return (
     <div className="space-y-8 fade-in pb-12">
       <div>
-        <h1 className="text-3xl font-bold text-foreground tracking-tight">Security & API Management</h1>
+        <h1 className="text-2xl font-bold text-foreground tracking-tight">Security & API Management</h1>
         <p className="text-muted-foreground mt-1">Enforce global security policies and manage tenant API access limits.</p>
       </div>
 

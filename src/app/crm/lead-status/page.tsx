@@ -97,17 +97,17 @@ export default function LeadStatusPage() {
         {/* Card 1 */}
         <div className="bg-blue-50/50 rounded-2xl p-5 border border-blue-100 shadow-sm">
           <p className="text-sm font-medium text-blue-600 mb-1">Total Status</p>
-          <h3 className="text-3xl font-bold text-blue-800">36</h3>
+          <h3 className="text-2xl font-bold text-blue-800">36</h3>
         </div>
         {/* Card 2 */}
         <div className="bg-green-50/50 rounded-2xl p-5 border border-green-100 shadow-sm">
           <p className="text-sm font-medium text-green-600 mb-1">Active Status</p>
-          <h3 className="text-3xl font-bold text-green-700">36</h3>
+          <h3 className="text-2xl font-bold text-green-700">36</h3>
         </div>
         {/* Card 3 */}
         <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl p-5 border border-zinc-800/60 shadow-sm">
           <p className="text-sm font-medium text-zinc-400 mb-1">Inactive Status</p>
-          <h3 className="text-3xl font-bold text-zinc-100">0</h3>
+          <h3 className="text-2xl font-bold text-zinc-100">0</h3>
         </div>
       </div>
 

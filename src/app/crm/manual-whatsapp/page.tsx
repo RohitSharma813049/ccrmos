@@ -17,7 +17,7 @@ export default function ManualWhatsAppPage() {
         </div>
 
         <div className="pt-8 space-y-12">
-          <h1 className="text-3xl font-light text-zinc-100">WhatsApp Integration</h1>
+          <h1 className="text-2xl font-light text-zinc-100">WhatsApp Integration</h1>
           
           <div className="flex flex-col items-center justify-center space-y-6">
             <Loader2 className="w-8 h-8 text-[#25D366] animate-spin" />

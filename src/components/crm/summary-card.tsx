@@ -52,7 +52,7 @@ export function SummaryCard({
       <div className="flex justify-between items-start mb-4">
         <div>
           <h3 className="text-zinc-400 font-medium text-sm mb-1">{title}</h3>
-          <div className="text-3xl font-bold text-zinc-100 tracking-tight">{value}</div>
+          <div className="text-2xl font-bold text-zinc-100 tracking-tight">{value}</div>
         </div>
         <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${bgAdjusted} shadow-sm`}>
           <Icon className="w-6 h-6" />

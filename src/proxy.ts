@@ -35,8 +35,8 @@ export async function proxy(req: NextRequest) {
     }
   }
   
-  // Only protect /dashboard and /owner paths natively
-  if (pathname.startsWith('/dashboard') || pathname.startsWith('/owner')) {
+  const protectedRoutes = ['/dashboard', '/owner', '/crm', '/portal', '/superadmin', '/book', '/m', '/f', '/shared'];
+  if (protectedRoutes.some(route => pathname.startsWith(route))) {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
     
     if (!token) {
@@ -66,5 +66,5 @@ export async function proxy(req: NextRequest) {
 
 // Specify the paths that should trigger this middleware
 export const config = {
-  matcher: ['/dashboard/:path*', '/owner/:path*', '/api/:path*'],
+  matcher: ['/dashboard/:path*', '/owner/:path*', '/crm/:path*', '/portal/:path*', '/superadmin/:path*', '/book/:path*', '/m/:path*', '/f/:path*', '/shared/:path*', '/api/:path*'],
 };

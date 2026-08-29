@@ -118,7 +118,7 @@ export default function BrandingSettingsPage() {
     return (
       <div className="max-w-3xl mx-auto space-y-8 fade-in pb-12">
         <div>
-          <h1 className="text-3xl font-bold text-zinc-100 tracking-tight">Branding & Appearance</h1>
+          <h1 className="text-2xl font-bold text-zinc-100 tracking-tight">Branding & Appearance</h1>
           <p className="text-zinc-400 mt-1">Configure your platform appearance.</p>
         </div>
         <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl border border-indigo-100 shadow-sm p-10 text-center">
@@ -142,7 +142,7 @@ export default function BrandingSettingsPage() {
   return (
     <div className="max-w-3xl mx-auto space-y-8 fade-in pb-12">
       <div>
-        <h1 className="text-3xl font-bold text-foreground tracking-tight">Branding & Appearance</h1>
+        <h1 className="text-2xl font-bold text-foreground tracking-tight">Branding & Appearance</h1>
         <p className="text-muted-foreground mt-1">Configure your workspace appearance.</p>
       </div>
 

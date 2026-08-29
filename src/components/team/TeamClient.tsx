@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { DataTable, ColumnDef } from '@/components/ui/DataTable';
 import { Mail, Plus, Shield, UserPlus, MoreHorizontal } from 'lucide-react';
-import { getTeamMembers, inviteTeamMember, toggleSuspendMember } from '@/app/(dashboard)/team/actions';
+import { getTeamMembers, inviteTeamMember, toggleSuspendMember } from '@/app/dashboard/team/actions';
 import { toast } from 'react-hot-toast';
 
 interface TeamMember {

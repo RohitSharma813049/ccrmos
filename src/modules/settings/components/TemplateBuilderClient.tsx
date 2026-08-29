@@ -76,7 +76,7 @@ export default function TemplateBuilderClient({ template }: { template: any }) {
     <div className="space-y-8 fade-in pb-12">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-zinc-100 tracking-tight">{template.name} - Bundle Configuration</h1>
+          <h1 className="text-2xl font-bold text-zinc-100 tracking-tight">{template.name} - Bundle Configuration</h1>
           <p className="text-zinc-400 mt-1">Select the global modules that should be cloned into this template.</p>
         </div>
         <div className="flex gap-3">

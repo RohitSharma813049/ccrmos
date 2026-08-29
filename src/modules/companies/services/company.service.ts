@@ -70,12 +70,20 @@ export class CompanyService {
     
     const checkoutToken = crypto.randomBytes(32).toString("hex");
 
+    // Derive the user quota from the subscription plan unless explicitly overridden
+    const plan = subscriptionPlanId ? await SubscriptionPlan.findById(subscriptionPlanId).lean() as any : null;
+    let effectiveUsersQuota = usersQuota;
+    if (effectiveUsersQuota === undefined || effectiveUsersQuota === null) {
+      // maxUsers of 0 means unlimited (same convention as maxCampaigns)
+      effectiveUsersQuota = plan?.maxUsers === 0 ? 100000 : (plan?.maxUsers || 5);
+    }
+
     // Create the company as pending/suspended
     const newCompany = await Company.create({
       name,
       adminEmail: normalizedEmail,
       subscriptionPlanId: subscriptionPlanId || undefined,
-      usersQuota: usersQuota || 5,
+      usersQuota: effectiveUsersQuota,
       industryId: industryId || undefined,
       selected_template_id: templateId || undefined,
       status: "Suspended",

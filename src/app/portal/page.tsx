@@ -42,7 +42,7 @@ export default async function PortalDashboard() {
   return (
     <div className="space-y-8 animate-in fade-in zoom-in-95 duration-300">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-zinc-900">Welcome back,</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-zinc-900">Welcome back,</h1>
         <p className="text-zinc-500 mt-1">Here is a summary of your account activity.</p>
       </div>
 

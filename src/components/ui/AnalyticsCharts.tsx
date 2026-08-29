@@ -91,7 +91,7 @@ export default function AnalyticsCharts() {
           : kpiData.map((item, index) => (
               <div key={index} className="bg-card p-6 rounded-xl border border-border shadow-sm flex flex-col justify-center">
                 <span className="text-muted-foreground text-sm font-medium">{item.name}</span>
-                <span className="text-3xl font-bold text-foreground mt-2">{item.value}</span>
+                <span className="text-2xl font-bold text-foreground mt-2">{item.value}</span>
               </div>
             ))}
       </div>

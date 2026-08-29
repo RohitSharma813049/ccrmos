@@ -164,7 +164,7 @@ export default function WhitelabelClient() {
   return (
     <div className="space-y-6 md:space-y-8 fade-in pb-12">
       <div>
-        <h1 className="text-3xl font-bold text-foreground tracking-tight">White-Label Management</h1>
+        <h1 className="text-2xl font-bold text-foreground tracking-tight">White-Label Management</h1>
         <p className="text-muted-foreground mt-1">Configure {isPlatformOwner ? 'global platform' : 'your tenant'} branding, custom domains, and visual identities.</p>
         {!isPlatformOwner && (
           <div className="mt-4 p-3 bg-primary/10 border border-primary/20 rounded-lg text-sm text-primary">

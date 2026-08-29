@@ -16,7 +16,7 @@ export default function GoogleCalendarPage() {
           {/* Header */}
           <div className="p-8 border-b border-[var(--rule)] flex items-start justify-between">
             <div>
-              <h1 className="text-3xl font-serif font-bold text-[var(--ink)] mb-2">Google Calendar Integration</h1>
+              <h1 className="text-2xl font-serif font-bold text-[var(--ink)] mb-2">Google Calendar Integration</h1>
               <p className="text-[var(--ink-muted)] text-sm">Sync your meetings and site visits with Google Calendar</p>
             </div>
             <div className="w-12 h-12 bg-[var(--violet-soft)] text-[var(--violet)] rounded-2xl flex items-center justify-center shrink-0 border border-[var(--violet-line)]">

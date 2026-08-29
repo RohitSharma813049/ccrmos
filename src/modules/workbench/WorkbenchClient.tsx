@@ -35,7 +35,7 @@ export default function WorkbenchClient() {
   return (
     <div className="space-y-8 fade-in pb-12">
       <div>
-        <h1 className="text-3xl font-bold text-foreground tracking-tight">Workbench</h1>
+        <h1 className="text-2xl font-bold text-foreground tracking-tight">Workbench</h1>
         <p className="text-muted-foreground mt-1">Your daily tasks and recent orders.</p>
       </div>
 

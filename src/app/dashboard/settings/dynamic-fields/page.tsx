@@ -176,7 +176,7 @@ export default function TenantDynamicFieldsPage() {
     <div className="space-y-8 fade-in pb-12">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-zinc-100 tracking-tight">Custom Fields</h1>
+          <h1 className="text-2xl font-bold text-zinc-100 tracking-tight">Custom Fields</h1>
           <p className="text-zinc-400 mt-1">Configure custom fields specific to your company.</p>
         </div>
         

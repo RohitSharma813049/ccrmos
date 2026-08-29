@@ -206,7 +206,7 @@ export default function DynamicFieldsPage() {
             </svg>
             Back to Overview
           </Link>
-          <h1 className="text-3xl font-bold text-foreground tracking-tight">Dynamic Engine: Fields</h1>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Dynamic Engine: Fields</h1>
           <p className="text-muted-foreground mt-1">Configure global custom fields pushed to all tenant databases.</p>
         </div>
         

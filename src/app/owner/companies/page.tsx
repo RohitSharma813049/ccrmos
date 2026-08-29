@@ -293,7 +293,7 @@ export default function ManageCompaniesPage() {
     },
     {
       header: "Users",
-      cell: (company) => `${company.users || 0} / ${company.usersQuota}`
+      cell: (company) => `${company.users || 0} / ${company.usersQuota >= 100000 ? "Unlimited" : company.usersQuota}`
     },
     {
       header: "Tenant Status",
@@ -333,7 +333,7 @@ export default function ManageCompaniesPage() {
             </svg>
             Back to Overview
           </Link>
-          <h1 className="text-3xl font-bold text-foreground tracking-tight">Manage Companies</h1>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Manage Companies</h1>
           <p className="text-muted-foreground mt-1">View, provision, and manage tenant accounts globally.</p>
         </div>
         

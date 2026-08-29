@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { DataTable, ColumnDef } from '@/components/ui/DataTable';
 import { Download } from 'lucide-react';
-import { getLeads } from '@/app/(dashboard)/leads/actions';
+import { getLeads } from '@/app/dashboard/leads/actions';
 
 interface Contact {
   id: string;

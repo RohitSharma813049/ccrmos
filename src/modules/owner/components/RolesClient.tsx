@@ -122,7 +122,7 @@ export default function RolesClient() {
     <div className="p-6 max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-extrabold text-zinc-100 tracking-tight">Custom Roles & Permissions</h1>
+          <h1 className="text-2xl font-extrabold text-zinc-100 tracking-tight">Custom Roles & Permissions</h1>
           <p className="text-zinc-400 mt-1">Define granular access control for your team globally.</p>
         </div>
         <button 

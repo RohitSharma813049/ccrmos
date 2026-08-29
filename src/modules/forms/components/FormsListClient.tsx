@@ -79,7 +79,7 @@ export default function FormsListClient() {
     <div className="space-y-8 fade-in pb-12 p-6 max-w-6xl mx-auto">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-zinc-900/40 backdrop-blur-xl p-6 rounded-2xl shadow-sm border border-zinc-800/60">
         <div>
-          <h1 className="text-3xl font-extrabold text-zinc-100 tracking-tight">Standalone Forms</h1>
+          <h1 className="text-2xl font-extrabold text-zinc-100 tracking-tight">Standalone Forms</h1>
           <p className="text-zinc-400 mt-1">Create custom surveys, contact forms, and lead captures.</p>
         </div>
         <button onClick={openCreateModal} className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-semibold shadow-sm transition-colors flex items-center gap-2 w-full sm:w-auto justify-center sm:justify-start">

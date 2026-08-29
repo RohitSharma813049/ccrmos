@@ -68,7 +68,7 @@ export default function LeadStagesPage() {
         <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl p-5 border border-zinc-800/60 shadow-sm flex items-center justify-between border-l-4 border-l-blue-500">
           <div>
             <p className="text-sm font-medium text-zinc-400 mb-1">Total Stages</p>
-            <h3 className="text-3xl font-bold text-blue-600">8</h3>
+            <h3 className="text-2xl font-bold text-blue-600">8</h3>
           </div>
           <div className="w-12 h-12 bg-zinc-900/40 backdrop-blur-xl rounded-xl flex items-center justify-center">
             
@@ -78,7 +78,7 @@ export default function LeadStagesPage() {
         <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl p-5 border border-zinc-800/60 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-sm font-medium text-zinc-400 mb-1">Total Leads</p>
-            <h3 className="text-3xl font-bold text-purple-600">0</h3>
+            <h3 className="text-2xl font-bold text-purple-600">0</h3>
           </div>
           <div className="w-12 h-12 bg-zinc-900/40 backdrop-blur-xl rounded-xl flex items-center justify-center">
             
@@ -88,7 +88,7 @@ export default function LeadStagesPage() {
         <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl p-5 border border-zinc-800/60 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-sm font-medium text-zinc-400 mb-1">Conversion Rate</p>
-            <h3 className="text-3xl font-bold text-green-600">0%</h3>
+            <h3 className="text-2xl font-bold text-green-600">0%</h3>
           </div>
           <div className="w-12 h-12 bg-zinc-900/40 backdrop-blur-xl rounded-xl flex items-center justify-center">
             

@@ -65,7 +65,7 @@ function SignupForm() {
       <div className="w-full max-w-md z-10 animate-[slide-up_0.5s_ease-out_forwards]">
         <div className="glass-panel border border-surface-border rounded-2xl p-8 shadow-2xl">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold tracking-tight mb-2">Create Workspace</h1>
+            <h1 className="text-2xl font-bold tracking-tight mb-2">Create Workspace</h1>
             <p className="text-foreground/60 text-sm">
               Let's get your CRM OS set up in seconds.
             </p>

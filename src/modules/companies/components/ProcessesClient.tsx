@@ -211,15 +211,15 @@ export default function ProcessesClient() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-zinc-900/40 backdrop-blur-xl/40 backdrop-blur-md border border-zinc-700/50 rounded-2xl p-6 shadow-lg">
           <p className="text-zinc-400 text-xs font-medium uppercase tracking-wider mb-1">Total Processes</p>
-          <p className="text-3xl font-bold text-zinc-100">{processes.length}</p>
+          <p className="text-2xl font-bold text-zinc-100">{processes.length}</p>
         </div>
         <div className="bg-zinc-900/40 backdrop-blur-xl/40 backdrop-blur-md border border-zinc-700/50 rounded-2xl p-6 shadow-lg">
           <p className="text-zinc-400 text-xs font-medium uppercase tracking-wider mb-1">Active</p>
-          <p className="text-3xl font-bold text-emerald-500">{processes.filter(p => p.isActive).length}</p>
+          <p className="text-2xl font-bold text-emerald-500">{processes.filter(p => p.isActive).length}</p>
         </div>
         <div className="bg-zinc-900/40 backdrop-blur-xl/40 backdrop-blur-md border border-zinc-700/50 rounded-2xl p-6 shadow-lg">
           <p className="text-zinc-400 text-xs font-medium uppercase tracking-wider mb-1">Suspended</p>
-          <p className="text-3xl font-bold text-amber-400">{processes.filter(p => !p.isActive).length}</p>
+          <p className="text-2xl font-bold text-amber-400">{processes.filter(p => !p.isActive).length}</p>
         </div>
       </div>
 

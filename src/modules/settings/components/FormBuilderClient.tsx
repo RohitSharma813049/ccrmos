@@ -225,7 +225,7 @@ export default function FormBuilderClient() {
     <div className="space-y-8 fade-in pb-12">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground tracking-tight">Form Builder</h1>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Form Builder</h1>
           <p className="text-muted-foreground mt-1">Design custom forms for your CRM modules (Platform Owner only).</p>
         </div>
         <div className="flex flex-wrap gap-3">

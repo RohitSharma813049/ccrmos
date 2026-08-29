@@ -89,7 +89,7 @@ export default function ModuleBuilderClient({ moduleData }: { moduleData: any })
             <ArrowLeft className="w-5 h-5 text-muted-foreground" />
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Builder: {moduleData.name}</h1>
+            <h1 className="text-2xl font-bold text-foreground">Builder: {moduleData.name}</h1>
             <p className="text-muted-foreground">Configure the schema fields for this dynamic module.</p>
           </div>
         </div>

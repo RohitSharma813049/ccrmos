@@ -98,19 +98,19 @@ export default function UsersPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl p-5 border border-zinc-800/60 shadow-sm">
           <p className="text-sm font-medium text-zinc-400 mb-1">Total Users</p>
-          <h3 className="text-3xl font-bold text-zinc-100">15</h3>
+          <h3 className="text-2xl font-bold text-zinc-100">15</h3>
         </div>
         <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl p-5 border border-zinc-800/60 shadow-sm">
           <p className="text-sm font-medium text-zinc-400 mb-1">Admins</p>
-          <h3 className="text-3xl font-bold text-red-500">1</h3>
+          <h3 className="text-2xl font-bold text-red-500">1</h3>
         </div>
         <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl p-5 border border-zinc-800/60 shadow-sm">
           <p className="text-sm font-medium text-zinc-400 mb-1">Sales Team</p>
-          <h3 className="text-3xl font-bold text-green-500">6</h3>
+          <h3 className="text-2xl font-bold text-green-500">6</h3>
         </div>
         <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl p-5 border border-zinc-800/60 shadow-sm">
           <p className="text-sm font-medium text-zinc-400 mb-1">Managers</p>
-          <h3 className="text-3xl font-bold text-orange-500">8</h3>
+          <h3 className="text-2xl font-bold text-orange-500">8</h3>
         </div>
       </div>
 

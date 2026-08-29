@@ -191,7 +191,7 @@ export default function ModulesClient() {
     <div className="space-y-8 fade-in pb-12">
       <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground tracking-tight">Dynamic Module Builder</h1>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Dynamic Module Builder</h1>
           <p className="text-muted-foreground mt-1">Create custom systemic modules that tenants can subscribe to.</p>
         </div>
         <button 

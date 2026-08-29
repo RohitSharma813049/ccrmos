@@ -179,7 +179,7 @@ export default function IntegrationsClient() {
   return (
     <div className="max-w-5xl mx-auto p-6 space-y-8 fade-in">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-extrabold text-foreground tracking-tight">API & Integrations</h1>
+        <h1 className="text-2xl font-extrabold text-foreground tracking-tight">API & Integrations</h1>
         <p className="text-muted-foreground max-w-2xl text-lg">
           Manage your API keys to securely connect your CRM tenant to external websites and applications.
         </p>

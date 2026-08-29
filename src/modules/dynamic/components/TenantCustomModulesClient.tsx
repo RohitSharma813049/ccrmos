@@ -252,7 +252,7 @@ export default function TenantCustomModulesClient() {
     <div className="space-y-8 fade-in pb-12">
       <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground tracking-tight">Custom Modules</h1>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Custom Modules</h1>
           <p className="text-muted-foreground mt-1">Build and manage custom databases tailored specifically to your business needs.</p>
         </div>
         {/* Removed Build Custom Module button per request */}

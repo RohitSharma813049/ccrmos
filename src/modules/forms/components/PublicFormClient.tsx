@@ -109,7 +109,7 @@ export default function PublicFormClient({ formId, isEmbed }: { formId: string, 
         
         {!isEmbed && (
           <div className="mb-8 text-center">
-            <h1 className="text-3xl font-extrabold text-zinc-100 tracking-tight">{form.title}</h1>
+            <h1 className="text-2xl font-extrabold text-zinc-100 tracking-tight">{form.title}</h1>
             {form.description && (
               <p className="mt-2 text-zinc-400 text-lg">{form.description}</p>
             )}

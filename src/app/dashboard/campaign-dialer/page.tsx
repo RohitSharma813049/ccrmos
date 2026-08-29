@@ -128,7 +128,7 @@ export default function CampaignDialerPage() {
             <div className="flex-1 overflow-y-auto p-6">
               <div className="flex justify-between items-start mb-6">
                 <div>
-                  <h2 className="text-3xl font-bold text-foreground">{currentLead.firstName} {currentLead.lastName}</h2>
+                  <h2 className="text-2xl font-bold text-foreground">{currentLead.firstName} {currentLead.lastName}</h2>
                   <div className="text-xl font-mono text-primary mt-2 flex items-center gap-2">
                     <Phone className="w-5 h-5" /> {currentLead.phone}
                   </div>

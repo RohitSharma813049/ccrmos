@@ -113,7 +113,7 @@ export default function CompanyDetailsPage() {
           </div>
           <div>
             <p className="text-sm text-zinc-400">Users Quota</p>
-            <p className="font-semibold text-zinc-100">{stats.users} / {company.usersQuota}</p>
+            <p className="font-semibold text-zinc-100">{stats.users} / {company.usersQuota >= 100000 ? "Unlimited" : company.usersQuota}</p>
           </div>
         </div>
       </div>

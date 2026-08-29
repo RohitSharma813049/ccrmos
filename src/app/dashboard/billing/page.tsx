@@ -1,5 +1,6 @@
 import { requireAuthenticatedUser } from "@/lib/auth-utils";
 import mongoose from "mongoose";
+import dbConnect from "@/lib/db";
 import Company from "@/modules/companies/schemas/Company";
 import SubscriptionPlan from "@/modules/settings/schemas/SubscriptionPlan";
 import StripeCheckoutClient from "@/modules/billing/components/StripeCheckoutClient";
@@ -9,9 +10,7 @@ export default async function BillingPage() {
   const user = await requireAuthenticatedUser();
   const companyId = user.companyId || user.impersonatedFounderId;
   
-  if (!mongoose.connection.readyState) {
-    await mongoose.connect(process.env.MONGODB_URI!);
-  }
+  await dbConnect();
 
   let currentCompany = null;
   if (companyId) {
@@ -22,10 +21,10 @@ export default async function BillingPage() {
   const plans = await SubscriptionPlan.find({ isActive: true }).sort({ price: 1 });
 
   return (
-    <div className="space-y-8 fade-in pb-12">
+    <div className="max-w-6xl mx-auto space-y-8 fade-in pb-12">
       <div>
         <h1 className="text-2xl font-bold text-zinc-100 tracking-tight">Billing & Subscription</h1>
-        <p className="text-zinc-400 mt-1">Manage your plan and payment methods.</p>
+        <p className="text-zinc-400 mt-1">Manage your plan, payment method, and invoice history.</p>
       </div>
 
       {currentCompany && (

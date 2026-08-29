@@ -185,7 +185,7 @@ export default function FormBuilderClient({ formId }: { formId: string }) {
               value={form.title}
               onChange={(e) => setForm({...form, title: e.target.value})}
               onBlur={() => saveForm()}
-              className="w-full text-3xl font-bold text-zinc-100 border-none outline-none focus:ring-0 px-0 bg-transparent placeholder-gray-300"
+              className="w-full text-2xl font-bold text-zinc-100 border-none outline-none focus:ring-0 px-0 bg-transparent placeholder-gray-300"
               placeholder="Form Title"
             />
             <textarea 

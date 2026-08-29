@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Plus, Check, Search, Calendar, Flag, MoreHorizontal, User, Filter, AlertCircle } from 'lucide-react';
-import { getTasks, createTask, toggleTaskStatus } from '@/app/(dashboard)/tasks/actions';
+import { getTasks, createTask, toggleTaskStatus } from '@/app/dashboard/tasks/actions';
 import { toast } from 'react-hot-toast';
 
 export function TasksClient() {

@@ -41,7 +41,7 @@ export default function DataExportPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-8 fade-in pb-12">
       <div>
-        <h1 className="text-3xl font-bold text-zinc-100 tracking-tight">Data Export</h1>
+        <h1 className="text-2xl font-bold text-zinc-100 tracking-tight">Data Export</h1>
         <p className="text-zinc-400 mt-1">Securely export your CRM data as a CSV file for backup or external analysis.</p>
       </div>
 

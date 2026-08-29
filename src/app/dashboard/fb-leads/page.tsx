@@ -156,17 +156,17 @@ export default function FbLeadsPage() {
 
         <div className="bg-card/50 backdrop-blur-xl rounded-2xl p-5 border border-border shadow-sm hover:border-primary/50 transition-colors">
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Total Leads</p>
-          <h3 className="text-3xl font-semibold tracking-tight text-foreground">{totalLeads}</h3>
+          <h3 className="text-2xl font-semibold tracking-tight text-foreground">{totalLeads}</h3>
         </div>
 
         <div className="bg-card/50 backdrop-blur-xl rounded-2xl p-5 border border-border shadow-sm hover:border-green-500/50 transition-colors">
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Processed</p>
-          <h3 className="text-3xl font-semibold tracking-tight text-green-500">{totalProcessed}</h3>
+          <h3 className="text-2xl font-semibold tracking-tight text-green-500">{totalProcessed}</h3>
         </div>
 
         <div className="bg-card/50 backdrop-blur-xl rounded-2xl p-5 border border-border shadow-sm hover:border-amber-500/50 transition-colors">
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Pending Sync</p>
-          <h3 className="text-3xl font-semibold tracking-tight text-amber-500">{pendingLeads > 0 ? pendingLeads : 0}</h3>
+          <h3 className="text-2xl font-semibold tracking-tight text-amber-500">{pendingLeads > 0 ? pendingLeads : 0}</h3>
         </div>
 
         <div className="bg-muted/30 rounded-xl p-4 border border-border flex gap-3 shadow-sm">

@@ -123,7 +123,7 @@ function CheckoutContent() {
             <h1 className="text-2xl font-bold text-zinc-100 tracking-tight">CRM OS</h1>
           </div>
           
-          <h2 className="text-3xl font-bold text-zinc-100 mb-2">Complete your setup</h2>
+          <h2 className="text-2xl font-bold text-zinc-100 mb-2">Complete your setup</h2>
           <p className="text-zinc-400 mb-8">Review your subscription details for <strong>{data.companyName}</strong>.</p>
           
           <div className="space-y-4">
@@ -137,7 +137,7 @@ function CheckoutContent() {
             </div>
             <div className="flex justify-between items-center py-3 border-b border-zinc-800/60">
               <span className="text-zinc-400 font-medium">Users Quota</span>
-              <span className="text-zinc-100 font-medium">{data.usersQuota} Users</span>
+              <span className="text-zinc-100 font-medium">{data.usersQuota >= 100000 ? "Unlimited" : `${data.usersQuota}`} Users</span>
             </div>
           </div>
         </div>

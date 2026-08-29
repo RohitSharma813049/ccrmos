@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Calendar, FolderKanban, MoreHorizontal, CheckCircle2, AlertTriangle, AlertCircle } from 'lucide-react';
-import { getProjects, createProject } from '@/app/(dashboard)/projects/actions';
+import { getProjects, createProject } from '@/app/dashboard/projects/actions';
 import { toast } from 'react-hot-toast';
 
 export function ProjectsClient() {

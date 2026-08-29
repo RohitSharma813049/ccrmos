@@ -87,7 +87,7 @@ export default function AiAgentsPage() {
       {/* Header */}
       <div className="flex justify-between items-end mb-8">
         <div>
-          <h1 className="text-3xl font-bold mb-1 font-serif text-[var(--foreground)]">AI Agents</h1>
+          <h1 className="text-2xl font-bold mb-1 font-serif text-[var(--foreground)]">AI Agents</h1>
           <p className="text-[var(--muted-foreground)] text-sm">Manage your AI voice agents</p>
         </div>
         <div className="flex gap-3">

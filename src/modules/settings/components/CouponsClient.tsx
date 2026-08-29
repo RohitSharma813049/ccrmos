@@ -163,7 +163,7 @@ export default function CouponsClient() {
     <div className="space-y-8 fade-in pb-12">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground tracking-tight">Offers & Coupons</h1>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Offers & Coupons</h1>
           <p className="text-muted-foreground mt-1">Manage promotional discount codes and limits.</p>
         </div>
         <button 

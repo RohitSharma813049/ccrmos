@@ -29,7 +29,7 @@ export default function GoogleCalendarPage() {
           {/* Header */}
           <div className="p-8 border-b border-zinc-800/60 flex items-start justify-between bg-zinc-950/50/50">
             <div>
-              <h1 className="text-3xl font-serif font-bold text-zinc-100 mb-2">Google Calendar</h1>
+              <h1 className="text-2xl font-serif font-bold text-zinc-100 mb-2">Google Calendar</h1>
               <p className="text-zinc-400 text-sm">Sync your meetings and site visits with Google Calendar</p>
             </div>
             <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shrink-0 border border-blue-100 shadow-sm">

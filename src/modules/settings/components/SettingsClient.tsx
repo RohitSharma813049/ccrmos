@@ -146,7 +146,7 @@ export default function SettingsClient() {
   return (
     <div className="space-y-8 fade-in pb-12 relative">
       <div>
-        <h1 className="text-3xl font-bold text-foreground tracking-tight">Global Settings & Templates</h1>
+        <h1 className="text-2xl font-bold text-foreground tracking-tight">Global Settings & Templates</h1>
         <p className="text-muted-foreground mt-1">Configure systemic variables, maintenance modes, and industry templates.</p>
       </div>
 

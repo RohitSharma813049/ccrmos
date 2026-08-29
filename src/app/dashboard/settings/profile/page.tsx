@@ -81,7 +81,7 @@ export default function ProfilePage() {
   return (
     <div className="max-w-3xl mx-auto space-y-8 fade-in pb-12">
       <div>
-        <h1 className="text-3xl font-bold text-zinc-100 tracking-tight">Your Profile</h1>
+        <h1 className="text-2xl font-bold text-zinc-100 tracking-tight">Your Profile</h1>
         <p className="text-zinc-400 mt-1">Manage your personal information, avatar, and settings.</p>
       </div>
 
@@ -98,7 +98,7 @@ export default function ProfilePage() {
                   className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
                 />
               ) : (
-                <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-3xl font-bold text-white shadow-lg border-4 border-white">
+                <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-2xl font-bold text-white shadow-lg border-4 border-white">
                   {name ? name.charAt(0).toUpperCase() : profile?.email.charAt(0).toUpperCase()}
                 </div>
               )}

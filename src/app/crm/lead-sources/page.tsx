@@ -53,7 +53,7 @@ export default function LeadSourcesPage() {
         <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl p-5 border border-zinc-800/60 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-sm font-medium text-zinc-400 mb-1">Total Sources</p>
-            <h3 className="text-3xl font-bold text-zinc-100">72</h3>
+            <h3 className="text-2xl font-bold text-zinc-100">72</h3>
           </div>
           <div className="w-12 h-12 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center">
             <Database className="w-6 h-6" />
@@ -63,7 +63,7 @@ export default function LeadSourcesPage() {
         <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl p-5 border border-zinc-800/60 shadow-sm flex items-center justify-between border-l-4 border-l-green-500">
           <div>
             <p className="text-sm font-medium text-zinc-400 mb-1">Active Sources</p>
-            <h3 className="text-3xl font-bold text-green-600">72</h3>
+            <h3 className="text-2xl font-bold text-green-600">72</h3>
           </div>
           <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
             <div className="w-3 h-3 bg-green-500 rounded-full" />
@@ -73,7 +73,7 @@ export default function LeadSourcesPage() {
         <div className="bg-zinc-900/40 backdrop-blur-xl rounded-2xl p-5 border border-zinc-800/60 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-sm font-medium text-zinc-400 mb-1">Total Leads</p>
-            <h3 className="text-3xl font-bold text-purple-600">0</h3>
+            <h3 className="text-2xl font-bold text-purple-600">0</h3>
           </div>
           <div className="w-12 h-12 bg-purple-50 text-purple-500 rounded-xl flex items-center justify-center">
             <BarChart3 className="w-6 h-6" />

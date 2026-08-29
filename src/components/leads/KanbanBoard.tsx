@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { DragDropContext, DropResult } from '@hello-pangea/dnd';
 import { KanbanColumn } from './KanbanColumn';
 import { LeadType } from './KanbanCard';
-import { getLeads, updateLeadStatus } from '@/app/(dashboard)/leads/actions';
+import { getLeads, updateLeadStatus } from '@/app/dashboard/leads/actions';
 
 // Base Column Structure
 const emptyColumns: Record<string, { id: string; title: string; accentColor: string; leads: LeadType[] }> = {
